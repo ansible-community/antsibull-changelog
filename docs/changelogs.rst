@@ -17,6 +17,7 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 
 1. ``title``: This is by default the titlecase of your collection's namespace and name. Feel free to insert a nicer name here.
 2. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``.
+3. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
 
 Validating changelog fragments
 ==============================
@@ -48,8 +49,8 @@ The metadata for modules and plugins is stored in ``changelogs/.plugin-cache.yam
 
 After running ``antsibull-changelog release``, you should check ``changelogs/changelog.yaml`` and the generated reStructuredText file (by default ``changelogs/CHANGELOG.rst``) in.
 
-Updating changelog.yaml
-=======================
+Updating/Refreshing changelog.yaml
+==================================
 
 In case plugin short descriptions are changed (for example typos are fixed), or changelog fragments were changed (to fix types; only in case ``keep_fragments`` is ``true``), and the existing changelog is not considered frozen, one can use::
 
@@ -62,6 +63,8 @@ The option ``--reload-plugins`` forces invaliation of the plugin cache (for the 
 The option ``--refresh`` does the real work. It updates all plugin descriptions from the plugin cache, and removes plugins mentioned in the changelog that do no longer appear in the cache. **Note** that if you do not start a new changelog file for every major version, and you remove plugins from your collections, this will remove the new plugin announcements for the deleted plugins from older changelog entries!
 
 If ``keep_fragments`` is set to ``true`` in the configuration, ``--refresh`` will regenerate all changes information from the fragments. The ``changelog.yaml`` file stores which fragment file belongs to which changelog entry. Using this information, all changes for this entry are recollected. If some fragment files have been removed in the past, their content will vanish from the changelog and the filenames will be removed from ``changelog.yaml``.
+
+Note that it is possible to always enable ``--refresh``, by setting ``always_refresh`` to ``true`` in the configuration.
 
 Changelog Fragment Categories
 =============================

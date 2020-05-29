@@ -289,7 +289,7 @@ def command_release(args: Any) -> int:
     plugins = load_plugins(paths=paths, collection_details=collection_details,
                            version=version, force_reload=reload_plugins)
     fragments = load_fragments(paths, config)
-    if args.refresh:
+    if args.refresh or config.always_refresh:
         refresh_changelog(config, changes, plugins, fragments)
     add_release(config, changes, plugins, fragments, version, codename, date)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
@@ -322,7 +322,7 @@ def command_generate(args: Any) -> int:
         return 5
     plugins: Optional[List[PluginDescription]] = None
     fragments: Optional[List[ChangelogFragment]]
-    if args.refresh:
+    if args.refresh or config.always_refresh:
         plugins = load_plugins(paths=paths, collection_details=collection_details,
                                version=changes.latest_version, force_reload=reload_plugins)
         fragments = load_fragments(paths, config)

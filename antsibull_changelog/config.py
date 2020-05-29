@@ -248,6 +248,7 @@ class ChangelogConfig:
     trivial_section_name: str
     release_tag_re: str
     pre_release_tag_re: str
+    always_refresh: bool
     sections: Mapping[str, str]
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
@@ -273,6 +274,7 @@ class ChangelogConfig:
             'changelog_filename_version_depth', 2)
         self.mention_ancestor = self.config.get('mention_ancestor', True)
         self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
+        self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
 
         # The following are only relevant for ansible-base:
         self.release_tag_re = self.config.get(
@@ -315,6 +317,10 @@ class ChangelogConfig:
             })
         if self.title is not None:
             config['title'] = self.title
+        if self.always_refresh != (self.changes_format == 'classic'):
+            config['always_refresh'] = self.always_refresh
+        self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
+
         sections = []
         for key, value in self.sections.items():
             if key == self.prelude_name and value == self.prelude_title:
