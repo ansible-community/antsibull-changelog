@@ -1,0 +1,5 @@
+packaging
+semantic_version
+docutils
+rstcheck
+PyYAML
