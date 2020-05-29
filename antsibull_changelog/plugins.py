@@ -129,6 +129,19 @@ def jsondoc_to_metadata(paths: PathsConfig, collection_name: Optional[str],
     }
 
 
+def get_plugins_path(paths: PathsConfig, plugin_type: str) -> str:
+    """
+    Return path to plugins of a given type.
+    """
+    if paths.is_collection:
+        return os.path.join(
+            paths.base_dir, 'plugins', 'modules' if plugin_type == 'module' else plugin_type)
+    lib_ansible = os.path.join(paths.base_dir, 'lib', 'ansible')
+    if plugin_type == 'module':
+        return os.path.join(lib_ansible, 'modules')
+    return os.path.join(lib_ansible, 'plugins', plugin_type)
+
+
 def list_plugins_walk(paths: PathsConfig, plugin_type: str,
                       collection_name: Optional[str]) -> List[str]:
     """
@@ -140,15 +153,7 @@ def list_plugins_walk(paths: PathsConfig, plugin_type: str,
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate.
     """
-    if paths.is_collection:
-        plugin_source_path = os.path.join(paths.base_dir, 'plugins')
-        if plugin_type == 'module':
-            plugin_source_path = os.path.join(plugin_source_path, 'modules')
-        else:
-            plugin_source_path = os.path.join(plugin_source_path, plugin_type)
-    else:
-        plugin_source_path = os.path.join(
-            paths.base_dir, 'lib', 'ansible', 'modules' if plugin_type == 'module' else plugin_type)
+    plugin_source_path = get_plugins_path(paths, plugin_type)
 
     if not os.path.exists(plugin_source_path):
         return []
@@ -183,15 +188,7 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate.
     """
-    if paths.is_collection:
-        plugin_source_path = os.path.join(paths.base_dir, 'plugins')
-        if plugin_type == 'module':
-            plugin_source_path = os.path.join(plugin_source_path, 'modules')
-        else:
-            plugin_source_path = os.path.join(plugin_source_path, 'plugins', plugin_type)
-    else:
-        plugin_source_path = os.path.join(
-            paths.base_dir, 'lib', 'ansible', 'modules' if plugin_type == 'module' else plugin_type)
+    plugin_source_path = get_plugins_path(paths, plugin_type)
 
     if not os.path.exists(plugin_source_path) or os.listdir(plugin_source_path) == []:
         return []
