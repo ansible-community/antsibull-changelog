@@ -23,7 +23,7 @@ except ImportError:
 
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
-from .changes import load_changes, add_release
+from .changes import load_changes, add_release, refresh_changelog
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .errors import ChangelogError
 from .fragment import load_fragments, ChangelogFragment, ChangelogFragmentLinter
@@ -132,6 +132,11 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument('--reload-plugins',
                                 action='store_true',
                                 help='force reload of plugin cache')
+    release_parser.add_argument('--refresh',
+                                action='store_true',
+                                help='update existing entries from fragment files (if '
+                                     'keep_fragments is true), and update plugin descriptions '
+                                     '(should be combined with --reload-plugins)')
 
     generate_parser = subparsers.add_parser('generate',
                                             parents=[common, is_collection, collection_details],
@@ -140,6 +145,11 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     generate_parser.add_argument('--reload-plugins',
                                  action='store_true',
                                  help='force reload of plugin cache')
+    generate_parser.add_argument('--refresh',
+                                 action='store_true',
+                                 help='update existing entries from fragment files (if '
+                                      'keep_fragments is true), and update plugin descriptions '
+                                      '(should be combined with --reload-plugins)')
 
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
@@ -279,6 +289,8 @@ def command_release(args: Any) -> int:
     plugins = load_plugins(paths=paths, collection_details=collection_details,
                            version=version, force_reload=reload_plugins)
     fragments = load_fragments(paths, config)
+    if args.refresh:
+        refresh_changelog(config, changes, plugins, fragments)
     add_release(config, changes, plugins, fragments, version, codename, date)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
@@ -308,13 +320,18 @@ def command_generate(args: Any) -> int:
     if not changes.has_release:
         print('Cannot create changelog when not at least one release has been added.')
         return 5
-    plugins: Optional[List[PluginDescription]]
-    if reload_plugins:
+    plugins: Optional[List[PluginDescription]] = None
+    fragments: Optional[List[ChangelogFragment]]
+    if args.refresh:
         plugins = load_plugins(paths=paths, collection_details=collection_details,
                                version=changes.latest_version, force_reload=reload_plugins)
+        fragments = load_fragments(paths, config)
+        refresh_changelog(config, changes, plugins, fragments)
     else:
-        plugins = None
-    fragments = load_fragments(paths, config)
+        fragments = None
+        if reload_plugins:
+            plugins = load_plugins(paths=paths, collection_details=collection_details,
+                                   version=changes.latest_version, force_reload=reload_plugins)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0

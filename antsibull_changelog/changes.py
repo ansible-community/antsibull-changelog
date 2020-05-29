@@ -138,9 +138,17 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.ancestor = self.data.get('ancestor')
 
     @abc.abstractmethod
-    def prune_plugins(self, plugins: List[PluginDescription]) -> None:
+    def update_plugins(self, plugins: List[PluginDescription]) -> None:
         """
-        Remove plugins which are not in the provided list of plugins.
+        Update plugin descriptions, and remove plugins which are not in the provided list
+        of plugins.
+        """
+
+    @abc.abstractmethod
+    def update_fragments(self, fragments: List[ChangelogFragment]) -> None:
+        """
+        Update fragment contents, and remove fragment contents which are not in the provided
+        list of fragments.
         """
 
     @abc.abstractmethod
@@ -341,27 +349,10 @@ class ChangesMetadata(ChangesBase):
 
             self.known_fragments |= set(config.get('fragments', []))
 
-    def prune_fragments(self, fragments: List[ChangelogFragment]) -> None:
+    def update_plugins(self, plugins: List[PluginDescription]) -> None:
         """
-        Remove fragments which are not in the provided list of fragments.
-        """
-        valid_fragments = set(fragment.name for fragment in fragments)
-
-        for _, config in self.releases.items():
-            if 'fragments' not in config:
-                continue
-
-            invalid_fragments = set(
-                fragment for fragment in config['fragments']
-                if fragment not in valid_fragments)
-            config['fragments'] = [
-                fragment for fragment in config['fragments']
-                if fragment not in invalid_fragments]
-            self.known_fragments -= invalid_fragments
-
-    def prune_plugins(self, plugins: List[PluginDescription]) -> None:
-        """
-        Remove plugins which are not in the provided list of plugins.
+        Update plugin descriptions, and remove plugins which are not in the provided list
+        of plugins.
         """
         valid_plugins = collections.defaultdict(set)
 
@@ -389,6 +380,25 @@ class ChangesMetadata(ChangesBase):
                         if plugin not in invalid_plugins]
                     self.known_plugins -= set(
                         '%s/%s' % (plugin_type, plugin) for plugin in invalid_plugins)
+
+    def update_fragments(self, fragments: List[ChangelogFragment]) -> None:
+        """
+        Update fragment contents, and remove fragment contents which are not in the provided
+        list of fragments.
+        """
+        valid_fragments = set(fragment.name for fragment in fragments)
+
+        for _, config in self.releases.items():
+            if 'fragments' not in config:
+                continue
+
+            invalid_fragments = set(
+                fragment for fragment in config['fragments']
+                if fragment not in valid_fragments)
+            config['fragments'] = [
+                fragment for fragment in config['fragments']
+                if fragment not in invalid_fragments]
+            self.known_fragments -= invalid_fragments
 
     def sort(self) -> None:
         """
@@ -524,14 +534,15 @@ class ChangesData(ChangesBase):
 
             self.known_fragments |= set(config.get('fragments', []))
 
-    def prune_plugins(self, plugins: List[PluginDescription]) -> None:
+    def update_plugins(self, plugins: List[PluginDescription]) -> None:
         """
-        Remove plugins which are not in the provided list of plugins.
+        Update plugin descriptions, and remove plugins which are not in the provided list
+        of plugins.
         """
-        valid_plugins = collections.defaultdict(set)
+        valid_plugins: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
 
         for plugin in plugins:
-            valid_plugins[plugin.type].add(plugin.name)
+            valid_plugins[plugin.type][plugin.name] = plugin
 
         for _, config in self.releases.items():
             if 'modules' in config:
@@ -539,7 +550,8 @@ class ChangesData(ChangesBase):
                     module['name'] for module in config['modules']
                     if module['name'] not in valid_plugins['module'])
                 config['modules'] = [
-                    module for module in config['modules']
+                    self._create_plugin_entry(valid_plugins['module'][module['name']])
+                    for module in config['modules']
                     if module['name'] not in invalid_module_names]
                 self.known_plugins -= set(
                     'module/%s' % module_name for module_name in invalid_module_names)
@@ -550,11 +562,36 @@ class ChangesData(ChangesBase):
                         plugin['name'] for plugin in config['plugins'][plugin_type]
                         if plugin['name'] not in valid_plugins[plugin_type])
                     config['plugins'][plugin_type] = [
-                        plugin for plugin in config['plugins'][plugin_type]
+                        self._create_plugin_entry(valid_plugins[plugin_type][plugin['name']])
+                        for plugin in config['plugins'][plugin_type]
                         if plugin['name'] not in invalid_plugin_names]
                     self.known_plugins -= set(
                         '%s/%s' % (plugin_type, plugin_name)
                         for plugin_name in invalid_plugin_names)
+
+    def update_fragments(self, fragments: List[ChangelogFragment]) -> None:
+        """
+        Update fragment contents, and remove fragment contents which are not in the provided
+        list of fragments.
+
+        Must only be called if ``keep_fragments`` is set to ``True`` in the configuration.
+        """
+        assert self.config.keep_fragments
+        valid_fragments = {fragment.name: fragment for fragment in fragments}
+        for _, config in self.releases.items():
+            config.pop('changes', None)
+
+            if 'fragments' in config:
+                invalid_fragments = set(
+                    fragment for fragment in config['fragments']
+                    if fragment not in valid_fragments)
+                config['fragments'] = [
+                    fragment for fragment in config['fragments']
+                    if fragment not in invalid_fragments]
+                self.known_fragments -= invalid_fragments
+
+                config['changes'] = ChangelogFragment.combine([
+                    valid_fragments[fragment] for fragment in config['fragments']])
 
     def sort(self) -> None:
         """
@@ -739,3 +776,18 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     if not config.keep_fragments:
         for fragment in fragments_added:
             fragment.remove()
+
+
+def refresh_changelog(config: ChangelogConfig,
+                      changes: ChangesBase,
+                      plugins: List[PluginDescription],
+                      fragments: List[ChangelogFragment]):
+    """
+    Refresh plugin information and (depending on config) changelog fragments in ``changes``.
+    """
+    changes.update_plugins(plugins)
+    if config.keep_fragments:
+        changes.update_fragments(fragments)
+    else:
+        LOGGER.warning('Cannot refresh changelog fragments, as keep_fragments is false')
+    changes.save()

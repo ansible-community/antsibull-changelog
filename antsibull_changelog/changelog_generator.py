@@ -17,7 +17,7 @@ import packaging.version
 import semantic_version
 
 from .config import PathsConfig, ChangelogConfig
-from .changes import ChangesBase, ChangesMetadata, FragmentResolver, PluginResolver
+from .changes import ChangesBase, FragmentResolver, PluginResolver
 from .fragment import ChangelogFragment
 from .logger import LOGGER
 from .plugins import PluginDescription
@@ -330,13 +330,6 @@ def generate_changelog(paths: PathsConfig,  # pylint: disable=too-many-arguments
     :arg fragments: Will be loaded if necessary. Only provide when you already have them
     :type flatmap: Whether the collection uses flatmapping or not
     """
-    if plugins is not None or fragments is not None:
-        if plugins is not None:
-            changes.prune_plugins(plugins)
-        if fragments is not None and isinstance(changes, ChangesMetadata):
-            changes.prune_fragments(fragments)
-        changes.save()
-
     major_minor_version = '.'.join(
         changes.latest_version.split('.')[:config.changelog_filename_version_depth])
     if '%s' in config.changelog_filename_template:
