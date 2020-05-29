@@ -1,8 +1,12 @@
 
-from fixtures import collection_changelog, create_plugin
+from fixtures import (  # noqa: F401
+    collection_changelog,  # pylint: disable=unused-variable
+    create_plugin,
+)
 
 
-def test_changelog_init(collection_changelog, namespace='asfd'):
+def test_changelog_init(  # pylint: disable=redefined-outer-name
+        collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
@@ -24,7 +28,8 @@ def test_changelog_init(collection_changelog, namespace='asfd'):
     assert config['title'] == collection_changelog.collection_name.title()
 
 
-def test_changelog_release_empty(collection_changelog):
+def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
+        collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
@@ -46,14 +51,17 @@ def test_changelog_release_empty(collection_changelog):
     assert changelog['ancestor'] is None
     assert list(changelog['releases']) == ['1.0.0']
     assert changelog['releases']['1.0.0']['release_date'] == '2020-01-02'
-    assert changelog['releases']['1.0.0']['changes'] == {'release_summary': 'This is the first proper release.'}
+    assert changelog['releases']['1.0.0']['changes'] == {
+        'release_summary': 'This is the first proper release.'
+    }
     assert changelog['releases']['1.0.0']['fragments'] == ['1.0.0.yml']
     assert 'modules' not in changelog['releases']['1.0.0']
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
 
 
-def test_changelog_release_simple(collection_changelog):
+def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
+        collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
@@ -63,7 +71,8 @@ def test_changelog_release_simple(collection_changelog):
     collection_changelog.add_fragment_line(
         'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
     collection_changelog.add_fragment_line(
-        'baz-new-option.yaml', 'minor_changes', ['baz lookup - no longer ignores the ``bar`` option.'])
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'])
     collection_changelog.set_plugin_cache('1.0.0', {
         'module': {
             'test': {
@@ -137,14 +146,16 @@ def test_changelog_release_simple(collection_changelog):
     assert 'codename' not in changelog['releases']['1.0.0']
 
 
-def test_changelog_release_simple_no_galaxy(collection_changelog):
+def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
+        collection_changelog):  # noqa: F811
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
     collection_changelog.add_fragment_line(
         'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
     collection_changelog.add_fragment_line(
-        'baz-new-option.yaml', 'minor_changes', ['baz lookup - no longer ignores the ``bar`` option.'])
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'])
 
     # If we don't specify all options, the call will fail
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 5
@@ -273,7 +284,8 @@ def test_changelog_release_simple_no_galaxy(collection_changelog):
     assert 'codename' not in changelog['releases']['1.0.0']
 
 
-def test_changelog_release_plugin_cache(collection_changelog):
+def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
+        collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
@@ -308,7 +320,11 @@ def test_changelog_release_plugin_cache(collection_changelog):
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/.plugin-cache.yaml', 'changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == [
+        'changelogs/.plugin-cache.yaml',
+        'changelogs/CHANGELOG.rst',
+        'changelogs/changelog.yaml',
+    ]
     assert diff.removed_dirs == []
     assert diff.removed_files == ['changelogs/fragments/1.0.0.yml']
     assert diff.changed_files == []
@@ -332,7 +348,9 @@ def test_changelog_release_plugin_cache(collection_changelog):
     assert changelog['ancestor'] is None
     assert sorted(changelog['releases']) == ['1.0.0']
     assert changelog['releases']['1.0.0']['release_date'] == '2020-01-02'
-    assert changelog['releases']['1.0.0']['changes'] == {'release_summary': 'This is the first proper release.'}
+    assert changelog['releases']['1.0.0']['changes'] == {
+        'release_summary': 'This is the first proper release.'
+    }
     assert changelog['releases']['1.0.0']['fragments'] == ['1.0.0.yml']
     assert len(changelog['releases']['1.0.0']['modules']) == 1
     assert changelog['releases']['1.0.0']['modules'][0]['name'] == 'test_module'

@@ -1,13 +1,13 @@
 import os
 import pathlib
 
+from typing import Any, Dict, List, Tuple, Optional, Set, Union
+
 import pytest
 import yaml
 
 from antsibull_changelog.cli import run as run_changelog_tool
 from antsibull_changelog.config import PathsConfig, CollectionDetails, ChangelogConfig
-
-from typing import Any, Dict, List, Tuple, Optional, Set, Union
 
 
 class Differences:
@@ -48,7 +48,7 @@ class ChangelogEnvironment:
     created_dirs: Set[str]
     created_files: Dict[str, bytes]
 
-    def __init__(self, base_path: pathlib.Path, paths: PathsConfig, is_collection: bool):
+    def __init__(self, base_path: pathlib.Path, paths: PathsConfig):
         self.base = base_path
 
         self.paths = paths
@@ -160,7 +160,8 @@ class ChangelogEnvironment:
 
 class AnsibleChangelogEnvironment(ChangelogEnvironment):
     def __init__(self, base_path: pathlib.Path):
-        super().__init__(base_path, PathsConfig.force_ansible(base_dir=str(base_path)), is_collection=False)
+        super().__init__(base_path,
+                         PathsConfig.force_ansible(base_dir=str(base_path)))
 
     def _plugin_base(self, plugin_type):
         if plugin_type == 'module':
@@ -176,7 +177,8 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
     def __init__(self, base_path: pathlib.Path, namespace: str, collection: str):
         collection_path = base_path / 'ansible_collections' / namespace / collection
         collection_path.mkdir(parents=True, exist_ok=True)
-        super().__init__(base_path, PathsConfig.force_collection(base_dir=str(collection_path)), is_collection=True)
+        super().__init__(base_path,
+                         PathsConfig.force_collection(base_dir=str(collection_path)))
         self.namespace = namespace
         self.collection = collection
         self.collection_name = '{0}.{1}'.format(namespace, collection)
@@ -198,7 +200,8 @@ def ansible_changelog(tmp_path_factory) -> AnsibleChangelogEnvironment:
 
 
 @pytest.fixture
-def collection_changelog(tmp_path_factory, namespace: str = 'acme', collection: str = 'test') -> CollectionChangelogEnvironment:
+def collection_changelog(tmp_path_factory, namespace: str = 'acme',
+                         collection: str = 'test') -> CollectionChangelogEnvironment:
     base_path = tmp_path_factory.mktemp('changelog-test')
     collection_path_env = 'ANSIBLE_COLLECTIONS_PATHS'
     original_path = os.environ.get(collection_path_env)
@@ -213,8 +216,6 @@ def collection_changelog(tmp_path_factory, namespace: str = 'acme', collection: 
 def create_plugin(**parts):
     result = [
         '#!/usr/bin/python',
-        '# Copyright 2020 Ansible',
-        '# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)',
         '',
         'from __future__ import absolute_import, division, print_function',
         '__metaclass__ = type',

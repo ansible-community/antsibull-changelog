@@ -16,21 +16,28 @@ BASE_DIR = os.path.dirname(__file__)
 GOOD_TESTS = []
 BAD_TESTS = []
 
-for pattern in PATTERNS:
-    for filename in glob.glob(os.path.join(BASE_DIR, 'good', pattern)):
-        GOOD_TESTS.append(filename)
-    for filename in glob.glob(os.path.join(BASE_DIR, 'bad', pattern)):
-        json_filename = os.path.splitext(filename)[0] + '.json'
-        if os.path.exists(json_filename):
-            BAD_TESTS.append((filename, json_filename))
-        else:
-            pytest.fail('Missing {0} for {1}'.format(json_filename, filename))
+
+def load_tests():
+    for pattern in PATTERNS:
+        for filename in glob.glob(os.path.join(BASE_DIR, 'good', pattern)):
+            GOOD_TESTS.append(filename)
+        for filename in glob.glob(os.path.join(BASE_DIR, 'bad', pattern)):
+            json_filename = os.path.splitext(filename)[0] + '.json'
+            if os.path.exists(json_filename):
+                BAD_TESTS.append((filename, json_filename))
+            else:
+                pytest.fail('Missing {0} for {1}'.format(json_filename, filename))
+
+
+load_tests()
+
 
 # Test good files
 @pytest.mark.parametrize('yaml_filename', GOOD_TESTS)
 def test_good_changelog_yaml_files(yaml_filename):
     errors = lint_changelog_yaml(yaml_filename)
     assert len(errors) == 0
+
 
 @pytest.mark.parametrize('yaml_filename, json_filename', BAD_TESTS)
 def test_bad_changelog_yaml_files(yaml_filename, json_filename):
