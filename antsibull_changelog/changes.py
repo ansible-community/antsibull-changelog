@@ -69,12 +69,14 @@ class ChangesBase(metaclass=abc.ABCMeta):
     path: str
     data: dict
     known_plugins: Set[str]
+    known_fragments: Set[str]
     ancestor: Optional[str]
 
     def __init__(self, config: ChangelogConfig, path: str):
         self.config = config
         self.path = path
         self.data = self.empty()
+        self.known_fragments = set()
         self.known_plugins = set()
         self.ancestor = None
 
@@ -315,14 +317,11 @@ class ChangesMetadata(ChangesBase):
     Read, write and manage classic Ansible (2.9 and earlier) change metadata.
     """
 
-    known_fragments: Set[str]
-
     def __init__(self, config: ChangelogConfig, path: str):
         """
         Create legacy change metadata.
         """
         super(ChangesMetadata, self).__init__(config, path)
-        self.known_fragments = set()
         self.load()
 
     def load(self, data_override: Optional[dict] = None) -> None:
@@ -358,7 +357,7 @@ class ChangesMetadata(ChangesBase):
             config['fragments'] = [
                 fragment for fragment in config['fragments']
                 if fragment not in invalid_fragments]
-            self.known_fragments -= set(config['fragments'])
+            self.known_fragments -= invalid_fragments
 
     def prune_plugins(self, plugins: List[PluginDescription]) -> None:
         """
@@ -523,6 +522,8 @@ class ChangesData(ChangesBase):
 
             self.known_plugins |= set('module/%s' % module['name'] for module in modules)
 
+            self.known_fragments |= set(config.get('fragments', []))
+
     def prune_plugins(self, plugins: List[PluginDescription]) -> None:
         """
         Remove plugins which are not in the provided list of plugins.
@@ -583,9 +584,10 @@ class ChangesData(ChangesBase):
         """
         Add a changelog fragment to the change metadata.
         """
-        if 'fragments' in self.releases[version]:
-            if fragment.name in self.releases[version]['fragments']:
-                return False
+        if fragment.name in self.known_fragments:
+            return False
+
+        self.known_fragments.add(fragment.name)
 
         if 'changes' not in self.releases[version]:
             self.releases[version]['changes'] = dict()
