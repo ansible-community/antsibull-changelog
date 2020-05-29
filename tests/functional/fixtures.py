@@ -4,8 +4,8 @@ import pathlib
 import pytest
 import yaml
 
-from antsibull.cli.antsibull_changelog import run as run_changelog_tool
-from antsibull.changelog.config import PathsConfig, CollectionDetails, ChangelogConfig
+from antsibull_changelog.cli import run as run_changelog_tool
+from antsibull_changelog.config import PathsConfig, CollectionDetails, ChangelogConfig
 
 from typing import Any, Dict, List, Tuple, Optional, Set, Union
 
