@@ -1,5 +1,6 @@
 
 from fixtures import (  # noqa: F401
+    ansible_changelog,  # pylint: disable=unused-variable
     collection_changelog,  # pylint: disable=unused-variable
     create_plugin,
 )
@@ -58,6 +59,156 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert 'modules' not in changelog['releases']['1.0.0']
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
+
+
+def test_changelog_release_ansible_simple(  # pylint: disable=redefined-outer-name
+        ansible_changelog):  # noqa: F811
+    ansible_config_contents = r'''
+---
+title: Ansible Base
+release_tag_re: '(v(?:[\d.ab\-]|rc)+)'
+pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
+changes_file: changelog.yaml
+changes_format: combined
+keep_fragments: true
+always_refresh: true
+mention_ancestor: false
+notesdir: fragments
+prelude_section_name: release_summary
+new_plugins_after_name: removed_features
+sections:
+- ['major_changes', 'Major Changes']
+- ['minor_changes', 'Minor Changes']
+- ['deprecated_features', 'Deprecated Features']
+- ['removed_features', 'Removed Features (previously deprecated)']
+- ['bugfixes', 'Bugfixes']
+- ['known_issues', 'Known Issues']
+'''
+    ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
+    ansible_changelog.set_config(ansible_changelog.config)
+    ansible_changelog.add_fragment_line(
+        '2.10.yml', 'release_summary', 'This is the first proper release.')
+    ansible_changelog.add_fragment_line(
+        'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
+    ansible_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.\n\nWe have multiple paragraphs!'])
+    ansible_changelog.set_plugin_cache('2.10', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a test module',
+                'namespace': '',
+                'version_added': '2.10',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo bar lookup',
+                'namespace': None,
+                'version_added': '2.10',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '2.9',
+            },
+        },
+    })
+
+    assert ansible_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-01-02',
+        '--version', '2.10',
+        '--codename', 'meow'
+    ]) == 0
+
+    diff = ansible_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ['changelogs/CHANGELOG-v2.10.rst', 'changelogs/changelog.yaml']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['2.10']
+    assert changelog['releases']['2.10']['release_date'] == '2020-01-02'
+    assert changelog['releases']['2.10']['changes'] == {
+        'release_summary': 'This is the first proper release.',
+        'minor_changes': [
+            'baz lookup - no longer ignores the ``bar`` option.\n\nWe have multiple paragraphs!',
+            'test - has a new option ``foo``.',
+        ],
+    }
+    assert changelog['releases']['2.10']['fragments'] == [
+        '2.10.yml',
+        'baz-new-option.yaml',
+        'test-new-option.yml',
+    ]
+    assert changelog['releases']['2.10']['modules'] == [
+        {
+            'name': 'test',
+            'description': 'This is a test module',
+            'namespace': '',
+        },
+    ]
+    assert changelog['releases']['2.10']['plugins'] == {
+        'lookup': [
+            {
+                'name': 'bar',
+                'description': 'A foo bar lookup',
+                'namespace': None,
+            },
+        ],
+    }
+    assert changelog['releases']['2.10']['codename'] == 'meow'
+
+    assert diff.file_contents['changelogs/CHANGELOG-v2.10.rst'].decode('utf-8') == (
+        r'''======================================
+Ansible Base 2.10 "meow" Release Notes
+======================================
+
+.. contents:: Topics
+
+
+v2.10
+=====
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+
+  We have multiple paragraphs!
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo bar lookup
+
+New Modules
+-----------
+
+- test - This is a test module
+''')
 
 
 def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
