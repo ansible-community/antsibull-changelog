@@ -1,9 +1,15 @@
+import os
+
+from typing import List
+
+import mock
 
 from fixtures import (  # noqa: F401
-    ansible_changelog,  # pylint: disable=unused-variable
     collection_changelog,  # pylint: disable=unused-variable
     create_plugin,
 )
+
+from antsibull_changelog.config import PathsConfig
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -59,156 +65,6 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert 'modules' not in changelog['releases']['1.0.0']
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
-
-
-def test_changelog_release_ansible_simple(  # pylint: disable=redefined-outer-name
-        ansible_changelog):  # noqa: F811
-    ansible_config_contents = r'''
----
-title: Ansible Base
-release_tag_re: '(v(?:[\d.ab\-]|rc)+)'
-pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
-changes_file: changelog.yaml
-changes_format: combined
-keep_fragments: true
-always_refresh: true
-mention_ancestor: false
-notesdir: fragments
-prelude_section_name: release_summary
-new_plugins_after_name: removed_features
-sections:
-- ['major_changes', 'Major Changes']
-- ['minor_changes', 'Minor Changes']
-- ['deprecated_features', 'Deprecated Features']
-- ['removed_features', 'Removed Features (previously deprecated)']
-- ['bugfixes', 'Bugfixes']
-- ['known_issues', 'Known Issues']
-'''
-    ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
-    ansible_changelog.set_config(ansible_changelog.config)
-    ansible_changelog.add_fragment_line(
-        '2.10.yml', 'release_summary', 'This is the first proper release.')
-    ansible_changelog.add_fragment_line(
-        'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
-    ansible_changelog.add_fragment_line(
-        'baz-new-option.yaml', 'minor_changes',
-        ['baz lookup - no longer ignores the ``bar`` option.\n\nWe have multiple paragraphs!'])
-    ansible_changelog.set_plugin_cache('2.10', {
-        'module': {
-            'test': {
-                'name': 'test',
-                'description': 'This is a test module',
-                'namespace': '',
-                'version_added': '2.10',
-            },
-        },
-        'lookup': {
-            'bar': {
-                'name': 'bar',
-                'description': 'A foo bar lookup',
-                'namespace': None,
-                'version_added': '2.10',
-            },
-            'baz': {
-                'name': 'baz',
-                'description': 'Has already been here',
-                'namespace': None,
-                'version_added': None,
-            },
-            'boom': {
-                'name': 'boom',
-                'description': 'Something older',
-                'namespace': None,
-                'version_added': '2.9',
-            },
-        },
-    })
-
-    assert ansible_changelog.run_tool('release', [
-        '-v',
-        '--date', '2020-01-02',
-        '--version', '2.10',
-        '--codename', 'meow'
-    ]) == 0
-
-    diff = ansible_changelog.diff()
-    assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG-v2.10.rst', 'changelogs/changelog.yaml']
-    assert diff.removed_dirs == []
-    assert diff.removed_files == []
-    assert diff.changed_files == []
-
-    changelog = diff.parse_yaml('changelogs/changelog.yaml')
-    assert changelog['ancestor'] is None
-    assert list(changelog['releases']) == ['2.10']
-    assert changelog['releases']['2.10']['release_date'] == '2020-01-02'
-    assert changelog['releases']['2.10']['changes'] == {
-        'release_summary': 'This is the first proper release.',
-        'minor_changes': [
-            'baz lookup - no longer ignores the ``bar`` option.\n\nWe have multiple paragraphs!',
-            'test - has a new option ``foo``.',
-        ],
-    }
-    assert changelog['releases']['2.10']['fragments'] == [
-        '2.10.yml',
-        'baz-new-option.yaml',
-        'test-new-option.yml',
-    ]
-    assert changelog['releases']['2.10']['modules'] == [
-        {
-            'name': 'test',
-            'description': 'This is a test module',
-            'namespace': '',
-        },
-    ]
-    assert changelog['releases']['2.10']['plugins'] == {
-        'lookup': [
-            {
-                'name': 'bar',
-                'description': 'A foo bar lookup',
-                'namespace': None,
-            },
-        ],
-    }
-    assert changelog['releases']['2.10']['codename'] == 'meow'
-
-    assert diff.file_contents['changelogs/CHANGELOG-v2.10.rst'].decode('utf-8') == (
-        r'''======================================
-Ansible Base 2.10 "meow" Release Notes
-======================================
-
-.. contents:: Topics
-
-
-v2.10
-=====
-
-Release Summary
----------------
-
-This is the first proper release.
-
-Minor Changes
--------------
-
-- baz lookup - no longer ignores the ``bar`` option.
-
-  We have multiple paragraphs!
-- test - has a new option ``foo``.
-
-New Plugins
------------
-
-Lookup
-~~~~~~
-
-- bar - A foo bar lookup
-
-New Modules
------------
-
-- test - This is a test module
-''')
 
 
 def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
@@ -337,6 +193,400 @@ New Modules
 -----------
 
 - test - This is a test module
+''')
+
+    # Check that regenerate doesn't change anything
+    assert collection_changelog.run_tool('generate', ['-v']) == 0
+    assert collection_changelog.diff().unchanged
+
+    # Update plugin descriptions
+    collection_changelog.set_plugin_cache('1.0.0', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '1.0.0',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '1.0.0',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
+        },
+    })
+
+    # Add another fragment
+    collection_changelog.add_fragment_line(
+        'test-new-fragment.yml', 'minor_changes', ['Another new fragment.'])
+
+    # Check that regenerate without --refresh doesn't change anything
+    assert collection_changelog.run_tool('generate', ['-v']) == 0
+    assert collection_changelog.diff().unchanged
+
+    # Check that regenerate with --refresh changes
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['releases']['1.0.0']['modules'] == [
+        {
+            'name': 'test',
+            'description': 'This is a TEST module',
+            'namespace': '',
+        },
+    ]
+    assert changelog['releases']['1.0.0']['plugins'] == {
+        'lookup': [
+            {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+            },
+        ],
+    }
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.0 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- test - This is a TEST module
+''')
+
+    # Update plugin descriptions for 1.1.0 beta 1
+    collection_changelog.set_plugin_cache('1.1.0-beta-1', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '1.0.0',
+            },
+            'test_new': {
+                'name': 'test_new',
+                'description': 'This is ANOTHER test module',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '1.0.0',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
+        },
+    })
+
+    collection_changelog.add_fragment_line(
+        '1.1.0-beta-1.yml', 'release_summary', 'Beta of 1.1.0.')
+
+    # Release 1.1.0-beta-1
+    assert collection_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-02-14',
+        '--version', '1.1.0-beta-1',
+    ]) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.1.0-beta-1.yml',
+        'changelogs/fragments/test-new-fragment.yml',
+    ]
+    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0', '1.1.0-beta-1']
+    assert changelog['releases']['1.1.0-beta-1']['release_date'] == '2020-02-14'
+    assert changelog['releases']['1.1.0-beta-1']['changes'] == {
+        'release_summary': 'Beta of 1.1.0.',
+        'minor_changes': [
+            'Another new fragment.',
+        ],
+    }
+    assert changelog['releases']['1.1.0-beta-1']['fragments'] == [
+        '1.1.0-beta-1.yml',
+        'test-new-fragment.yml',
+    ]
+    assert changelog['releases']['1.1.0-beta-1']['modules'] == [
+        {
+            'name': 'test_new',
+            'description': 'This is ANOTHER test module',
+            'namespace': '',
+        },
+    ]
+    assert 'plugins' not in changelog['releases']['1.1.0-beta-1']
+    assert 'codename' not in changelog['releases']['1.1.0-beta-1']
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.1 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.1.0-beta-1
+=============
+
+Release Summary
+---------------
+
+Beta of 1.1.0.
+
+Minor Changes
+-------------
+
+- Another new fragment.
+
+New Modules
+-----------
+
+- test_new - This is ANOTHER test module
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- test - This is a TEST module
+''')
+
+    # Update plugin descriptions for 1.1.0
+    collection_changelog.set_plugin_cache('1.1.0', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '1.0.0',
+            },
+            'test_new': {
+                'name': 'test_new',
+                'description': 'This is ANOTHER test module',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+            'test_new2': {
+                'name': 'test_new2',
+                'description': 'This is ANOTHER test module!!!11',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+            'test_new3': {
+                'name': 'test_new3',
+                'description': 'This is yet another test module.',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '1.0.0',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
+        },
+    })
+
+    collection_changelog.add_fragment_line(
+        '1.1.0.yml', 'release_summary', 'Final release of 1.1.0.')
+
+    # Final release 1.1.0
+    assert collection_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-02-29',
+        '--version', '1.1.0',
+    ]) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.1.0.yml',
+    ]
+    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0', '1.1.0', '1.1.0-beta-1']
+    assert changelog['releases']['1.1.0']['release_date'] == '2020-02-29'
+    assert changelog['releases']['1.1.0']['changes'] == {
+        'release_summary': 'Final release of 1.1.0.',
+    }
+    assert changelog['releases']['1.1.0']['fragments'] == [
+        '1.1.0.yml',
+    ]
+    assert changelog['releases']['1.1.0']['modules'] == [
+        {
+            'name': 'test_new2',
+            'description': 'This is ANOTHER test module!!!11',
+            'namespace': '',
+        },
+        {
+            'name': 'test_new3',
+            'description': 'This is yet another test module.',
+            'namespace': '',
+        },
+    ]
+    assert 'plugins' not in changelog['releases']['1.1.0']
+    assert 'codename' not in changelog['releases']['1.1.0']
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.1 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.1.0
+======
+
+Release Summary
+---------------
+
+Final release of 1.1.0.
+
+Minor Changes
+-------------
+
+- Another new fragment.
+
+New Modules
+-----------
+
+- test_new - This is ANOTHER test module
+- test_new2 - This is ANOTHER test module!!!11
+- test_new3 - This is yet another test module.
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- test - This is a TEST module
 ''')
 
 
@@ -514,6 +764,78 @@ New Modules
 - test - This is a test module
 ''')
 
+
+def fake_ansible_doc_collection(paths: PathsConfig, plugin_type: str,
+                                plugin_names: List[str]) -> dict:
+    """
+    Fake ansible-doc mock for collection.
+    """
+    if plugin_type == 'callback':
+        assert sorted(plugin_names) == ['acme.test.test_callback']
+        return {
+            'acme.test.test_callback': {
+                'doc': {
+                    'author': ['Someone else'],
+                    'description': ['This is a relatively new callback added before.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins',
+                                             'callback', 'test_callback.py'),
+                    'name': 'test_callback',
+                    'options': {},
+                    'short_description': 'A not so old callback',
+                    'version_added': '0.5.0',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    if plugin_type == 'module':
+        assert sorted(plugin_names) == ['acme.test.cloud.sky.old_module', 'acme.test.test_module']
+        return {
+            'acme.test.cloud.sky.old_module': {
+                'doc': {
+                    'author': ['Elder'],
+                    'description': ['This is an old module.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins', 'modules',
+                                             'cloud', 'sky', 'old_module.py'),
+                    'name': 'old_module',
+                    'options': {},
+                    'short_description': 'An old module',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            },
+            'acme.test.test_module': {
+                'doc': {
+                    'author': ['Someone'],
+                    'description': ['This is a test module.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins',
+                                             'modules', 'test_module.py'),
+                    'name': 'test_module',
+                    'options': {},
+                    'short_description': 'A test module',
+                    'version_added': '1.0.0',
+                },
+                'examples': '',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    raise Exception(
+        'ansible-doc should not be called with plugin_type == "{0}"'.format(plugin_type))
+
+
+@mock.patch('antsibull_changelog.plugins.run_ansible_doc', fake_ansible_doc_collection)
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
@@ -589,7 +911,8 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     # Plugin cache: callbacks
     assert sorted(plugin_cache['plugins']['callback']) == ['test_callback']
     assert plugin_cache['plugins']['callback']['test_callback']['name'] == 'test_callback'
-    assert plugin_cache['plugins']['callback']['test_callback']['description'] == 'A not so old callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['description'] == \
+        'A not so old callback'
     assert plugin_cache['plugins']['callback']['test_callback']['version_added'] == '0.5.0'
     assert 'namespace' not in plugin_cache['plugins']['callback']['test_callback']
 

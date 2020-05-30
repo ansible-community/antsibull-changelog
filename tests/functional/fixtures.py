@@ -38,6 +38,18 @@ class Differences:
     def parse_yaml(self, path):
         return yaml.load(self.file_contents[path], Loader=yaml.SafeLoader)
 
+    @property
+    def has_dir_changes(self):
+        return bool(self.added_dirs or self.added_files)
+
+    @property
+    def has_file_changes(self):
+        return bool(self.removed_dirs or self.removed_files or self.changed_files)
+
+    @property
+    def unchanged(self):
+        return not self.has_dir_changes and not self.has_file_changes
+
 
 class ChangelogEnvironment:
     base_path: pathlib.Path
@@ -54,7 +66,7 @@ class ChangelogEnvironment:
         self.paths = paths
         self.config = ChangelogConfig.default(paths, CollectionDetails(paths))
 
-        self.created_dirs = set()
+        self.created_dirs = set([self.paths.base_dir])
         self.created_files = dict()
 
     def _write(self, path: str, data: bytes):
@@ -101,6 +113,12 @@ class ChangelogEnvironment:
         self.config.store()
         self._written(self.paths.config_path)
 
+    def remove_fragment(self, fragment_name: str):
+        path = os.path.join(self.paths.changelog_dir, self.config.notes_dir, fragment_name)
+        if os.path.exists(path):
+            os.remove(path)
+        self.created_files.pop(path, None)
+
     def add_fragment(self, fragment_name: str, content: str):
         fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)
         self.mkdir(fragment_dir)
@@ -115,7 +133,10 @@ class ChangelogEnvironment:
         return ['plugins', plugin_type]
 
     def add_plugin(self, plugin_type: str, name: str, content: str, subdirs: List[str] = None):
-        plugin_dir = os.path.join(self.paths.base_dir, *self._plugin_base(plugin_type), *(subdirs or []))
+        plugin_dir = os.path.join(
+            self.paths.base_dir,
+            *self._plugin_base(plugin_type),
+            *(subdirs or []))
         self.mkdir(plugin_dir)
         self._write(os.path.join(plugin_dir, name), content.encode('utf-8'))
 
@@ -131,38 +152,54 @@ class ChangelogEnvironment:
         finally:
             os.chdir(old_cwd)
 
+    def _get_current_state(self) -> Tuple[Set[str], Dict[str, bytes]]:
+        created_dirs: Set[str] = set()
+        created_files: Dict[str, bytes] = dict()
+        for dirpath, _, filenames in os.walk(self.paths.base_dir):
+            created_dirs.add(dirpath)
+            for filename in filenames:
+                path = os.path.join(dirpath, filename)
+                with open(path, 'rb') as f:
+                    data = f.read()
+                created_files[path] = data
+        return created_dirs, created_files
+
+    def _rel_path(self, path: str) -> str:
+        return os.path.normpath(os.path.relpath(path, self.paths.base_dir))
+
     def diff(self) -> Differences:
         result = Differences()
-        existing_dirs = set()
-        existing_files = set()
-        for dirpath, _, filenames in os.walk(self.paths.base_dir):
-            reldir = os.path.relpath(dirpath, self.paths.base_dir)
-            if reldir != '.':
-                existing_dirs.add(dirpath)
-                if dirpath not in self.created_dirs:
-                    result.added_dirs.append(reldir)
-            for filename in filenames:
-                real_path = os.path.join(dirpath, filename)
-                existing_files.add(real_path)
-                with open(real_path, 'rb') as f:
-                    data = f.read()
-                path = os.path.normpath(os.path.join(reldir, filename))
-                result.file_contents[path] = data
-                if real_path in self.created_files:
-                    if data != self.created_files[real_path]:
-                        result.changed_files.append(path)
-                        result.file_differences[path] = (self.created_files[real_path], data)
-                else:
-                    result.added_files.append(path)
-        for path in self.created_dirs:
-            if path not in existing_dirs:
-                rel = os.path.relpath(path, self.paths.base_dir)
-                result.removed_dirs.append(rel)
-        for path in self.created_files:
-            if path not in existing_files:
-                rel = os.path.relpath(path, self.paths.base_dir)
-                result.removed_files.append(rel)
-        result.sort()
+        created_dirs, created_files = self._get_current_state()
+
+        result.added_dirs = [
+            self._rel_path(path)
+            for path in sorted(created_dirs - self.created_dirs)
+        ]
+        result.removed_dirs = [
+            self._rel_path(path)
+            for path in sorted(self.created_dirs - created_dirs)
+        ]
+        result.added_files = [
+            self._rel_path(path)
+            for path in sorted(created_files.keys() - self.created_files.keys())
+        ]
+        result.removed_files = [
+            self._rel_path(path)
+            for path in sorted(self.created_files.keys() - created_files.keys())
+        ]
+        result.file_contents = {
+            self._rel_path(path): content
+            for path, content in created_files.items()
+        }
+        result.file_differences = {
+            self._rel_path(path): (self.created_files[path], created_files[path])
+            for path in self.created_files.keys() & created_files.keys()
+            if self.created_files[path] != created_files[path]
+        }
+        result.changed_files = sorted(result.file_differences.keys())
+
+        self.created_dirs = created_dirs
+        self.created_files = created_files
         return result
 
 

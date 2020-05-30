@@ -215,6 +215,18 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
     return sorted(plugins_list.keys())
 
 
+def run_ansible_doc(paths: PathsConfig, plugin_type: str, plugin_names: List[str]) -> dict:
+    """
+    Runs ansible-doc to retrieve documentation for a given set of plugins in JSON format.
+
+    Plugins must be in FQCN for collections.
+    """
+    command = [paths.ansible_doc_path or 'ansible-doc', '--json', '-t', plugin_type]
+    command.extend(plugin_names)
+    output = subprocess.check_output(command)
+    return json.loads(output.decode('utf-8'))
+
+
 def load_plugin_metadata(paths: PathsConfig, plugin_type: str,
                          collection_name: Optional[str]) -> Dict[str, Dict[str, Any]]:
     """
@@ -225,16 +237,14 @@ def load_plugin_metadata(paths: PathsConfig, plugin_type: str,
     :arg collection_name: The name of the collection, if appropriate.
     """
     plugins_list = list_plugins_walk(paths, plugin_type, collection_name)
+    # WARNING: Do not switch to this before ansible-base is a requirement!
     # plugins_list = list_plugins_ansibledoc(paths, plugin_type, collection_name)
 
     result: Dict[str, Dict[str, Any]] = {}
     if not plugins_list:
         return result
 
-    command = [paths.ansible_doc_path or 'ansible-doc', '--json', '-t', plugin_type]
-    command.extend(plugins_list)
-    output = subprocess.check_output(command)
-    plugins_data = json.loads(output.decode('utf-8'))
+    plugins_data = run_ansible_doc(paths, plugin_type, plugins_list)
 
     for name, data in plugins_data.items():
         processed_data = jsondoc_to_metadata(paths, collection_name, plugin_type, name, data)
