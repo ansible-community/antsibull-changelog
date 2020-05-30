@@ -10,13 +10,13 @@ Changelog fragment loading, modification and linting.
 
 import os
 
-from typing import Any, Dict, List, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docutils.utils
 import rstcheck
 import yaml
 
-from .config import PathsConfig, ChangelogConfig
+from .config import ChangelogConfig, PathsConfig
 
 
 class ChangelogFragment:

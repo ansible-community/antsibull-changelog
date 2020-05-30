@@ -11,14 +11,14 @@ import io
 import os
 import pathlib
 
-from contextlib import redirect_stdout, redirect_stderr
-from typing import Any, Dict, List, Tuple, Optional, Set, Union
+from contextlib import redirect_stderr, redirect_stdout
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 import yaml
 
 from antsibull_changelog.cli import run as run_changelog_tool
-from antsibull_changelog.config import PathsConfig, CollectionDetails, ChangelogConfig
+from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
 
 
 class Differences:

@@ -1,6 +1,6 @@
-import docutils.utils
-
 from typing import List, Tuple, Union
+
+import docutils.utils
 
 
 def check(source: str,

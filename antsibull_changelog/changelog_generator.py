@@ -16,8 +16,8 @@ from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Union
 import packaging.version
 import semantic_version
 
-from .config import PathsConfig, ChangelogConfig
 from .changes import ChangesBase, FragmentResolver, PluginResolver
+from .config import ChangelogConfig, PathsConfig
 from .fragment import ChangelogFragment
 from .logger import LOGGER
 from .plugins import PluginDescription

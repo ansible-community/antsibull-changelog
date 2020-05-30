@@ -14,16 +14,16 @@ import collections
 import datetime
 import os
 
-from typing import cast, Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, cast
 
 import packaging.version
 import semantic_version
 import yaml
 
 from .config import ChangelogConfig
-from .fragment import load_fragments, ChangelogFragment
+from .fragment import ChangelogFragment, load_fragments
 from .logger import LOGGER
-from .plugins import load_plugins, PluginDescription
+from .plugins import PluginDescription, load_plugins
 from .utils import is_release_version
 
 

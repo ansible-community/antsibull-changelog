@@ -10,7 +10,7 @@ Linting for changelog.yaml.
 
 import re
 
-from typing import cast, Any, List, Optional, Tuple, Type
+from typing import Any, List, Optional, Tuple, Type, cast
 
 import semantic_version
 import yaml

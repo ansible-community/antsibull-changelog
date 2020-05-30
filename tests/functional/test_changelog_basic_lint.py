@@ -13,12 +13,10 @@ from typing import List
 
 import mock
 
-from fixtures import (  # noqa: F401
-    collection_changelog,  # pylint: disable=unused-variable
-    create_plugin,
-)
-
 from antsibull_changelog.config import PathsConfig
+
+from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
+from fixtures import create_plugin
 
 
 def test_changelog_fragment_lint_correct(  # pylint: disable=redefined-outer-name
