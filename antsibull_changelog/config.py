@@ -99,9 +99,10 @@ class PathsConfig:
                 ansible_lib_dir = os.path.join(base_dir, 'lib', 'ansible')
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
-                    return PathsConfig(
-                        False, base_dir, None,
-                        os.path.join(base_dir, 'bin', 'ansible-doc'))
+                    ansible_doc = os.path.join(base_dir, 'bin', 'ansible-doc')
+                    if not os.path.exists(ansible_doc):
+                        ansible_doc = 'ansible-doc'
+                    return PathsConfig(False, base_dir, None, ansible_doc)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ValueError('Cannot identify collection or ansible-base checkout.')
