@@ -1,0 +1,5 @@
+{
+    "errors": [
+        [0, 0, "error while parsing YAML: while parsing a flow node\nexpected the node content, but found '<stream end>'\n  in \"input.yaml\", line 2, column 1"]
+    ]
+}

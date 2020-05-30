@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+# Author: Felix Fontein <felix@fontein.de>
+# License: GPLv3+
+# Copyright: Ansible Project, 2020
+
 """
 Test changelog.yaml linting.
 """
+
 import glob
 import json
 import os.path
@@ -45,7 +51,7 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     assert len(errors) > 0
 
     # Cut off path
-    errors = [list(error[1:]) for error in errors]
+    errors = [[error[1], error[2], error[3].replace(yaml_filename, 'input.yaml')] for error in errors]
     # Load expected errors
     with open(json_filename, 'r') as json_f:
         data = json.load(json_f)
