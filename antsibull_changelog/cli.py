@@ -110,7 +110,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
                              help='path to collection root')
 
     lint_parser = subparsers.add_parser('lint',
-                                        parents=[common, is_collection],
+                                        parents=[common],
                                         help='check changelog fragments for syntax errors')
     lint_parser.set_defaults(func=command_lint)
     lint_parser.add_argument('fragments',
@@ -343,7 +343,9 @@ def command_lint(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    paths = set_paths(is_collection=args.is_collection)
+    # Passing is_collection=True ensures that we just look for changelogs/config.yaml,
+    # and don't expect galaxy.yml or lib/ansible to be present.
+    paths = set_paths(is_collection=True)
 
     fragment_paths: List[str] = args.fragments
 
