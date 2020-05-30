@@ -65,6 +65,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
+    collection_changelog.config.changelog_filename_version_depth = 2
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
@@ -151,9 +152,46 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     }
     assert 'codename' not in changelog['releases']['1.0.0']
 
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.0 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo bar lookup
+
+New Modules
+-----------
+
+- test - This is a test module
+''')
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
+    collection_changelog.config.title = 'Test Collection'
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
@@ -289,12 +327,48 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
     }
     assert 'codename' not in changelog['releases']['1.0.0']
 
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=============================
+Test Collection Release Notes
+=============================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo bar lookup
+
+New Modules
+-----------
+
+- test - This is a test module
+''')
 
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
         'version': '1.0.0',
     })
+    collection_changelog.config.title = 'My Amazing Collection'
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
@@ -382,3 +456,25 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     assert changelog['releases']['1.0.0']['modules'][0]['namespace'] == ''
     assert changelog['releases']['1.0.0']['modules'][0]['description'] == 'A test module'
     assert 'version_added' not in changelog['releases']['1.0.0']['modules'][0]
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''===================================
+My Amazing Collection Release Notes
+===================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+New Modules
+-----------
+
+- test_module - A test module
+''')
