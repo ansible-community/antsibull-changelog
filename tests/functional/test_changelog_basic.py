@@ -313,6 +313,22 @@ sections:
 - ['known_issues', 'Known Issues']
 '''
     ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
+    ansible_changelog.set_plugin_cache('2.9', {
+        'lookup': {
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '2.9',
+            },
+        },
+    })
     ansible_changelog.add_fragment_line(
         '2.10.yml', 'release_summary', 'This is the first proper release.')
     ansible_changelog.add_plugin('module', 'test_module.py', create_plugin(
@@ -361,13 +377,14 @@ sections:
     diff = ansible_changelog.diff()
     assert diff.added_dirs == []
     assert diff.added_files == [
-        'changelogs/.plugin-cache.yaml',
         'changelogs/CHANGELOG-v2.10.rst',
         'changelogs/changelog.yaml',
     ]
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == []
+    assert diff.changed_files == [
+        'changelogs/.plugin-cache.yaml',
+    ]
 
     plugin_cache = diff.parse_yaml('changelogs/.plugin-cache.yaml')
     assert plugin_cache['version'] == '2.10'
