@@ -95,6 +95,12 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
                 'namespace': None,
                 'version_added': None,
             },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
         },
     })
 
@@ -315,6 +321,18 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         EXAMPLES='# Some examples\n',
         RETURN={},
     ), subdirs=['cloud', 'sky'])
+    collection_changelog.add_plugin('callback', 'test_callback.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'test_callback',
+            'short_description': 'A not so old callback',
+            'version_added': '0.5.0',
+            'description': ['This is a relatively new callback added before.'],
+            'author': ['Someone else'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ))
 
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
 
@@ -342,6 +360,13 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     assert plugin_cache['plugins']['module']['test_module']['namespace'] == ''
     assert plugin_cache['plugins']['module']['test_module']['description'] == 'A test module'
     assert plugin_cache['plugins']['module']['test_module']['version_added'] == '1.0.0'
+
+    # Plugin cache: callbacks
+    assert sorted(plugin_cache['plugins']['callback']) == ['test_callback']
+    assert plugin_cache['plugins']['callback']['test_callback']['name'] == 'test_callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['description'] == 'A not so old callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['version_added'] == '0.5.0'
+    assert 'namespace' not in plugin_cache['plugins']['callback']['test_callback']
 
     # Changelog
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
