@@ -711,6 +711,12 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 'namespace': 'bar.baz',
                 'version_added': '1.0.0',
             },
+            'test6': {
+                'name': 'test6',
+                'description': 'This is a test module',
+                'namespace': 'foo.bar.baz',
+                'version_added': '1.0.0',
+            },
         },
         'lookup': {
             'bar': {
@@ -798,6 +804,11 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
             'description': 'This is a test module',
             'namespace': 'bar.baz',
         },
+        {
+            'name': 'test6',
+            'description': 'This is a test module',
+            'namespace': 'foo.bar.baz',
+        },
     ]
     assert changelog['releases']['1.0.0']['plugins'] == {
         'lookup': [
@@ -857,6 +868,11 @@ Foo
 ~~~
 
 - test4 - This is a test module
+
+bar.baz
+^^^^^^^
+
+- test6 - This is a test module
 
 Test
 ~~~~
