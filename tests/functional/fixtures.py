@@ -7,9 +7,11 @@
 Fixtures for changelog tests.
 """
 
+import io
 import os
 import pathlib
 
+from contextlib import redirect_stdout, redirect_stderr
 from typing import Any, Dict, List, Tuple, Optional, Set, Union
 
 import pytest
@@ -168,6 +170,14 @@ class ChangelogEnvironment:
             return run_changelog_tool(['changelog', command] + arguments)
         finally:
             os.chdir(old_cwd)
+
+    def run_tool_w_output(self, command: str, arguments: List[str], cwd: Optional[str] = None) -> Tuple[int, str, str]:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout):
+            with redirect_stderr(stderr):
+                rc = self.run_tool(command, arguments, cwd=cwd)
+        return rc, stdout.getvalue(), stderr.getvalue()
 
     def _get_current_state(self) -> Tuple[Set[str], Dict[str, bytes]]:
         created_dirs: Set[str] = set()
