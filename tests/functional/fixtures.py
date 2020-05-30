@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+# Author: Felix Fontein <felix@fontein.de>
+# License: GPLv3+
+# Copyright: Ansible Project, 2020
+
+"""
+Fixtures for changelog tests.
+"""
+
 import os
 import pathlib
 
@@ -11,6 +20,10 @@ from antsibull_changelog.config import PathsConfig, CollectionDetails, Changelog
 
 
 class Differences:
+    """
+    Describe differences between previous state (updated by environment) and filesystem.
+    """
+
     added_dirs: List[str]
     added_files: List[str]
     removed_dirs: List[str]
@@ -52,6 +65,10 @@ class Differences:
 
 
 class ChangelogEnvironment:
+    """
+    Base class for changelog environments.
+    """
+
     base_path: pathlib.Path
 
     paths: PathsConfig
@@ -204,6 +221,10 @@ class ChangelogEnvironment:
 
 
 class AnsibleChangelogEnvironment(ChangelogEnvironment):
+    """
+    Ansible changelog environment.
+    """
+
     def __init__(self, base_path: pathlib.Path):
         super().__init__(base_path,
                          PathsConfig.force_ansible(base_dir=str(base_path)))
@@ -217,6 +238,10 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
 
 
 class CollectionChangelogEnvironment(ChangelogEnvironment):
+    """
+    Collection changelog environment.
+    """
+
     namespace: str
     collection: str
     collection_name: str
@@ -243,12 +268,18 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
 
 @pytest.fixture
 def ansible_changelog(tmp_path_factory) -> AnsibleChangelogEnvironment:
+    """
+    Fixture for Ansible changelog environment.
+    """
     return AnsibleChangelogEnvironment(tmp_path_factory.mktemp('changelog-test'))
 
 
 @pytest.fixture
 def collection_changelog(tmp_path_factory, namespace: str = 'acme',
                          collection: str = 'test') -> CollectionChangelogEnvironment:
+    """
+    Fixture for collection changelog environment.
+    """
     base_path = tmp_path_factory.mktemp('changelog-test')
     collection_path_env = 'ANSIBLE_COLLECTIONS_PATHS'
     original_path = os.environ.get(collection_path_env)
@@ -261,6 +292,9 @@ def collection_changelog(tmp_path_factory, namespace: str = 'acme',
 
 
 def create_plugin(**parts):
+    """
+    Create plugin stub.
+    """
     result = [
         '#!/usr/bin/python',
         '',

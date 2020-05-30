@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+# Author: Felix Fontein <felix@fontein.de>
+# License: GPLv3+
+# Copyright: Ansible Project, 2020
+
+"""
+Test basic changelog functionality: Ansible 2.9 format.
+"""
+
 import os
 
 from typing import List

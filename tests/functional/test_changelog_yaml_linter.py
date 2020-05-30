@@ -1,6 +1,12 @@
+# -*- coding: utf-8 -*-
+# Author: Felix Fontein <felix@fontein.de>
+# License: GPLv3+
+# Copyright: Ansible Project, 2020
+
 """
 Test changelog.yaml linting.
 """
+
 import glob
 import json
 import os.path
