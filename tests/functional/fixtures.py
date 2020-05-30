@@ -70,29 +70,35 @@ class ChangelogEnvironment:
             data = f.read()
         self.created_files[path] = data
 
+    def mkdir(self, path: str):
+        parts = []
+        while path != self.paths.base_dir:
+            path, part = os.path.split(path)
+            parts.append(part)
+        dir = self.paths.base_dir
+        for part in reversed(parts):
+            dir = os.path.join(dir, part)
+            os.makedirs(dir, exist_ok=True)
+            self.created_dirs.add(dir)
+
     def set_plugin_cache(self, version: str, plugins: Dict[str, Dict[str, Dict[str, str]]]):
         data = {
             'version': version,
             'plugins': plugins,
         }
         config_dir = self.paths.changelog_dir
-        os.makedirs(config_dir, exist_ok=True)
-        self.created_dirs.add(config_dir)
+        self.mkdir(config_dir)
         self._write_yaml(os.path.join(config_dir, '.plugin-cache.yaml'), data)
 
     def set_config(self, config: ChangelogConfig):
-        config_dir = self.paths.changelog_dir
-        os.makedirs(config_dir, exist_ok=True)
-        self.created_dirs.add(config_dir)
+        self.mkdir(self.paths.changelog_dir)
         self.config = config
         self.config.store()
         self._written(self.paths.config_path)
 
     def add_fragment(self, fragment_name: str, content: str):
         fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)
-        os.makedirs(fragment_dir, exist_ok=True)
-        self.created_dirs.add(self.paths.changelog_dir)
-        self.created_dirs.add(fragment_dir)
+        self.mkdir(fragment_dir)
         self._write(os.path.join(fragment_dir, fragment_name), content.encode('utf-8'))
 
     def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str]):
@@ -104,11 +110,8 @@ class ChangelogEnvironment:
         return ['plugins', plugin_type]
 
     def add_plugin(self, plugin_type: str, name: str, content: str, subdirs: List[str] = None):
-        plugin_dir = self.paths.base_dir
-        for part in self._plugin_base(plugin_type) + (subdirs or []):
-            plugin_dir = os.path.join(plugin_dir, part)
-            os.makedirs(plugin_dir, exist_ok=True)
-            self.created_dirs.add(plugin_dir)
+        plugin_dir = os.path.join(self.paths.base_dir, *self._plugin_base(plugin_type), *(subdirs or []))
+        self.mkdir(plugin_dir)
         self._write(os.path.join(plugin_dir, name), content.encode('utf-8'))
 
     def run_tool(self, command: str, arguments: List[str], cwd: Optional[str] = None) -> int:
@@ -162,6 +165,8 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
     def __init__(self, base_path: pathlib.Path):
         super().__init__(base_path,
                          PathsConfig.force_ansible(base_dir=str(base_path)))
+        self.mkdir(os.path.join(self.paths.base_dir, 'lib', 'ansible', 'modules'))
+        self.mkdir(os.path.join(self.paths.base_dir, 'lib', 'ansible', 'plugins'))
 
     def _plugin_base(self, plugin_type):
         if plugin_type == 'module':
