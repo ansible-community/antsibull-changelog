@@ -205,10 +205,11 @@ class ChangelogGenerator:
 
         builder = RstBuilder()
         title = self.config.title or 'Ansible'
+        if major_minor_version:
+            title = '%s %s' % (title, major_minor_version)
         if codename:
-            builder.set_title('%s %s "%s" Release Notes' % (title, major_minor_version, codename))
-        else:
-            builder.set_title('%s %s Release Notes' % (title, major_minor_version))
+            title = '%s "%s"' % (title, codename)
+        builder.set_title('%s Release Notes' % (title,))
         builder.add_raw_rst('.. contents:: Topics\n')
 
         if self.changes.ancestor and self.config.mention_ancestor:
