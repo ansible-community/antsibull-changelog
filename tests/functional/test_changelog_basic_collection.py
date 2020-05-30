@@ -112,6 +112,10 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
         },
     })
 
+    # Lint fragments
+    assert collection_changelog.run_tool('lint', ['-vv']) == 0
+
+    # Release
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
 
     diff = collection_changelog.diff()
@@ -491,10 +495,14 @@ New Modules
 
     collection_changelog.add_fragment_line(
         '1.1.0.yml', 'release_summary', 'Final release of 1.1.0.')
+    collection_changelog.add_fragment_line(
+        'minorchange.yml', 'minor_changes', ['A minor change.'])
+    collection_changelog.add_fragment_line(
+        'bugfix.yml', 'bugfixes', ['A bugfix.'])
 
     # Final release 1.1.0
     assert collection_changelog.run_tool('release', [
-        '-v',
+        '-vvv',
         '--date', '2020-02-29',
         '--version', '1.1.0',
     ]) == 0
@@ -505,6 +513,8 @@ New Modules
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         'changelogs/fragments/1.1.0.yml',
+        'changelogs/fragments/bugfix.yml',
+        'changelogs/fragments/minorchange.yml',
     ]
     assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
 
@@ -514,9 +524,13 @@ New Modules
     assert changelog['releases']['1.1.0']['release_date'] == '2020-02-29'
     assert changelog['releases']['1.1.0']['changes'] == {
         'release_summary': 'Final release of 1.1.0.',
+        'bugfixes': ['A bugfix.'],
+        'minor_changes': ['A minor change.'],
     }
     assert changelog['releases']['1.1.0']['fragments'] == [
         '1.1.0.yml',
+        'bugfix.yml',
+        'minorchange.yml',
     ]
     assert changelog['releases']['1.1.0']['modules'] == [
         {
@@ -552,7 +566,13 @@ Final release of 1.1.0.
 Minor Changes
 -------------
 
+- A minor change.
 - Another new fragment.
+
+Bugfixes
+--------
+
+- A bugfix.
 
 New Modules
 -----------

@@ -470,10 +470,14 @@ New Modules
 
     ansible_changelog.add_fragment_line(
         '2.10.1.yml', 'release_summary', 'Final release of 2.10.1.')
+    ansible_changelog.add_fragment_line(
+        'minorchange.yml', 'minor_changes', ['A minor change.'])
+    ansible_changelog.add_fragment_line(
+        'bugfix.yml', 'bugfixes', ['A bugfix.'])
 
     # Final release 2.10.1
     assert ansible_changelog.run_tool('release', [
-        '-v',
+        '-vvv',
         '--date', '2020-02-29',
         '--version', '2.10.1',
         '--codename', 'woof!'
@@ -492,9 +496,13 @@ New Modules
     assert changelog['releases']['2.10.1']['release_date'] == '2020-02-29'
     assert changelog['releases']['2.10.1']['changes'] == {
         'release_summary': 'Final release of 2.10.1.',
+        'bugfixes': ['A bugfix.'],
+        'minor_changes': ['A minor change.'],
     }
     assert changelog['releases']['2.10.1']['fragments'] == [
         '2.10.1.yml',
+        'bugfix.yml',
+        'minorchange.yml',
     ]
     assert changelog['releases']['2.10.1']['modules'] == [
         {
@@ -530,7 +538,13 @@ Final release of 2.10.1.
 Minor Changes
 -------------
 
+- A minor change.
 - Another new fragment.
+
+Bugfixes
+--------
+
+- A bugfix.
 
 New Modules
 -----------
@@ -567,6 +581,9 @@ New Modules
 
 - test - This is a TEST module
 ''')
+
+    # Lint fragments
+    assert ansible_changelog.run_tool('lint', ['-vv']) == 0
 
 
 
