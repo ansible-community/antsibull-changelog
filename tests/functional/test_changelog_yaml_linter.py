@@ -51,7 +51,7 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     assert len(errors) > 0
 
     # Cut off path
-    errors = [list(error[1:]) for error in errors]
+    errors = [[error[1], error[2], error[3].replace(yaml_filename, 'input.yaml')] for error in errors]
     # Load expected errors
     with open(json_filename, 'r') as json_f:
         data = json.load(json_f)
