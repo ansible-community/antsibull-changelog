@@ -1,0 +1,5 @@
+{
+    "errors": [
+        [0, 0, "'releases' is expected to be <class 'dict'>, but got []"]
+    ]
+}
