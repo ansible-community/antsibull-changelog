@@ -295,7 +295,7 @@ class ChangelogGenerator:
 
             section = parts.pop(0).replace('_', ' ').title()
 
-            if not previous_section:
+            if previous_section is None:
                 builder.add_section('New Modules', start_level + 1)
 
             if section != previous_section and section:

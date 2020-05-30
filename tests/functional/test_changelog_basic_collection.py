@@ -681,6 +681,36 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 'namespace': '',
                 'version_added': '1.0.0',
             },
+            'test1': {
+                'name': 'test1',
+                'description': 'This is a test module',
+                'namespace': 'test',
+                'version_added': '1.0.0',
+            },
+            'test2': {
+                'name': 'test2',
+                'description': 'This is a test module',
+                'namespace': 'test.foo',
+                'version_added': '1.0.0',
+            },
+            'test3': {
+                'name': 'test3',
+                'description': 'This is a test module',
+                'namespace': 'test.bar',
+                'version_added': '1.0.0',
+            },
+            'test4': {
+                'name': 'test4',
+                'description': 'This is a test module',
+                'namespace': 'foo',
+                'version_added': '1.0.0',
+            },
+            'test5': {
+                'name': 'test5',
+                'description': 'This is a test module',
+                'namespace': 'bar.baz',
+                'version_added': '1.0.0',
+            },
         },
         'lookup': {
             'bar': {
@@ -743,6 +773,31 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
             'description': 'This is a test module',
             'namespace': '',
         },
+        {
+            'name': 'test1',
+            'description': 'This is a test module',
+            'namespace': 'test',
+        },
+        {
+            'name': 'test2',
+            'description': 'This is a test module',
+            'namespace': 'test.foo',
+        },
+        {
+            'name': 'test3',
+            'description': 'This is a test module',
+            'namespace': 'test.bar',
+        },
+        {
+            'name': 'test4',
+            'description': 'This is a test module',
+            'namespace': 'foo',
+        },
+        {
+            'name': 'test5',
+            'description': 'This is a test module',
+            'namespace': 'bar.baz',
+        },
     ]
     assert changelog['releases']['1.0.0']['plugins'] == {
         'lookup': [
@@ -789,6 +844,34 @@ New Modules
 -----------
 
 - test - This is a test module
+
+Bar
+~~~
+
+baz
+^^^
+
+- test5 - This is a test module
+
+Foo
+~~~
+
+- test4 - This is a test module
+
+Test
+~~~~
+
+- test1 - This is a test module
+
+bar
+^^^
+
+- test3 - This is a test module
+
+foo
+^^^
+
+- test2 - This is a test module
 ''')
 
 
