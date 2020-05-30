@@ -34,6 +34,7 @@ codecov = "*"
 pyre-check = "*"
 pylint = "*"
 mypy = "*"
+mock = "*"
 
 [tool.isort]
 line_length = 100

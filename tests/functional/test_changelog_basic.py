@@ -1,9 +1,16 @@
+import os
+
+from typing import List
+
+import mock
 
 from fixtures import (  # noqa: F401
     ansible_changelog,  # pylint: disable=unused-variable
     collection_changelog,  # pylint: disable=unused-variable
     create_plugin,
 )
+
+from antsibull_changelog.config import PathsConfig
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -85,14 +92,14 @@ sections:
 - ['known_issues', 'Known Issues']
 '''
     ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
-    ansible_changelog.set_config(ansible_changelog.config)
     ansible_changelog.add_fragment_line(
         '2.10.yml', 'release_summary', 'This is the first proper release.')
     ansible_changelog.add_fragment_line(
         'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
     ansible_changelog.add_fragment_line(
         'baz-new-option.yaml', 'minor_changes',
-        ['baz lookup - no longer ignores the ``bar`` option.\n\nWe have multiple paragraphs!'])
+        ['baz lookup - no longer ignores the ``bar`` option.\n\n'
+         'We have multiple paragraphs!'])
     ansible_changelog.set_plugin_cache('2.10', {
         'module': {
             'test': {
@@ -208,6 +215,217 @@ New Modules
 -----------
 
 - test - This is a test module
+''')
+
+
+def fake_ansible_doc_ansible(paths: PathsConfig, plugin_type: str,
+                             plugin_names: List[str]) -> dict:
+    """
+    Fake ansible-doc mock for Ansible-base.
+    """
+    if plugin_type == 'callback':
+        assert sorted(plugin_names) == ['test_callback']
+        return {
+            'test_callback': {
+                'doc': {
+                    'author': ['Someone else'],
+                    'description': ['This is a relatively new callback added before.'],
+                    'filename': os.path.join(paths.base_dir, 'lib', 'ansible', 'plugins',
+                                             'callback', 'test_callback.py'),
+                    'name': 'test_callback',
+                    'options': {},
+                    'short_description': 'A not so old callback',
+                    'version_added': '2.9',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    if plugin_type == 'module':
+        assert sorted(plugin_names) == ['cloud.sky.old_module', 'test_module']
+        return {
+            'cloud.sky.old_module': {
+                'doc': {
+                    'author': ['Elder'],
+                    'description': ['This is an old module.'],
+                    'filename': os.path.join(paths.base_dir, 'lib', 'ansible', 'modules',
+                                             'cloud', 'sky', 'old_module.py'),
+                    'name': 'old_module',
+                    'options': {},
+                    'short_description': 'An old module',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            },
+            'test_module': {
+                'doc': {
+                    'author': ['Someone'],
+                    'description': ['This is a test module.'],
+                    'filename': os.path.join(paths.base_dir, 'lib', 'ansible', 'modules',
+                                             'test_module.py'),
+                    'name': 'test_module',
+                    'options': {},
+                    'short_description': 'A test module',
+                    'version_added': '2.10',
+                },
+                'examples': '',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    raise Exception(
+        'ansible-doc should not be called with plugin_type == "{0}"'.format(plugin_type))
+
+
+@mock.patch('antsibull_changelog.plugins.run_ansible_doc', fake_ansible_doc_ansible)
+def test_changelog_release_ansible_plugin_cache(  # pylint: disable=redefined-outer-name
+        ansible_changelog):  # noqa: F811
+    ansible_config_contents = r'''
+---
+title: Ansible Base
+release_tag_re: '(v(?:[\d.ab\-]|rc)+)'
+pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
+changes_file: changelog.yaml
+changes_format: combined
+keep_fragments: true
+always_refresh: true
+mention_ancestor: false
+notesdir: fragments
+prelude_section_name: release_summary
+new_plugins_after_name: removed_features
+sections:
+- ['major_changes', 'Major Changes']
+- ['minor_changes', 'Minor Changes']
+- ['deprecated_features', 'Deprecated Features']
+- ['removed_features', 'Removed Features (previously deprecated)']
+- ['bugfixes', 'Bugfixes']
+- ['known_issues', 'Known Issues']
+'''
+    ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
+    ansible_changelog.add_fragment_line(
+        '2.10.yml', 'release_summary', 'This is the first proper release.')
+    ansible_changelog.add_plugin('module', 'test_module.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'test_module',
+            'short_description': 'A test module',
+            'version_added': '2.10',
+            'description': ['This is a test module.'],
+            'author': ['Someone'],
+            'options': {},
+        },
+        EXAMPLES='',
+        RETURN={},
+    ))
+    ansible_changelog.add_plugin('module', 'old_module.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'old_module',
+            'short_description': 'An old module',
+            'description': ['This is an old module.'],
+            'author': ['Elder'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['cloud', 'sky'])
+    ansible_changelog.add_plugin('callback', 'test_callback.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'test_callback',
+            'short_description': 'A not so old callback',
+            'version_added': '2.9',
+            'description': ['This is a relatively new callback added before.'],
+            'author': ['Someone else'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ))
+
+    assert ansible_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-01-02',
+        '--version', '2.10',
+        '--codename', 'meow'
+    ]) == 0
+
+    diff = ansible_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == [
+        'changelogs/.plugin-cache.yaml',
+        'changelogs/CHANGELOG-v2.10.rst',
+        'changelogs/changelog.yaml',
+    ]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    plugin_cache = diff.parse_yaml('changelogs/.plugin-cache.yaml')
+    assert plugin_cache['version'] == '2.10'
+
+    # Plugin cache: modules
+    assert sorted(plugin_cache['plugins']['module']) == ['old_module', 'test_module']
+    assert plugin_cache['plugins']['module']['old_module']['name'] == 'old_module'
+    assert plugin_cache['plugins']['module']['old_module']['namespace'] == 'cloud.sky'
+    assert plugin_cache['plugins']['module']['old_module']['description'] == 'An old module'
+    assert plugin_cache['plugins']['module']['old_module']['version_added'] is None
+    assert plugin_cache['plugins']['module']['test_module']['name'] == 'test_module'
+    assert plugin_cache['plugins']['module']['test_module']['namespace'] == ''
+    assert plugin_cache['plugins']['module']['test_module']['description'] == 'A test module'
+    assert plugin_cache['plugins']['module']['test_module']['version_added'] == '2.10'
+
+    # Plugin cache: callbacks
+    assert sorted(plugin_cache['plugins']['callback']) == ['test_callback']
+    assert plugin_cache['plugins']['callback']['test_callback']['name'] == 'test_callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['description'] == \
+        'A not so old callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['version_added'] == '2.9'
+    assert 'namespace' not in plugin_cache['plugins']['callback']['test_callback']
+
+    # Changelog
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert sorted(changelog['releases']) == ['2.10']
+    assert changelog['releases']['2.10']['release_date'] == '2020-01-02'
+    assert changelog['releases']['2.10']['changes'] == {
+        'release_summary': 'This is the first proper release.'
+    }
+    assert changelog['releases']['2.10']['fragments'] == ['2.10.yml']
+    assert len(changelog['releases']['2.10']['modules']) == 1
+    assert changelog['releases']['2.10']['modules'][0]['name'] == 'test_module'
+    assert changelog['releases']['2.10']['modules'][0]['namespace'] == ''
+    assert changelog['releases']['2.10']['modules'][0]['description'] == 'A test module'
+    assert 'version_added' not in changelog['releases']['2.10']['modules'][0]
+
+    assert diff.file_contents['changelogs/CHANGELOG-v2.10.rst'].decode('utf-8') == (
+        r'''======================================
+Ansible Base 2.10 "meow" Release Notes
+======================================
+
+.. contents:: Topics
+
+
+v2.10
+=====
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+New Modules
+-----------
+
+- test_module - A test module
 ''')
 
 
@@ -514,6 +732,78 @@ New Modules
 - test - This is a test module
 ''')
 
+
+def fake_ansible_doc_collection(paths: PathsConfig, plugin_type: str,
+                                plugin_names: List[str]) -> dict:
+    """
+    Fake ansible-doc mock for collection.
+    """
+    if plugin_type == 'callback':
+        assert sorted(plugin_names) == ['acme.test.test_callback']
+        return {
+            'acme.test.test_callback': {
+                'doc': {
+                    'author': ['Someone else'],
+                    'description': ['This is a relatively new callback added before.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins',
+                                             'callback', 'test_callback.py'),
+                    'name': 'test_callback',
+                    'options': {},
+                    'short_description': 'A not so old callback',
+                    'version_added': '0.5.0',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    if plugin_type == 'module':
+        assert sorted(plugin_names) == ['acme.test.cloud.sky.old_module', 'acme.test.test_module']
+        return {
+            'acme.test.cloud.sky.old_module': {
+                'doc': {
+                    'author': ['Elder'],
+                    'description': ['This is an old module.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins', 'modules',
+                                             'cloud', 'sky', 'old_module.py'),
+                    'name': 'old_module',
+                    'options': {},
+                    'short_description': 'An old module',
+                },
+                'examples': '# Some examples\n',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            },
+            'acme.test.test_module': {
+                'doc': {
+                    'author': ['Someone'],
+                    'description': ['This is a test module.'],
+                    'filename': os.path.join(paths.base_dir, 'plugins',
+                                             'modules', 'test_module.py'),
+                    'name': 'test_module',
+                    'options': {},
+                    'short_description': 'A test module',
+                    'version_added': '1.0.0',
+                },
+                'examples': '',
+                'metadata': {
+                    'status': ['preview'],
+                    'supported_by': 'community',
+                },
+                'return': {},
+            }
+        }
+    raise Exception(
+        'ansible-doc should not be called with plugin_type == "{0}"'.format(plugin_type))
+
+
+@mock.patch('antsibull_changelog.plugins.run_ansible_doc', fake_ansible_doc_collection)
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
     collection_changelog.set_galaxy({
@@ -589,7 +879,8 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     # Plugin cache: callbacks
     assert sorted(plugin_cache['plugins']['callback']) == ['test_callback']
     assert plugin_cache['plugins']['callback']['test_callback']['name'] == 'test_callback'
-    assert plugin_cache['plugins']['callback']['test_callback']['description'] == 'A not so old callback'
+    assert plugin_cache['plugins']['callback']['test_callback']['description'] == \
+        'A not so old callback'
     assert plugin_cache['plugins']['callback']['test_callback']['version_added'] == '0.5.0'
     assert 'namespace' not in plugin_cache['plugins']['callback']['test_callback']
 
