@@ -21,7 +21,30 @@ releases:
       name: felixfontein.hosttech_dns.hosttech_dns_record
       namespace: ''
     - name: a b c
+      namespace: 'a b'
+    - name: test
+      description: ''
+      namespace: '/'
+    - name: test
+      description: ''
+      namespace: '\\'
+    - name: test
+      description: ''
+      namespace: null
+    - name: test
+      description: ''
+    plugins:
+      lookup:
+        - name: test
+          namespace: hoo
+          description: 123
+      woo: []
+      screwed: 321
     release_date: yesterday
+  1.1.0:
+    changes:
+      release_summary: 23
+    release_date: 12345
   2.0:
     - lists
     - are not allowed
