@@ -38,6 +38,18 @@ class Differences:
     def parse_yaml(self, path):
         return yaml.load(self.file_contents[path], Loader=yaml.SafeLoader)
 
+    @property
+    def has_dir_changes(self):
+        return bool(self.added_dirs or self.added_files)
+
+    @property
+    def has_file_changes(self):
+        return bool(self.removed_dirs or self.removed_files or self.changed_files)
+
+    @property
+    def unchanged(self):
+        return not self.has_dir_changes and not self.has_file_changes
+
 
 class ChangelogEnvironment:
     base_path: pathlib.Path
@@ -100,6 +112,12 @@ class ChangelogEnvironment:
         self.config = config
         self.config.store()
         self._written(self.paths.config_path)
+
+    def remove_fragment(self, fragment_name: str):
+        path = os.path.join(self.paths.changelog_dir, self.config.notes_dir, fragment_name)
+        if os.path.exists(path):
+            os.remove(path)
+        self.created_files.pop(path, None)
 
     def add_fragment(self, fragment_name: str, content: str):
         fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)

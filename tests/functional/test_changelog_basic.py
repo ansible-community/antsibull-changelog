@@ -217,6 +217,129 @@ New Modules
 - test - This is a test module
 ''')
 
+    # Check that regenerate doesn't change anything
+    assert ansible_changelog.run_tool('generate', ['-v']) == 0
+    assert ansible_changelog.diff().unchanged
+
+    # Update plugin descriptions
+    ansible_changelog.set_plugin_cache('2.10', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '2.10',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '2.10',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '2.9',
+            },
+        },
+    })
+
+    # Update existing changelog fragment.
+    ansible_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.\n\n'
+         'We have multiple paragraphs in this fragment.'])
+
+    # Remove existing changelog fragment
+    ansible_changelog.remove_fragment('test-new-option.yml')
+
+    # Add another fragment
+    ansible_changelog.add_fragment_line(
+        'test-new-fragment.yml', 'minor_changes', ['Another new fragment.'])
+
+    # Check that regenerate without --refresh changes
+    # (since we specified always_refresh in config)
+    assert ansible_changelog.run_tool('generate', ['-v']) == 0
+
+    diff = ansible_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['changelogs/CHANGELOG-v2.10.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['releases']['2.10']['changes'] == {
+        'release_summary': 'This is the first proper release.',
+        'minor_changes': [
+            'baz lookup - no longer ignores the ``bar`` option.\n\n'
+            'We have multiple paragraphs in this fragment.',
+        ],
+    }
+    assert changelog['releases']['2.10']['modules'] == [
+        {
+            'name': 'test',
+            'description': 'This is a TEST module',
+            'namespace': '',
+        },
+    ]
+    assert changelog['releases']['2.10']['plugins'] == {
+        'lookup': [
+            {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+            },
+        ],
+    }
+
+    assert diff.file_contents['changelogs/CHANGELOG-v2.10.rst'].decode('utf-8') == (
+        r'''======================================
+Ansible Base 2.10 "meow" Release Notes
+======================================
+
+.. contents:: Topics
+
+
+v2.10
+=====
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+
+  We have multiple paragraphs in this fragment.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- test - This is a TEST module
+''')
+
+
 
 def fake_ansible_doc_ansible(paths: PathsConfig, plugin_type: str,
                              plugin_names: List[str]) -> dict:
@@ -572,6 +695,114 @@ New Modules
 -----------
 
 - test - This is a test module
+''')
+
+    # Check that regenerate doesn't change anything
+    assert collection_changelog.run_tool('generate', ['-v']) == 0
+    assert collection_changelog.diff().unchanged
+
+    # Update plugin descriptions
+    collection_changelog.set_plugin_cache('1.0.0', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '1.0.0',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '1.0.0',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
+        },
+    })
+
+    # Add another fragment
+    collection_changelog.add_fragment_line(
+        'test-new-fragment.yml', 'minor_changes', ['Another new fragment.'])
+
+    # Check that regenerate without --refresh doesn't change anything
+    assert collection_changelog.run_tool('generate', ['-v']) == 0
+    assert collection_changelog.diff().unchanged
+
+    # Check that regenerate with --refresh changes
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['releases']['1.0.0']['modules'] == [
+        {
+            'name': 'test',
+            'description': 'This is a TEST module',
+            'namespace': '',
+        },
+    ]
+    assert changelog['releases']['1.0.0']['plugins'] == {
+        'lookup': [
+            {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+            },
+        ],
+    }
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.0 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- test - This is a TEST module
 ''')
 
 
