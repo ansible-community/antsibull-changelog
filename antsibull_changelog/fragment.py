@@ -14,10 +14,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import docutils.utils
 import rstcheck
-import yaml
 
 from .config import ChangelogConfig, PathsConfig
 from .errors import ChangelogError
+from .yaml import load_yaml
 
 
 class ChangelogFragment:
@@ -51,9 +51,7 @@ class ChangelogFragment:
         """
         Load a ``ChangelogFragment`` from a file.
         """
-        with open(path, 'r') as fragment_fd:
-            content = yaml.safe_load(fragment_fd)
-
+        content = load_yaml(path)
         return ChangelogFragment(content, path)
 
     @staticmethod

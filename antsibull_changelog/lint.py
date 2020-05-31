@@ -13,11 +13,11 @@ import re
 from typing import Any, List, Optional, Tuple, Type, cast
 
 import semantic_version
-import yaml
 
 from .ansible import get_documentable_plugins
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .fragment import ChangelogFragment, ChangelogFragmentLinter
+from .yaml import load_yaml
 
 
 ISO_DATE_REGEX = re.compile('^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$')
@@ -217,8 +217,7 @@ class ChangelogYamlLinter:
         Load and lint the changelog.yaml file.
         """
         try:
-            with open(self.path, 'r') as changelog_fd:
-                changelog_yaml = yaml.safe_load(changelog_fd)
+            changelog_yaml = load_yaml(self.path)
         except Exception as exc:  # pylint: disable=broad-except
             self.errors.append((self.path, 0, 0, 'error while parsing YAML: {0}'.format(exc)))
             return self.errors

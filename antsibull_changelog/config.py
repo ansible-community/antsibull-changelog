@@ -13,10 +13,9 @@ import os
 
 from typing import Mapping, Optional
 
-import yaml
-
 from .errors import ChangelogError
 from .logger import LOGGER
+from .yaml import load_yaml, store_yaml
 
 
 class PathsConfig:
@@ -118,8 +117,7 @@ def load_galaxy_metadata(paths: PathsConfig) -> dict:
     path = paths.galaxy_path
     if path is None:
         raise ChangelogError('Cannot find galaxy.yml')
-    with open(path, 'r') as galaxy_fd:
-        return yaml.safe_load(galaxy_fd)
+    return load_yaml(path)
 
 
 class CollectionDetails:
@@ -331,16 +329,14 @@ class ChangelogConfig:
             sections.append([key, value])
         config['sections'] = sections
 
-        with open(self.paths.config_path, 'w') as config_f:
-            yaml.safe_dump(config, config_f, default_flow_style=False, encoding='utf-8')
+        store_yaml(self.paths.config_path, config)
 
     @staticmethod
     def load(paths: PathsConfig, collection_details: CollectionDetails) -> 'ChangelogConfig':
         """
         Load changelog configuration file from disk.
         """
-        with open(paths.config_path, 'r') as config_fd:
-            config = yaml.safe_load(config_fd)
+        config = load_yaml(paths.config_path)
         return ChangelogConfig(paths, collection_details, config)
 
     @staticmethod
