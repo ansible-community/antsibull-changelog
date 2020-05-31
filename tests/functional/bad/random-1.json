@@ -1,7 +1,7 @@
 {
     "errors": [
-        [0, 0, "Invalid ancestor version: error while parse version ['test']: Expecting string"],
-        [0, 0, "'releases' -> '1.0.0' -> 'release_date' must be a ISO date (YYYY-MM-DD)"],
+        [0, 0, "Invalid ancestor version: error while parse version \\['test'\\]: Expecting string"],
+        [0, 0, "'releases' -> '1.0.0' -> 'release_date' must be a ISO date \\(YYYY-MM-DD\\)"],
         [0, 0, "'releases' -> '1.0.0' -> 'changes': invalid section: invalid_category"],
         [0, 0, "'releases' -> '1.0.0' -> 'changes': section \"invalid_category\" list items must be type str not int"],
         [0, 0, "'releases' -> '1.0.0' -> 'changes': section \"minor_changes\" must be type list not dict"],
@@ -22,7 +22,7 @@
         [0, 0, "'releases' -> '1.1.0' -> 'release_date' is expected to be <class 'str'>, but got 12345"],
         [0, 0, "'releases' -> '1.1.0' -> 'changes': section \"release_summary\" must be type str not int"],
         [0, 0, "Invalid release version: error while parse version 2.0: Expecting string"],
-        [0, 0, "'releases' -> 2.0 is expected to be <class 'dict'>, but got ['lists', 'are not allowed']"],
+        [0, 0, "'releases' -> 2.0 is expected to be <class 'dict'>, but got \\['lists', 'are not allowed'\\]"],
         [0, 0, "'releases' -> '3.0.0' is expected to be <class 'dict'>, but got 42"]
     ]
 }

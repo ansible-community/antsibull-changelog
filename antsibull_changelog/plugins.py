@@ -14,11 +14,10 @@ import subprocess
 
 from typing import Any, Dict, List, Optional
 
-import yaml
-
 from .ansible import get_documentable_plugins
 from .config import CollectionDetails, PathsConfig
 from .logger import LOGGER
+from .yaml import load_yaml, store_yaml
 
 
 class PluginDescription:
@@ -269,13 +268,11 @@ def load_plugins(paths: PathsConfig,
     plugins_data: Dict[str, Any] = {}
 
     if not force_reload and os.path.exists(plugin_cache_path):
-        with open(plugin_cache_path, 'r') as plugin_cache_fd:
-            plugins_data = yaml.safe_load(plugin_cache_fd)
-
-            if version != plugins_data['version']:
-                LOGGER.info('version {} does not match plugin cache version {}',
-                            version, plugins_data['version'])
-                plugins_data = {}
+        plugins_data = load_yaml(plugin_cache_path)
+        if version != plugins_data['version']:
+            LOGGER.info('version {} does not match plugin cache version {}',
+                        version, plugins_data['version'])
+            plugins_data = {}
 
     if not plugins_data:
         LOGGER.info('refreshing plugin cache')
@@ -298,8 +295,7 @@ def load_plugins(paths: PathsConfig,
                 if plugin['namespace'] is None:
                     del plugin['namespace']
 
-        with open(plugin_cache_path, 'w') as plugin_cache_fd:
-            yaml.safe_dump(plugins_data, plugin_cache_fd, default_flow_style=False)
+        store_yaml(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(plugins_data['plugins'])
 

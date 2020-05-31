@@ -10,6 +10,7 @@ Test changelog.yaml linting.
 import glob
 import json
 import os.path
+import re
 
 import pytest
 
@@ -52,8 +53,15 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
 
     # Cut off path
     errors = [[error[1], error[2], error[3].replace(yaml_filename, 'input.yaml')] for error in errors]
+
     # Load expected errors
     with open(json_filename, 'r') as json_f:
         data = json.load(json_f)
 
-    assert errors == data['errors']
+    if errors != data['errors']:
+        print(json.dumps(errors, indent=2))
+
+    assert len(errors) == len(data['errors'])
+    for error1, error2 in zip(errors, data['errors']):
+        assert error1[0:2] == error2[0:2]
+        assert re.match(error2[2], error1[2], flags=re.DOTALL) is not None

@@ -18,13 +18,13 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 import packaging.version
 import semantic_version
-import yaml
 
 from .config import ChangelogConfig
 from .fragment import ChangelogFragment, load_fragments
 from .logger import LOGGER
 from .plugins import PluginDescription, load_plugins
 from .utils import is_release_version
+from .yaml import load_yaml, store_yaml
 
 
 class FragmentResolver(metaclass=abc.ABCMeta):
@@ -131,8 +131,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         if data_override is not None:
             self.data = data_override
         elif os.path.exists(self.path):
-            with open(self.path, 'r') as meta_fd:
-                self.data = yaml.safe_load(meta_fd)
+            self.data = load_yaml(self.path)
         else:
             self.data = self.empty()
         self.ancestor = self.data.get('ancestor')
@@ -163,9 +162,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         self.sort()
         self.data['ancestor'] = self.ancestor
-
-        with open(self.path, 'w') as config_fd:
-            yaml.safe_dump(self.data, config_fd, default_flow_style=False)
+        store_yaml(self.path, self.data)
 
     def add_release(self, version: str, codename: Optional[str], release_date: datetime.date):
         """
