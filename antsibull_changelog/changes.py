@@ -685,9 +685,10 @@ class ChangesData(ChangesBase):
             version_obj = self.version_constructor(version)
             if versions_after is not None and version_obj <= versions_after:
                 del self.data['releases'][version]
-                if self.ancestor is None:
+                current_ancestor = self.ancestor
+                if current_ancestor is None:
                     self.ancestor = version
-                elif self.version_constructor(self.ancestor) < self.version_constructor(version):
+                elif self.version_constructor(current_ancestor) < self.version_constructor(version):
                     self.ancestor = version
                 continue
             if versions_until is not None and version_obj > versions_until:
