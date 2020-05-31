@@ -616,6 +616,15 @@ New Modules
 - test - This is a TEST module
 ''')
 
+    # Final release 1.1.0 - should not change
+    assert collection_changelog.run_tool('release', [
+        '-vvv',
+        '--date', '2020-03-01',
+        '--version', '1.1.0',
+    ]) == 0
+
+    assert collection_changelog.diff().unchanged
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
@@ -983,11 +992,33 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         EXAMPLES='',
         RETURN={},
     ))
+    collection_changelog.add_plugin('module', '__init__.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'bad_module',
+            'short_description': 'Bad module',
+            'description': ['This should be ignored, not found as a module!.'],
+            'author': ['badguy'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['cloud'])
     collection_changelog.add_plugin('module', 'old_module.py', create_plugin(
         DOCUMENTATION={
             'name': 'old_module',
             'short_description': 'An old module',
             'description': ['This is an old module.'],
+            'author': ['Elder'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['cloud', 'sky'])
+    collection_changelog.add_plugin('module', 'bad_module2', create_plugin(
+        DOCUMENTATION={
+            'name': 'bad_module2',
+            'short_description': 'An bad module',
+            'description': ['Shold not be found either.'],
             'author': ['Elder'],
             'options': {},
         },
@@ -1006,6 +1037,18 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         EXAMPLES='# Some examples\n',
         RETURN={},
     ))
+    collection_changelog.add_plugin('callback', 'test_callback2.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'test_callback2',
+            'short_description': 'This one should not be found.',
+            'version_added': '2.9',
+            'description': ['This is a relatively new callback added before.'],
+            'author': ['Someone else'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['dont', 'find', 'me'])
 
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
 
