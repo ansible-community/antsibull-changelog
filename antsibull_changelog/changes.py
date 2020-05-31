@@ -703,17 +703,21 @@ class ChangesData(ChangesBase):
         last = changes_datas[-1]
         data = ChangesBase.empty()
         ancestor = None
+        no_ancestor = False
         for changes in changes_datas:
             data['releases'].update(changes.data['releases'])
-            changes_ancestor = changes.ancestor
-            if changes_ancestor is not None:
-                if ancestor is None:
+            if not no_ancestor:
+                changes_ancestor = changes.ancestor
+                if changes_ancestor is None:
+                    no_ancestor = True
+                    ancestor = None
+                elif ancestor is None:
                     ancestor = changes.ancestor
                 else:
                     ancestor_ = last.version_constructor(ancestor)
                     changes_ancestor_ = last.version_constructor(changes_ancestor)
                     if ancestor_ > changes_ancestor_:
-                        ancestor = changes.ancestor
+                        ancestor = changes_ancestor
         data['ancestor'] = ancestor
         return ChangesData(last.config, last.path, data)
 
