@@ -27,8 +27,8 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     if config.is_collection:
         try:
             return not bool(semantic_version.Version(version).prerelease)
-        except Exception as e:  # pylint: disable=broad-except
-            raise ChangelogError('unsupported semantic version format: %s' % version)
+        except Exception as exc:  # pylint: disable=broad-except
+            raise ChangelogError('unsupported semantic version format: %s (%s)' % (version, exc))
 
     tag_format = 'v%s' % version
 
