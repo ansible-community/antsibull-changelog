@@ -73,6 +73,75 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
 
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+''')
+
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+    assert collection_changelog.diff().unchanged
+
+    # Version 1.1.0
+
+    collection_changelog.set_galaxy({
+        'version': '1.1.0',
+    })
+    collection_changelog.set_plugin_cache('1.1.0', {})
+
+    assert collection_changelog.run_tool('release', ['-v', '--date', '2020-02-29']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0', '1.1.0']
+    assert changelog['releases']['1.1.0']['release_date'] == '2020-02-29'
+    assert 'changes' not in changelog['releases']['1.1.0']
+    assert 'fragments' not in changelog['releases']['1.1.0']
+    assert 'modules' not in changelog['releases']['1.1.0']
+    assert 'plugins' not in changelog['releases']['1.1.0']
+    assert 'codename' not in changelog['releases']['1.1.0']
+
+    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+        r'''=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+
+
+v1.1.0
+======
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+''')
+
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+    assert collection_changelog.diff().unchanged
+
 
 def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
