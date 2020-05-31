@@ -685,6 +685,11 @@ class ChangesData(ChangesBase):
             version_obj = self.version_constructor(version)
             if versions_after is not None and version_obj <= versions_after:
                 del self.data['releases'][version]
+                current_ancestor = self.ancestor
+                if current_ancestor is None:
+                    self.ancestor = version
+                elif self.version_constructor(current_ancestor) < self.version_constructor(version):
+                    self.ancestor = version
                 continue
             if versions_until is not None and version_obj > versions_until:
                 del self.data['releases'][version]
@@ -703,17 +708,21 @@ class ChangesData(ChangesBase):
         last = changes_datas[-1]
         data = ChangesBase.empty()
         ancestor = None
+        no_ancestor = False
         for changes in changes_datas:
             data['releases'].update(changes.data['releases'])
-            changes_ancestor = changes.ancestor
-            if changes_ancestor is not None:
-                if ancestor is None:
+            if not no_ancestor:
+                changes_ancestor = changes.ancestor
+                if changes_ancestor is None:
+                    no_ancestor = True
+                    ancestor = None
+                elif ancestor is None:
                     ancestor = changes.ancestor
                 else:
                     ancestor_ = last.version_constructor(ancestor)
                     changes_ancestor_ = last.version_constructor(changes_ancestor)
                     if ancestor_ > changes_ancestor_:
-                        ancestor = changes.ancestor
+                        ancestor = changes_ancestor
         data['ancestor'] = ancestor
         return ChangesData(last.config, last.path, data)
 

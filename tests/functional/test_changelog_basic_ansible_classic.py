@@ -19,6 +19,126 @@ from fixtures import ansible_changelog  # noqa: F401; pylint: disable=unused-var
 from fixtures import create_plugin
 
 
+def test_changelog_release_ansible_empty(  # pylint: disable=redefined-outer-name
+        ansible_changelog):  # noqa: F811
+    ansible_config_contents = r'''
+---
+release_tag_re: '(v(?:[\d.ab\-]|rc)+)'
+pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
+notesdir: fragments
+prelude_section_name: release_summary
+new_plugins_after_name: removed_features
+sections:
+- ['major_changes', 'Major Changes']
+- ['minor_changes', 'Minor Changes']
+- ['deprecated_features', 'Deprecated Features']
+- ['removed_features', 'Removed Features (previously deprecated)']
+- ['bugfixes', 'Bugfixes']
+- ['known_issues', 'Known Issues']
+'''
+    ansible_changelog.set_config_raw(ansible_config_contents.encode('utf-8'))
+    ansible_changelog.add_fragment_line(
+        '2.9.yml', 'release_summary', 'This is the first proper release.')
+    ansible_changelog.set_plugin_cache('2.9', {})
+
+    assert ansible_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-01-02',
+        '--version', '2.9',
+        '--codename', 'meow'
+    ]) == 0
+
+    diff = ansible_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ['changelogs/.changes.yaml', 'changelogs/CHANGELOG-v2.9.rst']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    changelog = diff.parse_yaml('changelogs/.changes.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['2.9']
+    assert changelog['releases']['2.9']['release_date'] == '2020-01-02'
+    assert 'changes' not in changelog['releases']['2.9']
+    assert changelog['releases']['2.9']['fragments'] == [
+        '2.9.yml',
+    ]
+    assert 'modules' not in changelog['releases']['2.9']
+    assert 'plugins' not in changelog['releases']['2.9']
+    assert changelog['releases']['2.9']['codename'] == 'meow'
+
+    assert diff.file_contents['changelogs/CHANGELOG-v2.9.rst'].decode('utf-8') == (
+        r'''================================
+Ansible 2.9 "meow" Release Notes
+================================
+
+.. contents:: Topics
+
+
+v2.9
+====
+
+Release Summary
+---------------
+
+This is the first proper release.
+''')
+
+    assert ansible_changelog.run_tool('generate', ['-v']) == 0
+    assert ansible_changelog.diff().unchanged
+
+    # Version 2.9.1
+
+    ansible_changelog.set_plugin_cache('2.9.1', {})
+
+    assert ansible_changelog.run_tool('release', [
+        '-v',
+        '--date', '2020-02-29',
+        '--version', '2.9.1',
+        '--codename', 'meow'
+    ]) == 0
+
+    diff = ansible_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['changelogs/.changes.yaml', 'changelogs/CHANGELOG-v2.9.rst']
+
+    changelog = diff.parse_yaml('changelogs/.changes.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['2.9', '2.9.1']
+    assert changelog['releases']['2.9.1']['release_date'] == '2020-02-29'
+    assert 'changes' not in changelog['releases']['2.9.1']
+    assert 'fragments' not in changelog['releases']['2.9.1']
+    assert 'modules' not in changelog['releases']['2.9.1']
+    assert 'plugins' not in changelog['releases']['2.9.1']
+    assert changelog['releases']['2.9.1']['codename'] == 'meow'
+
+    assert diff.file_contents['changelogs/CHANGELOG-v2.9.rst'].decode('utf-8') == (
+        r'''================================
+Ansible 2.9 "meow" Release Notes
+================================
+
+.. contents:: Topics
+
+
+v2.9.1
+======
+
+v2.9
+====
+
+Release Summary
+---------------
+
+This is the first proper release.
+''')
+
+    assert ansible_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+    assert ansible_changelog.diff().unchanged
+
+
 def test_changelog_release_ansible_simple(  # pylint: disable=redefined-outer-name
         ansible_changelog):  # noqa: F811
     ansible_config_contents = r'''
