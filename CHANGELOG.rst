@@ -20,4 +20,4 @@ Minor Changes
 v0.1.0
 ======
 
-Initial release as antsibull-changelog. The Ansible Changelog Tool has originally been developed by @mattclay in [the ansible/ansible](https://github.com/ansible/ansible/blob/stable-2.9/packaging/release/changelogs/changelog.py) repository for Ansible itself. It has been extended in https://github.com/felixfontein/ansible-changelog/ and https://github.com/ansible-community/antsibull/ to work with collections, until it was moved to its current location https://github.com/ansible-community/antsibull-changelog/.
+Initial release as antsibull-changelog. The Ansible Changelog Tool has originally been developed by @mattclay in `the ansible/ansible <https://github.com/ansible/ansible/blob/stable-2.9/packaging/release/changelogs/changelog.py>`_ repository for Ansible itself. It has been extended in `felixfontein/ansible-changelog <https://github.com/felixfontein/ansible-changelog/>`_ and `ansible-community/antsibull <https://github.com/ansible-community/antsibull/>`_ to work with collections, until it was moved to its current location `ansible-community/antsibull-changelog <https://github.com/ansible-community/antsibull-changelog/>`_.
