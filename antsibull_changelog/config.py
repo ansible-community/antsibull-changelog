@@ -84,7 +84,7 @@ class PathsConfig:
         """
         Detect paths configuration from current working directory.
 
-        :raises ValueError: cannot identify collection or ansible-base checkout
+        :raises ChangelogError: cannot identify collection or ansible-base checkout
         """
         previous: Optional[str] = None
         base_dir = os.getcwd()
@@ -105,7 +105,7 @@ class PathsConfig:
                     return PathsConfig(False, base_dir, None, ansible_doc)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
-                raise ValueError('Cannot identify collection or ansible-base checkout.')
+                raise ChangelogError('Cannot identify collection or ansible-base checkout.')
 
 
 def load_galaxy_metadata(paths: PathsConfig) -> dict:
@@ -117,7 +117,7 @@ def load_galaxy_metadata(paths: PathsConfig) -> dict:
     """
     path = paths.galaxy_path
     if path is None:
-        raise ValueError('Cannot find galaxy.yml')
+        raise ChangelogError('Cannot find galaxy.yml')
     with open(path, 'r') as galaxy_fd:
         return yaml.safe_load(galaxy_fd)
 
@@ -145,6 +145,8 @@ class CollectionDetails:
 
     def _parse_galaxy_yaml(self, galaxy_yaml):
         self.galaxy_yaml_loaded = True
+        if not isinstance(galaxy_yaml, dict):
+            raise ChangelogError('galaxy.yml must be a dictionary')
         if self.namespace is None and isinstance(galaxy_yaml.get('namespace'), str):
             self.namespace = galaxy_yaml.get('namespace')
         if self.name is None and isinstance(galaxy_yaml.get('name'), str):
@@ -166,8 +168,8 @@ class CollectionDetails:
             what_for = 'load field "{0}"'.format(needed_var)
         try:
             galaxy_yaml = load_galaxy_metadata(self.paths)
-        except Exception as e:
-            msg = 'Cannot find galaxy.yaml to {0}: {1}'.format(what_for, e)
+        except Exception as exc:  # pylint: disable=broad-except
+            msg = 'Cannot find galaxy.yaml to {0}: {1}'.format(what_for, exc)
             if help_text is not None:
                 msg = '{0}. {1}'.format(msg, help_text)
             raise ChangelogError(msg)
@@ -284,10 +286,10 @@ class ChangelogConfig:
             'pre_release_tag_re', r'(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$')
 
         if self.changes_format not in ('classic', 'combined'):
-            raise ValueError('changes_format must be one of "classic" and "combined"')
+            raise ChangelogError('changes_format must be one of "classic" and "combined"')
         if self.changes_format == 'classic' and not self.keep_fragments:
-            raise ValueError('changes_format == "classic" cannot be '
-                             'combined with keep_fragments == False')
+            raise ChangelogError('changes_format == "classic" cannot be '
+                                 'combined with keep_fragments == False')
 
         sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
         for section_name, section_title in self.config['sections']:

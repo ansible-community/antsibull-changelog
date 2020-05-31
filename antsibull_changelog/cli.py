@@ -45,7 +45,7 @@ def set_paths(force: Optional[str] = None, is_collection: Optional[bool] = None)
 
     try:
         return PathsConfig.detect(is_collection=is_collection)
-    except ValueError:
+    except ChangelogError:
         raise ChangelogError(
             "Only the 'init' and 'lint-changelog' commands can be used outside an "
             "Ansible checkout and outside a collection repository.\n"

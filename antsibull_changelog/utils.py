@@ -13,6 +13,7 @@ import re
 import semantic_version
 
 from .config import ChangelogConfig
+from .errors import ChangelogError
 
 
 def is_release_version(config: ChangelogConfig, version: str) -> bool:
@@ -24,7 +25,10 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     :return: Whether the provided version is a release version
     """
     if config.is_collection:
-        return not bool(semantic_version.Version(version).prerelease)
+        try:
+            return not bool(semantic_version.Version(version).prerelease)
+        except Exception as e:  # pylint: disable=broad-except
+            raise ChangelogError('unsupported semantic version format: %s' % version)
 
     tag_format = 'v%s' % version
 
@@ -34,4 +38,4 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     if re.search(config.release_tag_re, tag_format):
         return True
 
-    raise Exception('unsupported version format: %s' % version)
+    raise ChangelogError('unsupported version format: %s' % version)

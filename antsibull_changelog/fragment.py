@@ -17,6 +17,7 @@ import rstcheck
 import yaml
 
 from .config import ChangelogConfig, PathsConfig
+from .errors import ChangelogError
 
 
 class ChangelogFragment:
@@ -77,7 +78,7 @@ class ChangelogFragment:
                         lines = []
                         result[section] = lines
                     elif not isinstance(lines, list):
-                        raise ValueError(
+                        raise ChangelogError(
                             'Cannot append list to string for section "{0}"'.format(section))
 
                     lines.extend(content)
@@ -194,6 +195,6 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
             if exceptions is not None:
                 exceptions.append((path, ex))
             else:
-                raise
+                raise ChangelogError(str(ex))
 
     return fragments

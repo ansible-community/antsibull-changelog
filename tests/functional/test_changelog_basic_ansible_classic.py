@@ -641,11 +641,33 @@ sections:
         EXAMPLES='',
         RETURN={},
     ))
+    ansible_changelog.add_plugin('module', '__init__.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'bad_module',
+            'short_description': 'Bad module',
+            'description': ['This should be ignored, not found as a module!.'],
+            'author': ['badguy'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['cloud'])
     ansible_changelog.add_plugin('module', 'old_module.py', create_plugin(
         DOCUMENTATION={
             'name': 'old_module',
             'short_description': 'An old module',
             'description': ['This is an old module.'],
+            'author': ['Elder'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['cloud', 'sky'])
+    ansible_changelog.add_plugin('module', 'bad_module2', create_plugin(
+        DOCUMENTATION={
+            'name': 'bad_module2',
+            'short_description': 'An bad module',
+            'description': ['Shold not be found either.'],
             'author': ['Elder'],
             'options': {},
         },
@@ -664,6 +686,18 @@ sections:
         EXAMPLES='# Some examples\n',
         RETURN={},
     ))
+    ansible_changelog.add_plugin('callback', 'test_callback2.py', create_plugin(
+        DOCUMENTATION={
+            'name': 'test_callback2',
+            'short_description': 'This one should not be found.',
+            'version_added': '2.9',
+            'description': ['This is a relatively new callback added before.'],
+            'author': ['Someone else'],
+            'options': {},
+        },
+        EXAMPLES='# Some examples\n',
+        RETURN={},
+    ), subdirs=['dont', 'find', 'me'])
 
     assert ansible_changelog.run_tool('release', [
         '-v',
