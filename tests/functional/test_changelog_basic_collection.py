@@ -616,6 +616,15 @@ New Modules
 - test - This is a TEST module
 ''')
 
+    # Final release 1.1.0 - should not change
+    assert collection_changelog.run_tool('release', [
+        '-vvv',
+        '--date', '2020-03-01',
+        '--version', '1.1.0',
+    ]) == 0
+
+    assert collection_changelog.diff().unchanged
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811

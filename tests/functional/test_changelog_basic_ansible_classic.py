@@ -517,6 +517,16 @@ New Modules
 - test - This is a TEST module
 ''')
 
+    # Final release 2.9.1 again - should not change
+    assert ansible_changelog.run_tool('release', [
+        '-vvv',
+        '--date', '2020-03-01',
+        '--version', '2.9.1',
+        '--codename', 'woof!!!'
+    ]) == 0
+
+    assert ansible_changelog.diff().unchanged
+
     # Lint fragments
     assert ansible_changelog.run_tool('lint', ['-vv']) == 0
 
