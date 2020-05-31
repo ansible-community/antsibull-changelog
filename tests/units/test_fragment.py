@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+# Author: Felix Fontein <felix@fontein.de>
+# License: GPLv3+
+# Copyright: Ansible Project, 2020
+
+"""
+Test fragment module.
+"""
+
 import pytest
 
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
