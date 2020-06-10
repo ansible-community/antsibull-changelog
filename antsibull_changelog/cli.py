@@ -132,6 +132,9 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument('--reload-plugins',
                                 action='store_true',
                                 help='force reload of plugin cache')
+    release_parser.add_argument('--use-ansible-doc',
+                                action='store_true',
+                                help='always use ansible-doc to find plugins')
     release_parser.add_argument('--refresh',
                                 action='store_true',
                                 help='update existing entries from fragment files (if '
@@ -145,6 +148,9 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     generate_parser.add_argument('--reload-plugins',
                                  action='store_true',
                                  help='force reload of plugin cache')
+    generate_parser.add_argument('--use-ansible-doc',
+                                 action='store_true',
+                                 help='always use ansible-doc to find plugins')
     generate_parser.add_argument('--refresh',
                                  action='store_true',
                                  help='update existing entries from fragment files (if '
@@ -262,6 +268,7 @@ def command_release(args: Any) -> int:
     codename: Union[str, None] = args.codename
     date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
     reload_plugins: bool = args.reload_plugins
+    use_ansible_doc: bool = args.use_ansible_doc
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -287,7 +294,8 @@ def command_release(args: Any) -> int:
 
     changes = load_changes(config)
     plugins = load_plugins(paths=paths, collection_details=collection_details,
-                           version=version, force_reload=reload_plugins)
+                           version=version, force_reload=reload_plugins,
+                           use_ansible_doc=use_ansible_doc)
     fragments = load_fragments(paths, config)
     if args.refresh or config.always_refresh:
         refresh_changelog(config, changes, plugins, fragments)
@@ -306,6 +314,7 @@ def command_generate(args: Any) -> int:
     paths = set_paths(is_collection=args.is_collection)
 
     reload_plugins: bool = args.reload_plugins
+    use_ansible_doc: bool = args.use_ansible_doc
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -324,7 +333,8 @@ def command_generate(args: Any) -> int:
     fragments: Optional[List[ChangelogFragment]]
     if args.refresh or config.always_refresh:
         plugins = load_plugins(paths=paths, collection_details=collection_details,
-                               version=changes.latest_version, force_reload=reload_plugins)
+                               version=changes.latest_version, force_reload=reload_plugins,
+                               use_ansible_doc=use_ansible_doc)
         fragments = load_fragments(paths, config)
         refresh_changelog(config, changes, plugins, fragments)
     else:

@@ -227,17 +227,21 @@ def run_ansible_doc(paths: PathsConfig, plugin_type: str, plugin_names: List[str
 
 
 def load_plugin_metadata(paths: PathsConfig, plugin_type: str,
-                         collection_name: Optional[str]) -> Dict[str, Dict[str, Any]]:
+                         collection_name: Optional[str],
+                         use_ansible_doc: bool = False) -> Dict[str, Dict[str, Any]]:
     """
     Collect plugin metadata for all plugins of a given type.
 
     :arg paths: Paths configuration
     :arg plugin_type: The plugin type to consider
-    :arg collection_name: The name of the collection, if appropriate.
+    :arg collection_name: The name of the collection, if appropriate
+    :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     """
-    plugins_list = list_plugins_walk(paths, plugin_type, collection_name)
-    # WARNING: Do not switch to this before ansible-base is a requirement!
-    # plugins_list = list_plugins_ansibledoc(paths, plugin_type, collection_name)
+    if use_ansible_doc:
+        # WARNING: Do not make this the default to this before ansible-base is a requirement!
+        plugins_list = list_plugins_ansibledoc(paths, plugin_type, collection_name)
+    else:
+        plugins_list = list_plugins_walk(paths, plugin_type, collection_name)
 
     result: Dict[str, Dict[str, Any]] = {}
     if not plugins_list:
@@ -254,7 +258,8 @@ def load_plugin_metadata(paths: PathsConfig, plugin_type: str,
 def load_plugins(paths: PathsConfig,
                  collection_details: CollectionDetails,
                  version: str,
-                 force_reload: bool = False) -> List[PluginDescription]:
+                 force_reload: bool = False,
+                 use_ansible_doc: bool = False) -> List[PluginDescription]:
     """
     Load plugins from ansible-doc.
 
@@ -262,6 +267,7 @@ def load_plugins(paths: PathsConfig,
     :arg collection_details: Collection details
     :arg version: The current version. Used for caching data
     :arg force_reload: Set to ``True`` to ignore potentially cached data
+    :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     :return: A list of all plugins
     """
     plugin_cache_path = os.path.join(paths.changelog_dir, '.plugin-cache.yaml')
@@ -287,7 +293,7 @@ def load_plugins(paths: PathsConfig,
 
         for plugin_type in get_documentable_plugins():
             plugins_data['plugins'][plugin_type] = load_plugin_metadata(
-                paths, plugin_type, collection_name)
+                paths, plugin_type, collection_name, use_ansible_doc=use_ansible_doc)
 
         # remove empty namespaces from plugins
         for section in plugins_data['plugins'].values():
