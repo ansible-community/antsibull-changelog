@@ -3,6 +3,14 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.2.1
+======
+
+Bugfixes
+--------
+
+- Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
+
 v0.2.0
 ======
 
