@@ -192,7 +192,7 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
     if not os.path.exists(plugin_source_path) or os.listdir(plugin_source_path) == []:
         return []
 
-    command = [paths.ansible_doc_path or 'ansible-doc', '--json', '-t', plugin_type, '--list']
+    command = [paths.ansible_doc_path, '--json', '-t', plugin_type, '--list']
     if collection_name:
         command.append(collection_name)
     output = subprocess.check_output(command)
@@ -220,7 +220,7 @@ def run_ansible_doc(paths: PathsConfig, plugin_type: str, plugin_names: List[str
 
     Plugins must be in FQCN for collections.
     """
-    command = [paths.ansible_doc_path or 'ansible-doc', '--json', '-t', plugin_type]
+    command = [paths.ansible_doc_path, '--json', '-t', plugin_type]
     command.extend(plugin_names)
     output = subprocess.check_output(command)
     return json.loads(output.decode('utf-8'))

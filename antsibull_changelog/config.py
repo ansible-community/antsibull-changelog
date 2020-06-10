@@ -29,7 +29,7 @@ class PathsConfig:
     galaxy_path: Optional[str]
     changelog_dir: str
     config_path: str
-    ansible_doc_path: Optional[str]
+    ansible_doc_path: str
 
     @staticmethod
     def _changelog_dir(base_dir: str) -> str:
@@ -56,7 +56,7 @@ class PathsConfig:
         self.galaxy_path = galaxy_path
         self.changelog_dir = PathsConfig._changelog_dir(self.base_dir)
         self.config_path = PathsConfig._config_path(self.changelog_dir)
-        self.ansible_doc_path = ansible_doc_path
+        self.ansible_doc_path = ansible_doc_path or 'ansible-doc'
 
     @staticmethod
     def force_collection(base_dir: str,
@@ -104,10 +104,6 @@ class PathsConfig:
                 ansible_lib_dir = os.path.join(base_dir, 'lib', 'ansible')
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
-                    if ansible_doc_bin is None:
-                        ansible_doc = os.path.join(base_dir, 'bin', 'ansible-doc')
-                        if os.path.exists(ansible_doc):
-                            ansible_doc_bin = ansible_doc
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
