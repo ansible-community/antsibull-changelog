@@ -10,6 +10,7 @@ Minor Changes
 -------------
 
 - Changelog generator can be ran via ``python -m antsibull_changelog``.
+- Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
 
 v0.2.1
 ======

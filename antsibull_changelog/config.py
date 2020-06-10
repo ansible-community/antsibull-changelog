@@ -59,31 +59,37 @@ class PathsConfig:
         self.ansible_doc_path = ansible_doc_path
 
     @staticmethod
-    def force_collection(base_dir: str) -> 'PathsConfig':
+    def force_collection(base_dir: str,
+                         ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
         Forces configuration for collection checkout with given base path.
 
         :arg base_dir: Base directory of collection checkout
+        :arg ansible_doc_bin: Override path to ansible-doc.
         """
         base_dir = os.path.abspath(base_dir)
-        return PathsConfig(True, base_dir, os.path.join(base_dir, 'galaxy.yml'), None)
+        return PathsConfig(True, base_dir, os.path.join(base_dir, 'galaxy.yml'), ansible_doc_bin)
 
     @staticmethod
-    def force_ansible(base_dir: str) -> 'PathsConfig':
+    def force_ansible(base_dir: str,
+                      ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
         Forces configuration with given Ansible Base base path.
 
         :type base_dir: Base directory of ansible-base checkout
+        :arg ansible_doc_bin: Override path to ansible-doc.
         """
         base_dir = os.path.abspath(base_dir)
-        return PathsConfig(False, base_dir, None, None)
+        return PathsConfig(False, base_dir, None, ansible_doc_bin)
 
     @staticmethod
-    def detect(is_collection: Optional[bool] = None) -> 'PathsConfig':
+    def detect(is_collection: Optional[bool] = None,
+               ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
 
         :raises ChangelogError: cannot identify collection or ansible-base checkout
+        :arg ansible_doc_bin: Override path to ansible-doc.
         """
         previous: Optional[str] = None
         base_dir = os.getcwd()
@@ -94,14 +100,15 @@ class PathsConfig:
                 galaxy_path = os.path.join(base_dir, 'galaxy.yml')
                 if os.path.exists(galaxy_path) or is_collection is True:
                     # We are in a collection and assume ansible-doc is available in $PATH
-                    return PathsConfig(True, base_dir, galaxy_path, 'ansible-doc')
+                    return PathsConfig(True, base_dir, galaxy_path, ansible_doc_bin)
                 ansible_lib_dir = os.path.join(base_dir, 'lib', 'ansible')
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
-                    ansible_doc = os.path.join(base_dir, 'bin', 'ansible-doc')
-                    if not os.path.exists(ansible_doc):
-                        ansible_doc = 'ansible-doc'
-                    return PathsConfig(False, base_dir, None, ansible_doc)
+                    if ansible_doc_bin is None:
+                        ansible_doc = os.path.join(base_dir, 'bin', 'ansible-doc')
+                        if os.path.exists(ansible_doc):
+                            ansible_doc_bin = ansible_doc
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection or ansible-base checkout.')
