@@ -74,7 +74,7 @@ def test_detect_ansible_doc_binary(cwd_tmp_path):
     d.mkdir()
     (d / 'config.yaml').write_text('---')
     c = PathsConfig.detect()
-    assert c.ansible_doc_path == str(ansible_doc)
+    assert c.ansible_doc_path == 'ansible-doc'
 
 
 def test_detect_ansible_no_doc_binary(cwd_tmp_path):

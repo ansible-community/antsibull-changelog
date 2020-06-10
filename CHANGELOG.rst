@@ -10,6 +10,8 @@ Minor Changes
 -------------
 
 - Changelog generator can be ran via ``python -m antsibull_changelog``.
+- Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
+- Use ``ansible-doc`` instead of ``/path/to/checkout/bin/ansible-doc`` when being run in ansible-base checkouts.
 
 v0.2.1
 ======

@@ -31,20 +31,25 @@ from .plugins import load_plugins, PluginDescription
 from .logger import LOGGER, setup_logger
 
 
-def set_paths(force: Optional[str] = None, is_collection: Optional[bool] = None) -> PathsConfig:
+def set_paths(force: Optional[str] = None,
+              is_collection: Optional[bool] = None,
+              ansible_doc_bin: Optional[str] = None) -> PathsConfig:
     """
     Create ``PathsConfig``.
 
     :arg force: If ``True``, create a collection path config for the given path.
                 Otherwise, detect configuration.
+    :arg is_collection: Override detection of whether the tool is run in a collection
+                        or in ansible-base.
+    :arg ansible_doc_bin: Override path to ansible-doc.
     """
     if force:
         if is_collection is False:
-            return PathsConfig.force_ansible(force)
-        return PathsConfig.force_collection(force)
+            return PathsConfig.force_ansible(force, ansible_doc_bin=ansible_doc_bin)
+        return PathsConfig.force_collection(force, ansible_doc_bin=ansible_doc_bin)
 
     try:
-        return PathsConfig.detect(is_collection=is_collection)
+        return PathsConfig.detect(is_collection=is_collection, ansible_doc_bin=ansible_doc_bin)
     except ChangelogError:
         raise ChangelogError(
             "Only the 'init' and 'lint-changelog' commands can be used outside an "
@@ -132,6 +137,8 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument('--reload-plugins',
                                 action='store_true',
                                 help='force reload of plugin cache')
+    release_parser.add_argument('--ansible-doc-bin',
+                                help='path to ansible-doc (overrides autodetect)')
     release_parser.add_argument('--use-ansible-doc',
                                 action='store_true',
                                 help='always use ansible-doc to find plugins')
@@ -148,6 +155,8 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     generate_parser.add_argument('--reload-plugins',
                                  action='store_true',
                                  help='force reload of plugin cache')
+    generate_parser.add_argument('--ansible-doc-bin',
+                                 help='path to ansible-doc (overrides autodetect)')
     generate_parser.add_argument('--use-ansible-doc',
                                  action='store_true',
                                  help='always use ansible-doc to find plugins')
@@ -262,7 +271,8 @@ def command_release(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    paths = set_paths(is_collection=args.is_collection)
+    ansible_doc_bin: Optional[str] = args.ansible_doc_bin
+    paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
     version: Union[str, None] = args.version
     codename: Union[str, None] = args.codename
@@ -311,7 +321,8 @@ def command_generate(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    paths = set_paths(is_collection=args.is_collection)
+    ansible_doc_bin: Optional[str] = args.ansible_doc_bin
+    paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
     reload_plugins: bool = args.reload_plugins
     use_ansible_doc: bool = args.use_ansible_doc
