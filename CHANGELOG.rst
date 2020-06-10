@@ -3,6 +3,14 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.3.0
+======
+
+Minor Changes
+-------------
+
+- Changelog generator can be ran via ``python -m antsibull_changelog``.
+
 v0.2.1
 ======
 
