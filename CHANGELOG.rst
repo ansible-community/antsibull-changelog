@@ -3,6 +3,16 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.3.1
+======
+
+Bugfixes
+--------
+
+- Improve error message when ``--is-collection`` is specified and ``changelogs/config.yaml`` cannot be found, or when the ``lint`` subcommand is used.
+- Improve behavior when ``changelogs/config.yaml`` is not a dictionary, or does not contain ``sections``.
+- Do not fail when ``changelogs/fragments`` does not exist. Simply assume there are no fragments in that case.
+
 v0.3.0
 ======
 

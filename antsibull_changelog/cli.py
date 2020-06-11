@@ -51,9 +51,17 @@ def set_paths(force: Optional[str] = None,
     try:
         return PathsConfig.detect(is_collection=is_collection, ansible_doc_bin=ansible_doc_bin)
     except ChangelogError:
+        if is_collection is True:
+            raise ChangelogError(
+                "Only the 'init' command can be used outside a collection repository, "
+                "or inside one without changelogs/config.yaml.")
+        if is_collection is False:
+            raise ChangelogError(
+                "Only the 'init' command can be used outside an Ansible checkout, "
+                "or inside one without changelogs/config.yaml.")
         raise ChangelogError(
-            "Only the 'init' and 'lint-changelog' commands can be used outside an "
-            "Ansible checkout and outside a collection repository.\n"
+            "Only the 'init' command can be used outside an Ansible checkout and outside a "
+            "collection repository, or inside one without changelogs/config.yaml.\n"
             "If you are in a collection without galaxy.yml, specify `--is-collection no` "
             "on the command line.")
 
