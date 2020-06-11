@@ -180,9 +180,12 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
     """
     if not fragment_paths:
         fragments_dir = os.path.join(paths.changelog_dir, config.notes_dir)
-        fragment_paths = [
-            os.path.join(fragments_dir, path)
-            for path in os.listdir(fragments_dir) if not path.startswith('.')]
+        if os.path.isdir(fragments_dir):
+            fragment_paths = [
+                os.path.join(fragments_dir, path)
+                for path in os.listdir(fragments_dir) if not path.startswith('.')]
+        else:
+            fragment_paths = []
 
     fragments: List[ChangelogFragment] = []
 

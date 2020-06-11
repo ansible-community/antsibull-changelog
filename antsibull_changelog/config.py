@@ -227,6 +227,18 @@ class CollectionDetails:
         return flatmap
 
 
+DEFAULT_SECTIONS = [
+    ['major_changes', 'Major Changes'],
+    ['minor_changes', 'Minor Changes'],
+    ['breaking_changes', 'Breaking Changes / Porting Guide'],
+    ['deprecated_features', 'Deprecated Features'],
+    ['removed_features', 'Removed Features (previously deprecated)'],
+    ['security_fixes', 'Security Fixes'],
+    ['bugfixes', 'Bugfixes'],
+    ['known_issues', 'Known Issues'],
+]
+
+
 class ChangelogConfig:
     # pylint: disable=too-many-instance-attributes
     """
@@ -293,7 +305,7 @@ class ChangelogConfig:
                                  'combined with keep_fragments == False')
 
         sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
-        for section_name, section_title in self.config['sections']:
+        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
             sections[section_name] = section_title
         self.sections = sections
 
@@ -340,6 +352,8 @@ class ChangelogConfig:
         Load changelog configuration file from disk.
         """
         config = load_yaml(paths.config_path)
+        if not isinstance(config, dict):
+            raise ChangelogError('{0} must be a dictionary'.format(paths.config_path))
         return ChangelogConfig(paths, collection_details, config)
 
     @staticmethod
@@ -356,16 +370,7 @@ class ChangelogConfig:
             'changelog_filename_template': 'CHANGELOG.rst',
             'changelog_filename_version_depth': 0,
             'new_plugins_after_name': 'removed_features',
-            'sections': [
-                ['major_changes', 'Major Changes'],
-                ['minor_changes', 'Minor Changes'],
-                ['breaking_changes', 'Breaking Changes / Porting Guide'],
-                ['deprecated_features', 'Deprecated Features'],
-                ['removed_features', 'Removed Features (previously deprecated)'],
-                ['security_fixes', 'Security Fixes'],
-                ['bugfixes', 'Bugfixes'],
-                ['known_issues', 'Known Issues'],
-            ],
+            'sections': DEFAULT_SECTIONS,
         }
         if title is not None:
             config['title'] = title
