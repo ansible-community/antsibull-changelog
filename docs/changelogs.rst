@@ -17,7 +17,8 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 
 1. ``title``: This is by default the titlecase of your collection's namespace and name. Feel free to insert a nicer name here.
 2. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``.
-3. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
+3. ``changelog_filename_template``: The default value ``CHANGELOG.rst`` is relative to the ``changelogs/`` directory. If you want to have the file in the root directory of your collection (i.e. the directory containing ``galaxy.yml``), change it to ``../CHANGELOG.rst``.
+4. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
 
 Validating changelog fragments
 ==============================
