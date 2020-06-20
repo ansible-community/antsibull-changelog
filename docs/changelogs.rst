@@ -132,6 +132,12 @@ A fragment can also contain multiple sections, or multiple entries in one sectio
 
 The ``release_summary`` section is special, in that it doesn't contain a list of strings, but a string, and that only one such entry can be shown in the changelog of a release. Usually for every release (pre-release or regular release), at most one fragment is added which contains a ``release_summary``, and this is only done by the person doing the release. The ``release_summary`` should include some global information on the release; for example, in `Ansible's changelog <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#release-summary>`_, it always mentions the release date and links to the porting guide.
 
+An example of how a fragment with ``release_summary`` could look like is ``changelogs/fragments/0.2.0.yml`` from community.general::
+
+    release_summary: |
+      This is the first proper release of the ``community.general`` collection on 2020-06-20.
+      The changelog describes all changes made to the modules and plugins included in this collection since Ansible 2.9.0.
+
 Porting Guide Entries
 =====================
 
