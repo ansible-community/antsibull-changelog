@@ -110,7 +110,7 @@ The full list of categories is:
 Porting Guide Entries
 =====================
 
-The changelog generator considers the following categories as part of a Porting Guide section:
+The following sections are considered as the Porting Guide of the collection. For collections included in Ansible, these will be inserted into Ansible's Porting Guide:
 
 * major_changes
 * breaking_changes
