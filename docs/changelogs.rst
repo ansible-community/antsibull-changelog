@@ -108,7 +108,7 @@ The full list of categories is:
   This category will **not be shown** in the changelog. It can be used to describe changes that are not touching user-facing code, like changes in tests. This is useful if every PR is required to have a changelog fragment.
 
 Porting Guide Entries
-======================
+=====================
 
 The changelog generator considers the following categories as part of a Porting Guide section:
 
