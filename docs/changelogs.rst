@@ -106,3 +106,13 @@ The full list of categories is:
 
 **trivial**
   This category will **not be shown** in the changelog. It can be used to describe changes that are not touching user-facing code, like changes in tests. This is useful if every PR is required to have a changelog fragment.
+
+Porting Guide Entries
+=====================
+
+The following sections are considered as the Porting Guide of the collection. For collections included in Ansible, these will be inserted into Ansible's Porting Guide:
+
+* major_changes
+* breaking_changes
+* deprecated_features
+* removed_features 
