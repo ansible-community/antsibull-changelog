@@ -17,7 +17,8 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 
 1. ``title``: This is by default the titlecase of your collection's namespace and name. Feel free to insert a nicer name here.
 2. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``.
-3. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
+3. ``changelog_filename_template``: The default value ``CHANGELOG.rst`` is relative to the ``changelogs/`` directory. If you want to have the file in the root directory of your collection (i.e. the directory containing ``galaxy.yml``), change it to ``../CHANGELOG.rst``.
+4. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
 
 Validating changelog fragments
 ==============================
@@ -106,6 +107,36 @@ The full list of categories is:
 
 **trivial**
   This category will **not be shown** in the changelog. It can be used to describe changes that are not touching user-facing code, like changes in tests. This is useful if every PR is required to have a changelog fragment.
+
+Examples
+--------
+
+A guide on how to write changelog fragments can be found in the `Ansible docs <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_.
+
+Example of a regular changelog fragment::
+
+    bugfixes:
+      - docker_container - wait for removal of container if docker API returns early
+        (https://github.com/ansible/ansible/issues/65811).
+
+The filename in this case was ``changelogs/fragments/65854-docker_container-wait-for-removal.yml``, because this was implemented in `PR #65854 in ansible/ansible <https://github.com/ansible/ansible/pull/65854>`_.
+
+A fragment can also contain multiple sections, or multiple entries in one section::
+
+    deprecated_features:
+    - docker_container - the ``trust_image_content`` option will be removed. It has always been ignored by the module.
+    - docker_stack - the return values ``err`` and ``out`` have been deprecated. Use ``stdout`` and ``stderr`` from now on instead.
+
+    breaking_changes:
+    - "docker_container - no longer passes information on non-anonymous volumes or binds as ``Volumes`` to the Docker daemon. This increases compatibility with the ``docker`` CLI program. Note that if you specify ``volumes: strict`` in ``comparisons``, this could cause existing containers created with docker_container from Ansible 2.9 or earlier to restart."
+
+The ``release_summary`` section is special, in that it doesn't contain a list of strings, but a string, and that only one such entry can be shown in the changelog of a release. Usually for every release (pre-release or regular release), at most one fragment is added which contains a ``release_summary``, and this is only done by the person doing the release. The ``release_summary`` should include some global information on the release; for example, in `Ansible's changelog <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#release-summary>`_, it always mentions the release date and links to the porting guide.
+
+An example of how a fragment with ``release_summary`` could look like is ``changelogs/fragments/0.2.0.yml`` from community.general::
+
+    release_summary: |
+      This is the first proper release of the ``community.general`` collection on 2020-06-20.
+      The changelog describes all changes made to the modules and plugins included in this collection since Ansible 2.9.0.
 
 Porting Guide Entries
 =====================
