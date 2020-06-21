@@ -10,7 +10,9 @@ Collect and store information on Ansible plugins and modules.
 
 import json
 import os
+import shutil
 import subprocess
+import tempfile
 
 from typing import Any, Dict, List, Optional
 
@@ -141,7 +143,9 @@ def get_plugins_path(paths: PathsConfig, plugin_type: str) -> str:
     return os.path.join(lib_ansible, 'plugins', plugin_type)
 
 
-def list_plugins_walk(paths: PathsConfig, plugin_type: str,
+def list_plugins_walk(paths: PathsConfig,
+                      playbook_dir: Optional[str],  # pylint: disable=unused-argument
+                      plugin_type: str,
                       collection_name: Optional[str]) -> List[str]:
     """
     Find all plugins of a type in a collection, or in Ansible-base. Uses os.walk().
@@ -149,6 +153,7 @@ def list_plugins_walk(paths: PathsConfig, plugin_type: str,
     This will also work with Ansible 2.9.
 
     :arg paths: Paths configuration
+    :arg playbook_dir: Value for the ``--playbook-dir`` argument of ``ansible-doc``
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate.
     """
@@ -176,7 +181,9 @@ def list_plugins_walk(paths: PathsConfig, plugin_type: str,
     return sorted(result)
 
 
-def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
+def list_plugins_ansibledoc(paths: PathsConfig,
+                            playbook_dir: Optional[str],
+                            plugin_type: str,
                             collection_name: Optional[str]) -> List[str]:
     """
     Find all plugins of a type in a collection, or in Ansible-base. Uses ansible-doc.
@@ -184,6 +191,7 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
     Note that ansible-doc from Ansible 2.10 or newer is needed for this!
 
     :arg paths: Paths configuration
+    :arg playbook_dir: Value for the ``--playbook-dir`` argument of ``ansible-doc``
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate.
     """
@@ -193,6 +201,8 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
         return []
 
     command = [paths.ansible_doc_path, '--json', '-t', plugin_type, '--list']
+    if playbook_dir:
+        command.extend(['--playbook-dir', playbook_dir])
     if collection_name:
         command.append(collection_name)
     output = subprocess.check_output(command)
@@ -214,45 +224,83 @@ def list_plugins_ansibledoc(paths: PathsConfig, plugin_type: str,
     return sorted(plugins_list.keys())
 
 
-def run_ansible_doc(paths: PathsConfig, plugin_type: str, plugin_names: List[str]) -> dict:
+def run_ansible_doc(paths: PathsConfig, playbook_dir: Optional[str],
+                    plugin_type: str, plugin_names: List[str]) -> dict:
     """
     Runs ansible-doc to retrieve documentation for a given set of plugins in JSON format.
 
     Plugins must be in FQCN for collections.
     """
     command = [paths.ansible_doc_path, '--json', '-t', plugin_type]
+    if playbook_dir:
+        command.extend(['--playbook-dir', playbook_dir])
     command.extend(plugin_names)
     output = subprocess.check_output(command)
     return json.loads(output.decode('utf-8'))
 
 
-def load_plugin_metadata(paths: PathsConfig, plugin_type: str,
+def load_plugin_metadata(paths: PathsConfig,
+                         playbook_dir: Optional[str],
+                         plugin_type: str,
                          collection_name: Optional[str],
                          use_ansible_doc: bool = False) -> Dict[str, Dict[str, Any]]:
     """
     Collect plugin metadata for all plugins of a given type.
 
     :arg paths: Paths configuration
+    :arg playbook_dir: Value for the ``--playbook-dir`` argument of ``ansible-doc``
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate
     :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     """
     if use_ansible_doc:
         # WARNING: Do not make this the default to this before ansible-base is a requirement!
-        plugins_list = list_plugins_ansibledoc(paths, plugin_type, collection_name)
+        plugins_list = list_plugins_ansibledoc(paths, playbook_dir, plugin_type, collection_name)
     else:
-        plugins_list = list_plugins_walk(paths, plugin_type, collection_name)
+        plugins_list = list_plugins_walk(paths, playbook_dir, plugin_type, collection_name)
 
     result: Dict[str, Dict[str, Any]] = {}
     if not plugins_list:
         return result
 
-    plugins_data = run_ansible_doc(paths, plugin_type, plugins_list)
+    plugins_data = run_ansible_doc(paths, playbook_dir, plugin_type, plugins_list)
 
     for name, data in plugins_data.items():
         processed_data = jsondoc_to_metadata(paths, collection_name, plugin_type, name, data)
         result[processed_data['name']] = processed_data
     return result
+
+
+class CollectionCopier:
+    """
+    Creates a copy of a collection to a place where ``--playbook-dir`` can be used
+    to prefer this copy of the collection over any installed ones.
+    """
+    def __init__(self, paths: PathsConfig, namespace: str, name: str):
+        self.paths = paths
+        self.namespace = namespace
+        self.name = name
+
+        self.dir = tempfile.mkdtemp(prefix='antsibull-changelog')
+
+    def __enter__(self):
+        try:
+            collection_container_dir = os.path.join(
+                self.dir, 'collections', 'ansible_collections', self.namespace)
+            os.makedirs(collection_container_dir)
+
+            collection_dir = os.path.join(collection_container_dir, self.name)
+            shutil.copytree(self.paths.base_dir, collection_dir, symlinks=True)
+
+            new_paths = PathsConfig.force_collection(
+                collection_dir, ansible_doc_bin=self.paths.ansible_doc_path)
+            return self.dir, new_paths
+        except Exception:  # pylint: disable=broad-except
+            shutil.rmtree(self.dir, ignore_errors=True)
+            raise
+
+    def __exit__(self, type_, value, traceback_):
+        shutil.rmtree(self.dir, ignore_errors=True)
 
 
 def load_plugins(paths: PathsConfig,
@@ -291,9 +339,18 @@ def load_plugins(paths: PathsConfig,
             collection_name = '{}.{}'.format(
                 collection_details.get_namespace(), collection_details.get_name())
 
-        for plugin_type in get_documentable_plugins():
-            plugins_data['plugins'][plugin_type] = load_plugin_metadata(
-                paths, plugin_type, collection_name, use_ansible_doc=use_ansible_doc)
+            with CollectionCopier(
+                    paths, collection_details.get_namespace(), collection_details.get_name()
+            ) as (playbook_dir, new_paths):
+                for plugin_type in get_documentable_plugins():
+                    plugins_data['plugins'][plugin_type] = load_plugin_metadata(
+                        new_paths, playbook_dir, plugin_type, collection_name,
+                        use_ansible_doc=use_ansible_doc)
+
+        else:
+            for plugin_type in get_documentable_plugins():
+                plugins_data['plugins'][plugin_type] = load_plugin_metadata(
+                    paths, None, plugin_type, collection_name, use_ansible_doc=use_ansible_doc)
 
         # remove empty namespaces from plugins
         for section in plugins_data['plugins'].values():

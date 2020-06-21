@@ -9,7 +9,7 @@ Test basic changelog functionality: Ansible Base 2.10+
 
 import os
 
-from typing import List
+from typing import List, Optional
 
 import mock
 
@@ -733,7 +733,9 @@ New Modules
 
 
 
-def fake_ansible_doc_ansible(paths: PathsConfig, plugin_type: str,
+def fake_ansible_doc_ansible(paths: PathsConfig,
+                             playbook_dir: Optional[str],
+                             plugin_type: str,
                              plugin_names: List[str]) -> dict:
     """
     Fake ansible-doc mock for Ansible-base.

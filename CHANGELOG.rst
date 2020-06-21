@@ -3,6 +3,14 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.4.0
+======
+
+Bugfixes
+--------
+
+- Fix bad module namespace detection when collection was symlinked into Ansible's collection search path. This also allows to add releases to collections which are not installed in a way that Ansible finds them.
+
 v0.3.1
 ======
 
