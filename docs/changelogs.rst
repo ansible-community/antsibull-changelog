@@ -34,8 +34,6 @@ If ``antsibull-changelog lint`` produces no output on stdout, and exits with exi
 Releasing a new version of a collection
 =======================================
 
-Note that to run, the tool assumes that the collection in whose directory you are can be found by Ansible, in particular information on the plugins can be retrieved by ``ansible-doc``. This means that the directory is of the form ``.../ansible_collections/namespace/name``. See `the collection dev guide <https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#contributing-to-collections>`_ for more details.
-
 To release a new version of a collection, you need to run::
 
     antsibull-changelog release
