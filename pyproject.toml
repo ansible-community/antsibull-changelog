@@ -10,7 +10,7 @@ authors = ["Felix Fontein <felix@fontein.de>", "Toshio Kuratomi <a.badger@gmail.
 license = "GPL-3.0-or-later"
 readme = "README.md"
 repository = "https://github.com/ansible-community/antsibull-changelog"
-documentation = "https://github.com/ansible-community/antsibull-changelog/tree/master/docs/"
+documentation = "https://github.com/ansible-community/antsibull-changelog/tree/main/docs/"
 packages = [
     { include = "antsibull_changelog" },
     { include = "tests", format = "sdist" }
@@ -18,7 +18,7 @@ packages = [
 
 [tool.poetry.urls]
 "Bug tracker" = "https://github.com/ansible-community/antsibull-changelog/issues"
-"Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/master/CHANGELOG.rst"
+"Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.rst"
 
 [tool.poetry.scripts]
 antsibull-changelog = "antsibull_changelog.cli:main"

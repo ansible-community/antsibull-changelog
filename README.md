@@ -2,8 +2,8 @@
 
 A changelog generator used by Ansible and Ansible collections.
 
-- Using the [`antsibull-changelog` CLI tool](https://github.com/ansible-community/antsibull-changelog/tree/master/docs/changelogs.rst).
-- Documentation on the [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/master/docs/changelog.yaml-format.md).
+- Using the [`antsibull-changelog` CLI tool](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+- Documentation on the [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
 
 Scripts are created by poetry at build time.  So if you want to run from
 a checkout, you'll have to run them under poetry:
