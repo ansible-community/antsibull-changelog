@@ -6,6 +6,11 @@ Changelog for Ansible Changelog Tool
 v0.4.0
 ======
 
+Minor Changes
+-------------
+
+- Allow to enable or disable flatmapping via ``config.yaml``.
+
 Bugfixes
 --------
 

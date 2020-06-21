@@ -130,15 +130,25 @@ def test_config_store_collection(collection_config_path):
     collection_details = CollectionDetails(paths)
 
     config = ChangelogConfig.default(paths, collection_details)
+    assert config.flatmap is None
+
+    config.store()
+    config = ChangelogConfig.load(paths, collection_details)
+    assert config.flatmap is None
+
     config.always_refresh = True
+    config.flatmap = True
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
     assert config.always_refresh is True
+    assert config.flatmap is True
 
     config.always_refresh = False
+    config.flatmap = False
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
     assert config.always_refresh is False
+    assert config.flatmap is False
 
 
 def test_collection_details(tmp_path):
@@ -185,7 +195,7 @@ def test_collection_details(tmp_path):
     with pytest.raises(ChangelogError) as exc:
         details.get_version()
     assert 'Cannot find "version" field in galaxy.yaml' in str(exc.value)
-    assert details.get_flatmap() is False
+    assert details.get_flatmap() is None
 
     galaxy_path = tmp_path / 'galaxy.yml'
     galaxy_path.write_text('---\nnamespace: 1\nname: 2\nversion: 3\ntype: 4')
@@ -210,6 +220,12 @@ def test_collection_details(tmp_path):
     assert details.get_name() == 'b'
     assert details.get_version() == 'c'
     assert details.get_flatmap() is True
+
+    galaxy_path = tmp_path / 'galaxy.yml'
+    galaxy_path.write_text('---\ntype: other')
+    paths = PathsConfig.force_collection(str(tmp_path))
+    details = CollectionDetails(paths)
+    assert details.get_flatmap() is False
 
     galaxy_path = tmp_path / 'galaxy.yml'
     galaxy_path.write_text('---\nnamespace: a\nname: b\nversion: c\ntype: flatmap')

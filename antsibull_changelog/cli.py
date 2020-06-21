@@ -273,6 +273,23 @@ def command_init(args: Any) -> int:
     return 0
 
 
+def _determine_flatmap(args: Any,
+                       collection_details: CollectionDetails,
+                       config: ChangelogConfig) -> bool:
+    """
+    Determine whether flatmapping is used or not for the collection.
+    """
+    flatmap = not config.is_collection
+    flatmap_ = config.flatmap
+    if flatmap_ is not None:
+        flatmap = flatmap_
+    if config.is_collection:
+        flatmap_ = collection_details.get_flatmap()
+        if flatmap_ is not None:
+            flatmap = flatmap_
+    return flatmap
+
+
 def command_release(args: Any) -> int:
     """
     Add a new release to a changelog.
@@ -293,9 +310,7 @@ def command_release(args: Any) -> int:
 
     load_collection_details(collection_details, args)
 
-    flatmap = True
-    if config.is_collection:
-        flatmap = collection_details.get_flatmap()
+    flatmap = _determine_flatmap(args, collection_details, config)
 
     if not version or not codename:
         if not config.is_collection:
@@ -340,9 +355,7 @@ def command_generate(args: Any) -> int:
 
     load_collection_details(collection_details, args)
 
-    flatmap = True
-    if config.is_collection:
-        flatmap = collection_details.get_flatmap()
+    flatmap = _determine_flatmap(args, collection_details, config)
 
     changes = load_changes(config)
     if not changes.has_release:

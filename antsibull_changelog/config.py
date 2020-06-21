@@ -154,8 +154,8 @@ class CollectionDetails:
             self.name = galaxy_yaml.get('name')
         if self.version is None and isinstance(galaxy_yaml.get('version'), str):
             self.version = galaxy_yaml.get('version')
-        if self.flatmap is None:
-            self.flatmap = galaxy_yaml.get('type', '') == 'flatmap'
+        if self.flatmap is None and galaxy_yaml.get('type') is not None:
+            self.flatmap = galaxy_yaml['type'] == 'flatmap'
 
     def _load_galaxy_yaml(self, needed_var: str,
                           what_for: Optional[str] = None,
@@ -213,18 +213,14 @@ class CollectionDetails:
             raise ChangelogError('Cannot find "version" field in galaxy.yaml. ' + help_text)
         return version
 
-    def get_flatmap(self) -> bool:
+    def get_flatmap(self) -> Optional[bool]:
         """
         Get collection's flatmap flag.
         """
         help_text = 'You can explicitly specify the value with `--collection-flatmap`.'
-        if self.flatmap is None:
+        if self.flatmap is None and not self.galaxy_yaml_loaded:
             self._load_galaxy_yaml('type', what_for='determine flatmapping', help_text=help_text)
-        flatmap = self.flatmap
-        if flatmap is None:
-            raise Exception(
-                'Internal error: flatmap is None after successful _load_galaxy_yaml() call')
-        return flatmap
+        return self.flatmap
 
 
 DEFAULT_SECTIONS = [
@@ -265,6 +261,7 @@ class ChangelogConfig:
     release_tag_re: str
     pre_release_tag_re: str
     always_refresh: bool
+    flatmap: Optional[bool]
     sections: Mapping[str, str]
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
@@ -291,6 +288,7 @@ class ChangelogConfig:
         self.mention_ancestor = self.config.get('mention_ancestor', True)
         self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
         self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
+        self.flatmap = self.config.get('flatmap')
 
         # The following are only relevant for ansible-base:
         self.release_tag_re = self.config.get(
@@ -335,6 +333,8 @@ class ChangelogConfig:
             config['title'] = self.title
         if self.always_refresh != (self.changes_format == 'classic'):
             config['always_refresh'] = self.always_refresh
+        if self.flatmap is not None:
+            config['flatmap'] = self.flatmap
         self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
 
         sections = []
