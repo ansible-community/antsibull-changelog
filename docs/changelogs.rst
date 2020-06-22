@@ -4,7 +4,7 @@ Changelogs for Collections
 
 The ``antsibull-changelog`` tool allows you to create and update changelogs for Ansible collections, that are similar to the ones provided by Ansible itself in earlier versions, and that are compatible to the combined Ansible Community Distribution changelogs.
 
-The following instructions assume that antsibull has been properly installed, for example via ``pip install antsibull-changelog``. To get the current ``master`` branch, do ``pip install https://github.com/ansible-community/ansible-changelog/archive/master.tar.gz``. If it is used with ``poetry`` from git, ``antsibull-changelog`` has to be substituted with ``poetry run antsibull-changelog``.
+The following instructions assume that antsibull has been properly installed, for example via ``pip install antsibull-changelog``. To get the current ``main`` branch, do ``pip install https://github.com/ansible-community/antsibull-changelog/archive/main.tar.gz``. If it is used with ``poetry`` from git, ``antsibull-changelog`` has to be substituted with ``poetry run antsibull-changelog``.
 
 Bootstrapping changelogs for collections
 ========================================
