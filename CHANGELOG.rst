@@ -3,6 +3,14 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.5.0
+======
+
+Minor Changes
+-------------
+
+- The internal changelog generator code got more flexible to help antsibull generate Ansible porting guides.
+
 v0.4.0
 ======
 
