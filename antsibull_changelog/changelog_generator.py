@@ -11,7 +11,7 @@ Generate reStructuredText changelog from ChangesBase instance.
 import collections
 import os
 
-from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 
 import packaging.version
 import semantic_version
@@ -23,6 +23,58 @@ from .logger import LOGGER
 from .plugins import PluginDescription
 from .rst import RstBuilder
 from .utils import is_release_version
+
+
+class ChangelogEntry:
+    """
+    Data for a changelog entry.
+    """
+
+    version: str
+
+    modules: List[Any]
+    plugins: Dict[Any, Any]
+    changes: Dict[str, Union[str, List[str]]]
+
+    def __init__(self, version: str):
+        self.version = version
+        self.modules = []
+        self.plugins = dict()
+        self.changes = dict()
+
+    def has_no_changes(self, section_names: Optional[List[str]] = None) -> bool:
+        """
+        Determine whether there are changes.
+
+        If ``section_names`` is not supplied, all sections will be checked.
+        """
+        if section_names is None:
+            return all(not content for content in self.changes)
+        return all(not self.changes.get(section_name) for section_name in section_names)
+
+    @property
+    def empty(self) -> bool:
+        """
+        Determine whether the entry has no content at all.
+        """
+        return not self.modules and not self.plugins and self.has_no_changes()
+
+    def add_section_content(self,
+                            builder: RstBuilder,
+                            section_name: str) -> None:
+        """
+        Add a section's content of fragments to the changelog.
+        """
+        if section_name not in self.changes:
+            return
+
+        content = self.changes[section_name]
+
+        if isinstance(content, list):
+            for rst in sorted(content):
+                builder.add_list_item(rst)
+        else:
+            builder.add_raw_rst(content)
 
 
 class ChangelogGenerator:
@@ -81,36 +133,33 @@ class ChangelogGenerator:
         return result
 
     @staticmethod
-    def _get_entry_config(release_entries: MutableMapping[str, dict], entry_version: str) -> dict:
+    def _get_entry_config(release_entries: MutableMapping[str, ChangelogEntry],
+                          entry_version: str) -> ChangelogEntry:
         """
         Create (if not existing) and return release entry for a given version.
         """
         if entry_version not in release_entries:
-            release_entries[entry_version] = dict(
-                modules=[],
-                plugins={},
-            )
-            release_entries[entry_version]['changes'] = dict()
+            release_entries[entry_version] = ChangelogEntry(entry_version)
 
         return release_entries[entry_version]
 
-    def _update_modules_plugins(self, entry_config: dict, release: dict) -> None:
+    def _update_modules_plugins(self, entry_config: ChangelogEntry, release: dict) -> None:
         """
         Update a release entry given a release information dict.
         """
         plugins = self.plugin_resolver.resolve(release)
 
         if 'module' in plugins:
-            entry_config['modules'] += plugins.pop('module')
+            entry_config.modules += plugins.pop('module')
 
         for plugin_type, plugin_list in plugins.items():
-            if plugin_type not in entry_config['plugins']:
-                entry_config['plugins'][plugin_type] = []
+            if plugin_type not in entry_config.plugins:
+                entry_config.plugins[plugin_type] = []
 
-            entry_config['plugins'][plugin_type] += plugin_list
+            entry_config.plugins[plugin_type] += plugin_list
 
-    def _collect(self, squash: bool = False, after_version: Optional[str] = None,
-                 until_version: Optional[str] = None) -> Mapping[str, dict]:
+    def collect(self, squash: bool = False, after_version: Optional[str] = None,
+                until_version: Optional[str] = None) -> List[ChangelogEntry]:
         """
         Collect release entries.
 
@@ -119,7 +168,7 @@ class ChangelogGenerator:
         :arg until_version: If given, do not consider versions following this one
         :return: An ordered mapping of versions to release entries
         """
-        release_entries: MutableMapping[str, dict] = collections.OrderedDict()
+        release_entries: MutableMapping[str, ChangelogEntry] = collections.OrderedDict()
         entry_version = until_version or self.changes.latest_version
         entry_fragment = None
 
@@ -139,7 +188,7 @@ class ChangelogGenerator:
 
             entry_config = self._get_entry_config(release_entries, entry_version)
 
-            dest_changes = entry_config['changes']
+            dest_changes = entry_config.changes
 
             for fragment in self.fragment_resolver.resolve(release):
                 for section, lines in fragment.content.items():
@@ -153,14 +202,35 @@ class ChangelogGenerator:
                         # lines is a str in this case!
                         entry_fragment = lines
                         dest_changes[section] = lines
-                    elif section in dest_changes:
-                        dest_changes[section].extend(lines)
                     else:
-                        dest_changes[section] = list(lines)
+                        content = dest_changes.get(section)
+                        if isinstance(content, list):
+                            content.extend(lines)
+                        else:
+                            dest_changes[section] = list(lines)
 
             self._update_modules_plugins(entry_config, release)
 
-        return release_entries
+        return list(release_entries.values())
+
+    def append_changelog_entry(self, builder: RstBuilder,
+                               changelog_entry: ChangelogEntry,
+                               start_level: int = 0,
+                               add_version: bool = False) -> None:
+        """
+        Append changelog entry to a reStructuredText (RST) builder.
+
+        :arg start_level: Level to add to headings in the generated RST
+        """
+        if add_version:
+            builder.add_section('v%s' % changelog_entry.version, start_level)
+
+        for section_name in self.config.sections:
+            self._add_section(builder, changelog_entry, section_name, start_level=start_level)
+
+        self._add_plugins(builder, changelog_entry.plugins, start_level=start_level)
+        self._add_modules(builder, changelog_entry.modules, flatmap=self.flatmap,
+                          start_level=start_level)
 
     def generate_to(self,  # pylint: disable=too-many-arguments
                     builder: RstBuilder,
@@ -175,24 +245,13 @@ class ChangelogGenerator:
         :arg squash: Squash all releases into one entry
         :arg after_version: If given, only consider versions after this one
         :arg until_version: If given, do not consider versions following this one
-        :return: An ordered mapping of versions to release entries
         """
-        release_entries = self._collect(
+        release_entries = self.collect(
             squash=squash, after_version=after_version, until_version=until_version)
 
-        for version, release in release_entries.items():
-            if not squash:
-                builder.add_section('v%s' % version, start_level)
-
-            combined_fragments = release['changes']
-
-            for section_name in self.config.sections:
-                self._add_section(builder, combined_fragments, section_name,
-                                  start_level=start_level)
-
-            self._add_plugins(builder, release['plugins'], start_level=start_level)
-            self._add_modules(builder, release['modules'], flatmap=self.flatmap,
-                              start_level=start_level)
+        for release in release_entries:
+            self.append_changelog_entry(
+                builder, release, start_level=start_level, add_version=not squash)
 
     def generate(self) -> str:
         """
@@ -224,25 +283,19 @@ class ChangelogGenerator:
         return builder.generate()
 
     def _add_section(self, builder: RstBuilder,
-                     combined_fragments: Dict[str, Union[str, List[str]]],
-                     section_name: str, start_level: int = 0) -> None:
+                     changelog_entry: ChangelogEntry,
+                     section_name: str,
+                     start_level: int) -> None:
         """
         Add a section of fragments to the changelog.
         """
-        if section_name not in combined_fragments:
+        if section_name not in changelog_entry.changes:
             return
 
         section_title = self.config.sections[section_name]
-
         builder.add_section(section_title, start_level + 1)
 
-        content = combined_fragments[section_name]
-
-        if isinstance(content, list):
-            for rst in sorted(content):
-                builder.add_list_item(rst)
-        else:
-            builder.add_raw_rst(content)
+        changelog_entry.add_section_content(builder, section_name)
 
         builder.add_raw_rst('')
 
