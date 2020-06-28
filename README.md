@@ -34,6 +34,14 @@ Note: When installing a package published by poetry, it is best to use pip >= 19
 Installing with pip-18.1 and below could create scripts which use pkg_resources
 which can slow down startup time (in some environments by quite a large amount).
 
+If you prefer to work with `pip install -e`, you can use [dephell](https://pypi.org/project/dephell/)
+to create a `setup.py` file from `pyproject.toml`:
+
+    dephell deps convert --from-path pyproject.toml --from-format poetry --to-path setup.py --to-format setuppy
+
+Then you can install antsibull-changelog with `pip install -e .`.
+
+
 ## License
 
 Unless otherwise noted in the code, it is licensed under the terms of the GNU
