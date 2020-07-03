@@ -58,7 +58,7 @@ Updating/Refreshing changelog.yaml
 
 In case plugin short descriptions are changed (for example typos are fixed), or changelog fragments were changed (to fix types; only in case ``keep_fragments`` is ``true``), and the existing changelog is not considered frozen, one can use::
 
-    antsibull-cangelog generate --refresh --reload-plugins
+    antsibull-changelog generate --refresh --reload-plugins
 
 to force updating the ``changelog.yaml`` and generated reStructuredText.
 
