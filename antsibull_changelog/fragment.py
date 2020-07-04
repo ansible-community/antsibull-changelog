@@ -17,6 +17,7 @@ import rstcheck
 
 from .config import ChangelogConfig, PathsConfig
 from .errors import ChangelogError
+from .logger import LOGGER
 from .yaml import load_yaml
 
 
@@ -44,7 +45,22 @@ class ChangelogFragment:
         try:
             os.remove(self.path)
         except Exception:  # pylint: disable=broad-except
-            pass
+            LOGGER.warn('Cannot remove fragment {path}'.format(
+                path=self.path,
+            ))
+
+    def move_to(self, directory: str) -> None:
+        """
+        Move changelog fragment to a different directory.
+        """
+        destination = os.path.join(directory, os.path.basename(self.path))
+        try:
+            os.rename(self.path, destination)
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.warn('Cannot move fragment {path} to {destination}'.format(
+                path=self.path,
+                destination=destination,
+            ))
 
     @staticmethod
     def load(path: str) -> 'ChangelogFragment':

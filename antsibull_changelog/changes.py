@@ -780,8 +780,18 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     changes.save()
 
     if not config.keep_fragments:
-        for fragment in fragments_added:
-            fragment.remove()
+        archive_path_template = config.archive_path_template
+        if archive_path_template is None:
+            # Actually remove fragments
+            for fragment in fragments_added:
+                fragment.remove()
+        else:
+            # Move fragments
+            archive_path = os.path.join(
+                config.paths.base_dir, archive_path_template.format(version=version))
+            os.makedirs(archive_path, exist_ok=True)
+            for fragment in fragments_added:
+                fragment.move_to(archive_path)
 
 
 def refresh_changelog(config: ChangelogConfig,
