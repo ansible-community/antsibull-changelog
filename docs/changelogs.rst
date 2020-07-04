@@ -22,6 +22,7 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 3. ``changelog_filename_template``: The default value ``CHANGELOG.rst`` is relative to the ``changelogs/`` directory. If you want to have the file in the root directory of your collection (i.e. the directory containing ``galaxy.yml``), change it to ``../CHANGELOG.rst``.
 4. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
 5. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
+6. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder `{version}` can be used for the current collection version into which the fragment was included.
 
 Validating changelog fragments
 ==============================

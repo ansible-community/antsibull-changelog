@@ -3,6 +3,14 @@ Changelog for Ansible Changelog Tool
 ====================================
 
 
+v0.6.0
+======
+
+Minor Changes
+-------------
+
+- The config option ``archive_path_template`` allows to move fragments into an archive directory when ``keep_fragments`` is set to ``false``.
+
 v0.5.0
 ======
 

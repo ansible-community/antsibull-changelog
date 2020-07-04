@@ -254,6 +254,7 @@ class ChangelogConfig:
     changes_file: str
     changes_format: str
     keep_fragments: bool
+    archive_path_template: Optional[str]
     changelog_filename_template: str
     changelog_filename_version_depth: int
     mention_ancestor: bool
@@ -281,6 +282,7 @@ class ChangelogConfig:
         self.changes_file = self.config.get('changes_file', '.changes.yaml')
         self.changes_format = self.config.get('changes_format', 'classic')
         self.keep_fragments = self.config.get('keep_fragments', self.changes_format == 'classic')
+        self.archive_path_template = self.config.get('archive_path_template')
         self.changelog_filename_template = self.config.get(
             'changelog_filename_template', 'CHANGELOG-v%s.rst')
         self.changelog_filename_version_depth = self.config.get(
@@ -335,6 +337,8 @@ class ChangelogConfig:
             config['always_refresh'] = self.always_refresh
         if self.flatmap is not None:
             config['flatmap'] = self.flatmap
+        if self.archive_path_template is not None:
+            config['archive_path_template'] = self.archive_path_template
         self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
 
         sections = []
