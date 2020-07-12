@@ -228,9 +228,26 @@ class ChangelogGenerator:
         for section_name in self.config.sections:
             self._add_section(builder, changelog_entry, section_name, start_level=start_level)
 
-        self._add_plugins(builder, changelog_entry.plugins, start_level=start_level)
-        self._add_modules(builder, changelog_entry.modules, flatmap=self.flatmap,
-                          start_level=start_level)
+        fqcn_prefix = None
+        if self.config.use_fqcn:
+            if self.config.paths.is_collection:
+                fqcn_prefix = '%s.%s' % (
+                    self.config.collection_details.get_namespace(),
+                    self.config.collection_details.get_name())
+            else:
+                fqcn_prefix = 'ansible.builtin'
+
+        self._add_plugins(
+            builder,
+            changelog_entry.plugins,
+            fqcn_prefix=fqcn_prefix,
+            start_level=start_level)
+        self._add_modules(
+            builder,
+            changelog_entry.modules,
+            flatmap=self.flatmap,
+            fqcn_prefix=fqcn_prefix,
+            start_level=start_level)
 
     def generate_to(self,  # pylint: disable=too-many-arguments
                     builder: RstBuilder,
@@ -302,6 +319,7 @@ class ChangelogGenerator:
     @staticmethod
     def _add_plugins(builder: RstBuilder,
                      plugins_database: Dict[str, List[Dict[str, Any]]],
+                     fqcn_prefix: Optional[str],
                      start_level: int = 0) -> None:
         """
         Add new plugins to the changelog.
@@ -323,7 +341,10 @@ class ChangelogGenerator:
             builder.add_section(plugin_type.title(), start_level + 2)
 
             for plugin in sorted(plugins, key=lambda plugin: plugin['name']):
-                builder.add_raw_rst('- %s - %s' % (plugin['name'], plugin['description']))
+                plugin_name = plugin['name']
+                if fqcn_prefix:
+                    plugin_name = '%s.%s' % (fqcn_prefix, plugin_name)
+                builder.add_raw_rst('- %s - %s' % (plugin_name, plugin['description']))
 
             builder.add_raw_rst('')
 
@@ -331,6 +352,7 @@ class ChangelogGenerator:
     def _add_modules(builder: RstBuilder,
                      modules: List[Dict[str, Any]],
                      flatmap: bool,
+                     fqcn_prefix: Optional[str],
                      start_level: int = 0) -> None:
         """
         Add new modules to the changelog.
@@ -365,6 +387,8 @@ class ChangelogGenerator:
                 module_name = module['name']
                 if not flatmap and namespace:
                     module_name = '%s.%s' % (namespace, module_name)
+                if fqcn_prefix:
+                    module_name = '%s.%s' % (fqcn_prefix, module_name)
 
                 builder.add_raw_rst('- %s - %s' % (module_name, module['description']))
 

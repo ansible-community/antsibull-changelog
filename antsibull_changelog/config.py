@@ -254,6 +254,7 @@ class ChangelogConfig:
     changes_file: str
     changes_format: str
     keep_fragments: bool
+    use_fqcn: bool
     archive_path_template: Optional[str]
     changelog_filename_template: str
     changelog_filename_version_depth: int
@@ -282,6 +283,7 @@ class ChangelogConfig:
         self.changes_file = self.config.get('changes_file', '.changes.yaml')
         self.changes_format = self.config.get('changes_format', 'classic')
         self.keep_fragments = self.config.get('keep_fragments', self.changes_format == 'classic')
+        self.use_fqcn = self.config.get('use_fqcn', False)
         self.archive_path_template = self.config.get('archive_path_template')
         self.changelog_filename_template = self.config.get(
             'changelog_filename_template', 'CHANGELOG-v%s.rst')
@@ -319,6 +321,7 @@ class ChangelogConfig:
             'changes_format': self.changes_format,
             'mention_ancestor': self.mention_ancestor,
             'keep_fragments': self.keep_fragments,
+            'use_fqcn': self.use_fqcn,
             'changelog_filename_template': self.changelog_filename_template,
             'changelog_filename_version_depth': self.changelog_filename_version_depth,
             'prelude_section_name': self.prelude_name,
@@ -375,6 +378,7 @@ class ChangelogConfig:
             'changelog_filename_version_depth': 0,
             'new_plugins_after_name': 'removed_features',
             'sections': DEFAULT_SECTIONS,
+            'use_fqcn': True,
         }
         if title is not None:
             config['title'] = title
