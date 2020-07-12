@@ -11,6 +11,7 @@ Minor Changes
 
 - The config option ``archive_path_template`` allows to move fragments into an archive directory when ``keep_fragments`` is set to ``false``.
 - New changelog configurations place the ``CHANGELOG.rst`` file by default in the top-level directory, and not in ``changelogs/``.
+- The option ``use_fqcn`` (set to ``true`` in new configurations) allows to use FQCN for new plugins and modules.
 
 v0.5.0
 ======

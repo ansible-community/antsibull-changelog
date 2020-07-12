@@ -267,12 +267,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo bar lookup
+- acme.test.bar - A foo bar lookup
 
 New Modules
 -----------
 
-- test - This is a test module
+- acme.test.test - This is a test module
 ''')
 
     # Check that regenerate doesn't change anything
@@ -375,12 +375,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- acme.test.test - This is a TEST module
 ''')
 
     # Update plugin descriptions for 1.1.0 beta 1
@@ -489,7 +489,7 @@ Minor Changes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
+- acme.test.test_new - This is ANOTHER test module
 
 v1.0.0
 ======
@@ -511,12 +511,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- acme.test.test - This is a TEST module
 ''')
 
     # Update plugin descriptions for 1.1.0
@@ -653,9 +653,9 @@ Bugfixes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
-- test_new2 - This is ANOTHER test module!!!11
-- test_new3 - This is yet another test module.
+- acme.test.test_new - This is ANOTHER test module
+- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new3 - This is yet another test module.
 
 v1.0.0
 ======
@@ -677,12 +677,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- acme.test.test - This is a TEST module
 ''')
 
     # Final release 1.1.0 - should not change
@@ -698,6 +698,7 @@ New Modules
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
     collection_changelog.config.title = 'Test Collection'
+    collection_changelog.config.use_fqcn = False
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
@@ -818,7 +819,8 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
         '--date', '2020-01-02',
         '--version', '1.0.0',
         '--is-collection', 'true',
-        # The following two options are not needed since the tool doesn't have to scan for plugins:
+        # The following two options are not needed since the tool doesn't have to scan for plugins,
+        # and since FQCNs are not used:
         # '--collection-namespace', 'cloud',
         # '--collection-name', 'sky',
         '--collection-flatmap', 'yes',
@@ -1190,5 +1192,5 @@ This is the first proper release.
 New Modules
 -----------
 
-- test_module - A test module
+- acme.test.test_module - A test module
 ''')
