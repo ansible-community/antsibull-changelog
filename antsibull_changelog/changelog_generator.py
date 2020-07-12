@@ -340,13 +340,22 @@ class ChangelogGenerator:
 
             builder.add_section(plugin_type.title(), start_level + 2)
 
-            for plugin in sorted(plugins, key=lambda plugin: plugin['name']):
-                plugin_name = plugin['name']
-                if fqcn_prefix:
-                    plugin_name = '%s.%s' % (fqcn_prefix, plugin_name)
-                builder.add_raw_rst('- %s - %s' % (plugin_name, plugin['description']))
+            ChangelogGenerator.add_plugins(builder, plugins, fqcn_prefix)
 
             builder.add_raw_rst('')
+
+    @staticmethod
+    def add_plugins(builder: RstBuilder,
+                    plugins: List[Dict[str, Any]],
+                    fqcn_prefix: Optional[str]) -> None:
+        """
+        Add new plugins of one type to the changelog.
+        """
+        for plugin in sorted(plugins, key=lambda plugin: plugin['name']):
+            plugin_name = plugin['name']
+            if fqcn_prefix:
+                plugin_name = '%s.%s' % (fqcn_prefix, plugin_name)
+            builder.add_raw_rst('- %s - %s' % (plugin_name, plugin['description']))
 
     @staticmethod
     def _add_modules(builder: RstBuilder,
@@ -360,6 +369,18 @@ class ChangelogGenerator:
         if not modules:
             return
 
+        builder.add_section('New Modules', start_level + 1)
+        ChangelogGenerator.add_modules(builder, modules, flatmap, fqcn_prefix, start_level + 2)
+
+    @staticmethod
+    def add_modules(builder: RstBuilder,
+                    modules: List[Dict[str, Any]],
+                    flatmap: bool,
+                    fqcn_prefix: Optional[str],
+                    level: int) -> None:
+        """
+        Add new modules to the changelog.
+        """
         modules_by_namespace = collections.defaultdict(list)
         for module in sorted(modules, key=lambda module: module['name']):
             modules_by_namespace[module['namespace']].append(module)
@@ -370,18 +391,15 @@ class ChangelogGenerator:
 
             section = parts.pop(0).replace('_', ' ').title()
 
-            if previous_section is None:
-                builder.add_section('New Modules', start_level + 1)
-
             if section != previous_section and section:
-                builder.add_section(section, start_level + 2)
+                builder.add_section(section, level)
 
             previous_section = section
 
             subsection = '.'.join(parts)
 
             if subsection:
-                builder.add_section(subsection, start_level + 3)
+                builder.add_section(subsection, level + 1)
 
             for module in modules_by_namespace[namespace]:
                 module_name = module['name']
