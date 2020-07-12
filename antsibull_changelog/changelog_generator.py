@@ -340,7 +340,7 @@ class ChangelogGenerator:
 
             builder.add_section(plugin_type.title(), start_level + 2)
 
-            self.add_plugins(builder, plugins, fqcn_prefix)
+            ChangelogGenerator.add_plugins(builder, plugins, fqcn_prefix)
 
             builder.add_raw_rst('')
 
@@ -370,7 +370,7 @@ class ChangelogGenerator:
             return
 
         builder.add_section('New Modules', start_level + 1)
-        self.add_modules(builder, modules, flatmap, fqcn_prefix, start_level + 2)
+        ChangelogGenerator.add_modules(builder, modules, flatmap, fqcn_prefix, start_level + 2)
 
     @staticmethod
     def add_modules(builder: RstBuilder,
