@@ -113,15 +113,25 @@ def test_config_store_ansible(ansible_config_path):
     collection_details = CollectionDetails(paths)
 
     config = ChangelogConfig.default(paths, collection_details)
+    config.always_refresh = 'none'
+    config.store()
+    config = ChangelogConfig.load(paths, collection_details)
+    assert config.always_refresh == 'none'
+
     config.always_refresh = False
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
-    assert config.always_refresh is False
+    assert config.always_refresh == 'none'
+
+    config.always_refresh = 'full'
+    config.store()
+    config = ChangelogConfig.load(paths, collection_details)
+    assert config.always_refresh == 'full'
 
     config.always_refresh = True
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
-    assert config.always_refresh is True
+    assert config.always_refresh == 'full'
 
 
 def test_config_store_collection(collection_config_path):
@@ -136,18 +146,30 @@ def test_config_store_collection(collection_config_path):
     config = ChangelogConfig.load(paths, collection_details)
     assert config.flatmap is None
 
-    config.always_refresh = True
+    config.always_refresh = 'full'
     config.flatmap = True
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
-    assert config.always_refresh is True
+    assert config.always_refresh == 'full'
     assert config.flatmap is True
 
-    config.always_refresh = False
+    config.always_refresh = True
+    config.store()
+    config = ChangelogConfig.load(paths, collection_details)
+    assert config.always_refresh == 'full'
+    assert config.flatmap is True
+
+    config.always_refresh = 'none'
     config.flatmap = False
     config.store()
     config = ChangelogConfig.load(paths, collection_details)
-    assert config.always_refresh is False
+    assert config.always_refresh == 'none'
+    assert config.flatmap is False
+
+    config.always_refresh = False
+    config.store()
+    config = ChangelogConfig.load(paths, collection_details)
+    assert config.always_refresh == 'none'
     assert config.flatmap is False
 
 

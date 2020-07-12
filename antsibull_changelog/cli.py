@@ -13,7 +13,7 @@ import os
 import sys
 import traceback
 
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Callable, cast, List, Optional, Tuple, Union
 
 try:
     import argcomplete
@@ -23,7 +23,7 @@ except ImportError:
 
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
-from .changes import load_changes, add_release, refresh_changelog
+from .changes import ChangesBase, load_changes, add_release
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .errors import ChangelogError
 from .fragment import load_fragments, ChangelogFragment, ChangelogFragmentLinter
@@ -131,8 +131,40 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
                              nargs='*',
                              help='path to fragment to test')
 
+    common_build = argparse.ArgumentParser(add_help=False)
+    common_build.add_argument('--reload-plugins',
+                              action='store_true',
+                              help='force reload of plugin cache')
+    common_build.add_argument('--ansible-doc-bin',
+                              help='path to ansible-doc (overrides autodetect)')
+    common_build.add_argument('--use-ansible-doc',
+                              action='store_true',
+                              help='always use ansible-doc to find plugins')
+    common_build.add_argument('--refresh',
+                              action='store_true',
+                              help='update existing entries from fragment files (if '
+                                   'keep_fragments is true), and update plugin descriptions '
+                                   '(should be combined with --reload-plugins)')
+    common_build.add_argument('--refresh-plugins',
+                              choices=['allow-removal', 'prevent-removal'],
+                              nargs='?',
+                              default=None,
+                              const='allow-removal',
+                              help='update plugin descriptions '
+                                   '(should be combined with --reload-plugins); '
+                                   'default is allow-removal')
+    common_build.add_argument('--refresh-fragments',
+                              choices=['without-archives', 'with-archives'],
+                              nargs='?',
+                              default=None,
+                              const='with-archives',
+                              help='update existing entries from fragment files (if '
+                                   'keep_fragments is true, or for with-archives if '
+                                   'archives are used); default is with-archives')
+
     release_parser = subparsers.add_parser('release',
-                                           parents=[common, is_collection, collection_details],
+                                           parents=[common, common_build,
+                                                    is_collection, collection_details],
                                            help='add a new release to the change metadata')
     release_parser.set_defaults(func=command_release)
     release_parser.add_argument('--version',
@@ -142,37 +174,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument('--date',
                                 default=str(datetime.date.today()),
                                 help='override release date')
-    release_parser.add_argument('--reload-plugins',
-                                action='store_true',
-                                help='force reload of plugin cache')
-    release_parser.add_argument('--ansible-doc-bin',
-                                help='path to ansible-doc (overrides autodetect)')
-    release_parser.add_argument('--use-ansible-doc',
-                                action='store_true',
-                                help='always use ansible-doc to find plugins')
-    release_parser.add_argument('--refresh',
-                                action='store_true',
-                                help='update existing entries from fragment files (if '
-                                     'keep_fragments is true), and update plugin descriptions '
-                                     '(should be combined with --reload-plugins)')
 
     generate_parser = subparsers.add_parser('generate',
-                                            parents=[common, is_collection, collection_details],
+                                            parents=[common, common_build,
+                                                     is_collection, collection_details],
                                             help='generate the changelog')
     generate_parser.set_defaults(func=command_generate)
-    generate_parser.add_argument('--reload-plugins',
-                                 action='store_true',
-                                 help='force reload of plugin cache')
-    generate_parser.add_argument('--ansible-doc-bin',
-                                 help='path to ansible-doc (overrides autodetect)')
-    generate_parser.add_argument('--use-ansible-doc',
-                                 action='store_true',
-                                 help='always use ansible-doc to find plugins')
-    generate_parser.add_argument('--refresh',
-                                 action='store_true',
-                                 help='update existing entries from fragment files (if '
-                                      'keep_fragments is true), and update plugin descriptions '
-                                      '(should be combined with --reload-plugins)')
 
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
@@ -289,6 +296,91 @@ def _determine_flatmap(collection_details: CollectionDetails,
     return flatmap
 
 
+def _get_refresh_config(args: Any,
+                        config: ChangelogConfig) -> Tuple[Optional[str], Optional[str]]:
+    refresh_plugins: Optional[str] = args.refresh_plugins
+    refresh_fragments: Optional[str] = args.refresh_fragments
+    always_refresh = config.always_refresh
+    if args.refresh or always_refresh == 'full':
+        if refresh_plugins is None:
+            refresh_plugins = 'allow-removal'
+        if refresh_fragments is None:
+            refresh_fragments = 'with-archives'
+    if always_refresh not in ('full', 'none'):
+        for part in always_refresh.split(','):
+            part = part.strip()
+            if part == 'plugins':
+                refresh_plugins = 'allow-removal'
+            elif part == 'plugins-without-removal':
+                refresh_plugins = 'prevent-removal'
+            elif part == 'fragments':
+                refresh_fragments = 'with-archives'
+            elif part == 'fragments-without-archives':
+                refresh_fragments = 'without-archives'
+            else:
+                raise Exception(
+                    'The config value always_refresh contains an invalid value "{0}"'.format(
+                        part))
+    return refresh_plugins, refresh_fragments
+
+
+def _get_archive_loader(archive_path_template: str,
+                        paths: PathsConfig,
+                        config: ChangelogConfig) -> Callable[[str], List[ChangelogFragment]]:
+    def load_extra_fragments(version: str) -> List[ChangelogFragment]:
+        archive_path = os.path.join(
+            paths.base_dir, archive_path_template.format(version=version))
+        return load_fragments(paths, config, fragments_dir=archive_path)
+
+    return load_extra_fragments
+
+
+def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
+                paths: PathsConfig,
+                collection_details: CollectionDetails,
+                config: ChangelogConfig,
+                changes: ChangesBase,
+                plugins: Optional[List[PluginDescription]] = None,
+                fragments: Optional[List[ChangelogFragment]] = None
+                ) -> Tuple[Optional[List[PluginDescription]], Optional[List[ChangelogFragment]]]:
+
+    refresh_plugins, refresh_fragments = _get_refresh_config(args, config)
+
+    if refresh_plugins:
+        if plugins is None:
+            plugins = load_plugins(paths=paths,
+                                   collection_details=collection_details,
+                                   version=changes.latest_version,
+                                   force_reload=args.reload_plugins,
+                                   use_ansible_doc=args.use_ansible_doc)
+        allow_removals = (refresh_plugins == 'allow-removal')
+
+        changes.update_plugins(plugins, allow_removals=allow_removals)
+
+    if refresh_fragments:
+        if fragments is None:
+            fragments = load_fragments(paths, config)
+        archive_path_template = config.archive_path_template
+        has_archives = (archive_path_template is not None)
+        with_archives = (refresh_fragments == 'with-archives')
+
+        if config.keep_fragments or (has_archives and with_archives):
+            all_fragments = list(fragments)
+            load_extra_fragments = None
+            if with_archives and archive_path_template is not None:
+                load_extra_fragments = _get_archive_loader(archive_path_template, paths, config)
+
+            changes.update_fragments(all_fragments, load_extra_fragments=load_extra_fragments)
+        else:
+            LOGGER.warning('Cannot refresh changelog fragments, as keep_fragments '
+                           'is false and archives are not enabled')
+
+    if refresh_plugins or refresh_fragments:
+        changes.save()
+
+    return plugins, fragments
+
+
 def command_release(args: Any) -> int:
     """
     Add a new release to a changelog.
@@ -301,8 +393,6 @@ def command_release(args: Any) -> int:
     version: Union[str, None] = args.version
     codename: Union[str, None] = args.codename
     date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
-    reload_plugins: bool = args.reload_plugins
-    use_ansible_doc: bool = args.use_ansible_doc
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -324,14 +414,23 @@ def command_release(args: Any) -> int:
             # Codename is not required for collections, only version is
             version = collection_details.get_version()
 
+    plugins: Optional[List[PluginDescription]]
+    fragments: Optional[List[ChangelogFragment]]
+
     changes = load_changes(config)
     plugins = load_plugins(paths=paths, collection_details=collection_details,
-                           version=version, force_reload=reload_plugins,
-                           use_ansible_doc=use_ansible_doc)
+                           version=version, force_reload=args.reload_plugins,
+                           use_ansible_doc=args.use_ansible_doc)
     fragments = load_fragments(paths, config)
-    if args.refresh or config.always_refresh:
-        refresh_changelog(config, changes, plugins, fragments)
-    add_release(config, changes, plugins, fragments, version, codename, date)
+    plugins, fragments = _do_refresh(
+        args, paths, collection_details, config, changes, plugins, fragments)
+    add_release(
+        config, changes,
+        # Need cast() here because there is currently no way to mark _do_refresh so that
+        # it does not convert a non-None value to None for plugins or fragments
+        cast(List[PluginDescription], plugins),
+        cast(List[ChangelogFragment], fragments),
+        version, codename, date)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0
@@ -346,9 +445,6 @@ def command_generate(args: Any) -> int:
     ansible_doc_bin: Optional[str] = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
-    reload_plugins: bool = args.reload_plugins
-    use_ansible_doc: bool = args.use_ansible_doc
-
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
 
@@ -360,19 +456,10 @@ def command_generate(args: Any) -> int:
     if not changes.has_release:
         print('Cannot create changelog when not at least one release has been added.')
         return 5
-    plugins: Optional[List[PluginDescription]] = None
-    fragments: Optional[List[ChangelogFragment]]
-    if args.refresh or config.always_refresh:
+    plugins, fragments = _do_refresh(args, paths, collection_details, config, changes, None, None)
+    if args.reload_plugins and plugins is None:
         plugins = load_plugins(paths=paths, collection_details=collection_details,
-                               version=changes.latest_version, force_reload=reload_plugins,
-                               use_ansible_doc=use_ansible_doc)
-        fragments = load_fragments(paths, config)
-        refresh_changelog(config, changes, plugins, fragments)
-    else:
-        fragments = None
-        if reload_plugins:
-            plugins = load_plugins(paths=paths, collection_details=collection_details,
-                                   version=changes.latest_version, force_reload=reload_plugins)
+                               version=changes.latest_version, force_reload=args.reload_plugins)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0

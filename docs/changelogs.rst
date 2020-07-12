@@ -22,7 +22,7 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 #. ``changelog_filename_template``: The default value ``../CHANGELOG.rst`` is relative to the ``changelogs/`` directory.
 #. ``use_fqcn``: The default value ``true`` uses FQCN when mentioning new plugins and modules.
 #. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
-#. ``always_refresh``: If set to ``true``, both the ``generate`` and the ``release`` subcommands will behave as if ``--refresh`` is always specified. See below for more information on updating/refreshing ``changelog.yaml``.
+#. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments and/or plugin descriptions.
 #. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
 
 Validating changelog fragments
@@ -55,22 +55,37 @@ The metadata for modules and plugins is stored in ``changelogs/.plugin-cache.yam
 
 After running ``antsibull-changelog release``, you should check ``changelogs/changelog.yaml`` and the generated reStructuredText file (by default ``CHANGELOG.rst``) in.
 
+.. _refreshing:
+
 Updating/Refreshing changelog.yaml
 ==================================
 
-In case plugin short descriptions are changed (for example typos are fixed), or changelog fragments were changed (to fix types; only in case ``keep_fragments`` is ``true``), and the existing changelog is not considered frozen, one can use::
+By default, the ``changelogs/changelog.yaml`` file is the main source of truth for antsibull-changelog. It is only modified when a new release is done, and in that case existing entries for other versions than the current one are not touched.
 
-    antsibull-changelog generate --refresh --reload-plugins
+If the main source of truth should be the fragments, or the plugin sources, the refreshing options or config has to be used.
 
-to force updating the ``changelog.yaml`` and generated reStructuredText.
+Please note that for plugins, a cache is created in ``changelogs/.plugin-cache.yaml``. This cache is updated when the ``generate`` and ``release`` subcommands are run, and the latest version (for ``generate``) resp. the release version (for ``release``) differs from the version recorded in the cache file. Regeneration can be enforced by specifying the ``--reload-plugins`` option.
 
-The option ``--reload-plugins`` forces invaliation of the plugin cache (for the current version). All plugins in the collection will be re-scanned and information such as ``short_description`` and ``version_added`` is collected in a cache file.
+This means that if plugin descriptions should be updated, either the plugin cache has to be deleted, or ``--reload-plugins`` has to be specified next to the refresh options/configuration. Refreshing can be configured in different ways, either by the ``always_refresh`` configuration setting, or three command line options ``--refresh``, ``--refresh-plugins`` and ``--refresh-fragments``. These can be specified for both the ``generate`` and ``release`` subcommands.
 
-The option ``--refresh`` does the real work. It updates all plugin descriptions from the plugin cache, and removes plugins mentioned in the changelog that do no longer appear in the cache. **Note** that if you do not start a new changelog file for every major version, and you remove plugins from your collections, this will remove the new plugin announcements for the deleted plugins from older changelog entries!
+#. The ``always_refresh`` configuration is a string with one of the following values:
+    * ``none`` (default): equivalent to ``--refresh-plugins``, ``--refresh-fragments``, and ``--refresh`` not specified;
+    * ``full``: equivalent to ``--refresh-plugins allow-removal --refresh-fragments with-archives`` specified, or alternatively ``--refresh``;
+    * a comma-separated list, where the following entries are supported:
+        * ``plugins``: equivalent to ``--refresh-plugins allow-removal`` specified;
+        * ``plugins-without-removal``: equivalent to ``--refresh-plugins prevent-removal`` specified;
+        * ``fragments``: equivalent to ``--refresh-fragments with-archives`` specified;
+        * ``fragments-without-archives``: equivalent to ``--refresh-fragments without-archives`` specified.
 
-If ``keep_fragments`` is set to ``true`` in the configuration, ``--refresh`` will regenerate all changes information from the fragments. The ``changelog.yaml`` file stores which fragment file belongs to which changelog entry. Using this information, all changes for this entry are recollected. If some fragment files have been removed in the past, their content will vanish from the changelog and the filenames will be removed from ``changelog.yaml``.
+#. The ``--refresh`` command line parameter is equivalent to ``--refresh-plugins allow-removal --refresh-fragments with-archives``.
 
-Note that it is possible to always enable ``--refresh``, by setting ``always_refresh`` to ``true`` in the configuration.
+#. ``--refresh-plugins``: if specified, plugin and module descriptions are updated from the plugin cache.
+    * ``allow-removal`` (default): Plugin and module descriptions are updated. If a module or plugin does not exist in the cache, it will be **removed** from the changelog. Please note that if you do not start a new changelog per major release of a collection, and have removed plugins or modules before, ``--refresh plugins allow-removal`` will remove earlier changelog entries from when these plugins resp. modules were added!
+    * ``prevent-removal``: Plugin and module descriptions are updated. If a module or plugin does not exist in the cache, it will **not** be removed from the changelog.
+
+#. ``--refresh-fragments``: if specified, the fragments for all versions will be recreated from the changelog fragment files. This is only possible if ``keep_fragments`` is ``true``, or fragment archives exist (see the ``archive_path_template`` option). Note that if not all fragments were archived or kept in the fragments directory, they will be **removed** from the changelog.
+    * ``with-archives`` (default): Uses both the archives and the current fragment directory to update the fragments.
+    * ``without-archives``: Uses only the current fragment directory to update the fragments. Fragments that have been moved to the archive and no longer exist in the fragment directory will vanish from the changelog.
 
 Changelog Fragment Categories
 =============================
