@@ -183,7 +183,8 @@ class ChangelogFragmentLinter:
 
 def load_fragments(paths: PathsConfig, config: ChangelogConfig,
                    fragment_paths: Optional[List[str]] = None,
-                   exceptions: Optional[List[Tuple[str, Exception]]] = None
+                   exceptions: Optional[List[Tuple[str, Exception]]] = None,
+                   fragments_dir: Optional[str] = None,
                    ) -> List[ChangelogFragment]:
     """
     Load changelog fragments from disk.
@@ -191,11 +192,14 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
     :arg path: Paths configuration
     :arg config: Changelog configuration
     :arg fragment_paths: List of changelog fragment paths. If not given, all will be used
+    :arg fragments_dir: Path where to load changelog fragments from. If not given, the default
+                        path will be used.
     :arg exceptions: If given, exceptions during loading will be stored in this list instead
                      of being propagated
     """
     if not fragment_paths:
-        fragments_dir = os.path.join(paths.changelog_dir, config.notes_dir)
+        if fragments_dir is None:
+            fragments_dir = os.path.join(paths.changelog_dir, config.notes_dir)
         if os.path.isdir(fragments_dir):
             fragment_paths = [
                 os.path.join(fragments_dir, path)

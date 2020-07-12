@@ -11,7 +11,7 @@ Configuration classes for paths and changelogs.
 import collections
 import os
 
-from typing import Mapping, Optional
+from typing import Mapping, Optional, Union
 
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -262,7 +262,7 @@ class ChangelogConfig:
     trivial_section_name: str
     release_tag_re: str
     pre_release_tag_re: str
-    always_refresh: bool
+    always_refresh: Union[bool, str]
     flatmap: Optional[bool]
     sections: Mapping[str, str]
 
@@ -336,7 +336,9 @@ class ChangelogConfig:
             })
         if self.title is not None:
             config['title'] = self.title
-        if self.always_refresh != (self.changes_format == 'classic'):
+        should_always_refresh = (self.changes_format == 'classic')
+        if self.always_refresh not in (
+                should_always_refresh, 'full' if should_always_refresh else 'none'):
             config['always_refresh'] = self.always_refresh
         if self.flatmap is not None:
             config['flatmap'] = self.flatmap
