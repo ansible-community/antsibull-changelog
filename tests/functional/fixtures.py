@@ -7,9 +7,11 @@
 Fixtures for changelog tests.
 """
 
+import difflib
 import io
 import os
 import pathlib
+import textwrap
 
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -19,6 +21,29 @@ import yaml
 
 from antsibull_changelog.cli import run as run_changelog_tool
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
+
+
+# When debugging failed tests and you want to see what exactly changed, you can set this
+# variable to True. Then for all changed files, a colorized diff will be printed.
+PRINT_DIFFS = False
+
+
+def diff(old: str, new: str) -> str:
+    seqm = difflib.SequenceMatcher(None, old, new)
+    output = []
+    for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
+        if opcode == 'equal':
+            output.append(seqm.a[a0:a1])
+        elif opcode == 'insert':
+            output.append("\033[42m" + seqm.b[b0:b1] + "\033[49m")  # inserted
+        elif opcode == 'delete':
+            output.append("\033[41m\033[9m" + seqm.a[a0:a1] + "\033[29m\033[49m")  # removed
+        elif opcode == 'replace':
+            output.append("\033[41m\033[9m" + seqm.a[a0:a1] + "\033[29m\033[49m")  # removed
+            output.append("\033[42m" + seqm.b[b0:b1] + "\033[49m")  # inserted
+        else:
+            raise RuntimeError("unexpected opcode")
+    return ''.join(output)
 
 
 class Differences:
@@ -43,27 +68,44 @@ class Differences:
         self.file_contents = dict()
         self.file_differences = dict()
 
-    def sort(self):
+    def sort(self) -> None:
         self.added_dirs.sort()
         self.added_files.sort()
         self.removed_dirs.sort()
         self.removed_files.sort()
         self.changed_files.sort()
 
-    def parse_yaml(self, path):
+    def parse_yaml(self, path: str) -> Any:
         return yaml.load(self.file_contents[path], Loader=yaml.SafeLoader)
 
     @property
-    def has_dir_changes(self):
+    def has_dir_changes(self) -> bool:
         return bool(self.added_dirs or self.added_files)
 
     @property
-    def has_file_changes(self):
+    def has_file_changes(self) -> bool:
         return bool(self.removed_dirs or self.removed_files or self.changed_files)
 
     @property
-    def unchanged(self):
+    def unchanged(self) -> bool:
         return not self.has_dir_changes and not self.has_file_changes
+
+    def dump(self) -> None:
+        print('== Differences ==')
+        for field in ('added_dirs', 'added_files', 'removed_dirs',
+                      'removed_files', 'changed_files'):
+            list = getattr(self, field)
+            print('{title} ({count} entries)'.format(
+                title=field.replace('_', ' ').title(),
+                count=len(list)))
+            for entry in list:
+                print('    {entry}'.format(entry=entry))
+
+        if PRINT_DIFFS:
+            for name, (before, after) in sorted(self.file_differences.items()):
+                print('\nDifferences in {name}:'.format(name=name))
+                print(textwrap.indent(
+                    diff(before.decode('utf-8'), after.decode('utf-8')), '  # ', lambda line: True))
 
 
 class ChangelogEnvironment:
@@ -227,6 +269,8 @@ class ChangelogEnvironment:
 
         self.created_dirs = created_dirs
         self.created_files = created_files
+
+        result.dump()
         return result
 
 
