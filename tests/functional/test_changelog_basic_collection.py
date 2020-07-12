@@ -315,12 +315,18 @@ New Modules
     collection_changelog.add_fragment_line(
         'test-new-fragment.yml', 'minor_changes', ['Another new fragment.'])
 
-    # Check that regenerate without --refresh doesn't change anything
+    # Check that regenerate without --refresh* doesn't change anything
     assert collection_changelog.run_tool('generate', ['-v']) == 0
     assert collection_changelog.diff().unchanged
 
-    # Check that regenerate with --refresh changes
-    assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
+    # Check that regenerate with --refresh-fragments does not change
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-fragments']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.unchanged
+
+    # Check that regenerate with --refresh-plugins changes
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-plugins']) == 0
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []

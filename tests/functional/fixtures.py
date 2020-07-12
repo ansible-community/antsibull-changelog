@@ -180,13 +180,20 @@ class ChangelogEnvironment:
             os.remove(path)
         self.created_files.pop(path, None)
 
-    def add_fragment(self, fragment_name: str, content: str):
-        fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)
+    def add_fragment(self, fragment_name: str, content: str, fragment_dir: Optional[str] = None):
+        if fragment_dir is None:
+            fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)
+        else:
+            fragment_dir = os.path.join(self.paths.base_dir, fragment_dir)
         self.mkdir(fragment_dir)
         self._write(os.path.join(fragment_dir, fragment_name), content.encode('utf-8'))
 
-    def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str]):
-        self.add_fragment(fragment_name, yaml.dump({section: lines}, Dumper=yaml.SafeDumper))
+    def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str],
+                          fragment_dir: Optional[str] = None):
+        self.add_fragment(
+            fragment_name,
+            yaml.dump({section: lines}, Dumper=yaml.SafeDumper),
+            fragment_dir=fragment_dir)
 
     def _plugin_base(self, plugin_type):
         if plugin_type == 'module':

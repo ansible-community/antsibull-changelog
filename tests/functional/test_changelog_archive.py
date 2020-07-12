@@ -69,6 +69,44 @@ Minor Changes
 - test - has a new option ``foo``.
 ''')
 
+    # Modify fragment
+    collection_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option!'])
+
+    # Refresh
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-fragments']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.0 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option!
+- test - has a new option ``foo``.
+''')
+
 
 def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
@@ -124,6 +162,10 @@ Minor Changes
 - baz lookup - no longer ignores the ``bar`` option.
 - test - has a new option ``foo``.
 ''')
+
+    # Refresh should be ignored
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-fragments']) == 0
+    assert collection_changelog.diff().unchanged
 
 
 def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer-name
@@ -186,3 +228,52 @@ Minor Changes
 - baz lookup - no longer ignores the ``bar`` option.
 - test - has a new option ``foo``.
 ''')
+
+    # Modify archived fragment
+    collection_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option!'],
+        fragment_dir='.archive/v1.0.0')
+
+    # Refresh
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-fragments']) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.0 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option!
+- test - has a new option ``foo``.
+''')
+
+    # Modify archived fragment back
+    collection_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'],
+        fragment_dir='.archive/v1.0.0')
+
+    # Refresh with --without-archives should be ignored
+    assert collection_changelog.run_tool('generate', ['-v', '--refresh-fragments', 'without-archives']) == 0
+    assert collection_changelog.diff().unchanged
