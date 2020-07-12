@@ -11,7 +11,7 @@ Configuration classes for paths and changelogs.
 import collections
 import os
 
-from typing import Mapping, Optional, Union
+from typing import Mapping, Optional
 
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -262,7 +262,7 @@ class ChangelogConfig:
     trivial_section_name: str
     release_tag_re: str
     pre_release_tag_re: str
-    always_refresh: Union[bool, str]
+    always_refresh: str
     flatmap: Optional[bool]
     sections: Mapping[str, str]
 
@@ -291,7 +291,12 @@ class ChangelogConfig:
             'changelog_filename_version_depth', 2)
         self.mention_ancestor = self.config.get('mention_ancestor', True)
         self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
-        self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
+        always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
+        if always_refresh is True:
+            always_refresh = 'full'
+        if always_refresh is False:
+            always_refresh = 'none'
+        self.always_refresh = always_refresh
         self.flatmap = self.config.get('flatmap')
 
         # The following are only relevant for ansible-base:
@@ -337,14 +342,12 @@ class ChangelogConfig:
         if self.title is not None:
             config['title'] = self.title
         should_always_refresh = (self.changes_format == 'classic')
-        if self.always_refresh not in (
-                should_always_refresh, 'full' if should_always_refresh else 'none'):
+        if self.always_refresh != ('full' if should_always_refresh else 'none'):
             config['always_refresh'] = self.always_refresh
         if self.flatmap is not None:
             config['flatmap'] = self.flatmap
         if self.archive_path_template is not None:
             config['archive_path_template'] = self.archive_path_template
-        self.always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
 
         sections = []
         for key, value in self.sections.items():

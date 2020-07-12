@@ -301,12 +301,12 @@ def _get_refresh_config(args: Any,
     refresh_plugins: Optional[str] = args.refresh_plugins
     refresh_fragments: Optional[str] = args.refresh_fragments
     always_refresh = config.always_refresh
-    if args.refresh or always_refresh in (True, 'full'):
+    if args.refresh or always_refresh == 'full':
         if refresh_plugins is None:
             refresh_plugins = 'allow-removal'
         if refresh_fragments is None:
             refresh_fragments = 'with-archives'
-    if isinstance(always_refresh, str) and always_refresh not in ('full', 'none'):
+    if always_refresh not in ('full', 'none'):
         for part in always_refresh.split(','):
             part = part.strip()
             if part == 'plugins':
