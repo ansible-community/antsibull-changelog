@@ -36,7 +36,7 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     config = diff.parse_yaml('changelogs/config.yaml')
     assert config['notesdir'] == 'fragments'
     assert config['changes_file'] == 'changelog.yaml'
-    assert config['changelog_filename_template'] == 'CHANGELOG.rst'
+    assert config['changelog_filename_template'] == '../CHANGELOG.rst'
     assert 'release_tag_re' not in config
     assert 'pre_release_tag_re' not in config
     assert config['title'] == collection_changelog.collection_name.title()
@@ -56,7 +56,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
     assert diff.removed_files == ['changelogs/fragments/1.0.0.yml']
     assert diff.changed_files == []
@@ -73,7 +73,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=====================
 Ansible Release Notes
 =====================
@@ -107,7 +107,7 @@ This is the first proper release.
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
 
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
     assert changelog['ancestor'] is None
@@ -119,7 +119,7 @@ This is the first proper release.
     assert 'plugins' not in changelog['releases']['1.1.0']
     assert 'codename' not in changelog['releases']['1.1.0']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=====================
 Ansible Release Notes
 =====================
@@ -196,7 +196,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         'changelogs/fragments/1.0.0.yml',
@@ -239,7 +239,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     }
     assert 'codename' not in changelog['releases']['1.0.0']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.0 Release Notes
 =========================
@@ -327,7 +327,7 @@ New Modules
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
 
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
     assert changelog['releases']['1.0.0']['modules'] == [
@@ -347,7 +347,7 @@ New Modules
         ],
     }
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.0 Release Notes
 =========================
@@ -439,7 +439,7 @@ New Modules
         'changelogs/fragments/1.1.0-beta-1.yml',
         'changelogs/fragments/test-new-fragment.yml',
     ]
-    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
 
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
     assert changelog['ancestor'] is None
@@ -465,7 +465,7 @@ New Modules
     assert 'plugins' not in changelog['releases']['1.1.0-beta-1']
     assert 'codename' not in changelog['releases']['1.1.0-beta-1']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.1 Release Notes
 =========================
@@ -592,7 +592,7 @@ New Modules
         'changelogs/fragments/bugfix.yml',
         'changelogs/fragments/minorchange.yml',
     ]
-    assert diff.changed_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
 
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
     assert changelog['ancestor'] is None
@@ -623,7 +623,7 @@ New Modules
     assert 'plugins' not in changelog['releases']['1.1.0']
     assert 'codename' not in changelog['releases']['1.1.0']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.1 Release Notes
 =========================
@@ -826,7 +826,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         'changelogs/fragments/1.0.0.yml',
@@ -899,7 +899,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
     }
     assert 'codename' not in changelog['releases']['1.0.0']
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=============================
 Test Collection Release Notes
 =============================
@@ -1126,8 +1126,8 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
     assert diff.added_files == [
+        'CHANGELOG.rst',
         'changelogs/.plugin-cache.yaml',
-        'changelogs/CHANGELOG.rst',
         'changelogs/changelog.yaml',
     ]
     assert diff.removed_dirs == []
@@ -1171,7 +1171,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     assert changelog['releases']['1.0.0']['modules'][0]['description'] == 'A test module'
     assert 'version_added' not in changelog['releases']['1.0.0']['modules'][0]
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''===================================
 My Amazing Collection Release Notes
 ===================================

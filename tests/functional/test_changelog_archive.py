@@ -41,12 +41,12 @@ def test_changelog_release_keep_fragments(  # pylint: disable=redefined-outer-na
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
     assert diff.removed_files == []
     assert diff.changed_files == []
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.0 Release Notes
 =========================
@@ -93,7 +93,7 @@ def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ['changelogs/CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         'changelogs/fragments/1.0.0.yml',
@@ -102,7 +102,7 @@ def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-
     ]
     assert diff.changed_files == []
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.0 Release Notes
 =========================
@@ -153,7 +153,7 @@ def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer
         '.archive/v1.0.0/1.0.0.yml',
         '.archive/v1.0.0/baz-new-option.yaml',
         '.archive/v1.0.0/test-new-option.yml',
-        'changelogs/CHANGELOG.rst',
+        'CHANGELOG.rst',
         'changelogs/changelog.yaml',
     ]
     assert diff.removed_dirs == []
@@ -164,7 +164,7 @@ def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer
     ]
     assert diff.changed_files == []
 
-    assert diff.file_contents['changelogs/CHANGELOG.rst'].decode('utf-8') == (
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
         r'''=========================
 Ansible 1.0 Release Notes
 =========================

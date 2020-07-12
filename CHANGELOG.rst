@@ -10,6 +10,7 @@ Minor Changes
 -------------
 
 - The config option ``archive_path_template`` allows to move fragments into an archive directory when ``keep_fragments`` is set to ``false``.
+- New changelog configurations place the ``CHANGELOG.rst`` file by default in the top-level directory, and not in ``changelogs/``.
 
 v0.5.0
 ======

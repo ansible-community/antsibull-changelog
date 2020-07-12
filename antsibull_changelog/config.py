@@ -371,7 +371,7 @@ class ChangelogConfig:
         config = {
             'changes_file': 'changelog.yaml',
             'changes_format': 'combined',
-            'changelog_filename_template': 'CHANGELOG.rst',
+            'changelog_filename_template': '../CHANGELOG.rst',
             'changelog_filename_version_depth': 0,
             'new_plugins_after_name': 'removed_features',
             'sections': DEFAULT_SECTIONS,
