@@ -203,7 +203,8 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
         if os.path.isdir(fragments_dir):
             fragment_paths = [
                 os.path.join(fragments_dir, path)
-                for path in os.listdir(fragments_dir) if not path.startswith('.') and path.endswith(('.yml', '.yaml', '.json'))]
+                for path in os.listdir(fragments_dir)
+                if not path.startswith('.') and path.endswith(('.yml', '.yaml', '.json'))]
         else:
             fragment_paths = []
 
