@@ -36,12 +36,15 @@ def test_fragment_loading_fail(tmp_path):
     with pytest.raises(ChangelogError):
         load_fragments(paths, config, [str(p)])
 
-def test_fragments_dir_ignores_backup_files(tmp_path):
+def test_fragments_filename_ignore_regex(tmp_path):
     '''Ensure we don't load files we mean to ignore'''
     paths = PathsConfig.force_ansible(str(tmp_path))
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
-    test_filenames = ['.test.yaml', 'test.yaml~', 'test.yml~', 'test.foo']
+    test_filenames = ['.test.yaml', 'test.yaml~', 'test.yml~', 'valid.yml', 'valid']
+
     for fn in test_filenames:
         p = tmp_path / fn
         p.write_text('minor_changes: ["foo"]')
-        assert load_fragments(paths, config, [], None, tmp_path) == []
+
+    loaded = load_fragments(paths, config, [], None, tmp_path)
+    assert sorted([x.name for x in  loaded]) == ['valid', 'valid.yml']

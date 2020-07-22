@@ -265,6 +265,7 @@ class ChangelogConfig:
     always_refresh: str
     flatmap: Optional[bool]
     sections: Mapping[str, str]
+    fragment_filename_ignore_re: str
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
         """
@@ -316,6 +317,9 @@ class ChangelogConfig:
             sections[section_name] = section_title
         self.sections = sections
 
+        self.fragment_filename_ignore_re = self.config.get(
+            'fragment_filename_ignore_re', r'(?:^\.|~$)')
+
     def store(self) -> None:
         """
         Store changelog configuration file to disk.
@@ -333,6 +337,7 @@ class ChangelogConfig:
             'prelude_section_title': self.prelude_title,
             'new_plugins_after_name': self.new_plugins_after_name,
             'trivial_section_name': self.trivial_section_name,
+            'fragment_filename_ignore_re': self.fragment_filename_ignore_re,
         }
         if not self.is_collection:
             config.update({

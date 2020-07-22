@@ -2,6 +2,13 @@
 Changelog for Ansible Changelog Tool
 ====================================
 
+v0.7.0
+======
+
+Minor Changes
+-------------
+
+- A new config option, ``fragment_filename_ignore_re`` allows for configuring which filenames are not considered when searching a directory for changelog fragments. The default excludes files starting with ``.`` or ending with ``~``.
 
 v0.6.0
 ======
