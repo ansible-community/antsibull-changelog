@@ -35,3 +35,21 @@ def test_fragment_loading_fail(tmp_path):
     p.write_text('test: [')
     with pytest.raises(ChangelogError):
         load_fragments(paths, config, [str(p)])
+
+
+def test_fragments_filename_ignore(tmp_path):
+    '''Ensure we don't load files we mean to ignore'''
+    paths = PathsConfig.force_ansible(str(tmp_path))
+    config = ChangelogConfig.default(paths, CollectionDetails(paths))
+    test_filenames = ['.test.yaml', 'test.yaml~', 'test.yml~', 'test', 'valid.yml', 'valid.yaml']
+
+    for fn in test_filenames:
+        p = tmp_path / fn
+        p.write_text('minor_changes: ["foo"]')
+
+    loaded = load_fragments(paths, config, [], None, tmp_path)
+    assert sorted([x.name for x in  loaded]) == ['valid.yaml', 'valid.yml']
+
+    config.ignore_other_fragment_extensions = False
+    loaded = load_fragments(paths, config, [], None, tmp_path)
+    assert sorted([x.name for x in  loaded]) == ['test', 'test.yaml~', 'test.yml~', 'valid.yaml', 'valid.yml']

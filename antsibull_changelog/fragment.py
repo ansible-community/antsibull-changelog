@@ -203,7 +203,12 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
         if os.path.isdir(fragments_dir):
             fragment_paths = [
                 os.path.join(fragments_dir, path)
-                for path in os.listdir(fragments_dir) if not path.startswith('.')]
+                for path in os.listdir(fragments_dir)
+                if not path.startswith('.')]
+            if config.ignore_other_fragment_extensions:
+                fragment_paths = [
+                    path for path in fragment_paths if any(
+                        path.endswith(ext) for ext in ('.yml', '.yaml'))]
         else:
             fragment_paths = []
 
