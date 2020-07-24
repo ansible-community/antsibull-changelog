@@ -8,7 +8,6 @@
 Changelog fragment loading, modification and linting.
 """
 
-import re
 import os
 
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -205,7 +204,11 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
             fragment_paths = [
                 os.path.join(fragments_dir, path)
                 for path in os.listdir(fragments_dir)
-                if not re.search(config.fragment_filename_ignore_re, path)]
+                if not path.startswith('.')]
+            if config.ignore_other_fragment_extensions:
+                fragment_paths = [
+                    path for path in fragment_paths if any(
+                        path.endswith(ext) for ext in ('.yml', '.yaml'))]
         else:
             fragment_paths = []
 

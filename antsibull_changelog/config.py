@@ -263,9 +263,9 @@ class ChangelogConfig:
     release_tag_re: str
     pre_release_tag_re: str
     always_refresh: str
+    ignore_other_fragment_extensions: bool
     flatmap: Optional[bool]
     sections: Mapping[str, str]
-    fragment_filename_ignore_re: str
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
         """
@@ -298,6 +298,8 @@ class ChangelogConfig:
         if always_refresh is False:
             always_refresh = 'none'
         self.always_refresh = always_refresh
+        self.ignore_other_fragment_extensions = self.config.get(
+            'ignore_other_fragment_extensions', False)
         self.flatmap = self.config.get('flatmap')
 
         # The following are only relevant for ansible-base:
@@ -317,9 +319,6 @@ class ChangelogConfig:
             sections[section_name] = section_title
         self.sections = sections
 
-        self.fragment_filename_ignore_re = self.config.get(
-            'fragment_filename_ignore_re', r'(?:^\.|~$)')
-
     def store(self) -> None:
         """
         Store changelog configuration file to disk.
@@ -337,7 +336,7 @@ class ChangelogConfig:
             'prelude_section_title': self.prelude_title,
             'new_plugins_after_name': self.new_plugins_after_name,
             'trivial_section_name': self.trivial_section_name,
-            'fragment_filename_ignore_re': self.fragment_filename_ignore_re,
+            'ignore_other_fragment_extensions': self.ignore_other_fragment_extensions,
         }
         if not self.is_collection:
             config.update({
@@ -389,6 +388,7 @@ class ChangelogConfig:
             'new_plugins_after_name': 'removed_features',
             'sections': DEFAULT_SECTIONS,
             'use_fqcn': True,
+            'ignore_other_fragment_extensions': True,
         }
         if title is not None:
             config['title'] = title

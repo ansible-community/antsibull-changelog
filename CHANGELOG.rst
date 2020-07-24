@@ -8,7 +8,7 @@ v0.7.0
 Minor Changes
 -------------
 
-- A new config option, ``fragment_filename_ignore_re`` allows for configuring which filenames are not considered when searching a directory for changelog fragments. The default excludes files starting with ``.`` or ending with ``~``.
+- A new config option, ``ignore_other_fragment_extensions`` allows for configuring whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test sanity --test changelog`` test). The default value for existing configurations is ``false``, and for new configurations ``true``.
 
 v0.6.0
 ======
