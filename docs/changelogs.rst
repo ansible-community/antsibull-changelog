@@ -2,6 +2,10 @@
 Changelogs for Collections
 **************************
 
+.. contents::
+   :local:
+   :depth: 2
+
 The ``antsibull-changelog`` tool allows you to create and update changelogs for Ansible collections, that are similar to the ones provided by Ansible itself in earlier versions, and that are compatible to the combined Ansible Community Distribution changelogs.
 
 The following instructions assume that antsibull has been properly installed, for example via ``pip install antsibull-changelog``. This is the preferred way to install ``antsibull-changelog``.
@@ -24,7 +28,8 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 #. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
 #. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments and/or plugin descriptions.
 #. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
-#. ``ignore_other_fragment_extensions``: If set to ``true``, only ``.yml`` and ``.yaml`` fragment filenames are considered which do not start with a dot. This is compatible with what ``ansible-test sanity --test changelog`` enforces. If set to ``false`` (default if not specified), all filenames that do not start with a dot are accepted.
+
+For a description of all configuration settings, see the separate document `Configuration Settings for Changelogs for Collections <./changelog-configuration.rst>`_.
 
 Validating changelog fragments
 ==============================
