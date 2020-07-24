@@ -175,13 +175,13 @@ These options are only used for the changelog for ansible-base, i.e. in the ansi
 ``release_tag_re`` (string)
 ---------------------------
 
-The default value is ``'((?:[\d.ab]|rc)+)'``.
+The default value is ``((?:[\d.ab]|rc)+)``.
 
 This value is used to detect versions that are proper release versions, and not prereleases. This is a regular expression matching the version string preprended with ``v``.
 
 ``pre_release_tag_re`` (string)
 -------------------------------
 
-The default value is ``'(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$'``.
+The default value is ``(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$``.
 
 This value is used to detect versions that are prereleases. This is a regular expression matching the version string preprended with ``v``.
