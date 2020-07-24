@@ -37,7 +37,7 @@ def test_fragment_loading_fail(tmp_path):
         load_fragments(paths, config, [str(p)])
 
 
-def test_fragments_filename_ignore_regex(tmp_path):
+def test_fragments_filename_ignore(tmp_path):
     '''Ensure we don't load files we mean to ignore'''
     paths = PathsConfig.force_ansible(str(tmp_path))
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
@@ -49,3 +49,7 @@ def test_fragments_filename_ignore_regex(tmp_path):
 
     loaded = load_fragments(paths, config, [], None, tmp_path)
     assert sorted([x.name for x in  loaded]) == ['valid.yaml', 'valid.yml']
+
+    config.ignore_other_fragment_extensions = False
+    loaded = load_fragments(paths, config, [], None, tmp_path)
+    assert sorted([x.name for x in  loaded]) == ['test', 'test.yaml~', 'test.yml~', 'valid.yaml', 'valid.yml']
