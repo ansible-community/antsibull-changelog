@@ -2,6 +2,10 @@
 Changelog for Ansible Changelog Tool
 ====================================
 
+.. contents::
+   :local:
+   :depth: 1
+
 v0.7.0
 ======
 

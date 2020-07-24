@@ -2,6 +2,10 @@
 Configuration Settings for Changelogs for Collections
 *****************************************************
 
+.. contents::
+   :local:
+   :depth: 2
+
 This document describes all settings that are supported in ``changelogs/config.yaml``.
 
 General options

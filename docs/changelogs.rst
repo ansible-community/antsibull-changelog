@@ -2,6 +2,10 @@
 Changelogs for Collections
 **************************
 
+.. contents::
+   :local:
+   :depth: 2
+
 The ``antsibull-changelog`` tool allows you to create and update changelogs for Ansible collections, that are similar to the ones provided by Ansible itself in earlier versions, and that are compatible to the combined Ansible Community Distribution changelogs.
 
 The following instructions assume that antsibull has been properly installed, for example via ``pip install antsibull-changelog``. This is the preferred way to install ``antsibull-changelog``.
