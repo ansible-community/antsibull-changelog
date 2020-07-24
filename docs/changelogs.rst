@@ -26,6 +26,8 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 #. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
 #. ``ignore_other_fragment_extensions``: If set to ``true``, only ``.yml`` and ``.yaml`` fragment filenames are considered which do not start with a dot. This is compatible with what ``ansible-test sanity --test changelog`` enforces. If set to ``false`` (default if not specified), all filenames that do not start with a dot are accepted.
 
+A description of all configuration settings, see the separate document `Configuration Settings for Changelogs for Collections <./changelog-configuration.rst>`_.
+
 Validating changelog fragments
 ==============================
 
