@@ -111,9 +111,28 @@ The title for the section whose name is set in ``prelude_name``.
 ``sections`` (list of two-element lists of strings)
 ---------------------------------------------------
 
-        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
-        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
-            sections[section_name] = section_title
+The default value is::
+
+    - - major_changes
+      - Major Changes
+    - - minor_changes
+      - Minor Changes
+    - - breaking_changes
+      - Breaking Changes / Porting Guide
+    - - deprecated_features
+      - Deprecated Features
+    - - removed_features
+      - Removed Features (previously deprecated)
+    - - security_fixes
+      - Security Fixes
+    - - bugfixes
+      - Bugfixes
+    - - known_issues
+      - Known Issues
+
+Lists all section names (first element) and their titles (second element). The only two sections not listed here are the prelude section (``release_summary`` / "Release Summary") and the trivial section (``trivial``, no title).
+
+It is not recommended to change this list, except possibly adjust section titles. Collections using other section names will cause problems with the Ansible Community Distribution changelog generation.
 
 ``title`` (string)
 ------------------
