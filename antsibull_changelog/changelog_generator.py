@@ -11,7 +11,7 @@ Generate reStructuredText changelog from ChangesBase instance.
 import collections
 import os
 
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, cast, Dict, List, MutableMapping, Optional, Tuple, Union
 
 import packaging.version
 import semantic_version
@@ -35,12 +35,14 @@ class ChangelogEntry:
     modules: List[Any]
     plugins: Dict[Any, Any]
     changes: Dict[str, Union[str, List[str]]]
+    preludes: List[Tuple[str, str]]
 
     def __init__(self, version: str):
         self.version = version
         self.modules = []
         self.plugins = dict()
         self.changes = dict()
+        self.preludes = []
 
     def has_no_changes(self, section_names: Optional[List[str]] = None) -> bool:
         """
@@ -57,7 +59,7 @@ class ChangelogEntry:
         """
         Determine whether the entry has no content at all.
         """
-        return not self.modules and not self.plugins and self.has_no_changes()
+        return not self.modules and not self.plugins and not self.preludes and self.has_no_changes()
 
     def add_section_content(self,
                             builder: RstBuilder,
@@ -158,7 +160,9 @@ class ChangelogGenerator:
 
             entry_config.plugins[plugin_type] += plugin_list
 
-    def collect(self, squash: bool = False, after_version: Optional[str] = None,
+    def collect(self,  # pylint: disable=too-many-locals
+                squash: bool = False,
+                after_version: Optional[str] = None,
                 until_version: Optional[str] = None) -> List[ChangelogEntry]:
         """
         Collect release entries.
@@ -193,6 +197,9 @@ class ChangelogGenerator:
             for fragment in self.fragment_resolver.resolve(release):
                 for section, lines in fragment.content.items():
                     if section == self.config.prelude_name:
+                        prelude_content = cast(str, lines)
+                        entry_config.preludes.append((version, prelude_content))
+
                         if entry_fragment:
                             LOGGER.info('skipping prelude in version {} due to newer '
                                         'prelude in version {}',
@@ -200,8 +207,8 @@ class ChangelogGenerator:
                             continue
 
                         # lines is a str in this case!
-                        entry_fragment = lines
-                        dest_changes[section] = lines
+                        entry_fragment = prelude_content
+                        dest_changes[section] = prelude_content
                     else:
                         content = dest_changes.get(section)
                         if isinstance(content, list):
