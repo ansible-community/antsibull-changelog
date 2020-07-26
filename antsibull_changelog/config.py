@@ -265,6 +265,7 @@ class ChangelogConfig:
     always_refresh: str
     ignore_other_fragment_extensions: bool
     flatmap: Optional[bool]
+    use_semantic_versioning: bool
     sections: Mapping[str, str]
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
@@ -301,12 +302,15 @@ class ChangelogConfig:
         self.ignore_other_fragment_extensions = self.config.get(
             'ignore_other_fragment_extensions', False)
         self.flatmap = self.config.get('flatmap')
+        self.use_semantic_versioning = True
 
         # The following are only relevant for ansible-base:
         self.release_tag_re = self.config.get(
             'release_tag_re', r'((?:[\d.ab]|rc)+)')
         self.pre_release_tag_re = self.config.get(
             'pre_release_tag_re', r'(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$')
+        if not self.is_collection:
+            self.use_semantic_versioning = self.config.get('use_semantic_versioning', False)
 
         if self.changes_format not in ('classic', 'combined'):
             raise ChangelogError('changes_format must be one of "classic" and "combined"')
@@ -339,10 +343,13 @@ class ChangelogConfig:
             'ignore_other_fragment_extensions': self.ignore_other_fragment_extensions,
         }
         if not self.is_collection:
-            config.update({
-                'release_tag_re': self.release_tag_re,
-                'pre_release_tag_re': self.pre_release_tag_re,
-            })
+            if self.use_semantic_versioning:
+                config['use_semantic_versioning'] = True
+            else:
+                config.update({
+                    'release_tag_re': self.release_tag_re,
+                    'pre_release_tag_re': self.pre_release_tag_re,
+                })
         if self.title is not None:
             config['title'] = self.title
         should_always_refresh = (self.changes_format == 'classic')

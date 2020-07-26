@@ -26,7 +26,7 @@ def get_version_constructor(config: ChangelogConfig) -> Callable[[str], Any]:
     :arg config: The changelog configuration
     :return: A callable which converts a string to a version object
     """
-    if config.is_collection:
+    if config.use_semantic_versioning:
         return semantic_version.Version
     return packaging.version.Version
 

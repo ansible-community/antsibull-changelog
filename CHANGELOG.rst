@@ -14,6 +14,7 @@ Minor Changes
 
 - A new config option, ``ignore_other_fragment_extensions`` allows for configuring whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test sanity --test changelog`` test). The default value for existing configurations is ``false``, and for new configurations ``true``.
 - Refactoring changelog generation code to provide all preludes (release summaries) in changelog entries, and provide generic functionality to extract a grouped list of versions. These changes are mainly for the antsibull project.
+- Allow to use semantic versioning also for Ansible-base with the ``use_semantic_versioning`` configuration setting.
 
 v0.6.0
 ======
