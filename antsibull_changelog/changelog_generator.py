@@ -13,16 +13,13 @@ import os
 
 from typing import Any, cast, Dict, List, MutableMapping, Optional, Tuple, Union
 
-import packaging.version
-import semantic_version
-
 from .changes import ChangesBase, FragmentResolver, PluginResolver
 from .config import ChangelogConfig, PathsConfig
 from .fragment import ChangelogFragment
 from .logger import LOGGER
 from .plugins import PluginDescription
 from .rst import RstBuilder
-from .utils import is_release_version
+from .utils import collect_versions
 
 
 class ChangelogEntry:
@@ -109,31 +106,6 @@ class ChangelogGenerator:
         self.plugin_resolver = changes.get_plugin_resolver(plugins)
         self.fragment_resolver = changes.get_fragment_resolver(fragments)
 
-    def version_constructor(self, version: str) -> Any:
-        """
-        Create a version object.
-        """
-        if self.config.is_collection:
-            return semantic_version.Version(version)
-        return packaging.version.Version(version)
-
-    def _collect_versions(self, after_version: Optional[str] = None,
-                          until_version: Optional[str] = None) -> List[str]:
-        """
-        Collect all versions of interest and return them as an ordered list,
-        latest to earliest.
-        """
-        result = []
-        for version in sorted(self.changes.releases, reverse=True, key=self.version_constructor):
-            if after_version is not None:
-                if self.version_constructor(version) <= self.version_constructor(after_version):
-                    continue
-            if until_version is not None:
-                if self.version_constructor(version) > self.version_constructor(until_version):
-                    continue
-            result.append(version)
-        return result
-
     @staticmethod
     def _get_entry_config(release_entries: MutableMapping[str, ChangelogEntry],
                           entry_version: str) -> ChangelogEntry:
@@ -160,39 +132,19 @@ class ChangelogGenerator:
 
             entry_config.plugins[plugin_type] += plugin_list
 
-    def collect(self,  # pylint: disable=too-many-locals
-                squash: bool = False,
-                after_version: Optional[str] = None,
-                until_version: Optional[str] = None) -> List[ChangelogEntry]:
+    def _collect_entry(self,
+                       entry_config: ChangelogEntry,
+                       entry_version: str,
+                       versions: List[str]) -> None:
         """
-        Collect release entries.
-
-        :arg squash: Squash all releases into one entry
-        :arg after_version: If given, only consider versions after this one
-        :arg until_version: If given, do not consider versions following this one
-        :return: An ordered mapping of versions to release entries
+        Do actual work of collecting data for a changelog entry.
         """
-        release_entries: MutableMapping[str, ChangelogEntry] = collections.OrderedDict()
-        entry_version = until_version or self.changes.latest_version
         entry_fragment = None
 
-        for version in self._collect_versions(
-                after_version=after_version, until_version=until_version):
+        dest_changes = entry_config.changes
+
+        for version in versions:
             release = self.changes.releases[version]
-
-            if not squash:
-                if is_release_version(self.config, version):
-                    # next version is a release, it needs its own entry
-                    entry_version = version
-                    entry_fragment = None
-                elif not is_release_version(self.config, entry_version):
-                    # current version is a pre-release, next version needs its own entry
-                    entry_version = version
-                    entry_fragment = None
-
-            entry_config = self._get_entry_config(release_entries, entry_version)
-
-            dest_changes = entry_config.changes
 
             for fragment in self.fragment_resolver.resolve(release):
                 for section, lines in fragment.content.items():
@@ -217,6 +169,29 @@ class ChangelogGenerator:
                             dest_changes[section] = list(lines)
 
             self._update_modules_plugins(entry_config, release)
+
+    def collect(self,
+                squash: bool = False,
+                after_version: Optional[str] = None,
+                until_version: Optional[str] = None) -> List[ChangelogEntry]:
+        """
+        Collect release entries.
+
+        :arg squash: Squash all releases into one entry
+        :arg after_version: If given, only consider versions after this one
+        :arg until_version: If given, do not consider versions following this one
+        :return: An ordered mapping of versions to release entries
+        """
+        release_entries: MutableMapping[str, ChangelogEntry] = collections.OrderedDict()
+
+        for entry_version, versions in collect_versions(
+                self.changes.releases,
+                self.config,
+                after_version=after_version,
+                until_version=until_version,
+                squash=squash):
+            entry_config = self._get_entry_config(release_entries, entry_version)
+            self._collect_entry(entry_config, entry_version, versions)
 
         return list(release_entries.values())
 
