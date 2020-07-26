@@ -172,6 +172,13 @@ Ansible-base specific options
 
 These options are only used for the changelog for ansible-base, i.e. in the ansible/ansible GitHub repository.
 
+``use_semantic_versioning`` (boolean)
+-------------------------------------
+
+The default value is ``false``.
+
+If set to ``true``, assumes that Ansible-base use semantic versioning instead of the classic Ansible version numbers. This is mainly relevant for pre-releases. If set to ``true``, ``release_tag_re`` and ``pre_release_tag_re`` are ignored.
+
 ``release_tag_re`` (string)
 ---------------------------
 
@@ -179,9 +186,13 @@ The default value is ``((?:[\d.ab]|rc)+)``.
 
 This value is used to detect versions that are proper release versions, and not prereleases. This is a regular expression matching the version string preprended with ``v``.
 
+This setting is ignored if ``use_semantic_versioning`` is set to ``true``.
+
 ``pre_release_tag_re`` (string)
 -------------------------------
 
 The default value is ``(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$``.
 
 This value is used to detect versions that are prereleases. This is a regular expression matching the version string preprended with ``v``.
+
+This setting is ignored if ``use_semantic_versioning`` is set to ``true``.

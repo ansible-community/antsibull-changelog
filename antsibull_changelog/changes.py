@@ -16,14 +16,11 @@ import os
 
 from typing import Any, Callable, Dict, List, Optional, Set, cast
 
-import packaging.version
-import semantic_version
-
 from .config import ChangelogConfig
 from .fragment import ChangelogFragment, load_fragments
 from .logger import LOGGER
 from .plugins import PluginDescription, load_plugins
-from .utils import is_release_version
+from .utils import get_version_constructor, is_release_version
 from .yaml import load_yaml, store_yaml
 
 
@@ -84,9 +81,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         Create a version object.
         """
-        if self.config.is_collection:
-            return semantic_version.Version(version)
-        return packaging.version.Version(version)
+        return get_version_constructor(self.config)(version)
 
     @staticmethod
     def empty() -> dict:
@@ -789,8 +784,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     :arg date: The release date
     """
     # make sure the version parses
-    version_constructor = (semantic_version.Version if config.is_collection
-                           else packaging.version.Version)
+    version_constructor = get_version_constructor(config)
     version_constructor(version)
 
     LOGGER.info('release version {} is a {} version', version,
