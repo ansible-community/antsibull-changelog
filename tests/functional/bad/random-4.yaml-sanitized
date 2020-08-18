@@ -1,0 +1,6 @@
+ancestor: 1.0.0
+releases:
+  1.0.0:
+    plugins:
+      callback: []
+    release_date: '2020-01-01'
