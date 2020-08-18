@@ -108,6 +108,13 @@ The default value is ``Release Summary``.
 
 The title for the section whose name is set in ``prelude_name``.
 
+``sanitize_changelog`` (boolean)
+--------------------------------
+
+The default value is ``false`` for existing configurations, and ``true`` for new configurations.
+
+Remove all invalid and superfluous information when loading a ``changelogs/changelog.yaml`` file.
+
 ``sections`` (list of two-element lists of strings)
 ---------------------------------------------------
 

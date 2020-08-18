@@ -20,6 +20,7 @@ from .config import ChangelogConfig
 from .fragment import ChangelogFragment, load_fragments
 from .logger import LOGGER
 from .plugins import PluginDescription, load_plugins
+from .sanitize import sanitize_changes
 from .utils import get_version_constructor, is_release_version
 from .yaml import load_yaml, store_yaml
 
@@ -124,9 +125,9 @@ class ChangesBase(metaclass=abc.ABCMeta):
         :arg data_override: If provided, will use this as loaded data instead of reading self.path
         """
         if data_override is not None:
-            self.data = data_override
+            self.data = sanitize_changes(data_override, config=self.config)
         elif os.path.exists(self.path):
-            self.data = load_yaml(self.path)
+            self.data = sanitize_changes(load_yaml(self.path), config=self.config)
         else:
             self.data = self.empty()
         self.ancestor = self.data.get('ancestor')

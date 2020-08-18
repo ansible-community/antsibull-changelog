@@ -12,6 +12,7 @@ v0.8.0
 Minor Changes
 -------------
 
+- Allow to sanitize changelog data on load/save. This means that unknown information will be removed, and bad information will be stripped. This will be enabled in newly created changelog configs, but is disabled for backwards compatibility.
 - Allow to not save a changelog on release when using API.
 
 v0.7.0
