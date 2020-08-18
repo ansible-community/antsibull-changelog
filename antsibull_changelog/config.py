@@ -264,6 +264,7 @@ class ChangelogConfig:
     pre_release_tag_re: str
     always_refresh: str
     ignore_other_fragment_extensions: bool
+    sanitize_changelog: bool
     flatmap: Optional[bool]
     use_semantic_versioning: bool
     sections: Mapping[str, str]
@@ -293,6 +294,7 @@ class ChangelogConfig:
             'changelog_filename_version_depth', 2)
         self.mention_ancestor = self.config.get('mention_ancestor', True)
         self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
+        self.sanitize_changelog = self.config.get('sanitize_changelog', False)
         always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
         if always_refresh is True:
             always_refresh = 'full'
@@ -341,6 +343,7 @@ class ChangelogConfig:
             'new_plugins_after_name': self.new_plugins_after_name,
             'trivial_section_name': self.trivial_section_name,
             'ignore_other_fragment_extensions': self.ignore_other_fragment_extensions,
+            'sanitize_changelog': self.sanitize_changelog
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -396,6 +399,7 @@ class ChangelogConfig:
             'sections': DEFAULT_SECTIONS,
             'use_fqcn': True,
             'ignore_other_fragment_extensions': True,
+            'sanitize_changelog': True,
         }
         if title is not None:
             config['title'] = title
