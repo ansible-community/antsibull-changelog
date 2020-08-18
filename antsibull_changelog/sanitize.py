@@ -121,6 +121,19 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                 result.append(entry)
         return result
 
+    def _sanitize_modules_plugins(self, release: Mapping, result: Dict[str, Any]) -> None:
+        modules = release.get('modules')
+        if isinstance(modules, list):
+            sanitized_modules = self._sanitize_modules(modules)
+            if sanitized_modules:
+                result['modules'] = sanitized_modules
+
+        plugins = release.get('plugins')
+        if isinstance(plugins, collections.abc.Mapping):
+            sanitized_plugins = self._sanitize_plugins(plugins)
+            if sanitized_plugins:
+                result['plugins'] = sanitized_plugins
+
     def _sanitize_release(self, release: Mapping) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
@@ -138,17 +151,7 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             if sanitized_changes:
                 result['changes'] = sanitized_changes
 
-        modules = release.get('modules')
-        if isinstance(modules, list):
-            sanitized_modules = self._sanitize_modules(modules)
-            if sanitized_modules:
-                result['modules'] = sanitized_modules
-
-        plugins = release.get('plugins')
-        if isinstance(plugins, collections.abc.Mapping):
-            sanitized_plugins = self._sanitize_plugins(plugins)
-            if sanitized_plugins:
-                result['plugins'] = sanitized_plugins
+        self._sanitize_modules_plugins(release, result)
 
         fragments = release.get('fragments')
         if isinstance(fragments, list):
