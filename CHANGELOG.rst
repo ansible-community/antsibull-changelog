@@ -12,6 +12,7 @@ v0.8.0
 Minor Changes
 -------------
 
+- Sanitize changelog data on load/save. This means that unknown information will be removed, and bad information will be stripped.
 - Allow to not save a changelog on release when using API.
 
 v0.7.0
