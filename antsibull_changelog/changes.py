@@ -772,7 +772,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
                 fragments: List[ChangelogFragment],
                 version: str,
                 codename: Optional[str],
-                date: datetime.date) -> None:
+                date: datetime.date,
+                save_changes: bool = True) -> None:
     """
     Add a release to the change metadata.
 
@@ -808,7 +809,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
         if changes.add_fragment(fragment, version):
             fragments_added.append(fragment)
 
-    changes.save()
+    if save_changes:
+        changes.save()
 
     if not config.keep_fragments:
         archive_path_template = config.archive_path_template

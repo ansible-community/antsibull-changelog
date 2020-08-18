@@ -6,6 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
+v0.8.0
+======
+
+Minor Changes
+-------------
+
+- Allow to not save a changelog on release when using API.
+
 v0.7.0
 ======
 
