@@ -108,7 +108,9 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
         for key, value in data.items():
             if key not in self.documentable_plugins or not isinstance(value, list):
                 continue
-            result[key] = self._sanitize_modules(value, are_modules=False)
+            sanitized_value = self._sanitize_modules(value, are_modules=False)
+            if sanitized_value:
+                result[key] = sanitized_value
         return result
 
     @staticmethod
@@ -132,19 +134,27 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
 
         changes = release.get('changes')
         if isinstance(changes, collections.abc.Mapping):
-            result['changes'] = self._sanitize_changes(changes)
+            sanitized_changes = self._sanitize_changes(changes)
+            if sanitized_changes:
+                result['changes'] = sanitized_changes
 
         modules = release.get('modules')
         if isinstance(modules, list):
-            result['modules'] = self._sanitize_modules(modules)
+            sanitized_modules = self._sanitize_modules(modules)
+            if sanitized_modules:
+                result['modules'] = sanitized_modules
 
         plugins = release.get('plugins')
         if isinstance(plugins, collections.abc.Mapping):
-            result['plugins'] = self._sanitize_plugins(plugins)
+            sanitized_plugins = self._sanitize_plugins(plugins)
+            if sanitized_plugins:
+                result['plugins'] = sanitized_plugins
 
         fragments = release.get('fragments')
         if isinstance(fragments, list):
-            result['fragments'] = self._sanitize_fragments(fragments)
+            sanitized_fragments = self._sanitize_fragments(fragments)
+            if sanitized_fragments:
+                result['fragments'] = sanitized_fragments
 
         return result
 

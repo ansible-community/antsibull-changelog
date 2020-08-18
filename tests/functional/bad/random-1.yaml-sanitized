@@ -14,7 +14,4 @@ releases:
     - description: ''
       name: test
       namespace: \\
-    plugins:
-      lookup: []
-  1.1.0:
-    changes: {}
+  1.1.0: {}

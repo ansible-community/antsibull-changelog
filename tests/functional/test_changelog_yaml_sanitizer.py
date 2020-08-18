@@ -19,7 +19,8 @@ from antsibull_changelog.sanitize import sanitize_changes
 from antsibull_changelog.yaml import load_yaml, store_yaml
 
 
-STORE_RESULT = True
+# Set to True to generate sanitize files instead of using them
+STORE_RESULT = False
 
 
 # Collect files
