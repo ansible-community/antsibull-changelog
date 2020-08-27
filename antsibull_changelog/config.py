@@ -173,7 +173,7 @@ class CollectionDetails:
             msg = 'Cannot find galaxy.yaml to {0}: {1}'.format(what_for, exc)
             if help_text is not None:
                 msg = '{0}. {1}'.format(msg, help_text)
-            raise ChangelogError(msg)
+            raise ChangelogError(msg) from exc
 
         self._parse_galaxy_yaml(galaxy_yaml)
 
