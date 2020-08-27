@@ -326,14 +326,14 @@ class ChangesMetadata(ChangesBase):
         """
         Create legacy change metadata.
         """
-        super(ChangesMetadata, self).__init__(config, path)
+        super().__init__(config, path)
         self.load()
 
     def load(self, data_override: Optional[dict] = None) -> None:
         """
         Load the change metadata from disk.
         """
-        super(ChangesMetadata, self).load(data_override=data_override)
+        super().load(data_override=data_override)
 
         for _, config in self.releases.items():
             for plugin_type, plugin_names in config.get('plugins', {}).items():
@@ -519,7 +519,7 @@ class ChangesData(ChangesBase):
 
         :arg data_override: Allows to load data from dictionary instead from disk
         """
-        super(ChangesData, self).__init__(config, path)
+        super().__init__(config, path)
         self.config = config
         self.load(data_override=data_override)
 
@@ -527,7 +527,7 @@ class ChangesData(ChangesBase):
         """
         Load the change metadata from disk.
         """
-        super(ChangesData, self).load(data_override=data_override)
+        super().load(data_override=data_override)
 
         for _, config in self.releases.items():
             for plugin_type, plugins in config.get('plugins', {}).items():
@@ -627,7 +627,7 @@ class ChangesData(ChangesBase):
         """
         Sort change metadata in place.
         """
-        super(ChangesData, self).sort()
+        super().sort()
 
         for _, config in self.data['releases'].items():
             if 'modules' in config:

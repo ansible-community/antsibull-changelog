@@ -221,6 +221,6 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
             if exceptions is not None:
                 exceptions.append((path, ex))
             else:
-                raise ChangelogError(str(ex))
+                raise ChangelogError(str(ex)) from ex
 
     return fragments
