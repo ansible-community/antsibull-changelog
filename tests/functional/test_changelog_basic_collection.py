@@ -50,6 +50,8 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
+    collection_changelog.add_fragment_line(
+        'trivial.yml', 'trivial', 'This should not show up in the changelog.')
     collection_changelog.set_plugin_cache('1.0.0', {})
 
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
@@ -58,7 +60,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert diff.added_dirs == []
     assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
     assert diff.removed_dirs == []
-    assert diff.removed_files == ['changelogs/fragments/1.0.0.yml']
+    assert diff.removed_files == ['changelogs/fragments/1.0.0.yml', 'changelogs/fragments/trivial.yml']
     assert diff.changed_files == []
 
     changelog = diff.parse_yaml('changelogs/changelog.yaml')
@@ -68,7 +70,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert changelog['releases']['1.0.0']['changes'] == {
         'release_summary': 'This is the first proper release.'
     }
-    assert changelog['releases']['1.0.0']['fragments'] == ['1.0.0.yml']
+    assert changelog['releases']['1.0.0']['fragments'] == ['1.0.0.yml', 'trivial.yml']
     assert 'modules' not in changelog['releases']['1.0.0']
     assert 'plugins' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']

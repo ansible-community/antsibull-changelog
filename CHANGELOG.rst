@@ -6,6 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
+v0.8.1
+======
+
+Bugfixes
+--------
+
+- Fixed error on generating changelogs when using the trivial section.
+
 v0.8.0
 ======
 

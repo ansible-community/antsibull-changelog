@@ -21,8 +21,11 @@ releases:
     changes:
       bugfixes:
       - foo and bar - JSON decoding could still crash the module
+      trivial:
+      - This is trivial.
     fragments:
     - really-fix-json-decoding.yml
+    - trivial.yml
     release_date: '2020-04-29'
   0.2.3:
     release_date: '2020-04-29'
