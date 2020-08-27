@@ -29,6 +29,8 @@ def test_changelog_fragment_lint_correct(  # pylint: disable=redefined-outer-nam
     collection_changelog.add_fragment_line(
         'baz-new-option.yaml', 'minor_changes',
         ['baz lookup - no longer ignores the ``bar`` option.'])
+    collection_changelog.add_fragment_line(
+        'trivial.yaml', 'trivial', ['Something trivial.'])
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output('lint', [])

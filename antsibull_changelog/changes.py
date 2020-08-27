@@ -668,6 +668,8 @@ class ChangesData(ChangesBase):
                 if section in changes:
                     raise ValueError('Found prelude section "{0}" more than once!'.format(section))
                 changes[section] = lines
+            elif section == self.config.trivial_section_name:
+                continue
             elif section not in self.config.sections:
                 raise ValueError('Found unknown section "{0}"'.format(section))
             else:
