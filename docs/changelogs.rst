@@ -100,7 +100,7 @@ This section describes the section categories created in the default config. You
 
 The categories are very similar to the ones in the `Ansible-base changelog fragments <https://docs.ansible.com/ansible/latest/community/development_process.html#changelogs-how-to>`_. In fact, they are the same, except that there are three new categories: ``breaking_changes``, ``security_fixes`` and ``trivial``.
 
-NOTE: The changelog generator automatically detects new modules and new plugins which are documentable (i.e. where you have DOCUMENTATION where version_added is there), so you do not need to create changelog entries for them.
+**NOTE:** The changelog generator automatically detects new modules and new plugins which are documentable (i.e. where you have ``DOCUMENTATION`` where ``version_added`` is there), so you do not need to create changelog entries for them.
 
 The full list of categories is:
 
