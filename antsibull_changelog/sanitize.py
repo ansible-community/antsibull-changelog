@@ -7,7 +7,7 @@
 Sanitizing changelog.yaml files
 """
 
-import collections
+import collections.abc
 import re
 
 from typing import Any, Dict, List, Mapping, Optional, Union
