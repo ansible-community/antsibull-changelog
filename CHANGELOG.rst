@@ -6,6 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
+v0.9.0
+======
+
+Breaking Changes
+----------------
+
+- The new option ``prevent_known_fragments`` with default value being the value of ``keep_fragments`` allows to control whether fragments with names that already appeared in the past are ignored or not. The new behavior happens if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46). Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core changelog, are not affected.
+
 v0.8.1
 ======
 

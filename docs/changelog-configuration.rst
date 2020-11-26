@@ -80,6 +80,8 @@ If set to ``false``, the fragment files will be removed after a release is done.
 
 If fragment files should be moved to another directory after release, set this setting to ``false`` and set ``archive_path_template``.
 
+See also ``prevent_known_fragments``.
+
 ``mention_ancestor`` (boolean)
 ------------------------------
 
@@ -107,6 +109,15 @@ Name of the prelude section to be used in changelog fragments. This section is s
 The default value is ``Release Summary``.
 
 The title for the section whose name is set in ``prelude_name``.
+
+``prevent_known_fragments`` (optional boolean)
+----------------------------------------------
+
+The default value is the same value as the ``keep_fragments`` option.
+
+If set to ``true``, will not add changelog fragments to a release whose filename was already used in the past. This was the default behavior before antsibull-changelog 0.9.0. From 0.9.0 on, it is set to ``false`` by default if ``keep_fragments`` is ``false``.
+
+If ``keep_fragments`` is set to ``false`` later-on when some fragments from older releases are still there, and you want to keep them, make sure to set ``prevent_known_fragments`` explicitly to ``true``. Otherwise they will be added again to the next release.
 
 ``sanitize_changelog`` (boolean)
 --------------------------------

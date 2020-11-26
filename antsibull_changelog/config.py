@@ -254,6 +254,7 @@ class ChangelogConfig:
     changes_file: str
     changes_format: str
     keep_fragments: bool
+    prevent_known_fragments: bool
     use_fqcn: bool
     archive_path_template: Optional[str]
     changelog_filename_template: str
@@ -286,6 +287,8 @@ class ChangelogConfig:
         self.changes_file = self.config.get('changes_file', '.changes.yaml')
         self.changes_format = self.config.get('changes_format', 'classic')
         self.keep_fragments = self.config.get('keep_fragments', self.changes_format == 'classic')
+        self.prevent_known_fragments = self.config.get(
+            'prevent_known_fragments', self.keep_fragments)
         self.use_fqcn = self.config.get('use_fqcn', False)
         self.archive_path_template = self.config.get('archive_path_template')
         self.changelog_filename_template = self.config.get(
@@ -319,6 +322,9 @@ class ChangelogConfig:
         if self.changes_format == 'classic' and not self.keep_fragments:
             raise ChangelogError('changes_format == "classic" cannot be '
                                  'combined with keep_fragments == False')
+        if self.changes_format == 'classic' and not self.prevent_known_fragments:
+            raise ChangelogError('changes_format == "classic" cannot be '
+                                 'combined with prevent_known_fragments == False')
 
         sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
         for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
@@ -358,6 +364,8 @@ class ChangelogConfig:
         should_always_refresh = (self.changes_format == 'classic')
         if self.always_refresh != ('full' if should_always_refresh else 'none'):
             config['always_refresh'] = self.always_refresh
+        if self.keep_fragments != self.prevent_known_fragments:
+            config['prevent_known_fragments'] = self.prevent_known_fragments
         if self.flatmap is not None:
             config['flatmap'] = self.flatmap
         if self.archive_path_template is not None:
