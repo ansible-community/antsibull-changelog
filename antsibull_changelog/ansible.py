@@ -23,6 +23,11 @@ except ImportError:
     HAS_ANSIBLE_RELEASE = False
 
 
+OBJECT_TYPES = ('role', 'playbook')
+
+OTHER_PLUGIN_TYPES = ('module', 'test', 'filter')
+
+
 def get_documentable_plugins() -> Tuple[str, ...]:
     """
     Retrieve plugin types that can be documented. Does not include 'module'.

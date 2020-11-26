@@ -9,3 +9,12 @@ releases:
         - name: 123
           description: 234
           namespace: 345
+    objects:
+      chair:
+        - name: hello
+          description: world
+          namespace: null
+      role:
+        - name: my_role
+          description: This is my role
+          namespace: null

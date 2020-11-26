@@ -2,3 +2,8 @@ ancestor: 1.0.0
 releases:
   1.0.0:
     release_date: '2020-01-01'
+    objects:
+      role:
+        - name: my_role
+          description: This is my role
+          namespace: null

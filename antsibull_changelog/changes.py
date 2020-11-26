@@ -16,6 +16,16 @@ import os
 
 from typing import Any, Callable, Dict, List, Optional, Set, cast
 
+from .changes_resolvers import (
+    FragmentResolver,
+    PluginResolver,
+    LegacyFragmentResolver,
+    LegacyPluginResolver,
+    LegacyObjectResolver,
+    ChangesDataFragmentResolver,
+    ChangesDataPluginResolver,
+    ChangesDataObjectResolver
+)
 from .config import ChangelogConfig
 from .fragment import ChangelogFragment, load_fragments
 from .logger import LOGGER
@@ -23,39 +33,6 @@ from .plugins import PluginDescription, load_plugins
 from .sanitize import sanitize_changes
 from .utils import get_version_constructor, is_release_version
 from .yaml import load_yaml, store_yaml
-
-
-class FragmentResolver(metaclass=abc.ABCMeta):
-    # pylint: disable=too-few-public-methods
-    """
-    Allows to resolve a release section to a list of changelog fragments.
-    """
-
-    @abc.abstractmethod
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
-        """
-        Return a list of ``ChangelogFragment`` objects from the given release object.
-
-        :arg release: A release description
-        :return: A list of changelog fragments
-        """
-
-
-class PluginResolver(metaclass=abc.ABCMeta):
-    # pylint: disable=too-few-public-methods
-    """
-    Allows to resolve a release section to a plugin description database.
-    """
-
-    @abc.abstractmethod
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Return a dictionary of plugin types mapping to lists of plugin descriptions
-        for the given release.
-
-        :arg release: A release description
-        :return: A map of plugin types to lists of plugin descriptions
-        """
 
 
 class ChangesBase(metaclass=abc.ABCMeta):
@@ -67,6 +44,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
     path: str
     data: dict
     known_plugins: Set[str]
+    known_objects: Set[str]
     known_fragments: Set[str]
     ancestor: Optional[str]
 
@@ -76,6 +54,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.data = self.empty()
         self.known_fragments = set()
         self.known_plugins = set()
+        self.known_objects = set()
         self.ancestor = None
 
     def version_constructor(self, version: str) -> Any:
@@ -138,6 +117,14 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
+        """
+
+    @abc.abstractmethod
+    def update_objects(self, objects: List[PluginDescription],
+                       allow_removals: Optional[bool]) -> None:
+        """
+        Update object descriptions, and remove objects which are not in the provided list
+        of objects.
         """
 
     @abc.abstractmethod
@@ -224,6 +211,34 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         return True
 
+    def add_object(self, ansible_object: PluginDescription, version: str):
+        """
+        Add a new object to the change metadata for the given version.
+
+        If the object happens to be already known (for another version),
+        it will not be added.
+
+        :return: ``True`` if the object was added for this version
+        """
+        composite_name = '%s/%s' % (ansible_object.type, ansible_object.name)
+
+        if composite_name in self.known_objects:
+            return False
+
+        self.known_objects.add(composite_name)
+
+        if 'objects' not in self.releases[version]:
+            self.releases[version]['objects'] = {}
+
+        objects = self.releases[version]['objects']
+
+        if ansible_object.type not in objects:
+            objects[ansible_object.type] = []
+
+        objects[ansible_object.type].append(self._create_plugin_entry(ansible_object))
+
+        return True
+
     @abc.abstractmethod
     def get_plugin_resolver(
             self, plugins: Optional[List[PluginDescription]] = None) -> PluginResolver:
@@ -234,6 +249,12 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
+    def get_object_resolver(self) -> PluginResolver:
+        """
+        Create a object resolver.
+        """
+
+    @abc.abstractmethod
     def get_fragment_resolver(
             self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
         """
@@ -241,82 +262,6 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         If the fragments are not provided and needed by this object, they might be loaded.
         """
-
-
-class LegacyFragmentResolver(FragmentResolver):
-    # pylint: disable=too-few-public-methods
-    """
-    Given a list of changelog fragments, allows to resolve from a list of fragment names.
-    """
-
-    fragments: Dict[str, ChangelogFragment]
-
-    def __init__(self, fragments: List[ChangelogFragment]):
-        """
-        Create a simple fragment resolver.
-        """
-        self.fragments = dict()
-        for fragment in fragments:
-            self.fragments[fragment.name] = fragment
-
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
-        """
-        Return a list of ``ChangelogFragment`` objects from the given release object.
-
-        :arg release: A release description
-        :return: A list of changelog fragments
-        """
-        fragment_names: List[str] = release.get('fragments', [])
-        return [self.fragments[fragment] for fragment in fragment_names]
-
-
-class LegacyPluginResolver(PluginResolver):
-    # pylint: disable=too-few-public-methods
-    """
-    Provides a plugin resolved based on a list of ``PluginDescription`` objects.
-    """
-
-    plugins: Dict[str, Dict[str, Dict[str, Any]]]
-
-    @staticmethod
-    def resolve_plugin(plugin: PluginDescription) -> Dict[str, Any]:
-        """
-        Convert a ``PluginDecscription`` object to a plugin description dictionary.
-        """
-        return dict(
-            name=plugin.name,
-            namespace=plugin.namespace,
-            description=plugin.description,
-        )
-
-    def __init__(self, plugins: List[PluginDescription]):
-        """
-        Create a simple plugin resolver from a list of ``PluginDescription`` objects.
-        """
-        self.plugins = dict()
-        for plugin in plugins:
-            if plugin.type not in self.plugins:
-                self.plugins[plugin.type] = dict()
-
-            self.plugins[plugin.type][plugin.name] = self.resolve_plugin(plugin)
-
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Return a dictionary of plugin types mapping to lists of plugin descriptions
-        for the given release.
-
-        :arg release: A release description
-        :return: A map of plugin types to lists of plugin descriptions
-        """
-        result = dict()
-        if 'modules' in release:
-            result['module'] = [self.plugins['module'][module_name]
-                                for module_name in release['modules']]
-        if 'plugins' in release:
-            for plugin_type, plugin_names in release['plugins'].items():
-                result[plugin_type] = [self.plugins[plugin_type][plugin_name]
-                                       for plugin_name in plugin_names]
-        return result
 
 
 class ChangesMetadata(ChangesBase):
@@ -386,6 +331,14 @@ class ChangesMetadata(ChangesBase):
                     self.known_plugins -= set(
                         '%s/%s' % (plugin_type, plugin) for plugin in invalid_plugins)
 
+    def update_objects(self, objects: List[PluginDescription],
+                       allow_removals: Optional[bool]) -> None:
+        """
+        Update object descriptions, and remove objects which are not in the provided list
+        of objects.
+        """
+        return
+
     def update_fragments(self, fragments: List[ChangelogFragment],
                          load_extra_fragments: Optional[
                              Callable[[str], List[ChangelogFragment]]] = None
@@ -453,6 +406,12 @@ class ChangesMetadata(ChangesBase):
                                    force_reload=False)
         return LegacyPluginResolver(plugins)
 
+    def get_object_resolver(self) -> PluginResolver:
+        """
+        Create a dummy object resolver.
+        """
+        return LegacyObjectResolver()
+
     def get_fragment_resolver(
             self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
         """
@@ -463,47 +422,6 @@ class ChangesMetadata(ChangesBase):
         if fragments is None:
             fragments = load_fragments(paths=self.config.paths, config=self.config)
         return LegacyFragmentResolver(fragments)
-
-
-class ChangesDataFragmentResolver(FragmentResolver):
-    # pylint: disable=too-few-public-methods
-    """
-    A ``FragmentResolver`` class for modern ``ChangesData`` objects.
-    """
-
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
-        """
-        Return a list of ``ChangelogFragment`` objects from the given release object.
-
-        :arg release: A release description
-        :return: A list of changelog fragments
-        """
-        changes = release.get('changes')
-        if changes is None:
-            return []
-        return [ChangelogFragment.from_dict(changes)]
-
-
-class ChangesDataPluginResolver(PluginResolver):
-    # pylint: disable=too-few-public-methods
-    """
-    A ``PluginResolver`` class for modern ``ChangesData`` objects.
-    """
-
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Return a dictionary of plugin types mapping to lists of plugin descriptions
-        for the given release.
-
-        :arg release: A release description
-        :return: A map of plugin types to lists of plugin descriptions
-        """
-        result = dict()
-        if 'modules' in release:
-            result['module'] = release['modules']
-        if 'plugins' in release:
-            result.update(release['plugins'])
-        return result
 
 
 class ChangesData(ChangesBase):
@@ -535,6 +453,10 @@ class ChangesData(ChangesBase):
             for plugin_type, plugins in config.get('plugins', {}).items():
                 self.known_plugins |= set(
                     '%s/%s' % (plugin_type, plugin['name']) for plugin in plugins)
+
+            for object_type, objects in config.get('objects', {}).items():
+                self.known_objects |= set(
+                    '%s/%s' % (object_type, ansible_object['name']) for ansible_object in objects)
 
             modules = config.get('modules', [])
 
@@ -592,6 +514,40 @@ class ChangesData(ChangesBase):
                             plugin
                             for plugin in config['plugins'][plugin_type]]
 
+    def update_objects(self, objects: List[PluginDescription],
+                       allow_removals: Optional[bool]) -> None:
+        """
+        Update object descriptions, and remove objects which are not in the provided list
+        of objects.
+        """
+        valid_objects: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
+
+        for ansible_object in objects:
+            valid_objects[ansible_object.type][ansible_object.name] = ansible_object
+
+        for _, config in self.releases.items():
+            if 'objects' in config:
+                for object_type in config['objects']:
+                    invalid_object_names = set(
+                        ansible_object['name'] for ansible_object in config['objects'][object_type]
+                        if ansible_object['name'] not in valid_objects[object_type])
+                    if allow_removals:
+                        config['objects'][object_type] = [
+                            self._create_plugin_entry(
+                                valid_objects[object_type][ansible_object['name']])
+                            for ansible_object in config['objects'][object_type]
+                            if ansible_object['name'] not in invalid_object_names]
+                        self.known_objects -= set(
+                            '%s/%s' % (object_type, object_name)
+                            for object_name in invalid_object_names)
+                    else:
+                        config['objects'][object_type] = [
+                            self._create_plugin_entry(
+                                valid_objects[object_type][ansible_object['name']])
+                            if ansible_object['name'] not in invalid_object_names else
+                            ansible_object
+                            for ansible_object in config['objects'][object_type]]
+
     def update_fragments(self, fragments: List[ChangelogFragment],
                          load_extra_fragments: Optional[
                              Callable[[str], List[ChangelogFragment]]] = None
@@ -639,6 +595,12 @@ class ChangesData(ChangesBase):
                 for plugin_type in config['plugins']:
                     config['plugins'][plugin_type] = sorted(
                         config['plugins'][plugin_type], key=lambda plugin: plugin['name'])
+
+            if 'objects' in config:
+                for object_type in config['objects']:
+                    config['objects'][object_type] = sorted(
+                        config['objects'][object_type],
+                        key=lambda ansible_object: ansible_object['name'])
 
             if 'fragments' in config:
                 config['fragments'] = sorted(config['fragments'])
@@ -694,6 +656,12 @@ class ChangesData(ChangesBase):
         The plugins list is not used.
         """
         return ChangesDataPluginResolver()
+
+    def get_object_resolver(self) -> PluginResolver:
+        """
+        Create a object resolver.
+        """
+        return ChangesDataObjectResolver()
 
     def get_fragment_resolver(
             self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
@@ -771,6 +739,34 @@ def load_changes(config: ChangelogConfig) -> ChangesBase:
     return ChangesData(config, path)
 
 
+def _add_plugins_filters(changes: ChangesBase,
+                         plugins: List[PluginDescription],
+                         objects: List[PluginDescription],
+                         version: str,
+                         ) -> None:
+    # filter out plugins which were not added in this release
+    plugins = list(filter(lambda p: any([
+        version.startswith('%s.' % p.version_added),
+        version.startswith('%s-' % p.version_added),  # needed for semver
+        version.startswith('%s+' % p.version_added),  # needed for semver
+        version == p.version_added
+    ]), plugins))
+
+    # filter out objects which were not added in this release
+    objects = list(filter(lambda p: any([
+        version.startswith('%s.' % p.version_added),
+        version.startswith('%s-' % p.version_added),  # needed for semver
+        version.startswith('%s+' % p.version_added),  # needed for semver
+        version == p.version_added
+    ]), objects))
+
+    for plugin in plugins:
+        changes.add_plugin(plugin, version)
+
+    for ansible_object in objects:
+        changes.add_object(ansible_object, version)
+
+
 def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
                 changes: ChangesBase,
                 plugins: List[PluginDescription],
@@ -780,12 +776,14 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
                 date: datetime.date,
                 save_changes: bool = True,
                 update_existing: bool = False,
+                objects: Optional[List[PluginDescription]] = None,
                 ) -> None:
     """
     Add a release to the change metadata.
 
     :arg changes: Changes metadata to update
     :arg plugins: List of all plugin descriptions
+    :arg objects: List of all object descriptions
     :arg fragments: List of all changelog fragments
     :arg version: The version for the new release
     :arg codename: The codename for the new release. Optional for collections
@@ -793,6 +791,10 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     :arg update_existing: When set to ``True``, will update an existing release
                           instead of ignoring it
     """
+    # for backwards compatibility, objects can be None
+    if objects is None:
+        objects = []
+
     # make sure the version parses
     version_constructor = get_version_constructor(config)
     version_constructor(version)
@@ -800,18 +802,9 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     LOGGER.info('release version {} is a {} version', version,
                 'release' if is_release_version(config, version) else 'pre-release')
 
-    # filter out plugins which were not added in this release
-    plugins = list(filter(lambda p: any([
-        version.startswith('%s.' % p.version_added),
-        version.startswith('%s-' % p.version_added),  # needed for semver
-        version.startswith('%s+' % p.version_added),  # needed for semver
-        version == p.version_added
-    ]), plugins))
-
     changes.add_release(version, codename, date, update_existing=update_existing)
 
-    for plugin in plugins:
-        changes.add_plugin(plugin, version)
+    _add_plugins_filters(changes, plugins, objects, version)
 
     fragments_added = []
     for fragment in fragments:

@@ -31,6 +31,7 @@ class ChangelogEntry:
 
     modules: List[Any]
     plugins: Dict[Any, Any]
+    objects: Dict[Any, Any]
     changes: Dict[str, Union[str, List[str]]]
     preludes: List[Tuple[str, str]]
 
@@ -38,6 +39,7 @@ class ChangelogEntry:
         self.version = version
         self.modules = []
         self.plugins = dict()
+        self.objects = dict()
         self.changes = dict()
         self.preludes = []
 
@@ -56,7 +58,10 @@ class ChangelogEntry:
         """
         Determine whether the entry has no content at all.
         """
-        return not self.modules and not self.plugins and not self.preludes and self.has_no_changes()
+        return (
+            not self.modules and not self.plugins and not self.objects and
+            not self.preludes and self.has_no_changes()
+        )
 
     def add_section_content(self,
                             builder: RstBuilder,
@@ -104,6 +109,7 @@ class ChangelogGenerator:
         self.flatmap = flatmap
 
         self.plugin_resolver = changes.get_plugin_resolver(plugins)
+        self.object_resolver = changes.get_object_resolver()
         self.fragment_resolver = changes.get_fragment_resolver(fragments)
 
     @staticmethod
@@ -117,11 +123,12 @@ class ChangelogGenerator:
 
         return release_entries[entry_version]
 
-    def _update_modules_plugins(self, entry_config: ChangelogEntry, release: dict) -> None:
+    def _update_modules_plugins_objects(self, entry_config: ChangelogEntry, release: dict) -> None:
         """
         Update a release entry given a release information dict.
         """
         plugins = self.plugin_resolver.resolve(release)
+        objects = self.object_resolver.resolve(release)
 
         if 'module' in plugins:
             entry_config.modules += plugins.pop('module')
@@ -131,6 +138,12 @@ class ChangelogGenerator:
                 entry_config.plugins[plugin_type] = []
 
             entry_config.plugins[plugin_type] += plugin_list
+
+        for object_type, object_list in objects.items():
+            if object_type not in entry_config.objects:
+                entry_config.objects[object_type] = []
+
+            entry_config.objects[object_type] += object_list
 
     def _collect_entry(self,
                        entry_config: ChangelogEntry,
@@ -168,7 +181,7 @@ class ChangelogGenerator:
                         else:
                             dest_changes[section] = list(lines)
 
-            self._update_modules_plugins(entry_config, release)
+            self._update_modules_plugins_objects(entry_config, release)
 
     def collect(self,
                 squash: bool = False,
@@ -228,6 +241,11 @@ class ChangelogGenerator:
             builder,
             changelog_entry.modules,
             flatmap=self.flatmap,
+            fqcn_prefix=fqcn_prefix,
+            start_level=start_level)
+        self._add_objects(
+            builder,
+            changelog_entry.objects,
             fqcn_prefix=fqcn_prefix,
             start_level=start_level)
 
@@ -393,6 +411,41 @@ class ChangelogGenerator:
                 builder.add_raw_rst('- %s - %s' % (module_name, module['description']))
 
             builder.add_raw_rst('')
+
+    @staticmethod
+    def _add_objects(builder: RstBuilder,
+                     objects_database: Dict[str, List[Dict[str, Any]]],
+                     fqcn_prefix: Optional[str],
+                     start_level: int = 0) -> None:
+        """
+        Add new objects to the changelog.
+        """
+        if not objects_database:
+            return
+
+        for object_type in sorted(objects_database):
+            objects = objects_database.get(object_type)
+            if not objects:
+                continue
+
+            builder.add_section('New ' + object_type.title() + 's', start_level + 1)
+
+            ChangelogGenerator.add_objects(builder, objects, fqcn_prefix)
+
+            builder.add_raw_rst('')
+
+    @staticmethod
+    def add_objects(builder: RstBuilder,
+                    objects: List[Dict[str, Any]],
+                    fqcn_prefix: Optional[str]) -> None:
+        """
+        Add new objects of one type to the changelog.
+        """
+        for ansible_object in sorted(objects, key=lambda ansible_object: ansible_object['name']):
+            object_name = ansible_object['name']
+            if fqcn_prefix:
+                object_name = '%s.%s' % (fqcn_prefix, object_name)
+            builder.add_raw_rst('- %s - %s' % (object_name, ansible_object['description']))
 
 
 def generate_changelog(paths: PathsConfig,  # pylint: disable=too-many-arguments
