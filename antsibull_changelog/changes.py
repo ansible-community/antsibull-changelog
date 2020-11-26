@@ -651,7 +651,7 @@ class ChangesData(ChangesBase):
         """
         Add a changelog fragment to the change metadata.
         """
-        if fragment.name in self.known_fragments:
+        if fragment.name in self.known_fragments and self.config.prevent_known_fragments:
             return False
 
         self.known_fragments.add(fragment.name)
