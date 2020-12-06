@@ -173,6 +173,8 @@ Currently valid plugin types are:
 10. `shell`
 11. `strategy`
 12. `vars`
+13. `filter` (not documentable by `ansible-doc`)
+14. `test` (not documentable by `ansible-doc`)
 
 See `DOCUMENTABLE_PLUGINS` in https://github.com/ansible/ansible/blob/devel/lib/ansible/constants.py for a complete list of plugin types (minus `modules`).
 

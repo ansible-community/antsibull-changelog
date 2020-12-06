@@ -579,7 +579,8 @@ class ChangesData(ChangesBase):
                 self.known_fragments -= invalid_fragments
 
                 config['changes'] = ChangelogFragment.combine([
-                    valid_fragments[fragment] for fragment in config['fragments']])
+                    valid_fragments[fragment] for fragment in config['fragments']],
+                    ignore_obj_adds=True)
 
     def sort(self) -> None:
         """
@@ -611,6 +612,80 @@ class ChangesData(ChangesBase):
                     for section, entries in sorted(config['changes'].items())
                 }
 
+    def _add_fragment_obj(self, obj_class, obj_type, entry, version: str):
+        """
+        Add an object or a plugin from a changelog fragment.
+        """
+        if obj_class == 'object':
+            composite_name = '%s/%s' % (obj_type, entry['name'])
+            if composite_name in self.known_objects:
+                LOGGER.warning(
+                    'Ignore adding %s object "%s" from changelog fragment' % (
+                        obj_type, entry['name']))
+                return
+            self.known_objects.add(composite_name)
+            toplevel_type = 'objects'
+            has_categories = True
+        if obj_class == 'plugin':
+            composite_name = '%s/%s' % (obj_type, entry['name'])
+            if composite_name in self.known_plugins:
+                LOGGER.warning(
+                    'Ignore adding %s plugin "%s" from changelog fragment' % (
+                        obj_type, entry['name']))
+                return
+            self.known_plugins.add(composite_name)
+            if obj_type == 'module':
+                toplevel_type = 'modules'
+                has_categories = False
+            else:
+                toplevel_type = 'plugins'
+                has_categories = True
+
+        if has_categories:
+            if toplevel_type not in self.releases[version]:
+                self.releases[version][toplevel_type] = {}
+
+            categories = self.releases[version][toplevel_type]
+
+            if obj_type not in categories:
+                categories[obj_type] = []
+
+            obj_list = categories[obj_type]
+        else:
+            if toplevel_type not in self.releases[version]:
+                self.releases[version][toplevel_type] = []
+
+            obj_list = self.releases[version][toplevel_type]
+
+        obj_list.append({
+            'name': entry['name'],
+            'description': entry['description'],
+            'namespace': entry.get('namespace'),
+        })
+
+    def _add_fragment_content(self, version: str, changes: Dict[str, Any],
+                              section: str, lines: Any):
+        """
+        Add contents of a changelog fragment. Helps implementing add_fragment().
+        """
+        if section == self.config.prelude_name:
+            if section in changes:
+                raise ValueError('Found prelude section "{0}" more than once!'.format(section))
+            changes[section] = lines
+        elif section == self.config.trivial_section_name:
+            # Ignore trivial section entries
+            return
+        elif section.startswith('add') and '.' in section:
+            obj_class, obj_type = section[4:].split('.', 1)
+            for entry in lines:
+                self._add_fragment_obj(obj_class, obj_type, entry, version)
+        elif section not in self.config.sections:
+            raise ValueError('Found unknown section "{0}"'.format(section))
+        else:
+            if section not in changes:
+                changes[section] = []
+            changes[section].extend(lines)
+
     def add_fragment(self, fragment: ChangelogFragment, version: str):
         """
         Add a changelog fragment to the change metadata.
@@ -628,18 +703,7 @@ class ChangesData(ChangesBase):
             self.releases[version]['fragments'] = []
 
         for section, lines in fragment.content.items():
-            if section == self.config.prelude_name:
-                if section in changes:
-                    raise ValueError('Found prelude section "{0}" more than once!'.format(section))
-                changes[section] = lines
-            elif section == self.config.trivial_section_name:
-                continue
-            elif section not in self.config.sections:
-                raise ValueError('Found unknown section "{0}"'.format(section))
-            else:
-                if section not in changes:
-                    changes[section] = []
-                changes[section].extend(lines)
+            self._add_fragment_content(version, changes, section, lines)
 
         self.releases[version]['fragments'].append(fragment.name)
         return True
