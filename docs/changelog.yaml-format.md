@@ -58,7 +58,7 @@ The following is an example of release information for version `1.0.0`:
 ```.yaml
 releases:
   1.0.0:
-    release_date: 2020-04-01
+    release_date: '2020-04-01'
     codename: White Rabbit
     changes:
       release_summary: This is the initial White Rabbit release. Enjoy!
