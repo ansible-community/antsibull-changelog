@@ -14,6 +14,29 @@ Breaking Changes
 
 - The new option ``prevent_known_fragments`` with default value being the value of ``keep_fragments`` allows to control whether fragments with names that already appeared in the past are ignored or not. The new behavior happens if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46). Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core changelog, are not affected.
 
+Major Changes
+-------------
+
+- Add support for reporting new playbooks and roles in collections.
+- Add support for special changelog fragment sections which add new plugins and/or objects to the changelog for this version. This is mainly useful for ``test`` and ``filter`` plugins, and for ``playbook`` and ``role`` objects, which are not yet automatically detected and mentioned in ``changelogs/changelog.yaml`` or the generated RST changelog.
+
+  The format of these sections and their content is as follows::
+
+      ---
+      add plugin.filter:
+        - name: to_time_unit
+          description: Converts a time expression to a given unit
+        - name: to_seconds
+          description: Converts a time expression to seconds
+      add object.role:
+        - name: nginx
+          description: The most awesome nginx installation role ever
+      add object.playbook:
+        - name: wipe_server
+          description: Totally wipes a server
+
+  For every entry, a list of plugins (section ``add plugin.xxx``) or objects (section ``add object.xxx``) of the given type (``filter``, ``test`` for plugins, ``playbook``, ``role`` for objects) will be added. Every plugin or object has a short name as well as a short description. These fields correspond to the module/plugin name and the ``short_description`` field of the ``DOCUMENTATION`` block of modules and documentable plugins.
+
 Minor Changes
 -------------
 
