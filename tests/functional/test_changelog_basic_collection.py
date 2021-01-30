@@ -73,6 +73,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     assert changelog['releases']['1.0.0']['fragments'] == ['1.0.0.yml', 'trivial.yml']
     assert 'modules' not in changelog['releases']['1.0.0']
     assert 'plugins' not in changelog['releases']['1.0.0']
+    assert 'objects' not in changelog['releases']['1.0.0']
     assert 'codename' not in changelog['releases']['1.0.0']
 
     assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
@@ -151,6 +152,7 @@ This is the first proper release.
     assert 'fragments' not in changelog['releases']['1.1.0']
     assert 'modules' not in changelog['releases']['1.1.0']
     assert 'plugins' not in changelog['releases']['1.1.0']
+    assert 'objects' not in changelog['releases']['1.1.0']
     assert 'codename' not in changelog['releases']['1.1.0']
 
     assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
@@ -503,6 +505,7 @@ New Modules
         },
     ]
     assert 'plugins' not in changelog['releases']['1.1.0-beta-1']
+    assert 'objects' not in changelog['releases']['1.1.0-beta-1']
     assert 'codename' not in changelog['releases']['1.1.0-beta-1']
 
     assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
@@ -616,6 +619,11 @@ New Modules
     collection_changelog.add_fragment_line(
         'bugfix.yml', 'bugfixes', ['A bugfix.'])
 
+    # Lint fragments
+    assert collection_changelog.run_tool('lint', [
+        '-vvv',
+    ]) == 0
+
     # Final release 1.1.0
     assert collection_changelog.run_tool('release', [
         '-vvv',
@@ -661,6 +669,7 @@ New Modules
         },
     ]
     assert 'plugins' not in changelog['releases']['1.1.0']
+    assert 'objects' not in changelog['releases']['1.1.0']
     assert 'codename' not in changelog['releases']['1.1.0']
 
     assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
