@@ -2,6 +2,11 @@ ancestor: 1.0.0
 releases:
   1.0.0:
     release_date: '2020-01-01'
+    plugins:
+      callback:
+        - name: foo
+          description: bar
+          namespace: null
     objects:
       role:
         - name: my_role
