@@ -59,8 +59,18 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
         ],
         'add object.role': [
             'bah',
+            {
+                'meh': 'bar',
+            },
         ],
         'add moo.role': [],
+        'add plugin.asdf': [],
+        'add plugin.test': 'str',
+        'add plugin.module': [
+            {
+                'meh': '',
+            },
+        ],
     })
 
     # Lint fragments
@@ -71,7 +81,16 @@ changelogs/fragments/int-instead-of-list.yml:0:0: section "bugfixes" must be typ
 changelogs/fragments/int-instead-of-string.yml:0:0: section "release_summary" must be type str not int
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add moo.role"'s name must be of format "add (object|plugin).(type)"
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.foo"'s type must be one of role, playbook, not "foo"
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #1 has invalid keys "meh"
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #1 must have a "description" entry of type string
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #1 must have a "name" entry of type string
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" list items must be type dict not str
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.asdf"'s type must be one of become, cache, callback, cliconf, connection, httpapi, inventory, lookup, netconf, shell, vars, module, strategy, module, test, filter, not "asdf"
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 has invalid keys "meh"
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 must have a "description" entry of type string
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 must have a "name" entry of type string
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 must not have a non-null "namespace" entry
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.test" must be type list not str
 changelogs/fragments/invalid-yaml.yaml:0:0: yaml parsing error
 changelogs/fragments/list-instead-of-string.yml:0:0: section "release_summary" must be type str not list
 changelogs/fragments/list-of-ints.yaml:0:0: section "minor_changes" list items must be type str not int
