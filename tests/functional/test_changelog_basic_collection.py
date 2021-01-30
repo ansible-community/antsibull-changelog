@@ -734,6 +734,305 @@ New Modules
 
     assert collection_changelog.diff().unchanged
 
+    # Update plugin descriptions for 1.2.0
+    collection_changelog.set_plugin_cache('1.2.0', {
+        'module': {
+            'test': {
+                'name': 'test',
+                'description': 'This is a TEST module',
+                'namespace': '',
+                'version_added': '1.0.0',
+            },
+            'test_new': {
+                'name': 'test_new',
+                'description': 'This is ANOTHER test module',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+            'test_new2': {
+                'name': 'test_new2',
+                'description': 'This is ANOTHER test module!!!11',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+            'test_new3': {
+                'name': 'test_new3',
+                'description': 'This is yet another test module.',
+                'namespace': '',
+                'version_added': '1.1.0',
+            },
+            'test_new4': {
+                'name': 'test_new4',
+                'description': 'This is yet another test module!',
+                'namespace': '',
+                'version_added': '1.2.0',
+            },
+        },
+        'lookup': {
+            'bar': {
+                'name': 'bar',
+                'description': 'A foo_bar lookup',
+                'namespace': None,
+                'version_added': '1.0.0',
+            },
+            'baz': {
+                'name': 'baz',
+                'description': 'Has already been here before',
+                'namespace': None,
+                'version_added': None,
+            },
+            'boom': {
+                'name': 'boom',
+                'description': 'Something older',
+                'namespace': None,
+                'version_added': '0.5.0',
+            },
+        },
+    })
+
+    collection_changelog.add_fragment_line(
+        '1.2.0.yml', 'release_summary', 'Release of 1.2.0.')
+    collection_changelog.add_fragment_generic(
+        'new-plugins.yml', {
+            'add plugin.filter': [
+                {
+                    'name': 'to_time_unit',
+                    'description': 'Converts a time expression to a given unit',
+                },
+                {
+                    'name': 'to_seconds',
+                    'description': 'Converts a time expression to seconds',
+                },
+            ],
+            'add object.role': [
+                {
+                    'name': 'nginx',
+                    'description': 'The most awesome nginx installation role ever',
+                },
+            ],
+            'add object.playbook': [
+                {
+                    'name': 'wipe_server',
+                    'description': 'Totally wipes a server',
+                },
+            ],
+        })
+    collection_changelog.add_fragment_generic(
+        'new-test-plugin.yml', {
+            'add plugin.test': [
+                {
+                    'name': 'similar',
+                    'description': 'Tests whether two objects are similar',
+                },
+            ],
+        })
+    collection_changelog.add_fragment_generic(
+        'new-module.yml', {
+            'add plugin.module': [
+                {
+                    'name': 'meh',
+                    'description': 'A meh module',
+                    'namespace': 'foo'
+                },
+            ],
+        })
+
+    # Release 1.2.0
+    assert collection_changelog.run_tool('release', [
+        '-vvv',
+        '--date', '2020-03-01',
+        '--version', '1.2.0',
+    ]) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.2.0.yml',
+        'changelogs/fragments/new-module.yml',
+        'changelogs/fragments/new-plugins.yml',
+        'changelogs/fragments/new-test-plugin.yml',
+    ]
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0', '1.1.0', '1.1.0-beta-1', '1.2.0']
+    assert changelog['releases']['1.2.0']['release_date'] == '2020-03-01'
+    assert changelog['releases']['1.2.0']['changes'] == {
+        'release_summary': 'Release of 1.2.0.',
+    }
+    assert changelog['releases']['1.2.0']['fragments'] == [
+        '1.2.0.yml',
+        'new-module.yml',
+        'new-plugins.yml',
+        'new-test-plugin.yml',
+    ]
+    assert changelog['releases']['1.2.0']['modules'] == [
+        {
+            'name': 'meh',
+            'description': 'A meh module',
+            'namespace': 'foo',
+        },
+        {
+            'name': 'test_new4',
+            'description': 'This is yet another test module!',
+            'namespace': '',
+        },
+    ]
+    assert changelog['releases']['1.2.0']['plugins'] == {
+        'filter': [
+            {
+                'name': 'to_seconds',
+                'description': 'Converts a time expression to seconds',
+                'namespace': None,
+            },
+            {
+                'name': 'to_time_unit',
+                'description': 'Converts a time expression to a given unit',
+                'namespace': None,
+            },
+        ],
+        'test': [
+            {
+                'name': 'similar',
+                'description': 'Tests whether two objects are similar',
+                'namespace': None,
+            },
+        ],
+    }
+    assert changelog['releases']['1.2.0']['objects'] == {
+        'playbook': [
+            {
+                'name': 'wipe_server',
+                'description': 'Totally wipes a server',
+                'namespace': None,
+            },
+        ],
+        'role': [
+            {
+                'name': 'nginx',
+                'description': 'The most awesome nginx installation role ever',
+                'namespace': None,
+            },
+        ],
+    }
+    assert 'codename' not in changelog['releases']['1.2.0']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''=========================
+Ansible 1.2 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.2.0
+======
+
+Release Summary
+---------------
+
+Release of 1.2.0.
+
+New Plugins
+-----------
+
+Filter
+~~~~~~
+
+- acme.test.to_seconds - Converts a time expression to seconds
+- acme.test.to_time_unit - Converts a time expression to a given unit
+
+Test
+~~~~
+
+- acme.test.similar - Tests whether two objects are similar
+
+New Modules
+-----------
+
+- acme.test.test_new4 - This is yet another test module!
+
+Foo
+~~~
+
+- acme.test.foo.meh - A meh module
+
+New Playbooks
+-------------
+
+- acme.test.wipe_server - Totally wipes a server
+
+New Roles
+---------
+
+- acme.test.nginx - The most awesome nginx installation role ever
+
+v1.1.0
+======
+
+Release Summary
+---------------
+
+Final release of 1.1.0.
+
+Minor Changes
+-------------
+
+- A minor change.
+- Another new fragment.
+
+Bugfixes
+--------
+
+- A bugfix.
+
+New Modules
+-----------
+
+- acme.test.test_new - This is ANOTHER test module
+- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new3 - This is yet another test module.
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- acme.test.bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- acme.test.test - This is a TEST module
+''')
+
+    # Release 1.2.0 - should not change
+    assert collection_changelog.run_tool('release', [
+        '-vvv',
+        '--date', '2020-03-02',
+        '--version', '1.2.0',
+    ]) == 0
+
+    assert collection_changelog.diff().unchanged
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811

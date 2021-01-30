@@ -14,7 +14,7 @@ import pathlib
 import textwrap
 
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Mapping, Optional, Set, Tuple, Union
 
 import pytest
 import yaml
@@ -188,12 +188,16 @@ class ChangelogEnvironment:
         self.mkdir(fragment_dir)
         self._write(os.path.join(fragment_dir, fragment_name), content.encode('utf-8'))
 
-    def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str],
-                          fragment_dir: Optional[str] = None):
+    def add_fragment_generic(self, fragment_name: str, sections: Mapping[str, Mapping[str, Any]],
+                             fragment_dir: Optional[str] = None):
         self.add_fragment(
             fragment_name,
-            yaml.dump({section: lines}, Dumper=yaml.SafeDumper),
+            yaml.dump(sections, Dumper=yaml.SafeDumper),
             fragment_dir=fragment_dir)
+
+    def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str],
+                          fragment_dir: Optional[str] = None):
+        self.add_fragment_generic(fragment_name, {section: lines}, fragment_dir=fragment_dir)
 
     def _plugin_base(self, plugin_type):
         if plugin_type == 'module':
