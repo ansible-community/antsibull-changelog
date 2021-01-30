@@ -1,4 +1,7 @@
 # antsibull-changelog -- Ansible Changelog Tool
+[![CI](https://github.com/ansible-community/antsibull-changelog/workflows/Python linting/badge.svg?event=push)](https://github.com/ansible-community/antsibull-changelog/actions)
+[![CI](https://github.com/ansible-community/antsibull-changelog/workflows/Python testing/badge.svg?event=push)](https://github.com/ansible-community/antsibull-changelog/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
 
 A changelog generator used by Ansible and Ansible collections.
 
