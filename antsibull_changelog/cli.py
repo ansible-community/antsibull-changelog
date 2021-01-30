@@ -174,6 +174,10 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument('--date',
                                 default=str(datetime.date.today()),
                                 help='override release date')
+    release_parser.add_argument('--update-existing',
+                                action='store_true',
+                                help='if the release already exists, updates the release '
+                                     'date and (if relevant) the codename')
 
     generate_parser = subparsers.add_parser('generate',
                                             parents=[common, common_build,
@@ -430,7 +434,8 @@ def command_release(args: Any) -> int:
         # it does not convert a non-None value to None for plugins or fragments
         cast(List[PluginDescription], plugins),
         cast(List[ChangelogFragment], fragments),
-        version, codename, date)
+        version, codename, date,
+        update_existing=args.update_existing)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0

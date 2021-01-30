@@ -164,18 +164,20 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.data['ancestor'] = self.ancestor
         store_yaml(self.path, self.data)
 
-    def add_release(self, version: str, codename: Optional[str], release_date: datetime.date):
+    def add_release(self, version: str, codename: Optional[str],
+                    release_date: datetime.date, update_existing=False):
         """
         Add a new releases to the changes metadata.
         """
         if version not in self.releases:
-            self.releases[version] = dict(
-                release_date=release_date.isoformat(),
-            )
-            if codename is not None:
-                self.releases[version]['codename'] = codename
-        else:
+            self.releases[version] = dict()
+        elif not update_existing:
             LOGGER.warning('release {} already exists', version)
+            return
+
+        self.releases[version]['release_date'] = release_date.isoformat()
+        if codename is not None:
+            self.releases[version]['codename'] = codename
 
     @abc.abstractmethod
     def add_fragment(self, fragment: ChangelogFragment, version: str):
@@ -776,7 +778,9 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
                 version: str,
                 codename: Optional[str],
                 date: datetime.date,
-                save_changes: bool = True) -> None:
+                save_changes: bool = True,
+                update_existing: bool = False,
+                ) -> None:
     """
     Add a release to the change metadata.
 
@@ -786,6 +790,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     :arg version: The version for the new release
     :arg codename: The codename for the new release. Optional for collections
     :arg date: The release date
+    :arg update_existing: When set to ``True``, will update an existing release
+                          instead of ignoring it
     """
     # make sure the version parses
     version_constructor = get_version_constructor(config)
@@ -802,7 +808,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
         version == p.version_added
     ]), plugins))
 
-    changes.add_release(version, codename, date)
+    changes.add_release(version, codename, date, update_existing=update_existing)
 
     for plugin in plugins:
         changes.add_plugin(plugin, version)

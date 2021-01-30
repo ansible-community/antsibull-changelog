@@ -95,6 +95,38 @@ This is the first proper release.
     assert collection_changelog.run_tool('generate', ['-v', '--refresh']) == 0
     assert collection_changelog.diff().unchanged
 
+    assert collection_changelog.run_tool('release', ['-v', '--codename', 'primetime', '--date', '2020-01-03']) == 0
+    assert collection_changelog.diff().unchanged
+
+    assert collection_changelog.run_tool('release', ['-v', '--codename', 'primetime', '--date', '2020-01-03', '--update-existing']) == 0
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['releases']['1.0.0']['release_date'] == '2020-01-03'
+    assert changelog['releases']['1.0.0']['codename'] == 'primetime'
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''=================================
+Ansible "primetime" Release Notes
+=================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+''')
+
     # Version 1.1.0
 
     collection_changelog.set_galaxy({
