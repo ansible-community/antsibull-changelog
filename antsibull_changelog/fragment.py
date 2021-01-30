@@ -164,7 +164,7 @@ class ChangelogFragmentLinter:
         for index, entry in enumerate(entries):
             if not isinstance(entry, dict):
                 errors.append((fragment.path, 0, 0,
-                               'section "%s" list items must be type dict'
+                               'section "%s" list items must be type dict '
                                'not %s' % (section, type(entry).__name__)))
                 continue
 
