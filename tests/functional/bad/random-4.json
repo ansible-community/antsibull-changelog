@@ -2,9 +2,11 @@
     "errors": [
         [0, 0, "release version '1.0.0' must come after ancestor version '1.0.0'"],
         [0, 0, "'releases' -> '1.0.0' -> 'plugins' is expected to be <class 'str'>, but got 23"],
-        [0, 0, "'releases' -> '1.0.0' -> 'modules' -> 'callback' -> 0 is expected to be <class 'dict'>, but got 42"],
-        [0, 0, "'releases' -> '1.0.0' -> 'modules' -> 'callback' -> 1 -> 'name' is expected to be <class 'str'>, but got 123"],
-        [0, 0, "'releases' -> '1.0.0' -> 'modules' -> 'callback' -> 1 -> 'description' is expected to be <class 'str'>, but got 234"],
-        [0, 0, "'releases' -> '1.0.0' -> 'modules' -> 'callback' -> 1 -> 'namespace' must be null"]
+        [0, 0, "Unknown plugin type 'foo' in 'releases' -> '1.0.0' -> 'plugins'"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 0 is expected to be <class 'dict'>, but got 42"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'name' is expected to be <class 'str'>, but got 123"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'description' is expected to be <class 'str'>, but got 234"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'namespace' must be null"],
+        [0, 0, "Unknown object type 'chair' in 'releases' -> '1.0.0' -> 'objects'"]
     ]
 }

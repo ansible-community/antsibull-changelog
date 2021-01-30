@@ -33,6 +33,11 @@ releases:
     changes:
       bugfixes:
       - bob lookup - forgot to check whether ``Bob`` was already there.
+    objects:
+      playbook:
+      - description: Bob is wiping windows
+        name: wipe
+        namespace: null
     fragments:
     - bob-exists.yml
     release_date: '2020-05-01'

@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Mapping, Optional, Union
 import packaging.version
 import semantic_version
 
-from .ansible import get_documentable_plugins
+from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
 from .config import ChangelogConfig
 
 
@@ -31,7 +31,8 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
 
     def __init__(self, config: ChangelogConfig):
         self.config = config
-        self.documentable_plugins = get_documentable_plugins()
+        self.plugin_types = set(get_documentable_plugins())
+        self.plugin_types.update(OTHER_PLUGIN_TYPES)
 
     def _is_version(self, version: Any, allow_none: bool = False) -> bool:
         try:
@@ -106,7 +107,17 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
     def _sanitize_plugins(self, data: Mapping) -> Dict[str, List]:
         result = {}
         for key, value in data.items():
-            if key not in self.documentable_plugins or not isinstance(value, list):
+            if key not in self.plugin_types or not isinstance(value, list):
+                continue
+            sanitized_value = self._sanitize_modules(value, are_modules=False)
+            if sanitized_value:
+                result[key] = sanitized_value
+        return result
+
+    def _sanitize_objects(self, data: Mapping) -> Dict[str, List]:
+        result = {}
+        for key, value in data.items():
+            if key not in OBJECT_TYPES or not isinstance(value, list):
                 continue
             sanitized_value = self._sanitize_modules(value, are_modules=False)
             if sanitized_value:
@@ -133,6 +144,12 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             sanitized_plugins = self._sanitize_plugins(plugins)
             if sanitized_plugins:
                 result['plugins'] = sanitized_plugins
+
+        objects = release.get('objects')
+        if isinstance(objects, collections.abc.Mapping):
+            sanitized_objects = self._sanitize_objects(objects)
+            if sanitized_objects:
+                result['objects'] = sanitized_objects
 
     def _sanitize_release(self, release: Mapping) -> Dict[str, Any]:
         result: Dict[str, Any] = {}

@@ -4,8 +4,20 @@ releases:
     release_date: '2020-01-01'
     plugins:
       23: []
+      foo: []
       callback:
         - 42
         - name: 123
           description: 234
           namespace: 345
+        - name: foo
+          description: bar
+    objects:
+      chair:
+        - name: hello
+          description: world
+          namespace: null
+      role:
+        - name: my_role
+          description: This is my role
+          namespace: null

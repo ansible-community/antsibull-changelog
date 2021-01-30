@@ -72,6 +72,8 @@ If the main source of truth should be the fragments, or the plugin sources, the 
 
 Please note that for plugins, a cache is created in ``changelogs/.plugin-cache.yaml``. This cache is updated when the ``generate`` and ``release`` subcommands are run, and the latest version (for ``generate``) resp. the release version (for ``release``) differs from the version recorded in the cache file. Regeneration can be enforced by specifying the ``--reload-plugins`` option.
 
+Also note that refreshing plugins purges all plugins added by changelog fragments.
+
 This means that if plugin descriptions should be updated, either the plugin cache has to be deleted, or ``--reload-plugins`` has to be specified next to the refresh options/configuration. Refreshing can be configured in different ways, either by the ``always_refresh`` configuration setting, or three command line options ``--refresh``, ``--refresh-plugins`` and ``--refresh-fragments``. These can be specified for both the ``generate`` and ``release`` subcommands.
 
 #. The ``always_refresh`` configuration is a string with one of the following values:
@@ -134,6 +136,8 @@ The full list of categories is:
 **trivial**
   This category will **not be shown** in the changelog. It can be used to describe changes that are not touching user-facing code, like changes in tests. This is useful if every PR is required to have a changelog fragment.
 
+There are some special categories starting with "`add `"; please see the next section for details.
+
 Examples
 --------
 
@@ -163,6 +167,29 @@ An example of how a fragment with ``release_summary`` could look like is ``chang
     release_summary: |
       This is the first proper release of the ``community.general`` collection on 2020-06-20.
       The changelog describes all changes made to the modules and plugins included in this collection since Ansible 2.9.0.
+
+Adding new Roles, Playbooks, Test and Filter Plugins
+====================================================
+
+While ansible-base does not (yet) support roles, playbooks, and test and filter plugins as documentable plugins/objects, the changelog generator already has support for documenting new ones.
+
+This works by using special sections in changelog fragments whose names start with "`add `"::
+
+    ---
+    add plugin.filter:
+      - name: to_time_unit
+        description: Converts a time expression to a given unit
+      - name: to_seconds
+        description: Converts a time expression to seconds
+    add plugin.test:
+      - name: asn1time
+        description: Check whether the given string is an ASN.1 time
+    add object.role:
+      - name: nginx
+        description: A nginx installation role
+    add object.playbook:
+      - name: wipe_server
+        description: Wipes a server
 
 Porting Guide Entries
 =====================

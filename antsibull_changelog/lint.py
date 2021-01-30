@@ -14,7 +14,7 @@ from typing import Any, List, Optional, Tuple, Type, cast
 
 import semantic_version
 
-from .ansible import get_documentable_plugins
+from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .fragment import ChangelogFragment, ChangelogFragmentLinter
 from .yaml import load_yaml
@@ -34,6 +34,8 @@ class ChangelogYamlLinter:
     def __init__(self, path):
         self.errors = []
         self.path = path
+        self.valid_plugin_types = set(get_documentable_plugins())
+        self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
 
     def check_version(self, version: Any, message: str) -> Optional[semantic_version.Version]:
         """
@@ -131,7 +133,7 @@ class ChangelogYamlLinter:
         """
         for plugin_type, plugins in plugins_dict.items():
             if self.verify_type(plugin_type, (str, ), ['releases', version_str, 'plugins']):
-                if plugin_type not in get_documentable_plugins() or plugin_type == 'module':
+                if plugin_type not in self.valid_plugin_types:
                     self.errors.append((
                         self.path, 0, 0,
                         'Unknown plugin type {0!r} in {1}'.format(
@@ -141,7 +143,29 @@ class ChangelogYamlLinter:
                                 ['releases', version_str, 'plugins', plugin_type]):
                 for idx, plugin in enumerate(plugins):
                     self.verify_plugin(plugin,
-                                       ['releases', version_str, 'modules', plugin_type, idx],
+                                       ['releases', version_str, 'plugins', plugin_type, idx],
+                                       is_module=False)
+
+    def lint_objects(self, version_str: str, objects_dict: dict):
+        """
+        Lint a object dictionary.
+
+        :arg version_str: To which release the object dictionary belongs
+        :arg objects_dict: The object dictionary
+        """
+        for object_type, objects in objects_dict.items():
+            if self.verify_type(object_type, (str, ), ['releases', version_str, 'objects']):
+                if object_type not in OBJECT_TYPES:
+                    self.errors.append((
+                        self.path, 0, 0,
+                        'Unknown object type {0!r} in {1}'.format(
+                            object_type, self._format_yaml_path(
+                                ['releases', version_str, 'objects']))))
+            if self.verify_type(objects, (list, ),
+                                ['releases', version_str, 'objects', object_type]):
+                for idx, ansible_object in enumerate(objects):
+                    self.verify_plugin(ansible_object,
+                                       ['releases', version_str, 'objects', object_type, idx],
                                        is_module=False)
 
     def lint_changes(self, fragment_linter: ChangelogFragmentLinter,
@@ -191,8 +215,8 @@ class ChangelogYamlLinter:
                             ['releases', version_str, 'modules'],
                             allow_none=True) and modules:
             modules = cast(list, modules)
-            for idx, plugin in enumerate(modules):
-                self.verify_plugin(plugin,
+            for idx, module in enumerate(modules):
+                self.verify_plugin(module,
                                    ['releases', version_str, 'modules', idx],
                                    is_module=True)
 
@@ -202,6 +226,13 @@ class ChangelogYamlLinter:
                             allow_none=True) and plugins:
             plugins = cast(dict, plugins)
             self.lint_plugins(version_str, plugins)
+
+        objects = entry.get('objects')
+        if self.verify_type(objects, (dict, ),
+                            ['releases', version_str, 'objects'],
+                            allow_none=True) and objects:
+            objects = cast(dict, objects)
+            self.lint_objects(version_str, objects)
 
         fragments = entry.get('fragments')
         if self.verify_type(fragments, (list, ),
