@@ -6,6 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
+main branch
+===========
+
+Bugfixes
+--------
+
+- Make sure that the plugin caching inside ansible-base/-core works without ``--use-ansible-doc``.
+
 v0.9.0
 ======
 

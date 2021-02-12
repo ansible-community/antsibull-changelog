@@ -169,6 +169,11 @@ def list_plugins_walk(paths: PathsConfig,
         for filename in filenames:
             if filename == '__init__.py' or not filename.endswith('.py'):
                 continue
+            if not paths.is_collection and dirpath == plugin_source_path:
+                # Skip files which are *not* plugins/modules, but live in these directories inside
+                # ansible-base/-core.
+                if (plugin_type, filename) in (('cache', 'base.py'), ('module', 'async_wrapper.py')):
+                    continue
             path = follow_links(os.path.join(dirpath, filename))
             if path.endswith('.py'):
                 path = path[:-len('.py')]
