@@ -16,7 +16,7 @@ import tempfile
 
 from typing import Any, Dict, List, Optional
 
-from .ansible import get_documentable_plugins
+from .ansible import get_documentable_plugins, PLUGIN_EXCEPTIONS
 from .config import CollectionDetails, PathsConfig
 from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
@@ -172,7 +172,7 @@ def list_plugins_walk(paths: PathsConfig,
             if not paths.is_collection and dirpath == plugin_source_path:
                 # Skip files which are *not* plugins/modules, but live in these directories inside
                 # ansible-base/-core.
-                if (plugin_type, filename) in (('cache', 'base.py'), ('module', 'async_wrapper.py')):
+                if (plugin_type, filename) in PLUGIN_EXCEPTIONS:
                     continue
             path = follow_links(os.path.join(dirpath, filename))
             if path.endswith('.py'):

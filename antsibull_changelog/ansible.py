@@ -27,6 +27,10 @@ OBJECT_TYPES = ('role', 'playbook')
 
 OTHER_PLUGIN_TYPES = ('module', 'test', 'filter')
 
+# These are pairs (plugin_type, plugin_filename) inside ansible-core which are *not*
+# plugins, but files used by plugins.
+PLUGIN_EXCEPTIONS = (('cache', 'base.py'), ('module', 'async_wrapper.py'))
+
 
 def get_documentable_plugins() -> Tuple[str, ...]:
     """
