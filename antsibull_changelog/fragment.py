@@ -46,7 +46,7 @@ class ChangelogFragment:
         try:
             os.remove(self.path)
         except Exception:  # pylint: disable=broad-except
-            LOGGER.warn('Cannot remove fragment {path}'.format(
+            LOGGER.warning('Cannot remove fragment {path}'.format(
                 path=self.path,
             ))
 
@@ -58,7 +58,7 @@ class ChangelogFragment:
         try:
             os.rename(self.path, destination)
         except Exception:  # pylint: disable=broad-except
-            LOGGER.warn('Cannot move fragment {path} to {destination}'.format(
+            LOGGER.warning('Cannot move fragment {path} to {destination}'.format(
                 path=self.path,
                 destination=destination,
             ))
