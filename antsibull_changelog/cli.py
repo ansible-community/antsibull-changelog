@@ -178,6 +178,10 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
                                 action='store_true',
                                 help='if the release already exists, updates the release '
                                      'date and (if relevant) the codename')
+    release_parser.add_argument('--cummulative-release',
+                                action='store_true',
+                                help='include all plugins/modules/... that have been added '
+                                     'since the previous release / ancestor')
 
     generate_parser = subparsers.add_parser('generate',
                                             parents=[common, common_build,
@@ -418,10 +422,15 @@ def command_release(args: Any) -> int:
             # Codename is not required for collections, only version is
             version = collection_details.get_version()
 
+    changes = load_changes(config)
+
+    prev_version: Optional[str] = None
+    if args.cummulative_release:
+        prev_version = changes.latest_version if changes.has_release else changes.ancestor
+
     plugins: Optional[List[PluginDescription]]
     fragments: Optional[List[ChangelogFragment]]
 
-    changes = load_changes(config)
     plugins = load_plugins(paths=paths, collection_details=collection_details,
                            version=version, force_reload=args.reload_plugins,
                            use_ansible_doc=args.use_ansible_doc)
@@ -435,7 +444,8 @@ def command_release(args: Any) -> int:
         cast(List[PluginDescription], plugins),
         cast(List[ChangelogFragment], fragments),
         version, codename, date,
-        update_existing=args.update_existing)
+        update_existing=args.update_existing,
+        prev_version=prev_version)
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0

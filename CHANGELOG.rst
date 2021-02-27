@@ -9,6 +9,11 @@ Changelog for Ansible Changelog Tool
 main branch
 ===========
 
+Minor Changes
+-------------
+
+- The new ``--cummulative-release`` option for ``antsibull-changelog release`` allows to add all plugins and objects to a release since whose ``version_added`` is later than the previous release version (or ancestor if there was no previous release), and at latest the current release version. This is needed for major releases of ``community.general`` and similarly organized collections.
+
 Bugfixes
 --------
 
