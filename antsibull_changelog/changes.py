@@ -803,26 +803,50 @@ def load_changes(config: ChangelogConfig) -> ChangesBase:
     return ChangesData(config, path)
 
 
+def _filter_version_exact(version: str, version_added: Optional[str]) -> bool:
+    return bool(version_added) and any([
+        version.startswith('%s.' % version_added),
+        version.startswith('%s-' % version_added),  # needed for semver
+        version.startswith('%s+' % version_added),  # needed for semver
+        version == version_added
+    ])
+
+
+def _create_filter_version_range(prev_version: str, current_version: str, config: ChangelogConfig
+                                 ) -> Callable[[Optional[str]], bool]:
+    version_constructor = get_version_constructor(config)
+    prev_version_ = version_constructor(prev_version)
+    current_version_ = version_constructor(current_version)
+
+    def f(version_added: Optional[str]) -> bool:
+        if not version_added:
+            return False
+        version_added_ = version_constructor(version_added)
+        return prev_version_ < version_added_ <= current_version_
+
+    return f
+
+
 def _add_plugins_filters(changes: ChangesBase,
                          plugins: List[PluginDescription],
                          objects: List[PluginDescription],
                          version: str,
+                         prev_version: Optional[str],
                          ) -> None:
+    if prev_version is None:
+        def version_filter(obj: PluginDescription) -> bool:
+            return _filter_version_exact(version, obj.version_added)
+    else:
+        inner_version_filter = _create_filter_version_range(prev_version, version, changes.config)
+
+        def version_filter(obj: PluginDescription) -> bool:
+            return inner_version_filter(obj.version_added)
+
     # filter out plugins which were not added in this release
-    plugins = list(filter(lambda p: any([
-        version.startswith('%s.' % p.version_added),
-        version.startswith('%s-' % p.version_added),  # needed for semver
-        version.startswith('%s+' % p.version_added),  # needed for semver
-        version == p.version_added
-    ]), plugins))
+    plugins = list(filter(version_filter, plugins))
 
     # filter out objects which were not added in this release
-    objects = list(filter(lambda p: any([
-        version.startswith('%s.' % p.version_added),
-        version.startswith('%s-' % p.version_added),  # needed for semver
-        version.startswith('%s+' % p.version_added),  # needed for semver
-        version == p.version_added
-    ]), objects))
+    objects = list(filter(version_filter, objects))
 
     for plugin in plugins:
         changes.add_plugin(plugin, version)
@@ -831,7 +855,7 @@ def _add_plugins_filters(changes: ChangesBase,
         changes.add_object(ansible_object, version)
 
 
-def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
+def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,too-many-locals
                 changes: ChangesBase,
                 plugins: List[PluginDescription],
                 fragments: List[ChangelogFragment],
@@ -841,6 +865,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
                 save_changes: bool = True,
                 update_existing: bool = False,
                 objects: Optional[List[PluginDescription]] = None,
+                prev_version: Optional[str] = None,
                 ) -> None:
     """
     Add a release to the change metadata.
@@ -854,6 +879,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
     :arg date: The release date
     :arg update_existing: When set to ``True``, will update an existing release
                           instead of ignoring it
+    :arg prev_version: When provided, all plugins added after prev_version are included, and not
+                       only the ones added in this version.
     """
     # for backwards compatibility, objects can be None
     if objects is None:
@@ -868,7 +895,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments
 
     changes.add_release(version, codename, date, update_existing=update_existing)
 
-    _add_plugins_filters(changes, plugins, objects, version)
+    _add_plugins_filters(changes, plugins, objects, version, prev_version)
 
     fragments_added = []
     for fragment in fragments:
