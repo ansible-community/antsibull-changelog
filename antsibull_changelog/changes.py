@@ -855,6 +855,28 @@ def _add_plugins_filters(changes: ChangesBase,
         changes.add_object(ansible_object, version)
 
 
+def _add_fragments(changes: ChangesBase,
+                   fragments: List[ChangelogFragment],
+                   version: str,
+                   show_release_summary_warning: bool
+                   ) -> List[ChangelogFragment]:
+    fragments_added = []
+    has_release_summary = False
+    for fragment in fragments:
+        if changes.add_fragment(fragment, version):
+            fragments_added.append(fragment)
+            if changes.config.prelude_name in fragment.content:
+                has_release_summary = True
+
+    if not has_release_summary and show_release_summary_warning:
+        LOGGER.warning(
+            'Found no {} section in the changelog for this release. While this is not required,'
+            ' we suggest to add one with basic information on the release.'.format(
+                changes.config.prelude_name))
+
+    return fragments_added
+
+
 def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,too-many-locals
                 changes: ChangesBase,
                 plugins: List[PluginDescription],
@@ -866,6 +888,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,t
                 update_existing: bool = False,
                 objects: Optional[List[PluginDescription]] = None,
                 prev_version: Optional[str] = None,
+                show_release_summary_warning: bool = True,
                 ) -> None:
     """
     Add a release to the change metadata.
@@ -881,6 +904,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,t
                           instead of ignoring it
     :arg prev_version: When provided, all plugins added after prev_version are included, and not
                        only the ones added in this version.
+    :arg show_release_summary_warning: When set to ``True``, show a warning when the release has
+                                       no ``release_summary``.
     """
     # for backwards compatibility, objects can be None
     if objects is None:
@@ -897,10 +922,7 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,t
 
     _add_plugins_filters(changes, plugins, objects, version, prev_version)
 
-    fragments_added = []
-    for fragment in fragments:
-        if changes.add_fragment(fragment, version):
-            fragments_added.append(fragment)
+    fragments_added = _add_fragments(changes, fragments, version, show_release_summary_warning)
 
     if save_changes:
         changes.save()

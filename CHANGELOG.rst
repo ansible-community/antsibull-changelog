@@ -13,6 +13,7 @@ Minor Changes
 -------------
 
 - The new ``--cummulative-release`` option for ``antsibull-changelog release`` allows to add all plugins and objects to a release since whose ``version_added`` is later than the previous release version (or ancestor if there was no previous release), and at latest the current release version. This is needed for major releases of ``community.general`` and similarly organized collections.
+- Will now print a warning when a release is made where the no ``prelude_section_name`` section (default: ``release_summary``) appears.
 
 Bugfixes
 --------
