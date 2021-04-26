@@ -6,8 +6,8 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
-main branch
-===========
+v0.10.0
+=======
 
 Minor Changes
 -------------
