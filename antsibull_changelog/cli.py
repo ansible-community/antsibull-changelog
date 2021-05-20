@@ -364,6 +364,7 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
         allow_removals = (refresh_plugins == 'allow-removal')
 
         changes.update_plugins(plugins, allow_removals=allow_removals)
+        changes.update_objects(plugins, allow_removals=allow_removals)
 
     if refresh_fragments:
         if fragments is None:
@@ -445,7 +446,9 @@ def command_release(args: Any) -> int:
         cast(List[ChangelogFragment], fragments),
         version, codename, date,
         update_existing=args.update_existing,
-        prev_version=prev_version)
+        prev_version=prev_version,
+        objects=cast(List[PluginDescription], plugins),
+    )
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0

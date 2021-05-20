@@ -16,7 +16,7 @@ import tempfile
 
 from typing import Any, Dict, List, Optional
 
-from .ansible import get_documentable_plugins, PLUGIN_EXCEPTIONS
+from .ansible import get_documentable_plugins, get_documentable_objects, PLUGIN_EXCEPTIONS
 from .config import CollectionDetails, PathsConfig
 from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
@@ -28,6 +28,7 @@ class PluginDescription:
     Stores a description of one plugin.
     """
 
+    category: str
     type: str
     name: str
     namespace: Optional[str]
@@ -35,11 +36,13 @@ class PluginDescription:
     version_added: Optional[str]
 
     def __init__(self, plugin_type: str, name: str, namespace: Optional[str],
-                 description: str, version_added: Optional[str]):
+                 description: str, version_added: Optional[str],
+                 category: str = 'plugin'):
         # pylint: disable=too-many-arguments
         """
         Create a new plugin description.
         """
+        self.category = category
         self.type = plugin_type
         self.name = name
         self.namespace = namespace
@@ -47,7 +50,8 @@ class PluginDescription:
         self.version_added = version_added
 
     @staticmethod
-    def from_dict(data: Dict[str, Dict[str, Dict[str, Any]]]):
+    def from_dict(data: Dict[str, Dict[str, Dict[str, Any]]],
+                  category: str = 'plugin') -> 'List[PluginDescription]':
         """
         Return a list of ``PluginDescription`` objects from the given data.
 
@@ -64,6 +68,7 @@ class PluginDescription:
                     namespace=plugin_details.get('namespace'),
                     description=plugin_details['description'],
                     version_added=plugin_details['version_added'],
+                    category=category,
                 ))
 
         return plugins
@@ -83,42 +88,56 @@ def follow_links(path: str) -> str:
     return path
 
 
-def jsondoc_to_metadata(paths: PathsConfig, collection_name: Optional[str],
-                        plugin_type: str, name: str, data: Dict[str, Any]) -> Dict[str, Any]:
+def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filename: str) -> str:
+    """
+    Given a filename of a module, will extract the module's namespace.
+    """
+    # Follow links
+    filename = follow_links(filename)
+    # Determine relative path
+    if collection_name:
+        rel_to = os.path.join(paths.base_dir, 'plugins', 'modules')
+    else:
+        rel_to = os.path.join(paths.base_dir, 'lib', 'ansible', 'modules')
+    path = os.path.relpath(filename, rel_to)
+    path = os.path.split(path)[0]
+    # Extract namespace from relative path
+    namespace_list: List[str] = []
+    while True:
+        (path, last), prev = os.path.split(path), path
+        if path == prev:
+            break
+        if last not in ('', '.', '..'):
+            namespace_list.insert(0, last)
+    return'.'.join(namespace_list)
+
+
+def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
+                        collection_name: Optional[str],
+                        plugin_type: str, name: str, data: Dict[str, Any],
+                        category: str = 'plugin') -> Dict[str, Any]:
     """
     Convert ``ansible-doc --json`` output to plugin metadata.
 
     :arg paths: Paths configuration
     :arg collection_name: The name of the collection, if appropriate
-    :arg plugin_type: The plugin's type
+    :arg plugin_type: The plugin's or object's type
     :arg name: The plugin's name
     :arg data: The JSON for this plugin returned by ``ansible-doc --json``
+    :arg category: Set to ``object`` for roles and playbooks
     """
     namespace: Optional[str] = None
     if collection_name and name.startswith(collection_name + '.'):
         name = name[len(collection_name) + 1:]
     docs: dict = data.get('doc') or dict()
-    if plugin_type == 'module':
+    if category == 'object' and plugin_type == 'role':
+        entrypoints: dict = data.get('entry_points') or dict()
+        if 'main' in entrypoints:
+            docs = entrypoints['main']
+    if category == 'plugin' and plugin_type == 'module':
         filename: Optional[str] = docs.get('filename')
         if filename:
-            # Follow links
-            filename = follow_links(filename)
-            # Determine relative path
-            if collection_name:
-                rel_to = os.path.join(paths.base_dir, 'plugins', 'modules')
-            else:
-                rel_to = os.path.join(paths.base_dir, 'lib', 'ansible', 'modules')
-            path = os.path.relpath(filename, rel_to)
-            path = os.path.split(path)[0]
-            # Extract namespace from relative path
-            namespace_list: List[str] = []
-            while True:
-                (path, last), prev = os.path.split(path), path
-                if path == prev:
-                    break
-                if last not in ('', '.', '..'):
-                    namespace_list.insert(0, last)
-            namespace = '.'.join(namespace_list)
+            namespace = extract_namespace(paths, collection_name, filename)
         if '.' in name:
             # Flatmapping
             name = name[name.rfind('.') + 1:]
@@ -130,11 +149,13 @@ def jsondoc_to_metadata(paths: PathsConfig, collection_name: Optional[str],
     }
 
 
-def get_plugins_path(paths: PathsConfig, plugin_type: str) -> str:
+def get_plugins_path(paths: PathsConfig, plugin_type: str, category: str = 'plugin') -> str:
     """
     Return path to plugins of a given type.
     """
     if paths.is_collection:
+        if category == 'object':
+            return os.path.join(paths.base_dir, '{0}s'.format(plugin_type))
         return os.path.join(
             paths.base_dir, 'plugins', 'modules' if plugin_type == 'module' else plugin_type)
     lib_ansible = os.path.join(paths.base_dir, 'lib', 'ansible')
@@ -191,7 +212,8 @@ def list_plugins_walk(paths: PathsConfig,
 def list_plugins_ansibledoc(paths: PathsConfig,
                             playbook_dir: Optional[str],
                             plugin_type: str,
-                            collection_name: Optional[str]) -> List[str]:
+                            collection_name: Optional[str],
+                            category: str = 'plugin') -> List[str]:
     """
     Find all plugins of a type in a collection, or in Ansible-base. Uses ansible-doc.
 
@@ -202,7 +224,7 @@ def list_plugins_ansibledoc(paths: PathsConfig,
     :arg plugin_type: The plugin type to consider
     :arg collection_name: The name of the collection, if appropriate.
     """
-    plugin_source_path = get_plugins_path(paths, plugin_type)
+    plugin_source_path = get_plugins_path(paths, plugin_type, category)
 
     if not os.path.exists(plugin_source_path) or os.listdir(plugin_source_path) == []:
         return []
@@ -246,23 +268,26 @@ def run_ansible_doc(paths: PathsConfig, playbook_dir: Optional[str],
     return json.loads(output.decode('utf-8'))
 
 
-def load_plugin_metadata(paths: PathsConfig,
+def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
                          playbook_dir: Optional[str],
                          plugin_type: str,
                          collection_name: Optional[str],
-                         use_ansible_doc: bool = False) -> Dict[str, Dict[str, Any]]:
+                         use_ansible_doc: bool = False,
+                         category: str = 'plugin') -> Dict[str, Dict[str, Any]]:
     """
     Collect plugin metadata for all plugins of a given type.
 
     :arg paths: Paths configuration
     :arg playbook_dir: Value for the ``--playbook-dir`` argument of ``ansible-doc``
-    :arg plugin_type: The plugin type to consider
+    :arg plugin_type: The plugin type or object type to consider
     :arg collection_name: The name of the collection, if appropriate
     :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
+    :arg category: Set to ``object`` for roles and playbooks
     """
-    if use_ansible_doc:
+    if use_ansible_doc or category == 'object':
         # WARNING: Do not make this the default to this before ansible-base is a requirement!
-        plugins_list = list_plugins_ansibledoc(paths, playbook_dir, plugin_type, collection_name)
+        plugins_list = list_plugins_ansibledoc(
+            paths, playbook_dir, plugin_type, collection_name, category)
     else:
         plugins_list = list_plugins_walk(paths, playbook_dir, plugin_type, collection_name)
 
@@ -273,7 +298,8 @@ def load_plugin_metadata(paths: PathsConfig,
     plugins_data = run_ansible_doc(paths, playbook_dir, plugin_type, plugins_list)
 
     for name, data in plugins_data.items():
-        processed_data = jsondoc_to_metadata(paths, collection_name, plugin_type, name, data)
+        processed_data = jsondoc_to_metadata(
+            paths, collection_name, plugin_type, name, data, category=category)
         result[processed_data['name']] = processed_data
     return result
 
@@ -310,6 +336,34 @@ class CollectionCopier:
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
+def _load_collection_plugins(plugins_data: Dict[str, Any],
+                             paths: PathsConfig,
+                             collection_details: CollectionDetails,
+                             use_ansible_doc: bool) -> None:
+    collection_name = '{}.{}'.format(
+        collection_details.get_namespace(), collection_details.get_name())
+
+    with CollectionCopier(
+            paths, collection_details.get_namespace(), collection_details.get_name()
+    ) as (playbook_dir, new_paths):
+        for plugin_type in get_documentable_plugins():
+            plugins_data['plugins'][plugin_type] = load_plugin_metadata(
+                new_paths, playbook_dir, plugin_type, collection_name,
+                use_ansible_doc=use_ansible_doc)
+
+        for object_type in get_documentable_objects():
+            plugins_data['objects'][object_type] = load_plugin_metadata(
+                new_paths, playbook_dir, object_type, collection_name,
+                use_ansible_doc=use_ansible_doc, category='object')
+
+
+def _load_ansible_plugins(plugins_data: Dict[str, Any], paths: PathsConfig,
+                          use_ansible_doc: bool) -> None:
+    for plugin_type in get_documentable_plugins():
+        plugins_data['plugins'][plugin_type] = load_plugin_metadata(
+            paths, None, plugin_type, None, use_ansible_doc=use_ansible_doc)
+
+
 def load_plugins(paths: PathsConfig,
                  collection_details: CollectionDetails,
                  version: str,
@@ -340,33 +394,24 @@ def load_plugins(paths: PathsConfig,
 
         plugins_data['version'] = version
         plugins_data['plugins'] = {}
+        plugins_data['objects'] = {}
 
-        collection_name: Optional[str] = None
         if paths.is_collection:
-            collection_name = '{}.{}'.format(
-                collection_details.get_namespace(), collection_details.get_name())
-
-            with CollectionCopier(
-                    paths, collection_details.get_namespace(), collection_details.get_name()
-            ) as (playbook_dir, new_paths):
-                for plugin_type in get_documentable_plugins():
-                    plugins_data['plugins'][plugin_type] = load_plugin_metadata(
-                        new_paths, playbook_dir, plugin_type, collection_name,
-                        use_ansible_doc=use_ansible_doc)
-
+            _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
         else:
-            for plugin_type in get_documentable_plugins():
-                plugins_data['plugins'][plugin_type] = load_plugin_metadata(
-                    paths, None, plugin_type, collection_name, use_ansible_doc=use_ansible_doc)
+            _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
 
         # remove empty namespaces from plugins
-        for section in plugins_data['plugins'].values():
-            for plugin in section.values():
-                if plugin['namespace'] is None:
-                    del plugin['namespace']
+        for category in ('plugins', 'objects'):
+            for section in plugins_data[category].values():
+                for plugin in section.values():
+                    if plugin['namespace'] is None:
+                        del plugin['namespace']
 
         store_yaml(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(plugins_data['plugins'])
+    if 'objects' in plugins_data:
+        plugins.extend(PluginDescription.from_dict(plugins_data['objects'], category='object'))
 
     return plugins

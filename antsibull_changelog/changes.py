@@ -185,6 +185,9 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         :return: ``True`` if the plugin was added for this version
         """
+        if plugin.category != 'plugin':
+            return False
+
         composite_name = '%s/%s' % (plugin.type, plugin.name)
 
         if composite_name in self.known_plugins:
@@ -220,6 +223,9 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         :return: ``True`` if the object was added for this version
         """
+        if ansible_object.category != 'object':
+            return False
+
         composite_name = '%s/%s' % (ansible_object.type, ansible_object.name)
 
         if composite_name in self.known_objects:
@@ -307,7 +313,8 @@ class ChangesMetadata(ChangesBase):
         valid_plugins = collections.defaultdict(set)
 
         for plugin in plugins:
-            valid_plugins[plugin.type].add(plugin.name)
+            if plugin.category == 'plugin':
+                valid_plugins[plugin.type].add(plugin.name)
 
         for _, config in self.releases.items():
             if 'modules' in config:
@@ -473,7 +480,8 @@ class ChangesData(ChangesBase):
         valid_plugins: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
 
         for plugin in plugins:
-            valid_plugins[plugin.type][plugin.name] = plugin
+            if plugin.category == 'plugin':
+                valid_plugins[plugin.type][plugin.name] = plugin
 
         for _, config in self.releases.items():
             if 'modules' in config:
@@ -523,7 +531,8 @@ class ChangesData(ChangesBase):
         valid_objects: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
 
         for ansible_object in objects:
-            valid_objects[ansible_object.type][ansible_object.name] = ansible_object
+            if ansible_object.category == 'object':
+                valid_objects[ansible_object.type][ansible_object.name] = ansible_object
 
         for _, config in self.releases.items():
             if 'objects' in config:
@@ -843,10 +852,16 @@ def _add_plugins_filters(changes: ChangesBase,
             return inner_version_filter(obj.version_added)
 
     # filter out plugins which were not added in this release
-    plugins = list(filter(version_filter, plugins))
+    plugins = [
+        plugin for plugin in plugins
+        if version_filter(plugin) and plugin.category == 'plugin'
+    ]
 
     # filter out objects which were not added in this release
-    objects = list(filter(version_filter, objects))
+    objects = [
+        ansible_object for ansible_object in objects
+        if version_filter(ansible_object) and ansible_object.category == 'object'
+    ]
 
     for plugin in plugins:
         changes.add_plugin(plugin, version)
