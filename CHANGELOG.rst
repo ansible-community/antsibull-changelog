@@ -6,6 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
+v0.10.1
+=======
+
+Bugfixes
+--------
+
+- When subdirectories of ``modules`` are used in ansible-base/ansible-core, the wrong module name was passed to ``ansible-doc`` when ``--use-ansible-doc`` was not used.
+
 v0.10.0
 =======
 

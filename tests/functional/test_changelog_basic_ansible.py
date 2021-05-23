@@ -763,9 +763,9 @@ def fake_ansible_doc_ansible(paths: PathsConfig,
             }
         }
     if plugin_type == 'module':
-        assert sorted(plugin_names) == ['cloud.sky.old_module', 'test_module']
+        assert sorted(plugin_names) == ['old_module', 'test_module']
         return {
-            'cloud.sky.old_module': {
+            'old_module': {
                 'doc': {
                     'author': ['Elder'],
                     'description': ['This is an old module.'],
