@@ -7,7 +7,7 @@
 Return Ansible-specific information, like current release or list of documentable plugins.
 """
 
-from typing import Tuple
+from typing import Any, Tuple
 
 import packaging.version
 
@@ -18,10 +18,12 @@ except ImportError:
     HAS_ANSIBLE_CONSTANTS = False
 
 
+ansible_release: Any
 try:
     from ansible import release as ansible_release
     HAS_ANSIBLE_RELEASE = True
 except ImportError:
+    ansible_release = None
     HAS_ANSIBLE_RELEASE = False
 
 

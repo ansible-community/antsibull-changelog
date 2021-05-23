@@ -421,6 +421,21 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
 
         return fake_subprocess_ansible_doc
 
+    def add_role(self, name, entry_points):
+        role_meta_dir = os.path.join(self.paths.base_dir, 'roles', name, 'meta')
+        self.mkdir(role_meta_dir)
+        main = yaml.dump({
+            'galaxy_info': {
+                'role_name': name,
+            },
+            'dependencies': [],
+        }, Dumper=yaml.SafeDumper).encode('utf-8')
+        self._write(os.path.join(role_meta_dir, 'main.yml'), main)
+        argspec = yaml.dump({
+            'argument_specs': entry_points,
+        }, Dumper=yaml.SafeDumper).encode('utf-8')
+        self._write(os.path.join(role_meta_dir, 'argument_spec.yml'), argspec)
+
 
 @pytest.fixture
 def ansible_changelog(tmp_path_factory) -> AnsibleChangelogEnvironment:

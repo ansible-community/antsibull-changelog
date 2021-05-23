@@ -14,6 +14,8 @@ import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
+import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
+
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
@@ -1370,9 +1372,56 @@ FAKE_PLUGINS = {
             'return': {},
         },
     },
+    'role': {
+        'acme.test.test_role': {
+            'collection': 'acme.test',
+            'entry_points': {
+                'main': {
+                    'short_description': 'Test role',
+                    'version_added': '1.0.0',
+                    'options': {},
+                },
+                'foo': {
+                    'short_description': 'Test role foo entrypoint',
+                    'version_added': '0.9.0',
+                    'options': {},
+                },
+            },
+            'path': '',
+        },
+        'acme.test.old_role': {
+            'collection': 'acme.test',
+            'entry_points': {
+                'main': {
+                    'short_description': 'Old role',
+                    'options': {},
+                },
+            },
+            'path': '',
+        },
+        'acme.test.funky_role': {
+            'collection': 'acme.test',
+            'entry_points': {
+                'funky': {
+                    'short_description': 'A funky role',
+                    'version_added': '1.0.0',
+                    'options': {},
+                },
+            },
+            'path': '',
+        },
+    },
 }
 
 
+class FakeAnsibleRelease:
+    def __init__(self, version: str, codename: str):
+        self.__version__ = version
+        self.__codename__ = codename
+
+
+@mock.patch('antsibull_changelog.ansible.HAS_ANSIBLE_RELEASE', True)
+@mock.patch('antsibull_changelog.ansible.ansible_release', FakeAnsibleRelease('2.11.0', 'dummy codename'))
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         collection_changelog):  # noqa: F811
     with mock.patch('subprocess.check_output',
@@ -1453,6 +1502,31 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
             EXAMPLES='# Some examples\n',
             RETURN={},
         ), subdirs=['dont', 'find', 'me'])
+        collection_changelog.add_role('test_role', {
+            'main': {
+                'short_description': 'Test role',
+                'version_added': '1.0.0',
+                'options': {},
+            },
+            'foo': {
+                'short_description': 'Test role foo entrypoint',
+                'version_added': '0.9.0',
+                'options': {},
+            },
+        })
+        collection_changelog.add_role('old_role', {
+            'main': {
+                'short_description': 'Old role',
+                'options': {},
+            },
+        })
+        collection_changelog.add_role('funky_role', {
+            'funky': {
+                'short_description': 'A funky role',
+                'version_added': '1.0.0',
+                'options': {},
+            },
+        })
 
         assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
 
@@ -1489,6 +1563,21 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         assert plugin_cache['plugins']['callback']['test_callback']['version_added'] == '0.5.0'
         assert 'namespace' not in plugin_cache['plugins']['callback']['test_callback']
 
+        # Plugin cache: roles
+        assert sorted(plugin_cache['objects']['role']) == ['funky_role', 'old_role', 'test_role']
+        assert plugin_cache['objects']['role']['funky_role']['name'] == 'funky_role'
+        assert plugin_cache['objects']['role']['funky_role']['description'] is None
+        assert plugin_cache['objects']['role']['funky_role']['version_added'] is None
+        assert 'namespace' not in plugin_cache['objects']['role']['funky_role']
+        assert plugin_cache['objects']['role']['old_role']['name'] == 'old_role'
+        assert plugin_cache['objects']['role']['old_role']['description'] == 'Old role'
+        assert plugin_cache['objects']['role']['old_role']['version_added'] is None
+        assert 'namespace' not in plugin_cache['objects']['role']['old_role']
+        assert plugin_cache['objects']['role']['test_role']['name'] == 'test_role'
+        assert plugin_cache['objects']['role']['test_role']['description'] == 'Test role'
+        assert plugin_cache['objects']['role']['test_role']['version_added'] == '1.0.0'
+        assert 'namespace' not in plugin_cache['objects']['role']['test_role']
+
         # Changelog
         changelog = diff.parse_yaml('changelogs/changelog.yaml')
         assert changelog['ancestor'] is None
@@ -1524,6 +1613,11 @@ New Modules
 -----------
 
 - acme.test.test_module - A test module
+
+New Roles
+---------
+
+- acme.test.test_role - Test role
 ''')
 
         # Force reloading plugins. This time use ansible-doc for listing plugins.
