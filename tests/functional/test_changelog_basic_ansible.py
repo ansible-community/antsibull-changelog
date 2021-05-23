@@ -976,3 +976,10 @@ New Modules
 
 - test_module - A test module
 ''')
+
+        # Force reloading plugins. This time use ansible-doc for listing plugins.
+        assert ansible_changelog.run_tool('generate', ['-v', '--reload-plugins', '--use-ansible-doc']) == 0
+
+        diff = ansible_changelog.diff()
+        diff.dump()
+        assert diff.unchanged
