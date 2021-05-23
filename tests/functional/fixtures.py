@@ -9,12 +9,13 @@ Fixtures for changelog tests.
 
 import difflib
 import io
+import json
 import os
 import pathlib
 import textwrap
 
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Any, Dict, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
 
 import pytest
 import yaml
@@ -284,6 +285,42 @@ class ChangelogEnvironment:
         result.dump()
         return result
 
+    def _create_ansible_doc_list(self,
+                                 plugin_data: Dict[str, Dict[str, Any]],
+                                 plugin_type: str) -> Dict[str, Any]:
+        if plugin_type == 'role':
+            # Role listing works differently
+            result = dict()
+            for role, role_data in plugin_data[plugin_type].items():
+                result[role] = {
+                    'collection': role_data['collection'],
+                    'entry_points': {
+                        ep: ep_data.get('short_description')
+                        for ep, ep_data in role_data['entry_points'].items()
+                    }
+                }
+            return result
+        return {
+            plugin_name: plugin_data.get('short_description')
+            for plugin_name, plugin_data in plugin_data[plugin_type].items()
+        }
+
+    def _create_ansible_doc_info(self,
+                                 plugin_data: Dict[str, Dict[str, Any]],
+                                 plugin_type: str,
+                                 plugin_names: List[str],
+                                 base_dir: str) -> Dict[str, Any]:
+        result = dict()
+        for plugin_name in plugin_names:
+            doc = plugin_data[plugin_type][plugin_name].copy()
+            if 'doc' in doc and 'filename' in doc['doc']:
+                doc['doc'] = doc['doc'].copy()
+                doc['doc']['filename'] = os.path.join(base_dir, doc['doc']['filename'])
+            if 'path' in doc:
+                doc['path'] = os.path.join(base_dir, doc['path'])
+            result[plugin_name] = doc
+        return result
+
 
 class AnsibleChangelogEnvironment(ChangelogEnvironment):
     """
@@ -300,6 +337,27 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
         if plugin_type == 'module':
             return ['lib', 'ansible', 'modules']
         return ['lib', 'ansible', 'plugins', plugin_type]
+
+    def create_fake_subprocess_ansible_doc(self, plugin_data: Dict[str, Dict[str, Any]]
+                                           ) -> Callable[[List[str]], str]:
+        def fake_subprocess_ansible_doc(command: List[str]) -> str:
+            if command[0].endswith('ansible-doc') and command[1] == '--json' and command[2] == '-t':
+                plugin_type = command[3]
+                args = command[4:]
+                do_list = False
+                if args[0] == '--list':
+                    do_list = True
+                    args = args[1:]
+                if do_list:
+                    if args:
+                        raise Exception('Unexpected list commands: {0}'.format(args))
+                    result = self._create_ansible_doc_list(plugin_data, plugin_type)
+                else:
+                    result = self._create_ansible_doc_info(plugin_data, plugin_type, args, self.paths.base_dir)
+                return json.dumps(result).encode('utf-8')
+            raise Exception('Unexpected command: {0}'.format(command))
+
+        return fake_subprocess_ansible_doc
 
 
 class CollectionChangelogEnvironment(ChangelogEnvironment):
@@ -329,6 +387,39 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         galaxy_path = os.path.join(self.paths.base_dir, 'galaxy.yml')
         self._write_yaml(galaxy_path, data)
         self.paths.galaxy_path = galaxy_path
+
+    def create_fake_subprocess_ansible_doc(self, plugin_data: Dict[str, Dict[str, Any]]
+                                           ) -> Callable[[List[str]], str]:
+        def fake_subprocess_ansible_doc(command: List[str]) -> str:
+            base_dir = self.paths.base_dir
+            if command[0].endswith('ansible-doc') and command[1] == '--json' and command[2] == '-t':
+                plugin_type = command[3]
+                args = command[4:]
+                do_list = False
+                if args[0] == '--list':
+                    do_list = True
+                    args = args[1:]
+                if args[0] == '--playbook-dir':
+                    base_dir = os.path.join(
+                        args[1],
+                        'collections',
+                        'ansible_collections',
+                        self.namespace,
+                        self.collection,
+                    )
+                    args = args[2:]
+                if do_list:
+                    if len(args) and args[0] == self.collection_name:
+                        args = args[1:]
+                    if args:
+                        raise Exception('Unexpected list commands: {0}'.format(args))
+                    result = self._create_ansible_doc_list(plugin_data, plugin_type)
+                else:
+                    result = self._create_ansible_doc_info(plugin_data, plugin_type, args, base_dir)
+                return json.dumps(result).encode('utf-8')
+            raise Exception('Unexpected command: {0}'.format(command))
+
+        return fake_subprocess_ansible_doc
 
 
 @pytest.fixture
