@@ -175,9 +175,11 @@ def list_plugins_walk(paths: PathsConfig,
                 if (plugin_type, filename) in PLUGIN_EXCEPTIONS:
                     continue
             path = follow_links(os.path.join(dirpath, filename))
-            if path.endswith('.py'):
-                path = path[:-len('.py')]
+            path = os.path.splitext(path)[0]
             relpath = os.path.relpath(path, plugin_source_path)
+            if not paths.is_collection and os.sep in relpath:
+                # When listing modules in ansible-base/-core, get rid of the namespace.
+                relpath = os.path.basename(relpath)
             relname = relpath.replace(os.sep, '.')
             if collection_name:
                 relname = '{0}.{1}'.format(collection_name, relname)
