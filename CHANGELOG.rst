@@ -6,7 +6,6 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
-=======
 v0.11.0
 =======
 
