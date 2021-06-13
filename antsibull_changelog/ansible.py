@@ -7,7 +7,9 @@
 Return Ansible-specific information, like current release or list of documentable plugins.
 """
 
-from typing import Tuple
+from typing import Any, Tuple
+
+import packaging.version
 
 try:
     from ansible import constants as C
@@ -16,10 +18,12 @@ except ImportError:
     HAS_ANSIBLE_CONSTANTS = False
 
 
+ansible_release: Any
 try:
     from ansible import release as ansible_release
     HAS_ANSIBLE_RELEASE = True
 except ImportError:
+    ansible_release = None
     HAS_ANSIBLE_RELEASE = False
 
 
@@ -42,6 +46,17 @@ def get_documentable_plugins() -> Tuple[str, ...]:
         'become', 'cache', 'callback', 'cliconf', 'connection', 'httpapi', 'inventory',
         'lookup', 'netconf', 'shell', 'vars', 'module', 'strategy',
     )
+
+
+def get_documentable_objects() -> Tuple[str, ...]:
+    """
+    Retrieve object types that can be documented.
+    """
+    if not HAS_ANSIBLE_RELEASE:
+        return ()
+    if packaging.version.Version(ansible_release.__version__) < packaging.version.Version('2.11.0'):
+        return ()
+    return ('role', )
 
 
 def get_ansible_release() -> Tuple[str, str]:

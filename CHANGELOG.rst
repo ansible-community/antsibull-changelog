@@ -6,8 +6,14 @@ Changelog for Ansible Changelog Tool
    :local:
    :depth: 1
 
-v0.10.1
 =======
+v0.11.0
+=======
+
+Minor Changes
+-------------
+
+- When using ansible-core 2.11 or newer, will now detect new roles with argument spec. We only consider the ``main`` entrypoint of roles.
 
 Bugfixes
 --------
