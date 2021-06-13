@@ -40,6 +40,8 @@ pyre-check = "^0.0.56"
 pylint = "*"
 mypy = "*"
 mock = "*"
+types-docutils = "*"
+types-PyYAML = "*"
 
 [tool.isort]
 line_length = 100
