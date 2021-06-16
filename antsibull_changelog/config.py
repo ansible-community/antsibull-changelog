@@ -18,12 +18,21 @@ from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
 
 
+def _is_other_project_config(config_path: str) -> bool:
+    try:
+        config = load_yaml(config_path)
+        return config.get('is_other_project', False)
+    except Exception as exc:  # pylint: disable=broad-except
+        return False
+
+
 class PathsConfig:
     """
     Configuration for paths.
     """
 
     is_collection: bool
+    is_other_project: bool
 
     base_dir: str
     galaxy_path: Optional[str]
@@ -40,15 +49,18 @@ class PathsConfig:
         return os.path.join(changelog_dir, 'config.yaml')
 
     def __init__(self, is_collection: bool, base_dir: str, galaxy_path: Optional[str],
-                 ansible_doc_path: Optional[str]):
+                 ansible_doc_path: Optional[str], is_other_project: bool = False):
         """
         Forces configuration with given base path.
 
         :arg base_dir: Base directory of Ansible checkout or collection checkout
         :arg galaxy_path: Path to galaxy.yml for collection checkouts
         :arg ansible_doc_path: Path to ``ansible-doc``
+        :arg is_other_project: Flag whether this config belongs to another project than
+                               ansible-core or an Ansible collection
         """
         self.is_collection = is_collection
+        self.is_other_project = is_other_project
         self.base_dir = base_dir
         if galaxy_path and not os.path.exists(galaxy_path):
             LOGGER.debug('Cannot find galaxy.yml')
@@ -83,6 +95,19 @@ class PathsConfig:
         return PathsConfig(False, base_dir, None, ansible_doc_bin)
 
     @staticmethod
+    def force_other(base_dir: str,
+                    ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+        """
+        Forces configuration for a project that's neither ansible-core/-base nor an
+        Ansible collection.
+
+        :type base_dir: Base directory of the project
+        :arg ansible_doc_bin: Override path to ansible-doc.
+        """
+        base_dir = os.path.abspath(base_dir)
+        return PathsConfig(False, base_dir, None, ansible_doc_bin, is_other_project=True)
+
+    @staticmethod
     def detect(is_collection: Optional[bool] = None,
                ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
@@ -105,6 +130,10 @@ class PathsConfig:
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
+                if not is_collection and _is_other_project_config(config_path):
+                    # This is neither ansible-core/-base nor an Ansible collection,
+                    # but explicitly marked as an 'other project'
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin, is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection or ansible-base checkout.')

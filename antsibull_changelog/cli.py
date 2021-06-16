@@ -411,7 +411,7 @@ def command_release(args: Any) -> int:
     flatmap = _determine_flatmap(collection_details, config)
 
     if not version or not codename:
-        if not config.is_collection:
+        if not config.is_collection and not paths.is_other_project:
             # Both version and codename are required for Ansible (Base)
             try:
                 version, codename = get_ansible_release()
@@ -419,9 +419,12 @@ def command_release(args: Any) -> int:
                 LOGGER.error('Cannot import ansible.release to determine version and codename')
                 return 5
 
-        elif not version:
+        elif config.is_collection and not version:
             # Codename is not required for collections, only version is
             version = collection_details.get_version()
+        elif paths.is_other_project and not version:
+            LOGGER.error('You need to explicitly specify the version for other projects with --version')
+            return 5
 
     changes = load_changes(config)
 

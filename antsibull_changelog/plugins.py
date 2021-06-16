@@ -379,6 +379,9 @@ def load_plugins(paths: PathsConfig,
     :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     :return: A list of all plugins
     """
+    if paths.is_other_project:
+        return []
+
     plugin_cache_path = os.path.join(paths.changelog_dir, '.plugin-cache.yaml')
     plugins_data: Dict[str, Any] = {}
 
