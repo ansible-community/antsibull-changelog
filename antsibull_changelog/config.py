@@ -22,7 +22,7 @@ def _is_other_project_config(config_path: str) -> bool:
     try:
         config = load_yaml(config_path)
         return config.get('is_other_project', False)
-    except Exception as exc:  # pylint: disable=broad-except
+    except:  # pylint: disable=bare-except;  # noqa: E722
         return False
 
 
@@ -49,7 +49,8 @@ class PathsConfig:
         return os.path.join(changelog_dir, 'config.yaml')
 
     def __init__(self, is_collection: bool, base_dir: str, galaxy_path: Optional[str],
-                 ansible_doc_path: Optional[str], is_other_project: bool = False):
+                 ansible_doc_path: Optional[str], is_other_project: bool = False
+                 ):  # pylint: disable=too-many-arguments
         """
         Forces configuration with given base path.
 
@@ -133,7 +134,8 @@ class PathsConfig:
                 if not is_collection and _is_other_project_config(config_path):
                     # This is neither ansible-core/-base nor an Ansible collection,
                     # but explicitly marked as an 'other project'
-                    return PathsConfig(False, base_dir, None, ansible_doc_bin, is_other_project=True)
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
+                                       is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection or ansible-base checkout.')

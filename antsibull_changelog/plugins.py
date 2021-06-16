@@ -364,6 +364,33 @@ def _load_ansible_plugins(plugins_data: Dict[str, Any], paths: PathsConfig,
             paths, None, plugin_type, None, use_ansible_doc=use_ansible_doc)
 
 
+def _refresh_plugin_cache(paths: PathsConfig,
+                          collection_details: CollectionDetails,
+                          version: str,
+                          use_ansible_doc: bool = False):
+    LOGGER.info('refreshing plugin cache')
+
+    plugins_data: Dict[str, Any] = {
+        'version': version,
+        'plugins': {},
+        'objects': {},
+    }
+
+    if paths.is_collection:
+        _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
+    else:
+        _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
+
+    # remove empty namespaces from plugins
+    for category in ('plugins', 'objects'):
+        for section in plugins_data[category].values():
+            for plugin in section.values():
+                if plugin['namespace'] is None:
+                    del plugin['namespace']
+
+    return plugins_data
+
+
 def load_plugins(paths: PathsConfig,
                  collection_details: CollectionDetails,
                  version: str,
@@ -393,24 +420,7 @@ def load_plugins(paths: PathsConfig,
             plugins_data = {}
 
     if not plugins_data:
-        LOGGER.info('refreshing plugin cache')
-
-        plugins_data['version'] = version
-        plugins_data['plugins'] = {}
-        plugins_data['objects'] = {}
-
-        if paths.is_collection:
-            _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
-        else:
-            _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
-
-        # remove empty namespaces from plugins
-        for category in ('plugins', 'objects'):
-            for section in plugins_data[category].values():
-                for plugin in section.values():
-                    if plugin['namespace'] is None:
-                        del plugin['namespace']
-
+        plugins_data = _refresh_plugin_cache(paths, collection_details, version, use_ansible_doc)
         store_yaml(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(plugins_data['plugins'])
