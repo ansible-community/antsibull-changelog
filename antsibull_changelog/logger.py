@@ -44,19 +44,26 @@ class FormattingAdapter(logging.LoggerAdapter):
 
 LOGGER = FormattingAdapter(logging.getLogger('changelog'))
 
+_LOGGER_SET_UP = False
+
 
 def setup_logger(verbosity: int) -> None:
     """
     Setup logger.
     """
-    formatter = logging.Formatter('%(levelname)s %(message)s')
+    global _LOGGER_SET_UP
 
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
+    if not _LOGGER_SET_UP:
+        formatter = logging.Formatter('%(levelname)s %(message)s')
 
-    LOGGER.addHandler(handler)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(formatter)
+
+        LOGGER.addHandler(handler)
+
+        _LOGGER_SET_UP = True
+
     LOGGER.setLevel(logging.WARN)
-
     if verbosity > 2:
         LOGGER.setLevel(logging.DEBUG)
     elif verbosity > 1:
