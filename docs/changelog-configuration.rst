@@ -64,6 +64,13 @@ Can be set to ``true`` or ``false`` explicitly to enable respectively disable fl
 
 When enabled, a plugin ``foo.bar.subdir.dir.plugin_name`` will be mentioned as ``plugin_name`` or ``foo.bar.plugin_name`` (if ``use_fqcn`` is ``true``), instead of as ``subdir.dir.plugin_name`` respectively ``foo.bar.subdir.dir.plugin_name``.
 
+``is_other_project`` (boolean)
+------------------------------
+
+The default value is ``false``.
+
+If set to ``true``, does not look for ``galaxy.yml`` and does not look for new Ansible objects (plugins, modules and roles). This allows the changelog generator to be used for projects which are not ansible-base/-core or an Ansible collection.
+
 ``ignore_other_fragment_extensions`` (boolean)
 ----------------------------------------------
 
