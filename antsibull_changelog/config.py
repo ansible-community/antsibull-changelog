@@ -63,7 +63,7 @@ class PathsConfig:
         self.is_collection = is_collection
         self.is_other_project = is_other_project
         self.base_dir = base_dir
-        if galaxy_path and not os.path.exists(galaxy_path):
+        if not self.is_other_project and galaxy_path and not os.path.exists(galaxy_path):
             LOGGER.debug('Cannot find galaxy.yml')
             galaxy_path = None
         self.galaxy_path = galaxy_path
@@ -123,6 +123,11 @@ class PathsConfig:
             changelog_dir = PathsConfig._changelog_dir(base_dir)
             config_path = PathsConfig._config_path(changelog_dir)
             if os.path.exists(changelog_dir) and os.path.exists(config_path):
+                if not is_collection and _is_other_project_config(config_path):
+                    # This is neither ansible-core/-base nor an Ansible collection,
+                    # but explicitly marked as an 'other project'
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
+                                       is_other_project=True)
                 galaxy_path = os.path.join(base_dir, 'galaxy.yml')
                 if os.path.exists(galaxy_path) or is_collection is True:
                     # We are in a collection and assume ansible-doc is available in $PATH
@@ -131,11 +136,6 @@ class PathsConfig:
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
-                if not is_collection and _is_other_project_config(config_path):
-                    # This is neither ansible-core/-base nor an Ansible collection,
-                    # but explicitly marked as an 'other project'
-                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
-                                       is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection or ansible-base checkout.')
