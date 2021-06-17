@@ -25,7 +25,7 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 #. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``. If you want to remove fragments after a release, but archive them in another directory, you can use the ``archive_path_template`` option in combination with ``keep_fragments: no`. See further below in the list for its usage.
 #. ``changelog_filename_template``: The default value ``../CHANGELOG.rst`` is relative to the ``changelogs/`` directory.
 #. ``use_fqcn``: The default value ``true`` uses FQCN when mentioning new plugins and modules.
-#. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
+#. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-core/-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
 #. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments and/or plugin descriptions.
 #. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
 
@@ -100,14 +100,14 @@ Changelog Fragment Categories
 
 This section describes the section categories created in the default config. You can change them, though this is strongly discouraged for collections which will be included in the Ansible Community Distribution.
 
-The categories are very similar to the ones in the `Ansible-base changelog fragments <https://docs.ansible.com/ansible/latest/community/development_process.html#changelogs-how-to>`_. In fact, they are the same, except that there are three new categories: ``breaking_changes``, ``security_fixes`` and ``trivial``.
+The categories are very similar to the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_. In fact, they are the same, except that there are three new categories: ``breaking_changes``, ``security_fixes`` and ``trivial``.
 
 **NOTE:** The changelog generator automatically detects new modules and new plugins which are documentable (i.e. where you have ``DOCUMENTATION`` where ``version_added`` is there), so you do not need to create changelog entries for them.
 
 The full list of categories is:
 
 **release_summary**
-  This is a special section: as opposed to a list of strings, it accepts one string. This string will be inserted at the top of the changelog entry for the current version, before any section. There can only be one fragment with a ``release_summary`` section. In Ansible-base, this is used for stating the release date and for linking to the porting guide (`example <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/fragments/v2.9.0_summary.yaml>`_, `result <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#id23>`_).
+  This is a special section: as opposed to a list of strings, it accepts one string. This string will be inserted at the top of the changelog entry for the current version, before any section. There can only be one fragment with a ``release_summary`` section. In ansible-core, this is used for stating the release date and for linking to the porting guide (`example <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/fragments/v2.9.0_summary.yaml>`_, `result <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#id23>`_).
 
 **breaking_changes**
   This (new) category should list all changes to features which absolutely require attention from users when upgrading, because an existing behavior is changed. This is mostly what Ansible's Porting Guide used to describe. This section should only appear in a initial major release (`x.0.0`) according to semantic versioning.
@@ -171,7 +171,7 @@ An example of how a fragment with ``release_summary`` could look like is ``chang
 Adding new Roles, Playbooks, Test and Filter Plugins
 ====================================================
 
-While ansible-base does not (yet) support roles, playbooks, and test and filter plugins as documentable plugins/objects, the changelog generator already has support for documenting new ones.
+While ansible-core does not (yet) support playbooks, test filter plugins, and filter plugins as documentable plugins/objects, the changelog generator already has support for documenting new ones.
 
 This works by using special sections in changelog fragments whose names start with "`add `"::
 

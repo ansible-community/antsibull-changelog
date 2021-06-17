@@ -169,7 +169,7 @@ def list_plugins_walk(paths: PathsConfig,
                       plugin_type: str,
                       collection_name: Optional[str]) -> List[str]:
     """
-    Find all plugins of a type in a collection, or in Ansible-base. Uses os.walk().
+    Find all plugins of a type in a collection, or in ansible-core/-base. Uses os.walk().
 
     This will also work with Ansible 2.9.
 
@@ -192,14 +192,14 @@ def list_plugins_walk(paths: PathsConfig,
                 continue
             if not paths.is_collection and dirpath == plugin_source_path:
                 # Skip files which are *not* plugins/modules, but live in these directories inside
-                # ansible-base/-core.
+                # ansible-core/-base.
                 if (plugin_type, filename) in PLUGIN_EXCEPTIONS:
                     continue
             path = follow_links(os.path.join(dirpath, filename))
             path = os.path.splitext(path)[0]
             relpath = os.path.relpath(path, plugin_source_path)
             if not paths.is_collection and os.sep in relpath:
-                # When listing modules in ansible-base/-core, get rid of the namespace.
+                # When listing modules in ansible-core/-base, get rid of the namespace.
                 relpath = os.path.basename(relpath)
             relname = relpath.replace(os.sep, '.')
             if collection_name:
@@ -215,7 +215,7 @@ def list_plugins_ansibledoc(paths: PathsConfig,
                             collection_name: Optional[str],
                             category: str = 'plugin') -> List[str]:
     """
-    Find all plugins of a type in a collection, or in Ansible-base. Uses ansible-doc.
+    Find all plugins of a type in a collection, or in ansible-core/-base. Uses ansible-doc.
 
     Note that ansible-doc from Ansible 2.10 or newer is needed for this!
 
@@ -285,7 +285,7 @@ def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-argumen
     :arg category: Set to ``object`` for roles and playbooks
     """
     if use_ansible_doc or category == 'object':
-        # WARNING: Do not make this the default to this before ansible-base is a requirement!
+        # WARNING: Do not make this the default to this before ansible-core/-base is a requirement!
         plugins_list = list_plugins_ansibledoc(
             paths, playbook_dir, plugin_type, collection_name, category)
     else:

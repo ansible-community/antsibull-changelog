@@ -87,9 +87,9 @@ class PathsConfig:
     def force_ansible(base_dir: str,
                       ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
-        Forces configuration with given Ansible Base base path.
+        Forces configuration with given ansible-core/-base base path.
 
-        :type base_dir: Base directory of ansible-base checkout
+        :type base_dir: Base directory of ansible-core/-base checkout
         :arg ansible_doc_bin: Override path to ansible-doc.
         """
         base_dir = os.path.abspath(base_dir)
@@ -114,7 +114,8 @@ class PathsConfig:
         """
         Detect paths configuration from current working directory.
 
-        :raises ChangelogError: cannot identify collection or ansible-base checkout
+        :raises ChangelogError: cannot identify collection, ansible-core/-base checkout,
+                                or other project.
         :arg ansible_doc_bin: Override path to ansible-doc.
         """
         previous: Optional[str] = None
@@ -138,7 +139,8 @@ class PathsConfig:
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
-                raise ChangelogError('Cannot identify collection or ansible-base checkout.')
+                raise ChangelogError('Cannot identify collection, ansible-core/-base'
+                                     ' checkout, or other project.')
 
 
 def load_galaxy_metadata(paths: PathsConfig) -> dict:
@@ -342,7 +344,7 @@ class ChangelogConfig:
         self.use_semantic_versioning = True
         self.is_other_project = self.config.get('is_other_project', False)
 
-        # The following are only relevant for ansible-base/-core and other projects:
+        # The following are only relevant for ansible-core/-base and other projects:
         self.release_tag_re = self.config.get(
             'release_tag_re', r'((?:[\d.ab]|rc)+)')
         self.pre_release_tag_re = self.config.get(

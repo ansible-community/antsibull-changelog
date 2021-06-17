@@ -40,7 +40,7 @@ def set_paths(force: Optional[str] = None,
     :arg force: If ``True``, create a collection path config for the given path.
                 Otherwise, detect configuration.
     :arg is_collection: Override detection of whether the tool is run in a collection
-                        or in ansible-base.
+                        or in ansible-core.
     :arg ansible_doc_bin: Override path to ansible-doc.
     """
     if force:

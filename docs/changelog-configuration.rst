@@ -1,6 +1,6 @@
-*****************************************************
-Configuration Settings for Changelogs for Collections
-*****************************************************
+**********************************************
+Configuration Settings for antsibull-changelog
+**********************************************
 
 .. contents::
    :local:
@@ -60,7 +60,7 @@ Determines whether ``changes_file`` contains only references to changelog fragme
 
 The default value is ``null``.
 
-Can be set to ``true`` or ``false`` explicitly to enable respectively disable flatmapping. Since flatmapping is disabled by default (except for ansible-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
+Can be set to ``true`` or ``false`` explicitly to enable respectively disable flatmapping. Since flatmapping is disabled by default (except for ansible-core), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
 
 When enabled, a plugin ``foo.bar.subdir.dir.plugin_name`` will be mentioned as ``plugin_name`` or ``foo.bar.plugin_name`` (if ``use_fqcn`` is ``true``), instead of as ``subdir.dir.plugin_name`` respectively ``foo.bar.subdir.dir.plugin_name``.
 
@@ -69,7 +69,7 @@ When enabled, a plugin ``foo.bar.subdir.dir.plugin_name`` will be mentioned as `
 
 The default value is ``false``.
 
-If set to ``true``, does not look for ``galaxy.yml`` and does not look for new Ansible objects (plugins, modules and roles). This allows the changelog generator to be used for projects which are not ansible-base/-core or an Ansible collection.
+If set to ``true``, does not look for ``galaxy.yml`` and does not look for new Ansible objects (plugins, modules and roles). This allows the changelog generator to be used for projects which are not ansible-core/-base or an Ansible collection.
 
 ``ignore_other_fragment_extensions`` (boolean)
 ----------------------------------------------
@@ -192,17 +192,17 @@ The default value is ``''`` (empty string).
 This setting is not used.
 
 
-Ansible-base specific options
-=============================
+Ansible-core/-base specific options
+===================================
 
-These options are only used for the changelog for ansible-base, i.e. in the ansible/ansible GitHub repository.
+These options are only used for the changelog for ansible-core, i.e. in the ansible/ansible GitHub repository.
 
 ``use_semantic_versioning`` (boolean)
 -------------------------------------
 
 The default value is ``false``.
 
-If set to ``true``, assumes that Ansible-base use semantic versioning instead of the classic Ansible version numbers. This is mainly relevant for pre-releases. If set to ``true``, ``release_tag_re`` and ``pre_release_tag_re`` are ignored.
+If set to ``true``, assumes that ansible-core use semantic versioning instead of the classic Ansible version numbers. This is mainly relevant for pre-releases. If set to ``true``, ``release_tag_re`` and ``pre_release_tag_re`` are ignored.
 
 ``release_tag_re`` (string)
 ---------------------------
