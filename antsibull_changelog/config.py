@@ -365,7 +365,7 @@ class ChangelogConfig:
         """
         if self.is_other_project != self.paths.is_other_project:
             raise ChangelogError(
-                'is_other_project must be {0}'.format(self.paths.is_other_project))
+                'is_other_project must be {0}'.format(self.is_other_project))
         if self.is_other_project and self.is_collection:
             raise ChangelogError('is_other_project must not be True for collections')
         if self.changes_format not in ('classic', 'combined'):
