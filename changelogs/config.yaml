@@ -26,4 +26,5 @@ sections:
   - Bugfixes
 - - known_issues
   - Known Issues
+use_semantic_versioning: true
 title: Ansible Changelog Tool

@@ -411,7 +411,7 @@ def command_release(args: Any) -> int:
     flatmap = _determine_flatmap(collection_details, config)
 
     if not version or not codename:
-        if not config.is_collection and not paths.is_other_project:
+        if not config.is_collection and not config.is_other_project:
             # Both version and codename are required for Ansible (Base)
             try:
                 version, codename = get_ansible_release()

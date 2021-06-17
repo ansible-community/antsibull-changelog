@@ -299,6 +299,7 @@ class ChangelogConfig:
     sanitize_changelog: bool
     flatmap: Optional[bool]
     use_semantic_versioning: bool
+    is_other_project: bool
     sections: Mapping[str, str]
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
@@ -339,8 +340,9 @@ class ChangelogConfig:
             'ignore_other_fragment_extensions', False)
         self.flatmap = self.config.get('flatmap')
         self.use_semantic_versioning = True
+        self.is_other_project = self.config.get('is_other_project', False)
 
-        # The following are only relevant for ansible-base:
+        # The following are only relevant for ansible-base/-core and other projects:
         self.release_tag_re = self.config.get(
             'release_tag_re', r'((?:[\d.ab]|rc)+)')
         self.pre_release_tag_re = self.config.get(
@@ -348,6 +350,22 @@ class ChangelogConfig:
         if not self.is_collection:
             self.use_semantic_versioning = self.config.get('use_semantic_versioning', False)
 
+        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
+        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
+            sections[section_name] = section_title
+        self.sections = sections
+
+        self._validate_config()
+
+    def _validate_config(self) -> None:
+        """
+        Basic config validation.
+        """
+        if self.is_other_project != self.paths.is_other_project:
+            raise ChangelogError(
+                'is_other_project must be {0}'.format(self.paths.is_other_project))
+        if self.is_other_project and self.is_collection:
+            raise ChangelogError('is_other_project must not be True for collections')
         if self.changes_format not in ('classic', 'combined'):
             raise ChangelogError('changes_format must be one of "classic" and "combined"')
         if self.changes_format == 'classic' and not self.keep_fragments:
@@ -357,12 +375,7 @@ class ChangelogConfig:
             raise ChangelogError('changes_format == "classic" cannot be '
                                  'combined with prevent_known_fragments == False')
 
-        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
-        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
-            sections[section_name] = section_title
-        self.sections = sections
-
-    def store(self) -> None:
+    def store(self) -> None:  # noqa: C901
         """
         Store changelog configuration file to disk.
         """
@@ -401,6 +414,8 @@ class ChangelogConfig:
             config['flatmap'] = self.flatmap
         if self.archive_path_template is not None:
             config['archive_path_template'] = self.archive_path_template
+        if self.is_other_project:
+            config['is_other_project'] = self.is_other_project
 
         sections = []
         for key, value in self.sections.items():
@@ -439,6 +454,7 @@ class ChangelogConfig:
             'use_fqcn': True,
             'ignore_other_fragment_extensions': True,
             'sanitize_changelog': True,
+            'is_other_project': paths.is_other_project,
         }
         if title is not None:
             config['title'] = title
