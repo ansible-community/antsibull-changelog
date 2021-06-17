@@ -110,7 +110,8 @@ class PathsConfig:
 
     @staticmethod
     def detect(is_collection: Optional[bool] = None,
-               ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+               ansible_doc_bin: Optional[str] = None,
+               is_other_project: Optional[bool] = None) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
 
@@ -124,7 +125,7 @@ class PathsConfig:
             changelog_dir = PathsConfig._changelog_dir(base_dir)
             config_path = PathsConfig._config_path(changelog_dir)
             if os.path.exists(changelog_dir) and os.path.exists(config_path):
-                if not is_collection and _is_other_project_config(config_path):
+                if is_other_project is True or (not is_collection and _is_other_project_config(config_path)):
                     # This is neither ansible-core/-base nor an Ansible collection,
                     # but explicitly marked as an 'other project'
                     return PathsConfig(False, base_dir, None, ansible_doc_bin,
@@ -304,7 +305,8 @@ class ChangelogConfig:
     is_other_project: bool
     sections: Mapping[str, str]
 
-    def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
+    def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict,
+                       ignore_is_other_project: bool = False):
         """
         Create changelog config from dictionary.
         """
@@ -357,16 +359,16 @@ class ChangelogConfig:
             sections[section_name] = section_title
         self.sections = sections
 
-        self._validate_config()
+        self._validate_config(ignore_is_other_project)
 
-    def _validate_config(self) -> None:
+    def _validate_config(self, ignore_is_other_project: bool) -> None:
         """
         Basic config validation.
         """
-        if self.is_other_project != self.paths.is_other_project:
+        if self.is_other_project != self.paths.is_other_project and not ignore_is_other_project:
             raise ChangelogError(
                 'is_other_project must be {0}'.format(self.is_other_project))
-        if self.is_other_project and self.is_collection:
+        if self.is_other_project and self.is_collection and not ignore_is_other_project:
             raise ChangelogError('is_other_project must not be True for collections')
         if self.changes_format not in ('classic', 'combined'):
             raise ChangelogError('changes_format must be one of "classic" and "combined"')
@@ -429,14 +431,16 @@ class ChangelogConfig:
         store_yaml(self.paths.config_path, config)
 
     @staticmethod
-    def load(paths: PathsConfig, collection_details: CollectionDetails) -> 'ChangelogConfig':
+    def load(paths: PathsConfig, collection_details: CollectionDetails,
+             ignore_is_other_project: bool = False) -> 'ChangelogConfig':
         """
         Load changelog configuration file from disk.
         """
         config = load_yaml(paths.config_path)
         if not isinstance(config, dict):
             raise ChangelogError('{0} must be a dictionary'.format(paths.config_path))
-        return ChangelogConfig(paths, collection_details, config)
+        return ChangelogConfig(paths, collection_details, config,
+                               ignore_is_other_project=ignore_is_other_project)
 
     @staticmethod
     def default(paths: PathsConfig, collection_details: CollectionDetails,

@@ -33,23 +33,29 @@ from .logger import LOGGER, setup_logger
 
 def set_paths(force: Optional[str] = None,
               is_collection: Optional[bool] = None,
-              ansible_doc_bin: Optional[str] = None) -> PathsConfig:
+              ansible_doc_bin: Optional[str] = None,
+              is_other_project: Optional[bool] = None) -> PathsConfig:
     """
     Create ``PathsConfig``.
 
-    :arg force: If ``True``, create a collection path config for the given path.
+    :arg force: If provided, create a collection path config for the given path.
                 Otherwise, detect configuration.
     :arg is_collection: Override detection of whether the tool is run in a collection
                         or in ansible-core.
     :arg ansible_doc_bin: Override path to ansible-doc.
+    :arg is_other_project: Override detection of whether the tool is an other project
     """
-    if force:
+    if force is not None:
+        if is_other_project:
+            return PathsConfig.force_other(force, ansible_doc_bin=ansible_doc_bin)
         if is_collection is False:
             return PathsConfig.force_ansible(force, ansible_doc_bin=ansible_doc_bin)
         return PathsConfig.force_collection(force, ansible_doc_bin=ansible_doc_bin)
 
     try:
-        return PathsConfig.detect(is_collection=is_collection, ansible_doc_bin=ansible_doc_bin)
+        return PathsConfig.detect(is_collection=is_collection,
+                                  is_other_project=is_other_project,
+                                  ansible_doc_bin=ansible_doc_bin)
     except ChangelogError:
         if is_collection is True:
             raise ChangelogError(  # pylint: disable=raise-missing-from
@@ -494,14 +500,14 @@ def command_lint(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    # Passing is_collection=True ensures that we just look for changelogs/config.yaml,
+    # Passing is_other_project=True ensures that we just look for changelogs/config.yaml,
     # and don't expect galaxy.yml or lib/ansible to be present.
-    paths = set_paths(is_collection=True)
+    paths = set_paths(is_other_project=True)
 
     fragment_paths: List[str] = args.fragments
 
     collection_details = CollectionDetails(paths)
-    config = ChangelogConfig.load(paths, collection_details)
+    config = ChangelogConfig.load(paths, collection_details, ignore_is_other_project=True)
 
     exceptions: List[Tuple[str, Exception]] = []
     fragments = load_fragments(paths, config, fragment_paths, exceptions)
