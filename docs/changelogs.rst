@@ -100,7 +100,7 @@ Changelog Fragment Categories
 
 This section describes the section categories created in the default config. You can change them, though this is strongly discouraged for collections which will be included in the Ansible Community Distribution.
 
-The categories are very similar to the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_. In fact, they are the same, except that there are three new categories: ``breaking_changes``, ``security_fixes`` and ``trivial``.
+The categories are the same as the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_.
 
 **NOTE:** The changelog generator automatically detects new modules and new plugins which are documentable (i.e. where you have ``DOCUMENTATION`` where ``version_added`` is there), so you do not need to create changelog entries for them.
 

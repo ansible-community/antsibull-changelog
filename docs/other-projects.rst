@@ -26,7 +26,7 @@ This creates subdirectories ``changelogs/`` and ``changelogs/fragments/``, and a
 #. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``. If you want to remove fragments after a release, but archive them in another directory, you can use the ``archive_path_template`` option in combination with ``keep_fragments: no`. See further below in the list for its usage.
 #. ``changelog_filename_template``: The default value ``../CHANGELOG.rst`` is relative to the ``changelogs/`` directory.
 #. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments
-#. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
+#. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current project version into which the fragment was included.
 
 For a description of all configuration settings, see the separate document `Configuration Settings for antsibull-changelog <./changelog-configuration.rst>`_.
 
@@ -79,9 +79,9 @@ If the main source of truth should be the fragments, the refreshing options or c
 Changelog Fragment Categories
 =============================
 
-This section describes the section categories created in the default config. You can change them, though this is strongly discouraged for collections which will be included in the Ansible Community Distribution.
+This section describes the section categories created in the default config. If you really want, you can change them.
 
-The categories are very similar to the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_. In fact, they are the same, except that there are three new categories: ``breaking_changes``, ``security_fixes`` and ``trivial``.
+The categories are the same as the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_.
 
 The full list of categories is:
 
@@ -92,7 +92,7 @@ The full list of categories is:
   This (new) category should list all changes to features which absolutely require attention from users when upgrading, because an existing behavior is changed. This is mostly what Ansible's Porting Guide used to describe. This section should only appear in a initial major release (`x.0.0`) according to semantic versioning.
 
 **major_changes**
-  This category contains major changes to the collection. It should only contain a few items per major version, describing high-level changes. This section should not appear in patch releases according to semantic versioning.
+  This category contains major changes to the project. It should only contain a few items per major version, describing high-level changes. This section should not appear in patch releases according to semantic versioning.
 
 **minor_changes**
   This category should mention all new features, like plugin or module options. This section should not appear in patch releases according to semantic versioning.
@@ -141,8 +141,7 @@ A fragment can also contain multiple sections, or multiple entries in one sectio
 
 The ``release_summary`` section is special, in that it doesn't contain a list of strings, but a string, and that only one such entry can be shown in the changelog of a release. Usually for every release (pre-release or regular release), at most one fragment is added which contains a ``release_summary``, and this is only done by the person doing the release. The ``release_summary`` should include some global information on the release; for example, in `Ansible's changelog <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#release-summary>`_, it always mentions the release date and links to the porting guide.
 
-An example of how a fragment with ``release_summary`` could look like is ``changelogs/fragments/0.2.0.yml`` from community.general::
+An example of how a fragment with ``release_summary`` could look like::
 
     release_summary: |
-      This is the first proper release of the ``community.general`` collection on 2020-06-20.
-      The changelog describes all changes made to the modules and plugins included in this collection since Ansible 2.9.0.
+      This is the first proper release of ``antsibull-changelog`` on 2020-06-20.
