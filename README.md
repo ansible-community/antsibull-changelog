@@ -13,8 +13,6 @@ A changelog generator used by ansible-core and Ansible collections.
 - Documentation on the
   [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
 
-It is now also possible to use antsibull-changelog to create changelogs for other projects.
-
 antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
 
 ## Installation
