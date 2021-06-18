@@ -51,7 +51,7 @@ def setup_logger(verbosity: int) -> None:
     """
     Setup logger.
     """
-    global _LOGGER_SET_UP
+    global _LOGGER_SET_UP  # pylint: disable=global-statement
 
     if not _LOGGER_SET_UP:
         formatter = logging.Formatter('%(levelname)s %(message)s')

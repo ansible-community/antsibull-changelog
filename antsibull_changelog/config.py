@@ -125,7 +125,8 @@ class PathsConfig:
             changelog_dir = PathsConfig._changelog_dir(base_dir)
             config_path = PathsConfig._config_path(changelog_dir)
             if os.path.exists(changelog_dir) and os.path.exists(config_path):
-                if is_other_project is True or (not is_collection and _is_other_project_config(config_path)):
+                if is_other_project is True or (
+                        not is_collection and _is_other_project_config(config_path)):
                     # This is neither ansible-core/-base nor an Ansible collection,
                     # but explicitly marked as an 'other project'
                     return PathsConfig(False, base_dir, None, ansible_doc_bin,
@@ -306,7 +307,7 @@ class ChangelogConfig:
     sections: Mapping[str, str]
 
     def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict,
-                       ignore_is_other_project: bool = False):
+                 ignore_is_other_project: bool = False):
         """
         Create changelog config from dictionary.
         """
