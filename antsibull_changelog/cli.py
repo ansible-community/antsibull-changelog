@@ -122,11 +122,16 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
 
     init_parser = subparsers.add_parser('init',
                                         parents=[common],
-                                        help='set up changelog infrastructure for collection')
+                                        help='set up changelog infrastructure for '
+                                             'collection, or an other project')
     init_parser.set_defaults(func=command_init)
     init_parser.add_argument('root',
-                             metavar='COLLECTION_ROOT',
-                             help='path to collection root')
+                             metavar='PROJECT_ROOT',
+                             help='path to collection or project root')
+    init_parser.add_argument('--is-other-project',
+                             action='store_true',
+                             help='project root belongs to an other project, and '
+                                  'not to an Ansible collection')
 
     lint_parser = subparsers.add_parser('lint',
                                         parents=[common],
@@ -254,10 +259,11 @@ def command_init(args: Any) -> int:
     :arg args: Parsed arguments
     """
     root: str = args.root
+    is_other_project: bool = args.is_other_project
 
-    paths = set_paths(force=root)
+    paths = set_paths(force=root, is_other_project=is_other_project)
 
-    if paths.galaxy_path is None:
+    if not is_other_project and paths.galaxy_path is None:
         LOGGER.error('The file galaxy.yml does not exists in the collection root!')
         return 5
     LOGGER.debug('Checking for existance of "{}"', paths.config_path)
@@ -267,12 +273,12 @@ def command_init(args: Any) -> int:
 
     collection_details = CollectionDetails(paths)
 
-    config = ChangelogConfig.default(
-        paths,
-        collection_details,
-        title='{0}.{1}'.format(
-            collection_details.get_namespace().title(), collection_details.get_name().title()),
-    )
+    title = 'Project'
+    if not is_other_project:
+        title = '{0}.{1}'.format(
+            collection_details.get_namespace().title(), collection_details.get_name().title())
+
+    config = ChangelogConfig.default(paths, collection_details, title=title)
 
     fragments_dir = os.path.join(paths.changelog_dir, config.notes_dir)
     try:

@@ -461,8 +461,10 @@ class ChangelogConfig:
             'use_fqcn': True,
             'ignore_other_fragment_extensions': True,
             'sanitize_changelog': True,
-            'is_other_project': paths.is_other_project,
         }
         if title is not None:
             config['title'] = title
+        if paths.is_other_project:
+            config['is_other_project'] = True
+            config['use_semantic_versioning'] = True
         return ChangelogConfig(paths, collection_details, config)

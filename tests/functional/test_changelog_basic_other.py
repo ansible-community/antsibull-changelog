@@ -17,6 +17,30 @@ from fixtures import create_plugin
 import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
 
 
+def test_changelog_init(  # pylint: disable=redefined-outer-name
+        other_changelog):  # noqa: F811
+    # If we do not specify --is-other-project, it should error out
+    assert other_changelog.run_tool('init', [other_changelog.paths.base_dir]) == 5
+
+    # If we do specify it, it just work
+    assert other_changelog.run_tool('init', [other_changelog.paths.base_dir, '--is-other-project']) == 0
+
+    diff = other_changelog.diff()
+    assert diff.added_dirs == ['changelogs', 'changelogs/fragments']
+    assert diff.added_files == ['changelogs/config.yaml']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    config = diff.parse_yaml('changelogs/config.yaml')
+    assert config['notesdir'] == 'fragments'
+    assert config['changes_file'] == 'changelog.yaml'
+    assert config['changelog_filename_template'] == '../CHANGELOG.rst'
+    assert config['is_other_project'] is True
+    assert config['use_semantic_versioning'] is True
+    assert config['title'] == 'Project'
+
+
 def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
         other_changelog):  # noqa: F811
     other_changelog.set_config(other_changelog.config)
