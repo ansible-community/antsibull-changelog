@@ -49,6 +49,21 @@ to create a `setup.py` file from `pyproject.toml`:
 
 Then you can install antsibull-changelog with `pip install -e .`.
 
+## Build a release
+
+First update the `version` entry in `pyproject.toml`. Then generate the changelog:
+
+    antsibull-changelog release --version <version-number>
+
+Then build the build artefact:
+
+    poetry build
+
+Finally, publish to PyPi:
+
+    poetry publish
+
+Then tag the current state with the release version and push the tag to the repository.
 
 ## License
 
