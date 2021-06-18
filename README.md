@@ -6,7 +6,9 @@
 A changelog generator used by ansible-core and Ansible collections.
 
 - Using the
-  [`antsibull-changelog` CLI tool](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+  [`antsibull-changelog` CLI tool for collections](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+- Using the
+  [`antsibull-changelog` CLI tool for other projects](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/other-projects.rst).
 - Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog-configuration.rst).
 - Documentation on the
   [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).

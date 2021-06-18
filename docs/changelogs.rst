@@ -29,7 +29,7 @@ This is the directory which contains ``galaxy.yml``. This creates subdirectories
 #. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments and/or plugin descriptions.
 #. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
 
-For a description of all configuration settings, see the separate document `Configuration Settings for Changelogs for Collections <./changelog-configuration.rst>`_.
+For a description of all configuration settings, see the separate document `Configuration Settings for antsibull-changelog <./changelog-configuration.rst>`_.
 
 Validating changelog fragments
 ==============================
