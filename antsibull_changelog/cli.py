@@ -46,7 +46,7 @@ def set_paths(force: Optional[str] = None,
     :arg is_other_project: Override detection of whether the tool is an other project
     """
     if force is not None:
-        if is_other_project:
+        if is_other_project is True:
             return PathsConfig.force_other(force, ansible_doc_bin=ansible_doc_bin)
         if is_collection is False:
             return PathsConfig.force_ansible(force, ansible_doc_bin=ansible_doc_bin)

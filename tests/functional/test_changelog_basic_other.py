@@ -25,6 +25,10 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     other_changelog.add_fragment_line(
         'trivial.yml', 'trivial', 'This should not show up in the changelog.')
 
+    # If we do not pass --version, will fail
+    assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 5
+
+    # If we pass --version, will succeed
     assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02', '--version', '1.0.0']) == 0
 
     diff = other_changelog.diff()
