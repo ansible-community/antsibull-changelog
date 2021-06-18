@@ -15,8 +15,13 @@ packages = [
     { include = "antsibull_changelog" },
     { include = "tests", format = "sdist" }
 ]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers"
+]
 
 [tool.poetry.urls]
+"Code of Conduct" = "https://docs.ansible.com/ansible/latest/community/code_of_conduct.html"
 "Bug tracker" = "https://github.com/ansible-community/antsibull-changelog/issues"
 "Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.rst"
 

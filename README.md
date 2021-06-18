@@ -11,6 +11,8 @@ A changelog generator used by Ansible and Ansible collections.
 - Documentation on the
   [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
 
+antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+
 ## Installation
 
 It can be installed with pip:
