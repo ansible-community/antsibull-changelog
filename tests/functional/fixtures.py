@@ -437,6 +437,17 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         self._write(os.path.join(role_meta_dir, 'argument_spec.yml'), argspec)
 
 
+class OtherChangelogEnvironment(ChangelogEnvironment):
+    """
+    Other project changelog environment.
+    """
+
+    def __init__(self, base_path: pathlib.Path):
+        super().__init__(base_path,
+                         PathsConfig.force_other(base_dir=str(base_path)))
+        self.config.title = 'A Random Project'
+
+
 @pytest.fixture
 def ansible_changelog(tmp_path_factory) -> AnsibleChangelogEnvironment:
     """
@@ -479,3 +490,11 @@ def create_plugin(**parts):
         result.extend(['', '{part} = {data!r}'.format(part=part, data=data)])
 
     return '\n'.join(result)
+
+
+@pytest.fixture
+def other_changelog(tmp_path_factory) -> OtherChangelogEnvironment:
+    """
+    Fixture for Ansible changelog environment.
+    """
+    return OtherChangelogEnvironment(tmp_path_factory.mktemp('changelog-test'))

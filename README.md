@@ -3,10 +3,12 @@
 [![Python testing badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20testing/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+testing%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
 
-A changelog generator used by Ansible and Ansible collections.
+A changelog generator used by ansible-core and Ansible collections.
 
 - Using the
-  [`antsibull-changelog` CLI tool](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+  [`antsibull-changelog` CLI tool for collections](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+- Using the
+  [`antsibull-changelog` CLI tool for other projects](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/other-projects.rst).
 - Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog-configuration.rst).
 - Documentation on the
   [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
@@ -47,6 +49,21 @@ to create a `setup.py` file from `pyproject.toml`:
 
 Then you can install antsibull-changelog with `pip install -e .`.
 
+## Build a release
+
+First update the `version` entry in `pyproject.toml`. Then generate the changelog:
+
+    antsibull-changelog release --version <version-number>
+
+Then build the build artefact:
+
+    poetry build
+
+Finally, publish to PyPi:
+
+    poetry publish
+
+Then tag the current state with the release version and push the tag to the repository.
 
 ## License
 

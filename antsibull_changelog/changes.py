@@ -435,7 +435,7 @@ class ChangesData(ChangesBase):
     """
     Read, write and manage modern change metadata.
 
-    This is the format used for ansible-base 2.10+ and for Ansible collections.
+    This is the format used for ansible-base 2.10, ansible-core 2.11+, and for Ansible collections.
     """
 
     config: ChangelogConfig

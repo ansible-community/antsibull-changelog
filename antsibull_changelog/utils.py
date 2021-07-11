@@ -39,7 +39,7 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     :arg version: The version to check
     :return: Whether the provided version is a release version
     """
-    if config.is_collection:
+    if config.use_semantic_versioning:
         try:
             return not bool(semantic_version.Version(version).prerelease)
         except Exception as exc:  # pylint: disable=broad-except

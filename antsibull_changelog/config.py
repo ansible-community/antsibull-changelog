@@ -18,12 +18,21 @@ from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
 
 
+def _is_other_project_config(config_path: str) -> bool:
+    try:
+        config = load_yaml(config_path)
+        return config.get('is_other_project', False)
+    except:  # pylint: disable=bare-except;  # noqa: E722
+        return False
+
+
 class PathsConfig:
     """
     Configuration for paths.
     """
 
     is_collection: bool
+    is_other_project: bool
 
     base_dir: str
     galaxy_path: Optional[str]
@@ -40,17 +49,21 @@ class PathsConfig:
         return os.path.join(changelog_dir, 'config.yaml')
 
     def __init__(self, is_collection: bool, base_dir: str, galaxy_path: Optional[str],
-                 ansible_doc_path: Optional[str]):
+                 ansible_doc_path: Optional[str], is_other_project: bool = False
+                 ):  # pylint: disable=too-many-arguments
         """
         Forces configuration with given base path.
 
         :arg base_dir: Base directory of Ansible checkout or collection checkout
         :arg galaxy_path: Path to galaxy.yml for collection checkouts
         :arg ansible_doc_path: Path to ``ansible-doc``
+        :arg is_other_project: Flag whether this config belongs to another project than
+                               ansible-core or an Ansible collection
         """
         self.is_collection = is_collection
+        self.is_other_project = is_other_project
         self.base_dir = base_dir
-        if galaxy_path and not os.path.exists(galaxy_path):
+        if not self.is_other_project and galaxy_path and not os.path.exists(galaxy_path):
             LOGGER.debug('Cannot find galaxy.yml')
             galaxy_path = None
         self.galaxy_path = galaxy_path
@@ -74,21 +87,36 @@ class PathsConfig:
     def force_ansible(base_dir: str,
                       ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
         """
-        Forces configuration with given Ansible Base base path.
+        Forces configuration with given ansible-core/-base base path.
 
-        :type base_dir: Base directory of ansible-base checkout
+        :type base_dir: Base directory of ansible-core/-base checkout
         :arg ansible_doc_bin: Override path to ansible-doc.
         """
         base_dir = os.path.abspath(base_dir)
         return PathsConfig(False, base_dir, None, ansible_doc_bin)
 
     @staticmethod
+    def force_other(base_dir: str,
+                    ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+        """
+        Forces configuration for a project that's neither ansible-core/-base nor an
+        Ansible collection.
+
+        :type base_dir: Base directory of the project
+        :arg ansible_doc_bin: Override path to ansible-doc.
+        """
+        base_dir = os.path.abspath(base_dir)
+        return PathsConfig(False, base_dir, None, ansible_doc_bin, is_other_project=True)
+
+    @staticmethod
     def detect(is_collection: Optional[bool] = None,
-               ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+               ansible_doc_bin: Optional[str] = None,
+               is_other_project: Optional[bool] = None) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
 
-        :raises ChangelogError: cannot identify collection or ansible-base checkout
+        :raises ChangelogError: cannot identify collection, ansible-core/-base checkout,
+                                or other project.
         :arg ansible_doc_bin: Override path to ansible-doc.
         """
         previous: Optional[str] = None
@@ -97,6 +125,12 @@ class PathsConfig:
             changelog_dir = PathsConfig._changelog_dir(base_dir)
             config_path = PathsConfig._config_path(changelog_dir)
             if os.path.exists(changelog_dir) and os.path.exists(config_path):
+                if is_other_project is True or (
+                        not is_collection and _is_other_project_config(config_path)):
+                    # This is neither ansible-core/-base nor an Ansible collection,
+                    # but explicitly marked as an 'other project'
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
+                                       is_other_project=True)
                 galaxy_path = os.path.join(base_dir, 'galaxy.yml')
                 if os.path.exists(galaxy_path) or is_collection is True:
                     # We are in a collection and assume ansible-doc is available in $PATH
@@ -107,7 +141,8 @@ class PathsConfig:
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
-                raise ChangelogError('Cannot identify collection or ansible-base checkout.')
+                raise ChangelogError('Cannot identify collection, ansible-core/-base'
+                                     ' checkout, or other project.')
 
 
 def load_galaxy_metadata(paths: PathsConfig) -> dict:
@@ -268,9 +303,11 @@ class ChangelogConfig:
     sanitize_changelog: bool
     flatmap: Optional[bool]
     use_semantic_versioning: bool
+    is_other_project: bool
     sections: Mapping[str, str]
 
-    def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict):
+    def __init__(self, paths: PathsConfig, collection_details: CollectionDetails, config: dict,
+                 ignore_is_other_project: bool = False):
         """
         Create changelog config from dictionary.
         """
@@ -308,8 +345,9 @@ class ChangelogConfig:
             'ignore_other_fragment_extensions', False)
         self.flatmap = self.config.get('flatmap')
         self.use_semantic_versioning = True
+        self.is_other_project = self.config.get('is_other_project', False)
 
-        # The following are only relevant for ansible-base:
+        # The following are only relevant for ansible-core/-base and other projects:
         self.release_tag_re = self.config.get(
             'release_tag_re', r'((?:[\d.ab]|rc)+)')
         self.pre_release_tag_re = self.config.get(
@@ -317,6 +355,22 @@ class ChangelogConfig:
         if not self.is_collection:
             self.use_semantic_versioning = self.config.get('use_semantic_versioning', False)
 
+        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
+        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
+            sections[section_name] = section_title
+        self.sections = sections
+
+        self._validate_config(ignore_is_other_project)
+
+    def _validate_config(self, ignore_is_other_project: bool) -> None:
+        """
+        Basic config validation.
+        """
+        if self.is_other_project != self.paths.is_other_project and not ignore_is_other_project:
+            raise ChangelogError(
+                'is_other_project must be {0}'.format(self.is_other_project))
+        if self.is_other_project and self.is_collection and not ignore_is_other_project:
+            raise ChangelogError('is_other_project must not be True for collections')
         if self.changes_format not in ('classic', 'combined'):
             raise ChangelogError('changes_format must be one of "classic" and "combined"')
         if self.changes_format == 'classic' and not self.keep_fragments:
@@ -326,12 +380,7 @@ class ChangelogConfig:
             raise ChangelogError('changes_format == "classic" cannot be '
                                  'combined with prevent_known_fragments == False')
 
-        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
-        for section_name, section_title in self.config.get('sections', DEFAULT_SECTIONS):
-            sections[section_name] = section_title
-        self.sections = sections
-
-    def store(self) -> None:
+    def store(self) -> None:  # noqa: C901
         """
         Store changelog configuration file to disk.
         """
@@ -370,6 +419,8 @@ class ChangelogConfig:
             config['flatmap'] = self.flatmap
         if self.archive_path_template is not None:
             config['archive_path_template'] = self.archive_path_template
+        if self.is_other_project:
+            config['is_other_project'] = self.is_other_project
 
         sections = []
         for key, value in self.sections.items():
@@ -381,14 +432,16 @@ class ChangelogConfig:
         store_yaml(self.paths.config_path, config)
 
     @staticmethod
-    def load(paths: PathsConfig, collection_details: CollectionDetails) -> 'ChangelogConfig':
+    def load(paths: PathsConfig, collection_details: CollectionDetails,
+             ignore_is_other_project: bool = False) -> 'ChangelogConfig':
         """
         Load changelog configuration file from disk.
         """
         config = load_yaml(paths.config_path)
         if not isinstance(config, dict):
             raise ChangelogError('{0} must be a dictionary'.format(paths.config_path))
-        return ChangelogConfig(paths, collection_details, config)
+        return ChangelogConfig(paths, collection_details, config,
+                               ignore_is_other_project=ignore_is_other_project)
 
     @staticmethod
     def default(paths: PathsConfig, collection_details: CollectionDetails,
@@ -411,4 +464,7 @@ class ChangelogConfig:
         }
         if title is not None:
             config['title'] = title
+        if paths.is_other_project:
+            config['is_other_project'] = True
+            config['use_semantic_versioning'] = True
         return ChangelogConfig(paths, collection_details, config)

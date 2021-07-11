@@ -169,7 +169,7 @@ def list_plugins_walk(paths: PathsConfig,
                       plugin_type: str,
                       collection_name: Optional[str]) -> List[str]:
     """
-    Find all plugins of a type in a collection, or in Ansible-base. Uses os.walk().
+    Find all plugins of a type in a collection, or in ansible-core/-base. Uses os.walk().
 
     This will also work with Ansible 2.9.
 
@@ -192,14 +192,14 @@ def list_plugins_walk(paths: PathsConfig,
                 continue
             if not paths.is_collection and dirpath == plugin_source_path:
                 # Skip files which are *not* plugins/modules, but live in these directories inside
-                # ansible-base/-core.
+                # ansible-core/-base.
                 if (plugin_type, filename) in PLUGIN_EXCEPTIONS:
                     continue
             path = follow_links(os.path.join(dirpath, filename))
             path = os.path.splitext(path)[0]
             relpath = os.path.relpath(path, plugin_source_path)
             if not paths.is_collection and os.sep in relpath:
-                # When listing modules in ansible-base/-core, get rid of the namespace.
+                # When listing modules in ansible-core/-base, get rid of the namespace.
                 relpath = os.path.basename(relpath)
             relname = relpath.replace(os.sep, '.')
             if collection_name:
@@ -215,7 +215,7 @@ def list_plugins_ansibledoc(paths: PathsConfig,
                             collection_name: Optional[str],
                             category: str = 'plugin') -> List[str]:
     """
-    Find all plugins of a type in a collection, or in Ansible-base. Uses ansible-doc.
+    Find all plugins of a type in a collection, or in ansible-core/-base. Uses ansible-doc.
 
     Note that ansible-doc from Ansible 2.10 or newer is needed for this!
 
@@ -285,7 +285,7 @@ def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-argumen
     :arg category: Set to ``object`` for roles and playbooks
     """
     if use_ansible_doc or category == 'object':
-        # WARNING: Do not make this the default to this before ansible-base is a requirement!
+        # WARNING: Do not make this the default to this before ansible-core/-base is a requirement!
         plugins_list = list_plugins_ansibledoc(
             paths, playbook_dir, plugin_type, collection_name, category)
     else:
@@ -364,6 +364,33 @@ def _load_ansible_plugins(plugins_data: Dict[str, Any], paths: PathsConfig,
             paths, None, plugin_type, None, use_ansible_doc=use_ansible_doc)
 
 
+def _refresh_plugin_cache(paths: PathsConfig,
+                          collection_details: CollectionDetails,
+                          version: str,
+                          use_ansible_doc: bool = False):
+    LOGGER.info('refreshing plugin cache')
+
+    plugins_data: Dict[str, Any] = {
+        'version': version,
+        'plugins': {},
+        'objects': {},
+    }
+
+    if paths.is_collection:
+        _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
+    else:
+        _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
+
+    # remove empty namespaces from plugins
+    for category in ('plugins', 'objects'):
+        for section in plugins_data[category].values():
+            for plugin in section.values():
+                if plugin['namespace'] is None:
+                    del plugin['namespace']
+
+    return plugins_data
+
+
 def load_plugins(paths: PathsConfig,
                  collection_details: CollectionDetails,
                  version: str,
@@ -379,6 +406,9 @@ def load_plugins(paths: PathsConfig,
     :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     :return: A list of all plugins
     """
+    if paths.is_other_project:
+        return []
+
     plugin_cache_path = os.path.join(paths.changelog_dir, '.plugin-cache.yaml')
     plugins_data: Dict[str, Any] = {}
 
@@ -390,24 +420,7 @@ def load_plugins(paths: PathsConfig,
             plugins_data = {}
 
     if not plugins_data:
-        LOGGER.info('refreshing plugin cache')
-
-        plugins_data['version'] = version
-        plugins_data['plugins'] = {}
-        plugins_data['objects'] = {}
-
-        if paths.is_collection:
-            _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
-        else:
-            _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
-
-        # remove empty namespaces from plugins
-        for category in ('plugins', 'objects'):
-            for section in plugins_data[category].values():
-                for plugin in section.values():
-                    if plugin['namespace'] is None:
-                        del plugin['namespace']
-
+        plugins_data = _refresh_plugin_cache(paths, collection_details, version, use_ansible_doc)
         store_yaml(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(plugins_data['plugins'])

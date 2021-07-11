@@ -1,33 +1,32 @@
-**************************
-Changelogs for Collections
-**************************
+*****************************
+Changelogs for other projects
+*****************************
 
 .. contents::
    :local:
    :depth: 2
 
-The ``antsibull-changelog`` tool allows you to create and update changelogs for Ansible collections, that are similar to the ones provided by Ansible itself in earlier versions, and that are compatible to the combined Ansible Community Distribution changelogs.
+The ``antsibull-changelog`` tool allows you to create and update changelogs for arbitrary projects, similar to the changelog of ansible-core or many Ansible collections which rely on antsibull-changelog.
 
 The following instructions assume that antsibull has been properly installed, for example via ``pip install antsibull-changelog``. This is the preferred way to install ``antsibull-changelog``.
 
 If you want to get the current ``main`` branch with not yet released changes, run ``pip install https://github.com/ansible-community/antsibull-changelog/archive/main.tar.gz``. If you cloned the git repository and want to run it from there with ``poetry``, ``antsibull-changelog`` has to be substituted with ``poetry run antsibull-changelog``.
 
-Bootstrapping changelogs for collections
-========================================
+Bootstrapping changelogs for projects
+=====================================
 
 To set up ``antsibull-changelog``, run::
 
-    antsibull-changelog init /path/to/your/collection
+    antsibull-changelog init --is-other-project /path/to/your/project
 
-This is the directory which contains ``galaxy.yml``. This creates subdirectories ``changelogs/`` and ``changelogs/fragments/``, and a configuration file ``changelogs/config.yaml``. Adjust the configuration file to your needs. The settings of highest interest are:
+This creates subdirectories ``changelogs/`` and ``changelogs/fragments/``, and a configuration file ``changelogs/config.yaml``. Adjust the configuration file to your needs. The settings of highest interest are:
 
-#. ``title``: This is by default the titlecase of your collection's namespace and name. Feel free to insert a nicer name here.
+#. ``title``: This is by default ``Project``. Please replace this with the name of your project.
+#. ``use_semantic_versioning``: The default value ``true`` assumes that version numbers follow the `semantic versioning spec <https://semver.org/>`_. This mostly affects prerelease detection and version ordering.
 #. ``keep_fragments``: The default value ``false`` removes the fragment files after a release is done. If you prefer to keep fragment files for older releases, set this to ``true``. If you want to remove fragments after a release, but archive them in another directory, you can use the ``archive_path_template`` option in combination with ``keep_fragments: no`. See further below in the list for its usage.
 #. ``changelog_filename_template``: The default value ``../CHANGELOG.rst`` is relative to the ``changelogs/`` directory.
-#. ``use_fqcn``: The default value ``true`` uses FQCN when mentioning new plugins and modules.
-#. ``flatmap``: Setting to ``true`` or ``false`` explicitly enables resp. disables flatmapping. Since flatmapping is disabled by default (except for ansible-core/-base), this is effectively only needed for the big community collections ``community.general`` and ``community.network``.
-#. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments and/or plugin descriptions.
-#. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current collection version into which the fragment was included.
+#. ``always_refresh``: See :ref:`refreshing` on refreshing changelog fragments
+#. ``archive_path_template``: If ``keep_fragments`` is set to ``false``, and ``archive_path_template`` is set, fragments will be copied into the directory denoted by ``archive_path_template`` instead of being deleted. The directory is created if it does not exist. The placeholder ``{version}`` can be used for the current project version into which the fragment was included.
 
 For a description of all configuration settings, see the separate document `Configuration Settings for antsibull-changelog <./changelog-configuration.rst>`_.
 
@@ -42,22 +41,16 @@ If you want to check a specific fragment, you can provide a path to it; otherwis
 
 If ``antsibull-changelog lint`` produces no output on stdout, and exits with exit code 0, the changelog fragments are OK. If errors are found, they are reported by one line in stdout for each error in the format ``path/to/fragment:line:column:message``, and the program exits with exit code 3. Other exit codes indicate problems with the command line or during the execution of the linter.
 
-Releasing a new version of a collection
+Releasing a new version of your project
 =======================================
 
-To release a new version of a collection, you need to run::
+To release a new version of your project, you need to run::
 
-    antsibull-changelog release
+    antsibull-changelog release --version <version>
 
-inside your collection's tree. This assumes that ``galaxy.yml`` exists and its version is the version of the release you want to make. If that file does not exist, or has a wrong value for ``version``, you can explicitly specify the version you want to release::
+inside your project's tree. You can also specify a release date with ``--date 2020-12-31``, if the default (today) is not what you want.
 
-    antsibull-changelog release --version 1.0.0
-
-You can also specify a release date with ``--date 2020-12-31``, if the default (today) is not what you want.
-
-When doing a release, the changelog generator will read all changelog fragments which are not already mentioned in the changelog, and include them in a new entry in ``changelogs/changelog.yaml``. It will also scan metadata for all modules and plugins of your collection, and mention all modules and plugins with ``version_added`` equal to this version as new modules/plugins.
-
-The metadata for modules and plugins is stored in ``changelogs/.plugin-cache.yaml``, and is only recalculated once the release version changes. To force recollecting this data, either delete the file, or specify the ``--reload-plugins`` option to ``antsibull-changelog release``.
+When doing a release, the changelog generator will read all changelog fragments which are not already mentioned in the changelog, and include them in a new entry in ``changelogs/changelog.yaml``.
 
 After running ``antsibull-changelog release``, you should check ``changelogs/changelog.yaml`` and the generated reStructuredText file (by default ``CHANGELOG.rst``) in.
 
@@ -68,28 +61,16 @@ Updating/Refreshing changelog.yaml
 
 By default, the ``changelogs/changelog.yaml`` file is the main source of truth for antsibull-changelog. It is only modified when a new release is done, and in that case existing entries for other versions than the current one are not touched.
 
-If the main source of truth should be the fragments, or the plugin sources, the refreshing options or config has to be used.
-
-Please note that for plugins, a cache is created in ``changelogs/.plugin-cache.yaml``. This cache is updated when the ``generate`` and ``release`` subcommands are run, and the latest version (for ``generate``) resp. the release version (for ``release``) differs from the version recorded in the cache file. Regeneration can be enforced by specifying the ``--reload-plugins`` option.
-
-Also note that refreshing plugins purges all plugins added by changelog fragments.
-
-This means that if plugin descriptions should be updated, either the plugin cache has to be deleted, or ``--reload-plugins`` has to be specified next to the refresh options/configuration. Refreshing can be configured in different ways, either by the ``always_refresh`` configuration setting, or three command line options ``--refresh``, ``--refresh-plugins`` and ``--refresh-fragments``. These can be specified for both the ``generate`` and ``release`` subcommands.
+If the main source of truth should be the fragments, the refreshing options or config has to be used.
 
 #. The ``always_refresh`` configuration is a string with one of the following values:
-    * ``none`` (default): equivalent to ``--refresh-plugins``, ``--refresh-fragments``, and ``--refresh`` not specified;
-    * ``full``: equivalent to ``--refresh-plugins allow-removal --refresh-fragments with-archives`` specified, or alternatively ``--refresh``;
+    * ``none`` (default): equivalent to ``--refresh-fragments`` and ``--refresh`` not specified;
+    * ``full``: equivalent to ``--refresh-fragments with-archives`` specified, or alternatively ``--refresh``;
     * a comma-separated list, where the following entries are supported:
-        * ``plugins``: equivalent to ``--refresh-plugins allow-removal`` specified;
-        * ``plugins-without-removal``: equivalent to ``--refresh-plugins prevent-removal`` specified;
         * ``fragments``: equivalent to ``--refresh-fragments with-archives`` specified;
         * ``fragments-without-archives``: equivalent to ``--refresh-fragments without-archives`` specified.
 
-#. The ``--refresh`` command line parameter is equivalent to ``--refresh-plugins allow-removal --refresh-fragments with-archives``.
-
-#. ``--refresh-plugins``: if specified, plugin and module descriptions are updated from the plugin cache.
-    * ``allow-removal`` (default): Plugin and module descriptions are updated. If a module or plugin does not exist in the cache, it will be **removed** from the changelog. Please note that if you do not start a new changelog per major release of a collection, and have removed plugins or modules before, ``--refresh plugins allow-removal`` will remove earlier changelog entries from when these plugins resp. modules were added!
-    * ``prevent-removal``: Plugin and module descriptions are updated. If a module or plugin does not exist in the cache, it will **not** be removed from the changelog.
+#. The ``--refresh`` command line parameter is equivalent to ``--refresh-fragments with-archives``.
 
 #. ``--refresh-fragments``: if specified, the fragments for all versions will be recreated from the changelog fragment files. This is only possible if ``keep_fragments`` is ``true``, or fragment archives exist (see the ``archive_path_template`` option). Note that if not all fragments were archived or kept in the fragments directory, they will be **removed** from the changelog.
     * ``with-archives`` (default): Uses both the archives and the current fragment directory to update the fragments.
@@ -98,11 +79,9 @@ This means that if plugin descriptions should be updated, either the plugin cach
 Changelog Fragment Categories
 =============================
 
-This section describes the section categories created in the default config. You can change them, though this is strongly discouraged for collections which will be included in the Ansible Community Distribution.
+This section describes the section categories created in the default config. If you really want, you can change them.
 
 The categories are the same as the ones in the `Ansible-case changelog fragments <https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to>`_.
-
-**NOTE:** The changelog generator automatically detects new modules and new plugins which are documentable (i.e. where you have ``DOCUMENTATION`` where ``version_added`` is there), so you do not need to create changelog entries for them.
 
 The full list of categories is:
 
@@ -113,7 +92,7 @@ The full list of categories is:
   This (new) category should list all changes to features which absolutely require attention from users when upgrading, because an existing behavior is changed. This is mostly what Ansible's Porting Guide used to describe. This section should only appear in a initial major release (`x.0.0`) according to semantic versioning.
 
 **major_changes**
-  This category contains major changes to the collection. It should only contain a few items per major version, describing high-level changes. This section should not appear in patch releases according to semantic versioning.
+  This category contains major changes to the project. It should only contain a few items per major version, describing high-level changes. This section should not appear in patch releases according to semantic versioning.
 
 **minor_changes**
   This category should mention all new features, like plugin or module options. This section should not appear in patch releases according to semantic versioning.
@@ -162,41 +141,7 @@ A fragment can also contain multiple sections, or multiple entries in one sectio
 
 The ``release_summary`` section is special, in that it doesn't contain a list of strings, but a string, and that only one such entry can be shown in the changelog of a release. Usually for every release (pre-release or regular release), at most one fragment is added which contains a ``release_summary``, and this is only done by the person doing the release. The ``release_summary`` should include some global information on the release; for example, in `Ansible's changelog <https://github.com/ansible/ansible/blob/stable-2.9/changelogs/CHANGELOG-v2.9.rst#release-summary>`_, it always mentions the release date and links to the porting guide.
 
-An example of how a fragment with ``release_summary`` could look like is ``changelogs/fragments/0.2.0.yml`` from community.general::
+An example of how a fragment with ``release_summary`` could look like::
 
     release_summary: |
-      This is the first proper release of the ``community.general`` collection on 2020-06-20.
-      The changelog describes all changes made to the modules and plugins included in this collection since Ansible 2.9.0.
-
-Adding new Roles, Playbooks, Test and Filter Plugins
-====================================================
-
-While ansible-core does not (yet) support playbooks, test filter plugins, and filter plugins as documentable plugins/objects, the changelog generator already has support for documenting new ones.
-
-This works by using special sections in changelog fragments whose names start with "`add `"::
-
-    ---
-    add plugin.filter:
-      - name: to_time_unit
-        description: Converts a time expression to a given unit
-      - name: to_seconds
-        description: Converts a time expression to seconds
-    add plugin.test:
-      - name: asn1time
-        description: Check whether the given string is an ASN.1 time
-    add object.role:
-      - name: nginx
-        description: A nginx installation role
-    add object.playbook:
-      - name: wipe_server
-        description: Wipes a server
-
-Porting Guide Entries
-=====================
-
-The following sections are considered as the Porting Guide of the collection. For collections included in Ansible, these will be inserted into Ansible's Porting Guide:
-
-* major_changes
-* breaking_changes
-* deprecated_features
-* removed_features 
+      This is the first proper release of ``antsibull-changelog`` on 2020-06-20.

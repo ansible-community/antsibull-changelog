@@ -1,0 +1,2 @@
+bugfixes:
+- "Fix prerelease collapsing when ``use_semantic_versioning`` is set to ``true`` for ansible-core."

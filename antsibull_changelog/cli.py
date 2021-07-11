@@ -33,23 +33,29 @@ from .logger import LOGGER, setup_logger
 
 def set_paths(force: Optional[str] = None,
               is_collection: Optional[bool] = None,
-              ansible_doc_bin: Optional[str] = None) -> PathsConfig:
+              ansible_doc_bin: Optional[str] = None,
+              is_other_project: Optional[bool] = None) -> PathsConfig:
     """
     Create ``PathsConfig``.
 
-    :arg force: If ``True``, create a collection path config for the given path.
+    :arg force: If provided, create a collection path config for the given path.
                 Otherwise, detect configuration.
     :arg is_collection: Override detection of whether the tool is run in a collection
-                        or in ansible-base.
+                        or in ansible-core.
     :arg ansible_doc_bin: Override path to ansible-doc.
+    :arg is_other_project: Override detection of whether the tool is an other project
     """
-    if force:
+    if force is not None:
+        if is_other_project is True:
+            return PathsConfig.force_other(force, ansible_doc_bin=ansible_doc_bin)
         if is_collection is False:
             return PathsConfig.force_ansible(force, ansible_doc_bin=ansible_doc_bin)
         return PathsConfig.force_collection(force, ansible_doc_bin=ansible_doc_bin)
 
     try:
-        return PathsConfig.detect(is_collection=is_collection, ansible_doc_bin=ansible_doc_bin)
+        return PathsConfig.detect(is_collection=is_collection,
+                                  is_other_project=is_other_project,
+                                  ansible_doc_bin=ansible_doc_bin)
     except ChangelogError:
         if is_collection is True:
             raise ChangelogError(  # pylint: disable=raise-missing-from
@@ -116,11 +122,16 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
 
     init_parser = subparsers.add_parser('init',
                                         parents=[common],
-                                        help='set up changelog infrastructure for collection')
+                                        help='set up changelog infrastructure for '
+                                             'collection, or an other project')
     init_parser.set_defaults(func=command_init)
     init_parser.add_argument('root',
-                             metavar='COLLECTION_ROOT',
-                             help='path to collection root')
+                             metavar='PROJECT_ROOT',
+                             help='path to collection or project root')
+    init_parser.add_argument('--is-other-project',
+                             action='store_true',
+                             help='project root belongs to an other project, and '
+                                  'not to an Ansible collection')
 
     lint_parser = subparsers.add_parser('lint',
                                         parents=[common],
@@ -248,10 +259,11 @@ def command_init(args: Any) -> int:
     :arg args: Parsed arguments
     """
     root: str = args.root
+    is_other_project: bool = args.is_other_project
 
-    paths = set_paths(force=root)
+    paths = set_paths(force=root, is_other_project=is_other_project)
 
-    if paths.galaxy_path is None:
+    if not is_other_project and paths.galaxy_path is None:
         LOGGER.error('The file galaxy.yml does not exists in the collection root!')
         return 5
     LOGGER.debug('Checking for existance of "{}"', paths.config_path)
@@ -261,12 +273,12 @@ def command_init(args: Any) -> int:
 
     collection_details = CollectionDetails(paths)
 
-    config = ChangelogConfig.default(
-        paths,
-        collection_details,
-        title='{0}.{1}'.format(
-            collection_details.get_namespace().title(), collection_details.get_name().title()),
-    )
+    title = 'Project'
+    if not is_other_project:
+        title = '{0}.{1}'.format(
+            collection_details.get_namespace().title(), collection_details.get_name().title())
+
+    config = ChangelogConfig.default(paths, collection_details, title=title)
 
     fragments_dir = os.path.join(paths.changelog_dir, config.notes_dir)
     try:
@@ -411,7 +423,7 @@ def command_release(args: Any) -> int:
     flatmap = _determine_flatmap(collection_details, config)
 
     if not version or not codename:
-        if not config.is_collection:
+        if not config.is_collection and not config.is_other_project:
             # Both version and codename are required for Ansible (Base)
             try:
                 version, codename = get_ansible_release()
@@ -420,8 +432,13 @@ def command_release(args: Any) -> int:
                 return 5
 
         elif not version:
-            # Codename is not required for collections, only version is
-            version = collection_details.get_version()
+            if config.is_collection:
+                # Codename is not required for collections, only version is
+                version = collection_details.get_version()
+            else:
+                LOGGER.error('You need to explicitly specify the version for other projects with'
+                             ' --version')
+                return 5
 
     changes = load_changes(config)
 
@@ -489,14 +506,14 @@ def command_lint(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    # Passing is_collection=True ensures that we just look for changelogs/config.yaml,
+    # Passing is_other_project=True ensures that we just look for changelogs/config.yaml,
     # and don't expect galaxy.yml or lib/ansible to be present.
-    paths = set_paths(is_collection=True)
+    paths = set_paths(is_other_project=True)
 
     fragment_paths: List[str] = args.fragments
 
     collection_details = CollectionDetails(paths)
-    config = ChangelogConfig.load(paths, collection_details)
+    config = ChangelogConfig.load(paths, collection_details, ignore_is_other_project=True)
 
     exceptions: List[Tuple[str, Exception]] = []
     fragments = load_fragments(paths, config, fragment_paths, exceptions)
