@@ -1,2 +1,0 @@
-minor_changes:
-- "Support changelogs for other projects than ansible-core/-base and Ansible collections (https://github.com/ansible-community/antsibull-changelog/pull/60)."

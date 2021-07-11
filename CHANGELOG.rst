@@ -5,6 +5,24 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.12.0
+=======
+
+Release Summary
+---------------
+
+New feature release which supports other projects than ansible-core and Ansible collections.
+
+Minor Changes
+-------------
+
+- Support changelogs for other projects than ansible-core/-base and Ansible collections (https://github.com/ansible-community/antsibull-changelog/pull/60).
+
+Bugfixes
+--------
+
+- Fix prerelease collapsing when ``use_semantic_versioning`` is set to ``true`` for ansible-core.
+
 v0.11.0
 =======
 

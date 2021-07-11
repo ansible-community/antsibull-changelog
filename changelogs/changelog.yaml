@@ -34,6 +34,21 @@ releases:
       - When using ansible-core 2.11 or newer, will now detect new roles with argument
         spec. We only consider the ``main`` entrypoint of roles.
     release_date: '2021-06-13'
+  0.12.0:
+    changes:
+      bugfixes:
+      - Fix prerelease collapsing when ``use_semantic_versioning`` is set to ``true``
+        for ansible-core.
+      minor_changes:
+      - Support changelogs for other projects than ansible-core/-base and Ansible
+        collections (https://github.com/ansible-community/antsibull-changelog/pull/60).
+      release_summary: New feature release which supports other projects than ansible-core
+        and Ansible collections.
+    fragments:
+    - 0.12.0.yml
+    - other-projects.yml
+    - use_semantic_versioning.yml
+    release_date: '2021-07-11'
   0.2.0:
     changes:
       minor_changes:
