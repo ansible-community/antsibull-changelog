@@ -88,13 +88,14 @@ def collect_versions(versions: Collection[str],
             version_list = []
             entry = (version, version_list)
             result.append(entry)
-        elif not squash and not is_release_version(config, entry[0]):
+        elif not squash and not is_release_version(config, entry[0]): \
+                # pylint: disable=unsubscriptable-object
             # current version is a pre-release, next version needs its own entry
             version_list = []
             entry = (version, version_list)
             result.append(entry)
         else:
-            version_list = entry[1]
+            version_list = entry[1]  # pylint: disable=unsubscriptable-object
 
         version_list.append(version)
 
