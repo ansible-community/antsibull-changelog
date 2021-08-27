@@ -60,7 +60,7 @@ class LegacyFragmentResolver(FragmentResolver):
         """
         Create a simple fragment resolver.
         """
-        self.fragments = dict()
+        self.fragments = {}
         for fragment in fragments:
             self.fragments[fragment.name] = fragment
 
@@ -88,20 +88,20 @@ class LegacyPluginResolver(PluginResolver):
         """
         Convert a ``PluginDecscription`` object to a plugin description dictionary.
         """
-        return dict(
-            name=plugin.name,
-            namespace=plugin.namespace,
-            description=plugin.description,
-        )
+        return {
+            'name': plugin.name,
+            'namespace': plugin.namespace,
+            'description': plugin.description,
+        }
 
     def __init__(self, plugins: List[PluginDescription]):
         """
         Create a simple plugin resolver from a list of ``PluginDescription`` objects.
         """
-        self.plugins = dict()
+        self.plugins = {}
         for plugin in plugins:
             if plugin.type not in self.plugins:
-                self.plugins[plugin.type] = dict()
+                self.plugins[plugin.type] = {}
 
             self.plugins[plugin.type][plugin.name] = self.resolve_plugin(plugin)
 
@@ -113,7 +113,7 @@ class LegacyPluginResolver(PluginResolver):
         :arg release: A release description
         :return: A map of plugin types to lists of plugin descriptions
         """
-        result = dict()
+        result = {}
         if 'modules' in release:
             result['module'] = [self.plugins['module'][module_name]
                                 for module_name in release['modules']]
@@ -138,7 +138,7 @@ class LegacyObjectResolver(PluginResolver):
         :arg release: A release description
         :return: A map of object types to lists of plugin descriptions
         """
-        return dict()
+        return {}
 
 
 class ChangesDataFragmentResolver(FragmentResolver):
@@ -174,7 +174,7 @@ class ChangesDataPluginResolver(PluginResolver):
         :arg release: A release description
         :return: A map of plugin types to lists of plugin descriptions
         """
-        result = dict()
+        result = {}
         if 'modules' in release:
             result['module'] = release['modules']
         if 'plugins' in release:
@@ -196,7 +196,7 @@ class ChangesDataObjectResolver(PluginResolver):
         :arg release: A release description
         :return: A map of object types to lists of object descriptions
         """
-        result = dict()
+        result = {}
         if 'objects' in release:
             result.update(release['objects'])
         return result

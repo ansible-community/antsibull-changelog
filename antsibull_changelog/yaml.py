@@ -26,7 +26,7 @@ def load_yaml(path: str) -> Any:
     """
     Load and parse YAML file ``path``.
     """
-    with open(path, 'r') as stream:
+    with open(path, 'rb') as stream:
         return yaml.load(stream, Loader=_SafeLoader)
 
 
@@ -34,7 +34,7 @@ def store_yaml(path: str, content: Any) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
-    with open(path, 'w') as stream:
+    with open(path, 'wb') as stream:
         dumper = _SafeDumper
         dumper.ignore_aliases = lambda *args: True
         yaml.dump(content, stream, default_flow_style=False, encoding='utf-8', Dumper=dumper)

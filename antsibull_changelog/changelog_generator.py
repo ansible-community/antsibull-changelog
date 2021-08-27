@@ -38,9 +38,9 @@ class ChangelogEntry:
     def __init__(self, version: str):
         self.version = version
         self.modules = []
-        self.plugins = dict()
-        self.objects = dict()
-        self.changes = dict()
+        self.plugins = {}
+        self.objects = {}
+        self.changes = {}
         self.preludes = []
 
     def has_no_changes(self, section_names: Optional[List[str]] = None) -> bool:

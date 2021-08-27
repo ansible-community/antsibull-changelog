@@ -129,9 +129,9 @@ def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-argument
     namespace: Optional[str] = None
     if collection_name and name.startswith(collection_name + '.'):
         name = name[len(collection_name) + 1:]
-    docs: dict = data.get('doc') or dict()
+    docs: dict = data.get('doc') or {}
     if category == 'object' and plugin_type == 'role':
-        entrypoints: dict = data.get('entry_points') or dict()
+        entrypoints: dict = data.get('entry_points') or {}
         if 'main' in entrypoints:
             docs = entrypoints['main']
     if category == 'plugin' and plugin_type == 'module':

@@ -68,11 +68,10 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         Empty change metadata.
         """
-        return dict(
-            ancestor=None,
-            releases=dict(
-            ),
-        )
+        return {
+            'ancestor': None,
+            'releases': {},
+        }
 
     @property
     def latest_version(self) -> str:
@@ -157,7 +156,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         Add a new releases to the changes metadata.
         """
         if version not in self.releases:
-            self.releases[version] = dict()
+            self.releases[version] = {}
         elif not update_existing:
             LOGGER.warning('release {} already exists', version)
             return
@@ -705,7 +704,7 @@ class ChangesData(ChangesBase):
         self.known_fragments.add(fragment.name)
 
         if 'changes' not in self.releases[version]:
-            self.releases[version]['changes'] = dict()
+            self.releases[version]['changes'] = {}
         changes = self.releases[version]['changes']
 
         if 'fragments' not in self.releases[version]:
