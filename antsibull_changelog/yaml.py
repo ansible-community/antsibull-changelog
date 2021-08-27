@@ -34,7 +34,7 @@ def store_yaml(path: str, content: Any) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
-    with open(path, 'wb') as stream:
+    with open(path, 'w', encoding='utf-8') as stream:
         dumper = _SafeDumper
         dumper.ignore_aliases = lambda *args: True
-        yaml.dump(content, stream, default_flow_style=False, encoding='utf-8', Dumper=dumper)
+        yaml.dump(content, stream, default_flow_style=False, Dumper=dumper)
