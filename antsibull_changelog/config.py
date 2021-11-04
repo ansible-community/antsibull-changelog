@@ -150,7 +150,7 @@ def load_galaxy_metadata(paths: PathsConfig) -> dict:
     Load galaxy.yml metadata.
 
     :arg paths: Paths configuration.
-    :return: The contents of ``galaxy.yaml``.
+    :return: The contents of ``galaxy.yml``.
     """
     path = paths.galaxy_path
     if path is None:
@@ -205,7 +205,7 @@ class CollectionDetails:
         try:
             galaxy_yaml = load_galaxy_metadata(self.paths)
         except Exception as exc:  # pylint: disable=broad-except
-            msg = 'Cannot find galaxy.yaml to {0}: {1}'.format(what_for, exc)
+            msg = 'Cannot find galaxy.yml to {0}: {1}'.format(what_for, exc)
             if help_text is not None:
                 msg = '{0}. {1}'.format(msg, help_text)
             raise ChangelogError(msg) from exc
@@ -221,7 +221,7 @@ class CollectionDetails:
             self._load_galaxy_yaml('namespace', help_text=help_text)
         namespace = self.namespace
         if namespace is None:
-            raise ChangelogError('Cannot find "namespace" field in galaxy.yaml. ' + help_text)
+            raise ChangelogError('Cannot find "namespace" field in galaxy.yml. ' + help_text)
         return namespace
 
     def get_name(self) -> str:
@@ -233,7 +233,7 @@ class CollectionDetails:
             self._load_galaxy_yaml('name', help_text=help_text)
         name = self.name
         if name is None:
-            raise ChangelogError('Cannot find "name" field in galaxy.yaml. ' + help_text)
+            raise ChangelogError('Cannot find "name" field in galaxy.yml. ' + help_text)
         return name
 
     def get_version(self) -> str:
@@ -245,7 +245,7 @@ class CollectionDetails:
             self._load_galaxy_yaml('version', help_text=help_text)
         version = self.version
         if version is None:
-            raise ChangelogError('Cannot find "version" field in galaxy.yaml. ' + help_text)
+            raise ChangelogError('Cannot find "version" field in galaxy.yml. ' + help_text)
         return version
 
     def get_flatmap(self) -> Optional[bool]:
