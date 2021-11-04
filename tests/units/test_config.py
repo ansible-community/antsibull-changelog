@@ -287,13 +287,13 @@ def test_collection_details(tmp_path):
     details = CollectionDetails(paths)
     with pytest.raises(ChangelogError) as exc:
         details.get_namespace()
-    assert 'Cannot find "namespace" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "namespace" field in galaxy.yml' in str(exc.value)
     with pytest.raises(ChangelogError) as exc:
         details.get_name()
-    assert 'Cannot find "name" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "name" field in galaxy.yml' in str(exc.value)
     with pytest.raises(ChangelogError) as exc:
         details.get_version()
-    assert 'Cannot find "version" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "version" field in galaxy.yml' in str(exc.value)
     assert details.get_flatmap() is None
 
     galaxy_path = tmp_path / 'galaxy.yml'
@@ -302,13 +302,13 @@ def test_collection_details(tmp_path):
     details = CollectionDetails(paths)
     with pytest.raises(ChangelogError) as exc:
         details.get_namespace()
-    assert 'Cannot find "namespace" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "namespace" field in galaxy.yml' in str(exc.value)
     with pytest.raises(ChangelogError) as exc:
         details.get_name()
-    assert 'Cannot find "name" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "name" field in galaxy.yml' in str(exc.value)
     with pytest.raises(ChangelogError) as exc:
         details.get_version()
-    assert 'Cannot find "version" field in galaxy.yaml' in str(exc.value)
+    assert 'Cannot find "version" field in galaxy.yml' in str(exc.value)
     assert details.get_flatmap() is False
 
     galaxy_path = tmp_path / 'galaxy.yml'
