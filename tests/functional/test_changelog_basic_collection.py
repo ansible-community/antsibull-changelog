@@ -49,7 +49,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     collection_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
     collection_changelog.add_fragment_line(
-        'trivial.yml', 'trivial', 'This should not show up in the changelog.')
+        'trivial.yml', 'trivial', ['This should not show up in the changelog.'])
     collection_changelog.set_plugin_cache('1.0.0', {})
 
     assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
@@ -185,8 +185,6 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     collection_changelog.config.changelog_filename_version_depth = 2
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
-        '1.0.0.yml', 'release_summary', 'This is the first proper release.')
-    collection_changelog.add_fragment_line(
         'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
     collection_changelog.add_fragment_line(
         'baz-new-option.yaml', 'minor_changes',
@@ -221,6 +219,18 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
             },
         },
     })
+
+    collection_changelog.add_fragment_line(
+        '1.0.0.yml', 'release_summary', ['This is the first proper release.'])
+
+    # Lint fragments (should fail)
+    assert collection_changelog.run_tool('lint', ['-vv']) == 3
+
+    # Release (should fail)
+    assert collection_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 3
+
+    collection_changelog.add_fragment_line(
+        '1.0.0.yml', 'release_summary', 'This is the first proper release.')
 
     # Lint fragments
     assert collection_changelog.run_tool('lint', ['-vv']) == 0

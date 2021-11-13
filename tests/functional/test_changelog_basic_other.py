@@ -47,7 +47,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     other_changelog.add_fragment_line(
         '1.0.0.yml', 'release_summary', 'This is the first proper release.')
     other_changelog.add_fragment_line(
-        'trivial.yml', 'trivial', 'This should not show up in the changelog.')
+        'trivial.yml', 'trivial', ['This should not show up in the changelog.'])
 
     # If we do not pass --version, will fail
     assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 5

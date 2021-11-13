@@ -453,6 +453,13 @@ def command_release(args: Any) -> int:
                            version=version, force_reload=args.reload_plugins,
                            use_ansible_doc=args.use_ansible_doc)
     fragments = load_fragments(paths, config)
+    lint_rc = lint_fragments(config, fragments, [])
+    if lint_rc != 0:
+        LOGGER.error(
+            'Please fix all linting errors before releasing a new version! '
+            'Use `antsibull-changelog lint` to manually lint before releasing.')
+        return lint_rc
+
     plugins, fragments = _do_refresh(
         args, paths, collection_details, config, changes, plugins, fragments)
     add_release(
