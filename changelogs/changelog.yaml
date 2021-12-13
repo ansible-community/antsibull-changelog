@@ -49,6 +49,24 @@ releases:
     - other-projects.yml
     - use_semantic_versioning.yml
     release_date: '2021-07-11'
+  0.13.0:
+    changes:
+      bugfixes:
+      - Fix issues with module namespaces when symlinks appear in the path to the
+        temp directory (https://github.com/ansible-community/antsibull-changelog/issues/68,
+        https://github.com/ansible-community/antsibull-changelog/pull/69).
+      - Stop mentioning ``galaxy.yaml`` instead of ``galaxy.yml`` in some error messages
+        (https://github.com/ansible-community/antsibull-changelog/pull/66).
+      minor_changes:
+      - Always lint fragments before releasing (https://github.com/ansible-community/antsibull-changelog/issues/65,
+        https://github.com/ansible-community/antsibull-changelog/pull/67).
+      release_summary: This release makes changelog building more reliable.
+    fragments:
+    - 0.13.0.yml
+    - 66-galaxy.yaml
+    - 67-lint-before-release.yml
+    - 69-symlinks.yml
+    release_date: '2021-12-13'
   0.2.0:
     changes:
       minor_changes:

@@ -1,2 +1,0 @@
-bugfixes:
-  - "Stop mentioning ``galaxy.yaml`` instead of ``galaxy.yml`` in some error messages (https://github.com/ansible-community/antsibull-changelog/pull/66)."

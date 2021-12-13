@@ -1,2 +1,0 @@
-minor_changes:
-  - "Always lint fragments before releasing (https://github.com/ansible-community/antsibull-changelog/issues/65, https://github.com/ansible-community/antsibull-changelog/pull/67)."

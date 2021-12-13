@@ -1,2 +1,0 @@
-bugfixes:
-  - "Fix issues with module namespaces when symlinks appear in the path to the temp directory (https://github.com/ansible-community/antsibull-changelog/issues/68, https://github.com/ansible-community/antsibull-changelog/pull/69)."

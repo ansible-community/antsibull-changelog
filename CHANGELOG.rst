@@ -5,6 +5,25 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.13.0
+=======
+
+Release Summary
+---------------
+
+This release makes changelog building more reliable.
+
+Minor Changes
+-------------
+
+- Always lint fragments before releasing (https://github.com/ansible-community/antsibull-changelog/issues/65, https://github.com/ansible-community/antsibull-changelog/pull/67).
+
+Bugfixes
+--------
+
+- Fix issues with module namespaces when symlinks appear in the path to the temp directory (https://github.com/ansible-community/antsibull-changelog/issues/68, https://github.com/ansible-community/antsibull-changelog/pull/69).
+- Stop mentioning ``galaxy.yaml`` instead of ``galaxy.yml`` in some error messages (https://github.com/ansible-community/antsibull-changelog/pull/66).
+
 v0.12.0
 =======
 
