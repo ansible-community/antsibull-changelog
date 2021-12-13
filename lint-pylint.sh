@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e
-poetry run pylint --rcfile .pylintrc.automated antsibull_changelog "$@"
+poetry run pylint --rcfile .pylintrc.automated src/antsibull_changelog "$@"
