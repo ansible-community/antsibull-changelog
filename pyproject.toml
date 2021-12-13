@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.7"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "antsibull-changelog"
@@ -12,7 +12,7 @@ readme = "README.md"
 repository = "https://github.com/ansible-community/antsibull-changelog"
 documentation = "https://github.com/ansible-community/antsibull-changelog/tree/main/docs/"
 packages = [
-    { include = "antsibull_changelog" },
+    { include = "antsibull_changelog", from = "src" },
     { include = "tests", format = "sdist" }
 ]
 classifiers = [
