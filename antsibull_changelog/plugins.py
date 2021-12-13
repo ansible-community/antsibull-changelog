@@ -74,26 +74,12 @@ class PluginDescription:
         return plugins
 
 
-def follow_links(path: str) -> str:
-    """
-    Given a path, will recursively resolve symbolic links.
-    """
-    tried_links = set()
-    while os.path.islink(path):
-        if path in tried_links:
-            raise Exception(
-                'Found infinite symbolic link loop involving "{0}"'.format(path))
-        tried_links.add(path)
-        path = os.path.normpath(os.path.join(os.path.dirname(path), os.readlink(path)))
-    return path
-
-
 def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filename: str) -> str:
     """
     Given a filename of a module, will extract the module's namespace.
     """
     # Follow links
-    filename = follow_links(filename)
+    filename = os.path.realpath(filename)
     # Determine relative path
     if collection_name:
         rel_to = os.path.join(paths.base_dir, 'plugins', 'modules')
@@ -183,6 +169,8 @@ def list_plugins_walk(paths: PathsConfig,
     if not os.path.exists(plugin_source_path):
         return []
 
+    plugin_source_path = os.path.realpath(plugin_source_path)
+
     result = set()
     for dirpath, _, filenames in os.walk(plugin_source_path):
         if plugin_type != 'module' and dirpath != plugin_source_path:
@@ -195,7 +183,7 @@ def list_plugins_walk(paths: PathsConfig,
                 # ansible-core/-base.
                 if (plugin_type, filename) in PLUGIN_EXCEPTIONS:
                     continue
-            path = follow_links(os.path.join(dirpath, filename))
+            path = os.path.realpath(os.path.join(dirpath, filename))
             path = os.path.splitext(path)[0]
             relpath = os.path.relpath(path, plugin_source_path)
             if not paths.is_collection and os.sep in relpath:
@@ -314,7 +302,7 @@ class CollectionCopier:
         self.namespace = namespace
         self.name = name
 
-        self.dir = tempfile.mkdtemp(prefix='antsibull-changelog')
+        self.dir = os.path.realpath(tempfile.mkdtemp(prefix='antsibull-changelog'))
 
     def __enter__(self):
         try:
