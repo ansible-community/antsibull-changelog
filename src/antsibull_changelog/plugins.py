@@ -10,13 +10,18 @@ Collect and store information on Ansible plugins and modules.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
 
 from typing import Any, Dict, List, Optional
 
-from .ansible import get_documentable_plugins, get_documentable_objects, PLUGIN_EXCEPTIONS
+import packaging.version
+
+from .ansible import (
+    get_ansible_release, get_documentable_plugins, get_documentable_objects, PLUGIN_EXCEPTIONS,
+)
 from .config import CollectionDetails, PathsConfig
 from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
@@ -101,7 +106,8 @@ def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filena
 def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
                         collection_name: Optional[str],
                         plugin_type: str, name: str, data: Dict[str, Any],
-                        category: str = 'plugin') -> Dict[str, Any]:
+                        category: str = 'plugin',
+                        is_ansible_core_2_13: bool = False) -> Dict[str, Any]:
     """
     Convert ``ansible-doc --json`` output to plugin metadata.
 
@@ -111,6 +117,7 @@ def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-argument
     :arg name: The plugin's name
     :arg data: The JSON for this plugin returned by ``ansible-doc --json``
     :arg category: Set to ``object`` for roles and playbooks
+    :arg is_ansible_core_2_13: Set to ``True`` for ``--metadata-dump`` output
     """
     namespace: Optional[str] = None
     if collection_name and name.startswith(collection_name + '.'):
@@ -121,12 +128,20 @@ def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-argument
         if 'main' in entrypoints:
             docs = entrypoints['main']
     if category == 'plugin' and plugin_type == 'module':
-        filename: Optional[str] = docs.get('filename')
-        if filename:
-            namespace = extract_namespace(paths, collection_name, filename)
-        if '.' in name:
-            # Flatmapping
-            name = name[name.rfind('.') + 1:]
+        if is_ansible_core_2_13:
+            last_dot = name.rindex('.')
+            if last_dot >= 0:
+                namespace = name[:last_dot]
+                name = name[last_dot + 1:]
+            else:
+                namespace = ''
+        else:
+            filename: Optional[str] = docs.get('filename')
+            if filename:
+                namespace = extract_namespace(paths, collection_name, filename)
+            if '.' in name:
+                # Flatmapping
+                name = name[name.rfind('.') + 1:]
     return {
         'description': docs.get('short_description'),
         'name': name,
@@ -256,6 +271,20 @@ def run_ansible_doc(paths: PathsConfig, playbook_dir: Optional[str],
     return json.loads(output.decode('utf-8'))
 
 
+def run_ansible_doc_metadata_dump(paths: PathsConfig, playbook_dir: Optional[str],
+                                  collection_name: Optional[str]) -> dict:
+    """
+    Runs ansible-doc to retrieve documentation for all plugins in a collection.
+    """
+    command = [paths.ansible_doc_path, '--metadata-dump', '--dont-fail-on-errors']
+    if collection_name:
+        command.append(collection_name)
+    if playbook_dir:
+        command.extend(['--playbook-dir', playbook_dir])
+    output = subprocess.check_output(command)
+    return json.loads(output.decode('utf-8'))
+
+
 def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
                          playbook_dir: Optional[str],
                          plugin_type: str,
@@ -324,6 +353,40 @@ class CollectionCopier:
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
+def _load_plugins_2_13(plugins_data: Dict[str, Any],
+                       paths: PathsConfig,
+                       collection_name: str,
+                       playbook_dir: Optional[str] = None) -> None:
+    data = run_ansible_doc_metadata_dump(paths, playbook_dir, collection_name)['all']
+
+    for category, category_types in (
+        ('plugins', get_documentable_plugins()),
+        ('objects', get_documentable_objects()),
+    ):
+        for plugin_type in category_types:
+            if plugin_type in data:
+                plugins_data[category][plugin_type] = {}
+                for plugin_name, plugin_data in data[plugin_type].items():
+                    if plugin_name.startswith('ansible.builtin._'):
+                        plugin_name = plugin_name.replace('_', '', 1)
+                    processed_data = jsondoc_to_metadata(
+                        paths, collection_name, plugin_type, plugin_name,
+                        plugin_data, category=category[:-1])
+                    plugins_data[category][plugin_type][processed_data['name']] = processed_data
+
+
+def _load_collection_plugins_2_13(plugins_data: Dict[str, Any],
+                                  paths: PathsConfig,
+                                  collection_details: CollectionDetails) -> None:
+    collection_name = '{}.{}'.format(
+        collection_details.get_namespace(), collection_details.get_name())
+
+    with CollectionCopier(
+            paths, collection_details.get_namespace(), collection_details.get_name()
+    ) as (playbook_dir, new_paths):
+        _load_plugins_2_13(plugins_data, new_paths, collection_name, playbook_dir=playbook_dir)
+
+
 def _load_collection_plugins(plugins_data: Dict[str, Any],
                              paths: PathsConfig,
                              collection_details: CollectionDetails,
@@ -352,6 +415,23 @@ def _load_ansible_plugins(plugins_data: Dict[str, Any], paths: PathsConfig,
             paths, None, plugin_type, None, use_ansible_doc=use_ansible_doc)
 
 
+def _get_ansible_core_version(paths: PathsConfig) -> packaging.version.Version:
+    try:
+        version, _ = get_ansible_release()
+        return packaging.version.Version(version)
+    except ValueError:
+        pass
+
+    command = [paths.ansible_doc_path, '--version']
+    output = subprocess.check_output(command).decode('utf-8')
+    for regex in (r'^ansible-doc \[(?:core|base) ([^\]]+)\]', r'^ansible-doc ([^\s]+)'):
+        match = re.match(regex, output)
+        if match:
+            return packaging.version.Version(match.group(1))
+    raise Exception(
+        f'Cannot extract ansible-core version from ansible-doc --version output:\n{output}')
+
+
 def _refresh_plugin_cache(paths: PathsConfig,
                           collection_details: CollectionDetails,
                           version: str,
@@ -364,7 +444,13 @@ def _refresh_plugin_cache(paths: PathsConfig,
         'objects': {},
     }
 
-    if paths.is_collection:
+    core_version = _get_ansible_core_version(paths)
+    if core_version >= packaging.version.Version('2.13.0.dev0'):
+        if paths.is_collection:
+            _load_collection_plugins_2_13(plugins_data, paths, collection_details)
+        else:
+            _load_plugins_2_13(plugins_data, paths, 'ansible.builtin')
+    elif paths.is_collection:
         _load_collection_plugins(plugins_data, paths, collection_details, use_ansible_doc)
     else:
         _load_ansible_plugins(plugins_data, paths, use_ansible_doc)

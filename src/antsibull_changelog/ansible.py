@@ -38,7 +38,7 @@ PLUGIN_EXCEPTIONS = (('cache', 'base.py'), ('module', 'async_wrapper.py'))
 
 def get_documentable_plugins() -> Tuple[str, ...]:
     """
-    Retrieve plugin types that can be documented. Does not include 'module'.
+    Retrieve plugin types that can be documented.
     """
     if HAS_ANSIBLE_CONSTANTS:
         return C.DOCUMENTABLE_PLUGINS
