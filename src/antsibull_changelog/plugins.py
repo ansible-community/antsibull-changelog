@@ -276,7 +276,7 @@ def run_ansible_doc_metadata_dump(paths: PathsConfig, playbook_dir: Optional[str
     """
     Runs ansible-doc to retrieve documentation for all plugins in a collection.
     """
-    command = [paths.ansible_doc_path, '--metadata-dump', '--dont-fail-on-errors']
+    command = [paths.ansible_doc_path, '--metadata-dump']
     if collection_name:
         command.append(collection_name)
     if playbook_dir:
