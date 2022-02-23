@@ -1,0 +1,2 @@
+minor_changes:
+  - "The internal ``changelog.yaml`` linting API allows to use ``packaging.version.Version`` for version numbers instead of semantic versioning (https://github.com/ansible-community/antsibull-changelog/pull/73)."

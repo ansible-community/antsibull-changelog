@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "antsibull-changelog"
-version = "0.13.0"
+version = "0.14.0"
 description = "Changelog tool for Ansible-base and Ansible collections"
 authors = ["Felix Fontein <felix@fontein.de>", "Toshio Kuratomi <a.badger@gmail.com>", "Matt Clay <matt@mystile.com>"]
 license = "GPL-3.0-or-later"

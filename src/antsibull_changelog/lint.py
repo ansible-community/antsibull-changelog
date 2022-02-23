@@ -12,6 +12,7 @@ import re
 
 from typing import Any, List, Optional, Tuple, Type, cast
 
+import packaging.version
 import semantic_version
 
 from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
@@ -31,13 +32,14 @@ class ChangelogYamlLinter:
     errors: List[Tuple[str, int, int, str]]
     path: str
 
-    def __init__(self, path):
+    def __init__(self, path: str, no_semantic_versioning: bool = False):
         self.errors = []
         self.path = path
         self.valid_plugin_types = set(get_documentable_plugins())
         self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
+        self.no_semantic_versioning = no_semantic_versioning
 
-    def check_version(self, version: Any, message: str) -> Optional[semantic_version.Version]:
+    def check_version(self, version: Any, message: str) -> Optional[Any]:
         """
         Check that the given version is a valid semantic version.
 
@@ -48,6 +50,8 @@ class ChangelogYamlLinter:
         try:
             if not isinstance(version, str):
                 raise ValueError('Expecting string')
+            if self.no_semantic_versioning:
+                return packaging.version.Version(version)
             return semantic_version.Version(version)
         except ValueError as exc:
             self.errors.append((self.path, 0, 0,
@@ -280,8 +284,10 @@ class ChangelogYamlLinter:
         return self.errors
 
 
-def lint_changelog_yaml(path: str) -> List[Tuple[str, int, int, str]]:
+def lint_changelog_yaml(path: str,
+                        no_semantic_versioning: bool = False,
+                        ) -> List[Tuple[str, int, int, str]]:
     """
     Lint a changelogs/changelog.yaml file.
     """
-    return ChangelogYamlLinter(path).lint()
+    return ChangelogYamlLinter(path, no_semantic_versioning=no_semantic_versioning).lint()
