@@ -235,12 +235,12 @@ class ChangelogFragmentLinter:
 
                 results = rstcheck.check(
                     line, filename=fragment.path,
-                    report_level=docutils.utils.Reporter.WARNING_LEVEL)
+                    report_level=docutils.utils.Reporter.WARNING_LEVEL)  # type: ignore
                 errors += [(fragment.path, 0, 0, result[1]) for result in results]
         elif isinstance(lines, str):
             results = rstcheck.check(
                 lines, filename=fragment.path,
-                report_level=docutils.utils.Reporter.WARNING_LEVEL)
+                report_level=docutils.utils.Reporter.WARNING_LEVEL)  # type: ignore
             errors += [(fragment.path, 0, 0, result[1]) for result in results]
 
     def lint(self, fragment: ChangelogFragment) -> List[Tuple[str, int, int, str]]:
