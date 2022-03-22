@@ -1,11 +1,11 @@
 Changelog YAML Format
 =====================
 
-This describes the format which is required from collections which want to be included in the Ansible Community Distribution if they want to have a nicely formatted changelog for their collection in the ACD combined changelog.
+This describes the format which is required from collections which want to be included in the Ansible package if they want to have a nicely formatted changelog for their collection in the Ansible combined changelog.
 
 The format is similar to the `.changes.yaml` file used internally by Ansible until 2.9.x (see [here](https://github.com/ansible/ansible/blob/stable-2.9/changelogs/.changes.yaml) for an example). Concrete examples for collection changelogs with the new format described here can be found [here](https://github.com/felixfontein/ansible-versioning_test_collection/blob/master/changelogs/changelog.yaml) and [here](https://github.com/felixfontein/ansible-versioning_test_collection/blob/1.0.2/changelogs/changelog.yaml).
 
-Please remember that collection versions **must** use [semantic versioning](https://semver.org/) if included in ACD or RedHat's Automation Hub.
+Please remember that collection versions **must** use [semantic versioning](https://semver.org/) if included in the Ansible package or RedHat's Automation Hub.
 
 You can use the `antsibull-lint changelog-yaml` tool included in the `antsibull package <https://pypi.org/project/antsibull/>`_ to validate these files:
 
@@ -121,7 +121,8 @@ The `changes` dictionary contains different sections of the changelog for this v
 6. `removed_features`: a list of strings describing features removed in this release. The features should have been deprecated earlier. This should only appear for major releases (x.0.0) as these are breaking changes.
 7. `security_fixes`: a list of strings describing security-relevant bugfixes. If available, they should include the issue's CVE.
 8. `bugfixes`: a list of strings describing other bugfixes.
-9. `trivial`: a list of strings describing changes that are too trivial to show in the changelog.
+9. `known_issues`: a list of strings describing known issues that are currently not fixed or will not be fixed.
+10. `trivial`: a list of strings describing changes that are too trivial to show in the changelog.
 
 Note that not every section has to be used. Also note that the sections `deprecated_features`, `security_fixes` and `trivial` have been added only after Ansible 2.9, and that `trivial` is special in the sense that changes in there will not be shown to the user.
 
@@ -173,8 +174,8 @@ Currently valid plugin types are:
 10. `shell`
 11. `strategy`
 12. `vars`
-13. `filter` (not documentable by `ansible-doc`)
-14. `test` (not documentable by `ansible-doc`)
+13. `filter` (not yet documentable by `ansible-doc`)
+14. `test` (not yet documentable by `ansible-doc`)
 
 See `DOCUMENTABLE_PLUGINS` in https://github.com/ansible/ansible/blob/devel/lib/ansible/constants.py for a complete list of plugin types (minus `modules`).
 
