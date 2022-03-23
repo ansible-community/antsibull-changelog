@@ -1,2 +1,0 @@
-minor_changes:
-  - "Use the new ``--metadata-dump`` option for ansible-core 2.13+ to quickly dump and extract all module/plugin ``version_added`` values for the collection (https://github.com/ansible-community/antsibull-changelog/pull/72)."

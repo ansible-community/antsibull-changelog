@@ -67,6 +67,21 @@ releases:
     - 67-lint-before-release.yml
     - 69-symlinks.yml
     release_date: '2021-12-13'
+  0.14.0:
+    changes:
+      minor_changes:
+      - The internal ``changelog.yaml`` linting API allows to use ``packaging.version.Version``
+        for version numbers instead of semantic versioning (https://github.com/ansible-community/antsibull-changelog/pull/73).
+      - Use the new ``--metadata-dump`` option for ansible-core 2.13+ to quickly dump
+        and extract all module/plugin ``version_added`` values for the collection
+        (https://github.com/ansible-community/antsibull-changelog/pull/72).
+      release_summary: Feature release that will speed up the release process with
+        ansible-core 2.13.
+    fragments:
+    - 0.14.0.yml
+    - 72-ansible-core-2.13.yml
+    - changelog-linting.yml
+    release_date: '2022-03-23'
   0.2.0:
     changes:
       minor_changes:

@@ -5,6 +5,20 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.14.0
+=======
+
+Release Summary
+---------------
+
+Feature release that will speed up the release process with ansible-core 2.13.
+
+Minor Changes
+-------------
+
+- The internal ``changelog.yaml`` linting API allows to use ``packaging.version.Version`` for version numbers instead of semantic versioning (https://github.com/ansible-community/antsibull-changelog/pull/73).
+- Use the new ``--metadata-dump`` option for ansible-core 2.13+ to quickly dump and extract all module/plugin ``version_added`` values for the collection (https://github.com/ansible-community/antsibull-changelog/pull/72).
+
 v0.13.0
 =======
 
