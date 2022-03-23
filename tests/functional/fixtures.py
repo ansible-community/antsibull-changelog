@@ -28,6 +28,17 @@ from antsibull_changelog.config import ChangelogConfig, CollectionDetails, Paths
 # variable to True. Then for all changed files, a colorized diff will be printed.
 PRINT_DIFFS = False
 
+_ANSIBLE_DOC_VERSION_TEMPLATE = '''ansible-doc [core {ansible_core_version}]
+  config file = None
+  configured module search path = ['/home/me/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/local/lib/python3.9/dist-packages/ansible
+  ansible collection location = /home/me/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/local/bin/ansible-doc
+  python version = 3.9.2
+  jinja version = 3.0.3
+  libyaml = True
+'''
+
 
 def diff(old: str, new: str) -> str:
     seqm = difflib.SequenceMatcher(None, old, new)
@@ -130,6 +141,8 @@ class ChangelogEnvironment:
 
         self.created_dirs = set([self.paths.base_dir])
         self.created_files = dict()
+
+        self.ansible_core_version = '2.12.2'
 
     def _write(self, path: str, data: bytes):
         with open(path, 'wb') as f:
@@ -341,6 +354,10 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
     def create_fake_subprocess_ansible_doc(self, plugin_data: Dict[str, Dict[str, Any]]
                                            ) -> Callable[[List[str]], str]:
         def fake_subprocess_ansible_doc(command: List[str]) -> str:
+            if command[0].endswith('ansible-doc') and command[1] == '--version':
+                return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
+                    ansible_core_version=self.ansible_core_version,
+                ).encode('utf-8')
             if command[0].endswith('ansible-doc') and command[1] == '--json' and command[2] == '-t':
                 plugin_type = command[3]
                 args = command[4:]
@@ -392,6 +409,10 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
                                            ) -> Callable[[List[str]], str]:
         def fake_subprocess_ansible_doc(command: List[str]) -> str:
             base_dir = self.paths.base_dir
+            if command[0].endswith('ansible-doc') and command[1] == '--version':
+                return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
+                    ansible_core_version=self.ansible_core_version,
+                ).encode('utf-8')
             if command[0].endswith('ansible-doc') and command[1] == '--json' and command[2] == '-t':
                 plugin_type = command[3]
                 args = command[4:]
