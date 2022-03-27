@@ -35,15 +35,15 @@ jobs:
 
       - name: antsibull-changelog lint-changelog-yaml (community.general changelog)
         run: |
-          poetry run coverage run -p --source antsibull -m antsibull_changelog.cli lint-changelog-yaml community.general/changelogs/changelog.yaml
+          poetry run coverage run -p --source antsibull_changelog -m antsibull_changelog.cli lint-changelog-yaml community.general/changelogs/changelog.yaml
 
       - name: antsibull-changelog lint-changelog-yaml (own changelog)
         run: |
-          poetry run coverage run -p --source antsibull -m antsibull_changelog.cli lint-changelog-yaml --no-semantic-versioning changelogs/changelog.yaml
+          poetry run coverage run -p --source antsibull_changelog -m antsibull_changelog.cli lint-changelog-yaml --no-semantic-versioning changelogs/changelog.yaml
 
       - name: antsibull-changelog lint (own changelog fragments)
         run: |
-          poetry run coverage run -p --source antsibull -m antsibull_changelog.cli lint
+          poetry run coverage run -p --source antsibull_changelog -m antsibull_changelog.cli lint
 
       - name: Combine and upload coverage stats
         run: |
