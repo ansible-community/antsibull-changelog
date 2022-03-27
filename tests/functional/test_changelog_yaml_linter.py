@@ -14,6 +14,8 @@ import os.path
 import re
 import sys
 
+from contextlib import redirect_stdout
+
 import pytest
 
 from antsibull_changelog.lint import lint_changelog_yaml
@@ -48,21 +50,6 @@ class Args:
         self.no_semantic_versioning = no_semantic_versioning
 
 
-class CaptureStdout:
-    def __init__(self):
-        self.stdout_lines = []
-        self.stringio = io.StringIO()
-
-    def __enter__(self):
-        self.stdout = sys.stdout
-        sys.stdout = self.stringio
-        return self
-
-    def __exit__(self, *args):
-        self.stdout_lines.extend(self.stringio.getvalue().splitlines())
-        sys.stdout = self.stdout
-
-
 # Test good files
 @pytest.mark.parametrize('yaml_filename', GOOD_TESTS)
 def test_good_changelog_yaml_files(yaml_filename):
@@ -72,9 +59,11 @@ def test_good_changelog_yaml_files(yaml_filename):
 
     # Run test against CLI
     args = Args(changelog_yaml_path=yaml_filename)
-    with CaptureStdout() as output:
+    stdout = io.StringIO()
+    with redirect_stdout(stdout):
         rc = command_lint_changelog_yaml(args)
-    assert output.stdout_lines == []
+    stdout_lines = stdout.getvalue().splitlines()
+    assert stdout_lines == []
     assert rc == 0
 
 
@@ -101,11 +90,13 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
 
     # Run test against CLI
     args = Args(changelog_yaml_path=yaml_filename)
-    with CaptureStdout() as output:
+    stdout = io.StringIO()
+    with redirect_stdout(stdout):
         rc = command_lint_changelog_yaml(args)
-    assert len(output.stdout_lines) == len(data['errors'])
+    stdout_lines = stdout.getvalue().splitlines()
+    assert len(stdout_lines) == len(data['errors'])
     expected_lines = sorted(['^input\\.yaml:%d:%d: %s' % (error[0], error[1], error[2]) for error in data['errors']])
-    for line, expected in zip(output.stdout_lines, expected_lines):
+    for line, expected in zip(stdout_lines, expected_lines):
         line = line.replace(yaml_filename, 'input.yaml')
         assert re.match(expected, line, flags=re.DOTALL) is not None
     assert rc == 3
