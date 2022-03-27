@@ -27,8 +27,9 @@ from .changes import ChangesBase, load_changes, add_release
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .errors import ChangelogError
 from .fragment import load_fragments, ChangelogFragment, ChangelogFragmentLinter
-from .plugins import load_plugins, PluginDescription
+from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
+from .plugins import load_plugins, PluginDescription
 
 
 def set_paths(force: Optional[str] = None,
@@ -141,6 +142,20 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
                              metavar='FRAGMENT',
                              nargs='*',
                              help='path to fragment to test')
+
+    lint_changelog_yaml_parser = subparsers.add_parser('lint-changelog-yaml',
+                                                       parents=[common],
+                                                       help='check syntax of'
+                                                            ' changelogs/changelog.yaml file')
+    lint_changelog_yaml_parser.set_defaults(func=command_lint_changelog_yaml)
+    lint_changelog_yaml_parser.add_argument('changelog_yaml_path',
+                                            metavar='/path/to/changelog.yaml',
+                                            help='path to changelogs/changelog.yaml')
+
+    lint_changelog_yaml_parser.add_argument('--no-semantic-versioning', action='store_true',
+                                            help='assume that use_semantic_versioning=false in the'
+                                                 ' changelog config. Do not use this for Ansible'
+                                                 ' collections!')
 
     common_build = argparse.ArgumentParser(add_help=False)
     common_build.add_argument('--reload-plugins',
@@ -546,6 +561,23 @@ def lint_fragments(config: ChangelogConfig, fragments: List[ChangelogFragment],
     messages = sorted(set(
         '%s:%d:%d: %s' % (os.path.relpath(error[0]), error[1], error[2], error[3])
         for error in errors))
+
+    for message in messages:
+        print(message)
+
+    return 3 if messages else 0
+
+
+def command_lint_changelog_yaml(args: Any) -> int:
+    """
+    Lint changelogs/changelog.yaml file.
+
+    :arg args: Parsed arguments
+    """
+    errors = lint_changelog_yaml(
+        args.changelog_yaml_path, no_semantic_versioning=args.no_semantic_versioning)
+
+    messages = sorted(set(f'{error[0]}:{error[1]}:{error[2]}: {error[3]}' for error in errors))
 
     for message in messages:
         print(message)
