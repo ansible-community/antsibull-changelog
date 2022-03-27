@@ -8,13 +8,16 @@ Test changelog.yaml linting.
 """
 
 import glob
+import io
 import json
 import os.path
 import re
+import sys
 
 import pytest
 
 from antsibull_changelog.lint import lint_changelog_yaml
+from antsibull_changelog.cli import command_lint_changelog_yaml
 
 
 # Collect files
@@ -39,15 +42,45 @@ def load_tests():
 load_tests()
 
 
+class Args:
+    def __init__(self, changelog_yaml_path=None, no_semantic_versioning=False):
+        self.changelog_yaml_path = changelog_yaml_path
+        self.no_semantic_versioning = no_semantic_versioning
+
+
+class CaptureStdout:
+    def __init__(self):
+        self.stdout_lines = []
+        self.stringio = io.StringIO()
+
+    def __enter__(self):
+        self.stdout = sys.stdout
+        sys.stdout = self.stringio
+        return self
+
+    def __exit__(self, *args):
+        self.stdout_lines.extend(self.stringio.getvalue().splitlines())
+        sys.stdout = self.stdout
+
+
 # Test good files
 @pytest.mark.parametrize('yaml_filename', GOOD_TESTS)
 def test_good_changelog_yaml_files(yaml_filename):
+    # Run test directly against implementation
     errors = lint_changelog_yaml(yaml_filename)
     assert len(errors) == 0
+
+    # Run test against CLI
+    args = Args(changelog_yaml_path=yaml_filename)
+    with CaptureStdout() as output:
+        rc = command_lint_changelog_yaml(args)
+    assert output.stdout_lines == []
+    assert rc == 0
 
 
 @pytest.mark.parametrize('yaml_filename, json_filename', BAD_TESTS)
 def test_bad_changelog_yaml_files(yaml_filename, json_filename):
+    # Run test directly against implementation
     errors = lint_changelog_yaml(yaml_filename)
     assert len(errors) > 0
 
@@ -65,3 +98,14 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     for error1, error2 in zip(errors, data['errors']):
         assert error1[0:2] == error2[0:2]
         assert re.match(error2[2], error1[2], flags=re.DOTALL) is not None
+
+    # Run test against CLI
+    args = Args(changelog_yaml_path=yaml_filename)
+    with CaptureStdout() as output:
+        rc = command_lint_changelog_yaml(args)
+    assert len(output.stdout_lines) == len(data['errors'])
+    expected_lines = sorted(['^input\\.yaml:%d:%d: %s' % (error[0], error[1], error[2]) for error in data['errors']])
+    for line, expected in zip(output.stdout_lines, expected_lines):
+        line = line.replace(yaml_filename, 'input.yaml')
+        assert re.match(expected, line, flags=re.DOTALL) is not None
+    assert rc == 3
