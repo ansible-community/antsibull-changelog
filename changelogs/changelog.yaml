@@ -82,6 +82,17 @@ releases:
     - 72-ansible-core-2.13.yml
     - changelog-linting.yml
     release_date: '2022-03-23'
+  0.15.0:
+    changes:
+      minor_changes:
+      - Add ``changelogs/changelog.yaml`` file format linting subcommand that was
+        previously part of antsibull-lint (https://github.com/ansible-community/antsibull-changelog/pull/76,
+        https://github.com/ansible-community/antsibull/issues/410).
+      release_summary: Feature release.
+    fragments:
+    - 0.15.0.yml
+    - 76-lint-changelog-yaml.yml
+    release_date: '2022-03-30'
   0.2.0:
     changes:
       minor_changes:

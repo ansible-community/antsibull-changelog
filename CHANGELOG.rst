@@ -5,6 +5,19 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.15.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Add ``changelogs/changelog.yaml`` file format linting subcommand that was previously part of antsibull-lint (https://github.com/ansible-community/antsibull-changelog/pull/76, https://github.com/ansible-community/antsibull/issues/410).
+
 v0.14.0
 =======
 
