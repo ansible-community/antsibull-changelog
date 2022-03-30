@@ -7,11 +7,11 @@ The format is similar to the `.changes.yaml` file used internally by Ansible unt
 
 Please remember that collection versions **must** use [semantic versioning](https://semver.org/) if included in the Ansible package or RedHat's Automation Hub.
 
-You can use the `antsibull-lint changelog-yaml` tool included in the `antsibull package <https://pypi.org/project/antsibull/>`_ to validate these files:
+You can use the `antsibull-changelog lint-changelog-yaml` tool included in the `antsibull-changelog package <https://pypi.org/project/antsibull-changelog/>`_ to validate these files:
 
-    antsibull-lint changelog-yaml /path/to/changelog.yaml
+    antsibull-changelog lint-changelog-yaml /path/to/changelog.yaml
 
-(This only works for `changelog.yaml` files in collections, not for the corresponding files in ansible-core, since ansible-core currently does not conform to semantic versioning.)
+(For `changelog.yaml` files of projects that do not conform to semantic versioning use the `--no-semantic-versioning` parameter.)
 
 The tool does not output anything and exits with exit code 0 in case the file is OK, and outputs errors and exits with exit code 3 in case an error was found. Other exit codes indicate problems with the command line or during the execution of the linter.
 

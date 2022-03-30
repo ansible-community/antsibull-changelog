@@ -254,7 +254,8 @@ class ChangelogYamlLinter:
         try:
             changelog_yaml = load_yaml(self.path)
         except Exception as exc:  # pylint: disable=broad-except
-            self.errors.append((self.path, 0, 0, 'error while parsing YAML: {0}'.format(exc)))
+            self.errors.append(
+                (self.path, 0, 0, 'error while parsing YAML: {0}'.format(exc).replace('\n', ' ')))
             return self.errors
 
         ancestor_str = changelog_yaml.get('ancestor')

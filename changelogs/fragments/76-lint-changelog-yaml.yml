@@ -1,0 +1,2 @@
+minor_changes:
+  - "Add ``changelogs/changelog.yaml`` file format linting subcommand that was previously part of antsibull-lint (https://github.com/ansible-community/antsibull-changelog/pull/76, https://github.com/ansible-community/antsibull/issues/410)."
