@@ -171,7 +171,7 @@ An example of how a fragment with ``release_summary`` could look like is ``chang
 Adding new Roles, Playbooks, Test and Filter Plugins
 ====================================================
 
-Note that with ansible-core 2.11+, new roles are automatically detected if their documentation (in the argument spec) contains an appropriate ``version_added`` value. With ansible-core 2.14+ (or the current ``devel`` and ``milestone`` branches), also filter and test plugins are automatically detected if their documentation contains an appropriate ``version_added`` value. No version of ansible-core allows to document playbooks (yet), so new playbooks have to be documented as described below.
+Note that with ansible-core 2.11+, new roles are automatically detected if their documentation (in the argument spec) contains an appropriate ``version_added`` value. With ansible-core 2.14+ (or the current ``devel`` and ``milestone`` branches), filter and test plugins are also automatically detected if their documentation contains an appropriate ``version_added`` value. No version of ansible-core allows to document playbooks (yet), so new playbooks have to be documented as described below.
 
 The following describes a way to document new playbooks. When using older versions of ansible-core during release time when the changelog is generated, this can also be used to document new roles, test plugins, and filter plugins. This works by using special sections in changelog fragments whose names start with "`add `"::
 
