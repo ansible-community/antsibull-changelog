@@ -174,13 +174,13 @@ Currently valid plugin types are:
 10. `shell`
 11. `strategy`
 12. `vars`
-13. `filter` (not yet documentable by `ansible-doc`)
-14. `test` (not yet documentable by `ansible-doc`)
+13. `filter` (documentable by `ansible-doc` from ansible-core 2.14+, or the current devel and milestone versions)
+14. `test` (documentable by `ansible-doc` from ansible-core 2.14+, or the current devel and milestone versions)
 
 See `DOCUMENTABLE_PLUGINS` in https://github.com/ansible/ansible/blob/devel/lib/ansible/constants.py for a complete list of plugin types (minus `modules`).
 
 Currently valid object types are:
-1. `role`
+1. `role` (documentable by `ansible-doc` from ansible-core 2.11+)
 2. `playbook`
 
 For every module, plugin or object, the description is a dictionary with the following keys:
