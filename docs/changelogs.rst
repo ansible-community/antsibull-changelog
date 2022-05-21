@@ -171,7 +171,7 @@ An example of how a fragment with ``release_summary`` could look like is ``chang
 Adding new Roles, Playbooks, Test and Filter Plugins
 ====================================================
 
-Note that with ansible-core 2.11+, new roles are automatically detected if their documentation (in the argument spec) contains an appropriate ``version_added`` value. With ansible-core 2.14+ (or the current ``devel`` and ``milestone`` branches), filter and test plugins are also automatically detected if their documentation contains an appropriate ``version_added`` value. No version of ansible-core allows to document playbooks (yet), so new playbooks have to be documented as described below.
+Note that with ansible-core 2.11+, new roles are automatically detected if their documentation (in the argument spec) contains an appropriate ``version_added`` value for the ``main`` entrypoint. With ansible-core 2.14+ (or the current ``devel`` and ``milestone`` branches), filter and test plugins are also automatically detected if their documentation contains an appropriate ``version_added`` value. No version of ansible-core allows to document playbooks (yet), so new playbooks have to be documented as described below.
 
 The following describes a way to document new playbooks. When using older versions of ansible-core during release time when the changelog is generated, this can also be used to document new roles, test plugins, and filter plugins. This works by using special sections in changelog fragments whose names start with "`add `"::
 
@@ -181,19 +181,25 @@ The following describes a way to document new playbooks. When using older versio
       - name: wipe_server
         description: Wipes a server
 
-    # Only needed when ansible-core < 2.14 is used during the release process:
+    # Only needed when ansible-core < 2.14 is used during the release process,
+    # or when the filter has no documentation or the documentation is missing a
+    # 'version_added' entry:
     add plugin.filter:
       - name: to_time_unit
         description: Converts a time expression to a given unit
       - name: to_seconds
         description: Converts a time expression to seconds
 
-    # Only needed when ansible-core < 2.14 is used during the release process:
+    # Only needed when ansible-core < 2.14 is used during the release process,
+    # or when the test has no documentation or the documentation is missing a
+    # 'version_added' entry:
     add plugin.test:
       - name: asn1time
         description: Check whether the given string is an ASN.1 time
 
-    # Only needed when ansible-core < 2.11 is used during the release process:
+    # Only needed when ansible-core < 2.11 is used during the release process,
+    # or when the role has no argument spec or the argument spec is missing a
+    # 'version_added' entry for the 'main' entrypoint:
     add object.role:
       - name: nginx
         description: A nginx installation role
