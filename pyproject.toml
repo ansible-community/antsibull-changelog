@@ -47,6 +47,7 @@ mypy = "*"
 mock = "*"
 types-docutils = "*"
 types-PyYAML = "*"
+types-toml = "*"
 
 [tool.isort]
 line_length = 100
