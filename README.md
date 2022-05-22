@@ -53,7 +53,7 @@ Then you can install antsibull-changelog with `pip install -e .`.
 
 First update the `version` entry in `pyproject.toml`. Then generate the changelog:
 
-    antsibull-changelog release --version <version-number>
+    antsibull-changelog release
 
 Then build the build artefact:
 

@@ -13,13 +13,19 @@ import os
 import sys
 import traceback
 
-from typing import Any, Callable, cast, List, Optional, Tuple, Union
+from typing import Any, Callable, cast, List, Optional, Tuple
 
 try:
     import argcomplete
     HAS_ARGCOMPLETE = True
 except ImportError:
     HAS_ARGCOMPLETE = False
+
+try:
+    import toml
+    HAS_TOML = True
+except ImportError:
+    HAS_TOML = False
 
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
@@ -417,6 +423,68 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
     return plugins, fragments
 
 
+def _get_pyproject_toml_version(project_toml_path: str) -> Optional[str]:
+    '''
+    Try to extract version from pyproject.toml.
+    '''
+    if not HAS_TOML:
+        raise ChangelogError('Need toml library to read pyproject.toml')
+
+    with open(project_toml_path, 'r', encoding='utf-8') as f:
+        data = toml.loads(f.read())
+
+    tool_config = data.get('tool') or {}
+
+    if 'poetry' in tool_config:
+        poetry_config = tool_config['poetry']
+        return poetry_config.get('version')
+
+    return None
+
+
+def _get_project_version(paths: PathsConfig) -> Optional[str]:
+    '''
+    Try to extract version for other projects.
+    '''
+    project_toml_path = os.path.join(paths.base_dir, 'pyproject.toml')
+    if os.path.isfile(project_toml_path):
+        return _get_pyproject_toml_version(project_toml_path)
+
+    return None
+
+
+def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
+                              collection_details: CollectionDetails,
+                              args: Any) -> Tuple[str, Optional[str]]:
+    '''
+    Extract version and codename for a release from arguments, autodetect them, or fail.
+    '''
+    version: Optional[str] = args.version
+    codename: Optional[str] = args.codename
+
+    if not config.is_collection and not config.is_other_project and not (version and codename):
+        # Both version and codename are required for ansible-core
+        try:
+            return get_ansible_release()
+        except ValueError:
+            raise ChangelogError(  # pylint: disable=raise-missing-from
+                'Cannot import ansible.release to determine version and codename')
+
+    # Codename is not required for collections or other projects
+    if version:
+        return version, codename
+
+    if config.is_collection:
+        return collection_details.get_version(), codename
+
+    # Other projects
+    version = _get_project_version(paths)
+    if not version:
+        raise ChangelogError(
+            'You need to explicitly specify the version for other projects with --version')
+    return version, codename
+
+
 def command_release(args: Any) -> int:
     """
     Add a new release to a changelog.
@@ -426,8 +494,6 @@ def command_release(args: Any) -> int:
     ansible_doc_bin: Optional[str] = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
-    version: Union[str, None] = args.version
-    codename: Union[str, None] = args.codename
     date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
 
     collection_details = CollectionDetails(paths)
@@ -437,23 +503,7 @@ def command_release(args: Any) -> int:
 
     flatmap = _determine_flatmap(collection_details, config)
 
-    if not version or not codename:
-        if not config.is_collection and not config.is_other_project:
-            # Both version and codename are required for Ansible (Base)
-            try:
-                version, codename = get_ansible_release()
-            except ValueError:
-                LOGGER.error('Cannot import ansible.release to determine version and codename')
-                return 5
-
-        elif not version:
-            if config.is_collection:
-                # Codename is not required for collections, only version is
-                version = collection_details.get_version()
-            else:
-                LOGGER.error('You need to explicitly specify the version for other projects with'
-                             ' --version')
-                return 5
+    version, codename = _get_version_and_codename(paths, config, collection_details, args)
 
     changes = load_changes(config)
 
