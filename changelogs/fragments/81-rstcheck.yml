@@ -1,0 +1,2 @@
+bugfixes:
+  - "Mark rstcheck 4.x and 5.x as compatible (https://github.com/ansible-community/antsibull-changelog/pull/81)."
