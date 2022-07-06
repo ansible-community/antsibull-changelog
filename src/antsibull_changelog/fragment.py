@@ -12,13 +12,11 @@ import os
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import docutils.utils
-import rstcheck
-
 from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
 from .config import ChangelogConfig, PathsConfig
 from .errors import ChangelogError
 from .logger import LOGGER
+from .rstcheck import check_rst_content
 from .yaml import load_yaml
 
 
@@ -233,15 +231,11 @@ class ChangelogFragmentLinter:
                                    'not %s' % (section, type(line).__name__)))
                     continue
 
-                results = rstcheck.check(
-                    line, filename=fragment.path,
-                    report_level=docutils.utils.Reporter.WARNING_LEVEL)  # type: ignore
-                errors += [(fragment.path, 0, 0, result[1]) for result in results]
+                results = check_rst_content(line, filename=fragment.path)
+                errors += [(fragment.path, 0, 0, result[2]) for result in results]
         elif isinstance(lines, str):
-            results = rstcheck.check(
-                lines, filename=fragment.path,
-                report_level=docutils.utils.Reporter.WARNING_LEVEL)  # type: ignore
-            errors += [(fragment.path, 0, 0, result[1]) for result in results]
+            results = check_rst_content(lines, filename=fragment.path)
+            errors += [(fragment.path, 0, 0, result[2]) for result in results]
 
     def lint(self, fragment: ChangelogFragment) -> List[Tuple[str, int, int, str]]:
         """
