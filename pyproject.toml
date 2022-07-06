@@ -33,7 +33,7 @@ python = "^3.6.0"
 packaging = "*"
 semantic_version = "*"
 docutils = "*"
-rstcheck = ">= 3.0.0, < 6.0.0"
+rstcheck = ">= 3.0.0, < 7.0.0"
 PyYAML = "*"
 
 [tool.poetry.dev-dependencies]
