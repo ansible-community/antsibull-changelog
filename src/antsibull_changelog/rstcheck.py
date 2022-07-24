@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Author: Felix Fontein <felix@fontein.de>
 # License: GPLv3+
-# Copyright: Ansible Project, 2022
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2022, Ansible Project
 
 """
 Handle rstcheck.
