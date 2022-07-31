@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Author: Matt Clay <matt@mystile.com>
 # Author: Felix Fontein <felix@fontein.de>
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or
