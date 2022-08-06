@@ -43,7 +43,7 @@ def check_rst_content(content: str, filename: t.Optional[str] = None
             core_results = rstcheck_core.checker.check_file(pathlib.Path(rst_path), config)
             return [(result['line_number'], 0, result['message']) for result in core_results]
     else:
-        results = rstcheck.check(
+        results = rstcheck.check(  # pylint: disable=no-member
             content,
             filename=filename,
             report_level=docutils.utils.Reporter.WARNING_LEVEL,
