@@ -48,6 +48,8 @@ mock = "*"
 types-docutils = "*"
 types-PyYAML = "*"
 types-toml = "*"
+# Needed for TypedDict in rstcheck-core stubs
+typing-extensions = {version = ">=3.7.4", python = "<3.8"}
 
 [tool.isort]
 line_length = 100
