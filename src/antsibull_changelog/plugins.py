@@ -100,7 +100,7 @@ def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filena
             break
         if last not in ('', '.', '..'):
             namespace_list.insert(0, last)
-    return'.'.join(namespace_list)
+    return '.'.join(namespace_list)
 
 
 def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
