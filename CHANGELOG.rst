@@ -5,6 +5,25 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.16.0
+=======
+
+Release Summary
+---------------
+
+Feature and bugfix release.
+
+Minor Changes
+-------------
+
+- Allow to extract other project versions for Python poetry projects from ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/80).
+- The files in the source repository now follow the `REUSE Specification <https://reuse.software/spec/>`_. The only exceptions are changelog fragments in ``changelogs/fragments/`` (https://github.com/ansible-community/antsibull-changelog/pull/82).
+
+Bugfixes
+--------
+
+- Mark rstcheck 4.x and 5.x as compatible. Support rstcheck 6.x as well (https://github.com/ansible-community/antsibull-changelog/pull/81).
+
 v0.15.0
 =======
 

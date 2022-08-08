@@ -93,6 +93,22 @@ releases:
     - 0.15.0.yml
     - 76-lint-changelog-yaml.yml
     release_date: '2022-03-30'
+  0.16.0:
+    changes:
+      bugfixes:
+      - Mark rstcheck 4.x and 5.x as compatible. Support rstcheck 6.x as well (https://github.com/ansible-community/antsibull-changelog/pull/81).
+      minor_changes:
+      - Allow to extract other project versions for Python poetry projects from ``pyproject.toml``
+        (https://github.com/ansible-community/antsibull-changelog/pull/80).
+      - The files in the source repository now follow the `REUSE Specification <https://reuse.software/spec/>`_.
+        The only exceptions are changelog fragments in ``changelogs/fragments/`` (https://github.com/ansible-community/antsibull-changelog/pull/82).
+      release_summary: Feature and bugfix release.
+    fragments:
+    - 0.16.0.yml
+    - 80-pyproject-poetry.yml
+    - 81-rstcheck.yml
+    - 82-licenses.yml
+    release_date: '2022-08-08'
   0.2.0:
     changes:
       minor_changes:
