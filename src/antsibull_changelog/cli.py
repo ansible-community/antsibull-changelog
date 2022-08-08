@@ -27,6 +27,12 @@ try:
 except ImportError:
     HAS_TOML = False
 
+try:
+    import tomli
+    HAS_TOMLI = True
+except ImportError:
+    HAS_TOMLI = False
+
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
 from .changes import ChangesBase, load_changes, add_release
@@ -427,11 +433,11 @@ def _get_pyproject_toml_version(project_toml_path: str) -> Optional[str]:
     '''
     Try to extract version from pyproject.toml.
     '''
-    if not HAS_TOML:
-        raise ChangelogError('Need toml library to read pyproject.toml')
+    if not HAS_TOML and not HAS_TOMLI:
+        raise ChangelogError('Need toml/tomli library to read pyproject.toml')
 
     with open(project_toml_path, 'r', encoding='utf-8') as f:
-        data = toml.loads(f.read())
+        data = (toml if HAS_TOML else tomli).loads(f.read())
 
     tool_config = data.get('tool') or {}
 
