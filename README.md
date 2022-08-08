@@ -1,3 +1,9 @@
+<!--
+Copyright (c) Ansible Project
+GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # antsibull-changelog -- Ansible Changelog Tool
 [![Python linting badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20linting/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+linting%22+branch%3Amain)
 [![Python testing badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20testing/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+testing%22+branch%3Amain)
@@ -69,5 +75,8 @@ Then tag the current state with the release version and push the tag to the repo
 
 Unless otherwise noted in the code, it is licensed under the terms of the GNU
 General Public License v3 or, at your option, later. See
-[LICENSE](https://github.com/ansible-community/antsibull-changelog/tree/main/LICENSE)
+[LICENSES/GPL-3.0-or-later.txt](https://github.com/ansible-community/antsibull-changelog/tree/main/LICENSE)
 for a copy of the license.
+
+The repository follows the [REUSE Specification](https://reuse.software/spec/) for declaring copyright and
+licensing information. The only exception are changelog fragments in ``changelog/fragments/``.
