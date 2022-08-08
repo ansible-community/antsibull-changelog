@@ -25,7 +25,11 @@ try:
     import toml
     HAS_TOML = True
 except ImportError:
-    HAS_TOML = False
+    try:
+        import tomli as toml
+        HAS_TOML = True
+    except ImportError:
+        HAS_TOML = False
 
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
