@@ -635,7 +635,7 @@ class ChangesData(ChangesBase):
             self.known_objects.add(composite_name)
             toplevel_type = 'objects'
             has_categories = True
-        if obj_class == 'plugin':
+        elif obj_class == 'plugin':
             composite_name = '%s/%s' % (obj_type, entry['name'])
             if composite_name in self.known_plugins:
                 LOGGER.warning(
@@ -649,6 +649,8 @@ class ChangesData(ChangesBase):
             else:
                 toplevel_type = 'plugins'
                 has_categories = True
+        else:
+            raise ValueError('Invalid value %r for obj_class' % (obj_class, ))
 
         if has_categories:
             if toplevel_type not in self.releases[version]:
