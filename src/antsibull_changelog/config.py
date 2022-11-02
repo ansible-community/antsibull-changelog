@@ -296,7 +296,7 @@ class ChangelogConfig:
     changelog_filename_template: str
     changelog_filename_version_depth: int
     mention_ancestor: bool
-    trivial_section_name: str
+    trivial_section_name: Optional[str]
     release_tag_re: str
     pre_release_tag_re: str
     always_refresh: str
@@ -334,7 +334,9 @@ class ChangelogConfig:
         self.changelog_filename_version_depth = self.config.get(
             'changelog_filename_version_depth', 2)
         self.mention_ancestor = self.config.get('mention_ancestor', True)
-        self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
+        has_trivial_section_by_default = paths.is_collection or paths.is_other_project
+        self.trivial_section_name = self.config.get(
+            'trivial_section_name', 'trivial' if has_trivial_section_by_default else None)
         self.sanitize_changelog = self.config.get('sanitize_changelog', False)
         always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
         if always_refresh is True:
