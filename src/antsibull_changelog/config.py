@@ -112,7 +112,8 @@ class PathsConfig:
     @staticmethod
     def detect(is_collection: Optional[bool] = None,
                ansible_doc_bin: Optional[str] = None,
-               is_other_project: Optional[bool] = None) -> 'PathsConfig':
+               is_other_project: Optional[bool] = None,
+               fallback_to_other_project: bool = False) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
 
@@ -140,6 +141,10 @@ class PathsConfig:
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
+                if fallback_to_other_project:
+                    # Fallback to other project
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
+                                       is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection, ansible-core/-base'
@@ -296,7 +301,7 @@ class ChangelogConfig:
     changelog_filename_template: str
     changelog_filename_version_depth: int
     mention_ancestor: bool
-    trivial_section_name: str
+    trivial_section_name: Optional[str]
     release_tag_re: str
     pre_release_tag_re: str
     always_refresh: str
@@ -334,7 +339,9 @@ class ChangelogConfig:
         self.changelog_filename_version_depth = self.config.get(
             'changelog_filename_version_depth', 2)
         self.mention_ancestor = self.config.get('mention_ancestor', True)
-        self.trivial_section_name = self.config.get('trivial_section_name', 'trivial')
+        has_trivial_section_by_default = paths.is_collection or paths.is_other_project
+        self.trivial_section_name = self.config.get(
+            'trivial_section_name', 'trivial' if has_trivial_section_by_default else None)
         self.sanitize_changelog = self.config.get('sanitize_changelog', False)
         always_refresh = self.config.get('always_refresh', self.changes_format == 'classic')
         if always_refresh is True:

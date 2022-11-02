@@ -171,12 +171,12 @@ The default value is the titlecase of the collection's namespace and name.
 
 The title is shown at the top of the changelog.
 
-``trivial_section_name`` (string)
----------------------------------
+``trivial_section_name`` (optional string)
+------------------------------------------
 
-The default value is ``trivial``.
+The default value is ``trivial`` for collections and other projects, and ``null`` for ansible-core/ansible-base.
 
-This defines a section that is not included in the generated reStructuredText version of the changelog. It can be used to add changelog fragments to changes that are so minor (trivial) that they should not appear in the changelog, or that are irrelevant to the user (for example changes in the CI system used).
+This defines a section that is not included in the generated reStructuredText version of the changelog. It can be used to add changelog fragments to changes that are so minor (trivial) that they should not appear in the changelog, or that are irrelevant to the user (for example changes in the CI system used). When set to ``null``, no trivial section is allowed.
 
 ``use_fqcn`` (boolean)
 ----------------------

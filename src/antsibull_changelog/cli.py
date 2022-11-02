@@ -48,7 +48,8 @@ from .plugins import load_plugins, PluginDescription
 def set_paths(force: Optional[str] = None,
               is_collection: Optional[bool] = None,
               ansible_doc_bin: Optional[str] = None,
-              is_other_project: Optional[bool] = None) -> PathsConfig:
+              is_other_project: Optional[bool] = None,
+              fallback_to_other_project: bool = False) -> PathsConfig:
     """
     Create ``PathsConfig``.
 
@@ -58,6 +59,7 @@ def set_paths(force: Optional[str] = None,
                         or in ansible-core.
     :arg ansible_doc_bin: Override path to ansible-doc.
     :arg is_other_project: Override detection of whether the tool is an other project
+    :arg fallback_to_other_project: Fall back to other project
     """
     if force is not None:
         if is_other_project is True:
@@ -69,7 +71,8 @@ def set_paths(force: Optional[str] = None,
     try:
         return PathsConfig.detect(is_collection=is_collection,
                                   is_other_project=is_other_project,
-                                  ansible_doc_bin=ansible_doc_bin)
+                                  ansible_doc_bin=ansible_doc_bin,
+                                  fallback_to_other_project=fallback_to_other_project)
     except ChangelogError:
         if is_collection is True:
             raise ChangelogError(  # pylint: disable=raise-missing-from
@@ -585,9 +588,9 @@ def command_lint(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    # Passing is_other_project=True ensures that we just look for changelogs/config.yaml,
-    # and don't expect galaxy.yml or lib/ansible to be present.
-    paths = set_paths(is_other_project=True)
+    # Passing fallback_to_other_project=True ensures that we don't expect galaxy.yml
+    # or lib/ansible to be present.
+    paths = set_paths(fallback_to_other_project=True)
 
     fragment_paths: List[str] = args.fragments
 
