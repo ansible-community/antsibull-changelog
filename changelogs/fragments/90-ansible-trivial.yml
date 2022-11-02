@@ -1,0 +1,2 @@
+minor_changes:
+  - "Only allow a ``trival`` section in the ansible-core/ansible-base changelog when explicitly configured (https://github.com/ansible-community/antsibull-changelog/pull/90)."
