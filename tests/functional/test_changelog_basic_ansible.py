@@ -726,6 +726,17 @@ New Modules
     # Lint fragments
     assert ansible_changelog.run_tool('lint', ['-vv']) == 0
 
+    # Add fragment with trivial section
+    ansible_changelog.add_fragment_line(
+        'trivial.yml', 'trivial', ['This is trivial.'])
+
+    # Lint fragments
+    rc, stdout, stderr = ansible_changelog.run_tool_w_output('lint', ['-vv'])
+    assert rc == 3
+    assert stdout == r'''
+changelogs/fragments/trivial.yml:0:0: invalid section: trivial
+'''.lstrip()
+
 
 FAKE_PLUGINS = {
     'callback': {
