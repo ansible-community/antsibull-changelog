@@ -112,7 +112,8 @@ class PathsConfig:
     @staticmethod
     def detect(is_collection: Optional[bool] = None,
                ansible_doc_bin: Optional[str] = None,
-               is_other_project: Optional[bool] = None) -> 'PathsConfig':
+               is_other_project: Optional[bool] = None,
+               fallback_to_other_project: bool = False) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
 
@@ -140,6 +141,10 @@ class PathsConfig:
                 if os.path.exists(ansible_lib_dir) or is_collection is False:
                     # We are in a checkout of ansible/ansible
                     return PathsConfig(False, base_dir, None, ansible_doc_bin)
+                if fallback_to_other_project:
+                    # Fallback to other project
+                    return PathsConfig(False, base_dir, None, ansible_doc_bin,
+                                       is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
             if previous == base_dir:
                 raise ChangelogError('Cannot identify collection, ansible-core/-base'
