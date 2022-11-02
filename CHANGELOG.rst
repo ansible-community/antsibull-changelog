@@ -5,6 +5,19 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.17.0
+=======
+
+Release Summary
+---------------
+
+Feature release for ansible-core.
+
+Minor Changes
+-------------
+
+- Only allow a ``trival`` section in the ansible-core/ansible-base changelog when explicitly configured (https://github.com/ansible-community/antsibull-changelog/pull/90).
+
 v0.16.0
 =======
 

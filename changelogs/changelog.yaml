@@ -109,6 +109,16 @@ releases:
     - 81-rstcheck.yml
     - 82-licenses.yml
     release_date: '2022-08-08'
+  0.17.0:
+    changes:
+      minor_changes:
+      - Only allow a ``trival`` section in the ansible-core/ansible-base changelog
+        when explicitly configured (https://github.com/ansible-community/antsibull-changelog/pull/90).
+      release_summary: Feature release for ansible-core.
+    fragments:
+    - 0.17.0.yml
+    - 90-ansible-trivial.yml
+    release_date: '2022-11-02'
   0.2.0:
     changes:
       minor_changes:
