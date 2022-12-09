@@ -15,12 +15,14 @@ class RstBuilder:
     """
     Simple reStructuredText (RST) builder.
     """
+    lines: List[str]
+    section_underlines: str
 
     def __init__(self):
         """
         Create RST builder.
         """
-        self.lines: List[str] = []
+        self.lines = []
         self.section_underlines = '''=-~^.*+:`'"_#'''
 
     def set_title(self, title: str) -> None:

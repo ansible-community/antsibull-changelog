@@ -44,9 +44,10 @@ def check_rst_content(content: str, filename: t.Optional[str] = None
             core_results = rstcheck_core.checker.check_file(pathlib.Path(rst_path), config)
             return [(result['line_number'], 0, result['message']) for result in core_results]
     else:
-        results = rstcheck.check(  # pylint: disable=no-member
+        results = rstcheck.check(  # pylint: disable=no-member,used-before-assignment
             content,
             filename=filename,
+            # pylint: disable-next=used-before-assignment
             report_level=docutils.utils.Reporter.WARNING_LEVEL,
         )
         return [(result[0], 0, result[1]) for result in results]
