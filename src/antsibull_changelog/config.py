@@ -9,10 +9,12 @@
 Configuration classes for paths and changelogs.
 """
 
+from __future__ import annotations
+
 import collections
 import os
 
-from typing import Mapping, Optional
+from collections.abc import Mapping
 
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -36,7 +38,7 @@ class PathsConfig:
     is_other_project: bool
 
     base_dir: str
-    galaxy_path: Optional[str]
+    galaxy_path: str | None
     changelog_dir: str
     config_path: str
     ansible_doc_path: str
@@ -49,8 +51,8 @@ class PathsConfig:
     def _config_path(changelog_dir: str) -> str:
         return os.path.join(changelog_dir, 'config.yaml')
 
-    def __init__(self, is_collection: bool, base_dir: str, galaxy_path: Optional[str],
-                 ansible_doc_path: Optional[str], is_other_project: bool = False
+    def __init__(self, is_collection: bool, base_dir: str, galaxy_path: str | None,
+                 ansible_doc_path: str | None, is_other_project: bool = False
                  ):  # pylint: disable=too-many-arguments
         """
         Forces configuration with given base path.
@@ -74,7 +76,7 @@ class PathsConfig:
 
     @staticmethod
     def force_collection(base_dir: str,
-                         ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+                         ansible_doc_bin: str | None = None) -> 'PathsConfig':
         """
         Forces configuration for collection checkout with given base path.
 
@@ -86,7 +88,7 @@ class PathsConfig:
 
     @staticmethod
     def force_ansible(base_dir: str,
-                      ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+                      ansible_doc_bin: str | None = None) -> 'PathsConfig':
         """
         Forces configuration with given ansible-core/-base base path.
 
@@ -98,7 +100,7 @@ class PathsConfig:
 
     @staticmethod
     def force_other(base_dir: str,
-                    ansible_doc_bin: Optional[str] = None) -> 'PathsConfig':
+                    ansible_doc_bin: str | None = None) -> 'PathsConfig':
         """
         Forces configuration for a project that's neither ansible-core/-base nor an
         Ansible collection.
@@ -110,9 +112,9 @@ class PathsConfig:
         return PathsConfig(False, base_dir, None, ansible_doc_bin, is_other_project=True)
 
     @staticmethod
-    def detect(is_collection: Optional[bool] = None,
-               ansible_doc_bin: Optional[str] = None,
-               is_other_project: Optional[bool] = None,
+    def detect(is_collection: bool | None = None,
+               ansible_doc_bin: str | None = None,
+               is_other_project: bool | None = None,
                fallback_to_other_project: bool = False) -> 'PathsConfig':
         """
         Detect paths configuration from current working directory.
@@ -121,7 +123,7 @@ class PathsConfig:
                                 or other project.
         :arg ansible_doc_bin: Override path to ansible-doc.
         """
-        previous: Optional[str] = None
+        previous: str | None = None
         base_dir = os.getcwd()
         while True:
             changelog_dir = PathsConfig._changelog_dir(base_dir)
@@ -172,10 +174,10 @@ class CollectionDetails:
     paths: PathsConfig
     galaxy_yaml_loaded: bool
 
-    namespace: Optional[str]
-    name: Optional[str]
-    version: Optional[str]
-    flatmap: Optional[bool]
+    namespace: str | None
+    name: str | None
+    version: str | None
+    flatmap: bool | None
 
     def __init__(self, paths: PathsConfig):
         self.paths = paths
@@ -199,8 +201,8 @@ class CollectionDetails:
             self.flatmap = galaxy_yaml['type'] == 'flatmap'
 
     def _load_galaxy_yaml(self, needed_var: str,
-                          what_for: Optional[str] = None,
-                          help_text: Optional[str] = None):
+                          what_for: str | None = None,
+                          help_text: str | None = None):
         if self.galaxy_yaml_loaded:
             return
         if not self.paths.is_collection:
@@ -254,7 +256,7 @@ class CollectionDetails:
             raise ChangelogError('Cannot find "version" field in galaxy.yml. ' + help_text)
         return version
 
-    def get_flatmap(self) -> Optional[bool]:
+    def get_flatmap(self) -> bool | None:
         """
         Get collection's flatmap flag.
         """
@@ -287,7 +289,7 @@ class ChangelogConfig:
 
     config: dict
     is_collection: bool
-    title: Optional[str]
+    title: str | None
     notes_dir: str
     prelude_name: str
     prelude_title: str
@@ -297,17 +299,17 @@ class ChangelogConfig:
     keep_fragments: bool
     prevent_known_fragments: bool
     use_fqcn: bool
-    archive_path_template: Optional[str]
+    archive_path_template: str | None
     changelog_filename_template: str
     changelog_filename_version_depth: int
     mention_ancestor: bool
-    trivial_section_name: Optional[str]
+    trivial_section_name: str | None
     release_tag_re: str
     pre_release_tag_re: str
     always_refresh: str
     ignore_other_fragment_extensions: bool
     sanitize_changelog: bool
-    flatmap: Optional[bool]
+    flatmap: bool | None
     use_semantic_versioning: bool
     is_other_project: bool
     sections: Mapping[str, str]
@@ -453,7 +455,7 @@ class ChangelogConfig:
 
     @staticmethod
     def default(paths: PathsConfig, collection_details: CollectionDetails,
-                title: Optional[str] = None) -> 'ChangelogConfig':
+                title: str | None = None) -> 'ChangelogConfig':
         """
         Create default changelog config.
 

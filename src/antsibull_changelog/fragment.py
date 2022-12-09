@@ -9,9 +9,12 @@
 Changelog fragment loading, modification and linting.
 """
 
+from __future__ import annotations
+
+
 import os
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
 from .config import ChangelogConfig, PathsConfig
@@ -26,11 +29,11 @@ class ChangelogFragment:
     A changelog fragment.
     """
 
-    content: Dict[str, Union[List[str], str]]
+    content: dict[str, list[str] | str]
     path: str
     name: str
 
-    def __init__(self, content: Dict[str, Union[List[str], str]], path: str):
+    def __init__(self, content: dict[str, list[str] | str], path: str):
         """
         Create changelog fragment.
         """
@@ -71,19 +74,19 @@ class ChangelogFragment:
         return ChangelogFragment(content, path)
 
     @staticmethod
-    def from_dict(data: Dict[str, Union[List[str], str]], path: str = '') -> 'ChangelogFragment':
+    def from_dict(data: dict[str, list[str] | str], path: str = '') -> 'ChangelogFragment':
         """
         Create a ``ChangelogFragment`` from a dictionary.
         """
         return ChangelogFragment(data, path)
 
     @staticmethod
-    def combine(fragments: List['ChangelogFragment'],
-                ignore_obj_adds: bool = False) -> Dict[str, Union[List[str], str]]:
+    def combine(fragments: list['ChangelogFragment'],
+                ignore_obj_adds: bool = False) -> dict[str, list[str] | str]:
         """
         Combine fragments into a new fragment.
         """
-        result: Dict[str, Union[List[str], str]] = {}
+        result: dict[str, list[str] | str] = {}
 
         for fragment in fragments:
             for section, content in fragment.content.items():
@@ -117,9 +120,9 @@ class ChangelogFragmentLinter:
         """
         self.config = config
 
-    def _lint_add_section(self, errors: List[Tuple[str, int, int, str]],
+    def _lint_add_section(self, errors: list[tuple[str, int, int, str]],
                           fragment: ChangelogFragment, section: str,
-                          obj_class: str, obj_type: str, entries: List
+                          obj_class: str, obj_type: str, entries: list
                           # pylint: disable=too-many-arguments
                           ) -> None:
         """
@@ -154,7 +157,7 @@ class ChangelogFragmentLinter:
             self._lint_entries(errors, fragment, section, is_modules, entries)
 
     @staticmethod
-    def _lint_entries(errors: List[Tuple[str, int, int, str]],
+    def _lint_entries(errors: list[tuple[str, int, int, str]],
                       fragment: ChangelogFragment, section: str, is_modules: bool,
                       entries: Any) -> None:
         """
@@ -192,7 +195,7 @@ class ChangelogFragmentLinter:
                                    section, index,
                                    ', '.join(['"%s"' % k for k in invalid_keys]))))
 
-    def _lint_section(self, errors: List[Tuple[str, int, int, str]],
+    def _lint_section(self, errors: list[tuple[str, int, int, str]],
                       fragment: ChangelogFragment, section: str,
                       lines: Any) -> None:
         """
@@ -219,7 +222,7 @@ class ChangelogFragmentLinter:
                 errors.append((fragment.path, 0, 0, 'invalid section: %s' % section))
 
     @staticmethod
-    def _lint_lines(errors: List[Tuple[str, int, int, str]],
+    def _lint_lines(errors: list[tuple[str, int, int, str]],
                     fragment: ChangelogFragment, section: str,
                     lines: Any) -> None:
         """
@@ -239,14 +242,14 @@ class ChangelogFragmentLinter:
             results = check_rst_content(lines, filename=fragment.path)
             errors += [(fragment.path, 0, 0, result[2]) for result in results]
 
-    def lint(self, fragment: ChangelogFragment) -> List[Tuple[str, int, int, str]]:
+    def lint(self, fragment: ChangelogFragment) -> list[tuple[str, int, int, str]]:
         """
         Lint a ``ChangelogFragment``.
 
         :arg fragment: The changelog fragment to lint
         :return: A list of errors. If empty, the changelog fragment is valid.
         """
-        errors: List[Tuple[str, int, int, str]] = []
+        errors: list[tuple[str, int, int, str]] = []
 
         if isinstance(fragment.content, dict):  # type: ignore
             for section, lines in fragment.content.items():
@@ -261,10 +264,10 @@ class ChangelogFragmentLinter:
 
 
 def load_fragments(paths: PathsConfig, config: ChangelogConfig,
-                   fragment_paths: Optional[List[str]] = None,
-                   exceptions: Optional[List[Tuple[str, Exception]]] = None,
-                   fragments_dir: Optional[str] = None,
-                   ) -> List[ChangelogFragment]:
+                   fragment_paths: list[str] | None = None,
+                   exceptions: list[tuple[str, Exception]] | None = None,
+                   fragments_dir: str | None = None,
+                   ) -> list[ChangelogFragment]:
     """
     Load changelog fragments from disk.
 
@@ -291,7 +294,7 @@ def load_fragments(paths: PathsConfig, config: ChangelogConfig,
         else:
             fragment_paths = []
 
-    fragments: List[ChangelogFragment] = []
+    fragments: list[ChangelogFragment] = []
 
     for path in fragment_paths:
         try:

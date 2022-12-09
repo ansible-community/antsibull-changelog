@@ -7,9 +7,9 @@
 Test basic changelog functionality: lint fragments
 """
 
-import os
+from __future__ import annotations
 
-from typing import List
+import os
 
 import mock
 

@@ -9,10 +9,13 @@
 Generate reStructuredText changelog from ChangesBase instance.
 """
 
+from __future__ import annotations
+
 import collections
 import os
 
-from typing import Any, cast, Dict, List, MutableMapping, Optional, Tuple, Union
+from collections.abc import MutableMapping
+from typing import Any, cast
 
 from .changes import ChangesBase, FragmentResolver, PluginResolver
 from .config import ChangelogConfig, PathsConfig
@@ -30,11 +33,11 @@ class ChangelogEntry:
 
     version: str
 
-    modules: List[Any]
-    plugins: Dict[Any, Any]
-    objects: Dict[Any, Any]
-    changes: Dict[str, Union[str, List[str]]]
-    preludes: List[Tuple[str, str]]
+    modules: list[Any]
+    plugins: dict[Any, Any]
+    objects: dict[Any, Any]
+    changes: dict[str, str | list[str]]
+    preludes: list[tuple[str, str]]
 
     def __init__(self, version: str):
         self.version = version
@@ -44,7 +47,7 @@ class ChangelogEntry:
         self.changes = {}
         self.preludes = []
 
-    def has_no_changes(self, section_names: Optional[List[str]] = None) -> bool:
+    def has_no_changes(self, section_names: list[str] | None = None) -> bool:
         """
         Determine whether there are changes.
 
@@ -99,8 +102,8 @@ class ChangelogGenerator:
     def __init__(self,  # pylint: disable=too-many-arguments
                  config: ChangelogConfig,
                  changes: ChangesBase,
-                 plugins: Optional[List[PluginDescription]] = None,
-                 fragments: Optional[List[ChangelogFragment]] = None,
+                 plugins: list[PluginDescription] | None = None,
+                 fragments: list[ChangelogFragment] | None = None,
                  flatmap: bool = True):
         """
         Create a changelog generator.
@@ -149,7 +152,7 @@ class ChangelogGenerator:
     def _collect_entry(self,
                        entry_config: ChangelogEntry,
                        entry_version: str,
-                       versions: List[str]) -> None:
+                       versions: list[str]) -> None:
         """
         Do actual work of collecting data for a changelog entry.
         """
@@ -186,8 +189,8 @@ class ChangelogGenerator:
 
     def collect(self,
                 squash: bool = False,
-                after_version: Optional[str] = None,
-                until_version: Optional[str] = None) -> List[ChangelogEntry]:
+                after_version: str | None = None,
+                until_version: str | None = None) -> list[ChangelogEntry]:
         """
         Collect release entries.
 
@@ -254,8 +257,8 @@ class ChangelogGenerator:
                     builder: RstBuilder,
                     start_level: int = 0,
                     squash: bool = False,
-                    after_version: Optional[str] = None,
-                    until_version: Optional[str] = None) -> None:
+                    after_version: str | None = None,
+                    until_version: str | None = None) -> None:
         """
         Append changelog to a reStructuredText (RST) builder.
 
@@ -319,8 +322,8 @@ class ChangelogGenerator:
 
     @staticmethod
     def _add_plugins(builder: RstBuilder,
-                     plugins_database: Dict[str, List[Dict[str, Any]]],
-                     fqcn_prefix: Optional[str],
+                     plugins_database: dict[str, list[dict[str, Any]]],
+                     fqcn_prefix: str | None,
                      start_level: int = 0) -> None:
         """
         Add new plugins to the changelog.
@@ -347,8 +350,8 @@ class ChangelogGenerator:
 
     @staticmethod
     def add_plugins(builder: RstBuilder,
-                    plugins: List[Dict[str, Any]],
-                    fqcn_prefix: Optional[str]) -> None:
+                    plugins: list[dict[str, Any]],
+                    fqcn_prefix: str | None) -> None:
         """
         Add new plugins of one type to the changelog.
         """
@@ -360,9 +363,9 @@ class ChangelogGenerator:
 
     @staticmethod
     def _add_modules(builder: RstBuilder,
-                     modules: List[Dict[str, Any]],
+                     modules: list[dict[str, Any]],
                      flatmap: bool,
-                     fqcn_prefix: Optional[str],
+                     fqcn_prefix: str | None,
                      start_level: int = 0) -> None:
         """
         Add new modules to the changelog.
@@ -375,9 +378,9 @@ class ChangelogGenerator:
 
     @staticmethod
     def add_modules(builder: RstBuilder,
-                    modules: List[Dict[str, Any]],
+                    modules: list[dict[str, Any]],
                     flatmap: bool,
-                    fqcn_prefix: Optional[str],
+                    fqcn_prefix: str | None,
                     level: int) -> None:
         """
         Add new modules to the changelog.
@@ -415,8 +418,8 @@ class ChangelogGenerator:
 
     @staticmethod
     def _add_objects(builder: RstBuilder,
-                     objects_database: Dict[str, List[Dict[str, Any]]],
-                     fqcn_prefix: Optional[str],
+                     objects_database: dict[str, list[dict[str, Any]]],
+                     fqcn_prefix: str | None,
                      start_level: int = 0) -> None:
         """
         Add new objects to the changelog.
@@ -437,8 +440,8 @@ class ChangelogGenerator:
 
     @staticmethod
     def add_objects(builder: RstBuilder,
-                    objects: List[Dict[str, Any]],
-                    fqcn_prefix: Optional[str]) -> None:
+                    objects: list[dict[str, Any]],
+                    fqcn_prefix: str | None) -> None:
         """
         Add new objects of one type to the changelog.
         """
@@ -452,8 +455,8 @@ class ChangelogGenerator:
 def generate_changelog(paths: PathsConfig,  # pylint: disable=too-many-arguments
                        config: ChangelogConfig,
                        changes: ChangesBase,
-                       plugins: Optional[List[PluginDescription]] = None,
-                       fragments: Optional[List[ChangelogFragment]] = None,
+                       plugins: list[PluginDescription] | None = None,
+                       fragments: list[ChangelogFragment] | None = None,
                        flatmap: bool = True):
     """
     Generate the changelog as reStructuredText.

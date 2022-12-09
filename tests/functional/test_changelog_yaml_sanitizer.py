@@ -7,6 +7,8 @@
 Test changelog.yaml sanitizing.
 """
 
+from __future__ import annotations
+
 import glob
 import json
 import os.path

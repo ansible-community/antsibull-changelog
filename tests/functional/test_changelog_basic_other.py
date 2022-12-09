@@ -7,6 +7,8 @@
 Test basic changelog functionality: Ansible collections
 """
 
+from __future__ import annotations
+
 import os
 
 import mock

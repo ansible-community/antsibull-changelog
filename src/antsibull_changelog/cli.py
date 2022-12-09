@@ -8,13 +8,15 @@
 Entrypoint to the antsibull-changelog script.
 """
 
+from __future__ import annotations
+
 import argparse
 import datetime
 import os
 import sys
 import traceback
 
-from typing import Any, Callable, cast, List, Optional, Tuple
+from typing import Any, Callable, cast, List
 
 try:
     import argcomplete
@@ -45,10 +47,10 @@ from .logger import LOGGER, setup_logger
 from .plugins import load_plugins, PluginDescription
 
 
-def set_paths(force: Optional[str] = None,
-              is_collection: Optional[bool] = None,
-              ansible_doc_bin: Optional[str] = None,
-              is_other_project: Optional[bool] = None,
+def set_paths(force: str | None = None,
+              is_collection: bool | None = None,
+              ansible_doc_bin: str | None = None,
+              is_other_project: bool | None = None,
               fallback_to_other_project: bool = False) -> PathsConfig:
     """
     Create ``PathsConfig``.
@@ -249,7 +251,7 @@ def load_collection_details(collection_details: CollectionDetails, args: Any):
         collection_details.flatmap = args.collection_flatmap
 
 
-def run(args: List[str]) -> int:
+def run(args: list[str]) -> int:
     """
     Main program entry point.
     """
@@ -350,9 +352,9 @@ def _determine_flatmap(collection_details: CollectionDetails,
 
 
 def _get_refresh_config(args: Any,
-                        config: ChangelogConfig) -> Tuple[Optional[str], Optional[str]]:
-    refresh_plugins: Optional[str] = args.refresh_plugins
-    refresh_fragments: Optional[str] = args.refresh_fragments
+                        config: ChangelogConfig) -> tuple[str | None, str | None]:
+    refresh_plugins: str | None = args.refresh_plugins
+    refresh_fragments: str | None = args.refresh_fragments
     always_refresh = config.always_refresh
     if args.refresh or always_refresh == 'full':
         if refresh_plugins is None:
@@ -379,8 +381,8 @@ def _get_refresh_config(args: Any,
 
 def _get_archive_loader(archive_path_template: str,
                         paths: PathsConfig,
-                        config: ChangelogConfig) -> Callable[[str], List[ChangelogFragment]]:
-    def load_extra_fragments(version: str) -> List[ChangelogFragment]:
+                        config: ChangelogConfig) -> Callable[[str], list[ChangelogFragment]]:
+    def load_extra_fragments(version: str) -> list[ChangelogFragment]:
         archive_path = os.path.join(
             paths.base_dir, archive_path_template.format(version=version))
         return load_fragments(paths, config, fragments_dir=archive_path)
@@ -393,9 +395,9 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
                 collection_details: CollectionDetails,
                 config: ChangelogConfig,
                 changes: ChangesBase,
-                plugins: Optional[List[PluginDescription]] = None,
-                fragments: Optional[List[ChangelogFragment]] = None
-                ) -> Tuple[Optional[List[PluginDescription]], Optional[List[ChangelogFragment]]]:
+                plugins: list[PluginDescription] | None = None,
+                fragments: list[ChangelogFragment] | None = None
+                ) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]:
 
     refresh_plugins, refresh_fragments = _get_refresh_config(args, config)
 
@@ -435,7 +437,7 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
     return plugins, fragments
 
 
-def _get_pyproject_toml_version(project_toml_path: str) -> Optional[str]:
+def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
     '''
     Try to extract version from pyproject.toml.
     '''
@@ -454,7 +456,7 @@ def _get_pyproject_toml_version(project_toml_path: str) -> Optional[str]:
     return None
 
 
-def _get_project_version(paths: PathsConfig) -> Optional[str]:
+def _get_project_version(paths: PathsConfig) -> str | None:
     '''
     Try to extract version for other projects.
     '''
@@ -467,12 +469,12 @@ def _get_project_version(paths: PathsConfig) -> Optional[str]:
 
 def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
                               collection_details: CollectionDetails,
-                              args: Any) -> Tuple[str, Optional[str]]:
+                              args: Any) -> tuple[str, str | None]:
     '''
     Extract version and codename for a release from arguments, autodetect them, or fail.
     '''
-    version: Optional[str] = args.version
-    codename: Optional[str] = args.codename
+    version: str | None = args.version
+    codename: str | None = args.codename
 
     if not config.is_collection and not config.is_other_project and not (version and codename):
         # Both version and codename are required for ansible-core
@@ -503,7 +505,7 @@ def command_release(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    ansible_doc_bin: Optional[str] = args.ansible_doc_bin
+    ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
     date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
@@ -519,12 +521,12 @@ def command_release(args: Any) -> int:
 
     changes = load_changes(config)
 
-    prev_version: Optional[str] = None
+    prev_version: str | None = None
     if args.cummulative_release:
         prev_version = changes.latest_version if changes.has_release else changes.ancestor
 
-    plugins: Optional[List[PluginDescription]]
-    fragments: Optional[List[ChangelogFragment]]
+    plugins: list[PluginDescription] | None
+    fragments: list[ChangelogFragment] | None
 
     plugins = load_plugins(paths=paths, collection_details=collection_details,
                            version=version, force_reload=args.reload_plugins,
@@ -561,7 +563,7 @@ def command_generate(args: Any) -> int:
 
     :arg args: Parsed arguments
     """
-    ansible_doc_bin: Optional[str] = args.ansible_doc_bin
+    ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
     collection_details = CollectionDetails(paths)
@@ -594,18 +596,18 @@ def command_lint(args: Any) -> int:
     # or lib/ansible to be present.
     paths = set_paths(fallback_to_other_project=True)
 
-    fragment_paths: List[str] = args.fragments
+    fragment_paths: list[str] = args.fragments
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details, ignore_is_other_project=True)
 
-    exceptions: List[Tuple[str, Exception]] = []
+    exceptions: list[tuple[str, Exception]] = []
     fragments = load_fragments(paths, config, fragment_paths, exceptions)
     return lint_fragments(config, fragments, exceptions)
 
 
-def lint_fragments(config: ChangelogConfig, fragments: List[ChangelogFragment],
-                   exceptions: List[Tuple[str, Exception]]) -> int:
+def lint_fragments(config: ChangelogConfig, fragments: list[ChangelogFragment],
+                   exceptions: list[tuple[str, Exception]]) -> int:
     """
     Lint a given set of changelog fragment objects.
 

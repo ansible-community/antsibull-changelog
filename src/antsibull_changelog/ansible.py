@@ -8,7 +8,9 @@
 Return Ansible-specific information, like current release or list of documentable plugins.
 """
 
-from typing import Any, Tuple
+from __future__ import annotations
+
+from typing import Any
 
 import packaging.version
 
@@ -37,7 +39,7 @@ OTHER_PLUGIN_TYPES = ('module', 'test', 'filter')
 PLUGIN_EXCEPTIONS = (('cache', 'base.py'), ('module', 'async_wrapper.py'))
 
 
-def get_documentable_plugins() -> Tuple[str, ...]:
+def get_documentable_plugins() -> tuple[str, ...]:
     """
     Retrieve plugin types that can be documented.
     """
@@ -49,7 +51,7 @@ def get_documentable_plugins() -> Tuple[str, ...]:
     )
 
 
-def get_documentable_objects() -> Tuple[str, ...]:
+def get_documentable_objects() -> tuple[str, ...]:
     """
     Retrieve object types that can be documented.
     """
@@ -60,7 +62,7 @@ def get_documentable_objects() -> Tuple[str, ...]:
     return ('role', )
 
 
-def get_ansible_release() -> Tuple[str, str]:
+def get_ansible_release() -> tuple[str, str]:
     """
     Retrieve current version and codename of Ansible.
 

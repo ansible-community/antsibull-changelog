@@ -8,10 +8,13 @@
 Sanitizing changelog.yaml files
 """
 
+from __future__ import annotations
+
 import collections.abc
 import re
 
-from typing import Any, Dict, List, Mapping, Optional, Union
+from collections.abc import Mapping
+from typing import Any
 
 import packaging.version
 import semantic_version
@@ -49,17 +52,17 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
         except ValueError:
             return False
 
-    def _sanitize_ancestor(self, ancestor: Any) -> Optional[str]:
+    def _sanitize_ancestor(self, ancestor: Any) -> str | None:
         return ancestor if self._is_version(ancestor, allow_none=True) else None
 
     @staticmethod
-    def _sanitize_date(date: Any) -> Optional[str]:
+    def _sanitize_date(date: Any) -> str | None:
         if not isinstance(date, str):
             return None
         return date if ISO_DATE_REGEX.match(date) else None
 
-    def _sanitize_changes(self, data: Mapping) -> Dict[str, Union[str, List[str]]]:
-        result: Dict[str, Union[str, List[str]]] = {}
+    def _sanitize_changes(self, data: Mapping) -> dict[str, str | list[str]]:
+        result: dict[str, str | list[str]] = {}
         for key, value in data.items():
             if not isinstance(key, str):
                 continue
@@ -75,9 +78,9 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                     result[key] = entries
         return result
 
-    def _sanitize_modules(self, data: List,
-                          are_modules: bool = True) -> List:
-        result: List = []
+    def _sanitize_modules(self, data: list,
+                          are_modules: bool = True) -> list:
+        result: list = []
         if self.config.changes_format == 'classic':
             for entry in data:
                 if isinstance(entry, str):
@@ -105,7 +108,7 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                 })
         return result
 
-    def _sanitize_plugins(self, data: Mapping) -> Dict[str, List]:
+    def _sanitize_plugins(self, data: Mapping) -> dict[str, list]:
         result = {}
         for key, value in data.items():
             if key not in self.plugin_types or not isinstance(value, list):
@@ -115,7 +118,7 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                 result[key] = sanitized_value
         return result
 
-    def _sanitize_objects(self, data: Mapping) -> Dict[str, List]:
+    def _sanitize_objects(self, data: Mapping) -> dict[str, list]:
         result = {}
         for key, value in data.items():
             if key not in OBJECT_TYPES or not isinstance(value, list):
@@ -126,14 +129,14 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
         return result
 
     @staticmethod
-    def _sanitize_fragments(data: List) -> List[str]:
+    def _sanitize_fragments(data: list) -> list[str]:
         result = []
         for entry in data:
             if isinstance(entry, str):
                 result.append(entry)
         return result
 
-    def _sanitize_modules_plugins(self, release: Mapping, result: Dict[str, Any]) -> None:
+    def _sanitize_modules_plugins(self, release: Mapping, result: dict[str, Any]) -> None:
         modules = release.get('modules')
         if isinstance(modules, list):
             sanitized_modules = self._sanitize_modules(modules)
@@ -152,8 +155,8 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             if sanitized_objects:
                 result['objects'] = sanitized_objects
 
-    def _sanitize_release(self, release: Mapping) -> Dict[str, Any]:
-        result: Dict[str, Any] = {}
+    def _sanitize_release(self, release: Mapping) -> dict[str, Any]:
+        result: dict[str, Any] = {}
 
         release_date = self._sanitize_date(release.get('release_date'))
         if release_date is not None:
@@ -189,7 +192,7 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             result[key] = self._sanitize_release(value)
         return result
 
-    def sanitize(self, data: Any) -> Dict[str, Any]:
+    def sanitize(self, data: Any) -> dict[str, Any]:
         """
         Given an arbitrary object, sanitizes it so it a valid changelog.yaml object.
         """
@@ -206,7 +209,7 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
         return result
 
 
-def sanitize_changes(data: Any, config: ChangelogConfig) -> Dict[str, Any]:
+def sanitize_changes(data: Any, config: ChangelogConfig) -> dict[str, Any]:
     """
     Given an arbitrary object, sanitizes it so it a valid changelog.yaml object.
     """

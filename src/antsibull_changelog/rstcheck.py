@@ -8,10 +8,11 @@
 Handle rstcheck.
 """
 
+from __future__ import annotations
+
 import os.path
 import pathlib
 import tempfile
-import typing as t
 
 # rstcheck >= 6.0.0 depends on rstcheck-core
 try:
@@ -24,8 +25,8 @@ except ImportError:
     import rstcheck
 
 
-def check_rst_content(content: str, filename: t.Optional[str] = None
-                      ) -> t.List[t.Tuple[int, int, str]]:
+def check_rst_content(content: str, filename: str | None = None
+                      ) -> list[tuple[int, int, str]]:
     '''
     Check the content with rstcheck. Return list of errors and warnings.
 

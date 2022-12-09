@@ -10,6 +10,8 @@ Executable entrypoint to the antsibull_changelog module.
 Called by "python -m antsibull_changelog".
 """
 
+from __future__ import annotations
+
 import sys
 
 from .cli import run

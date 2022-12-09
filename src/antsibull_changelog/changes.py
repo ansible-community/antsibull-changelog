@@ -10,12 +10,14 @@ Classes handling ``changelog.yaml`` (new Ansible and collections)
 and ``.changes.yaml`` (old Ansible) files.
 """
 
+from __future__ import annotations
+
 import abc
 import collections
 import datetime
 import os
 
-from typing import Any, Callable, Dict, List, Optional, Set, cast
+from typing import Any, Callable, cast
 
 from .changes_resolvers import (
     FragmentResolver,
@@ -44,10 +46,10 @@ class ChangesBase(metaclass=abc.ABCMeta):
     config: ChangelogConfig
     path: str
     data: dict
-    known_plugins: Set[str]
-    known_objects: Set[str]
-    known_fragments: Set[str]
-    ancestor: Optional[str]
+    known_plugins: set[str]
+    known_objects: set[str]
+    known_fragments: set[str]
+    ancestor: str | None
 
     def __init__(self, config: ChangelogConfig, path: str):
         self.config = config
@@ -91,13 +93,13 @@ class ChangesBase(metaclass=abc.ABCMeta):
         return bool(self.releases)
 
     @property
-    def releases(self) -> Dict[str, Dict[str, Any]]:
+    def releases(self) -> dict[str, dict[str, Any]]:
         """
         Dictionary of releases.
         """
-        return cast(Dict[str, Dict[str, Any]], self.data['releases'])
+        return cast(dict[str, dict[str, Any]], self.data['releases'])
 
-    def load(self, data_override: Optional[dict] = None) -> None:
+    def load(self, data_override: dict | None = None) -> None:
         """
         Load the change metadata from disk.
 
@@ -112,25 +114,25 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.ancestor = self.data.get('ancestor')
 
     @abc.abstractmethod
-    def update_plugins(self, plugins: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_plugins(self, plugins: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
         """
 
     @abc.abstractmethod
-    def update_objects(self, objects: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_objects(self, objects: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
 
     @abc.abstractmethod
-    def update_fragments(self, fragments: List[ChangelogFragment],
-                         load_extra_fragments: Optional[
-                             Callable[[str], List[ChangelogFragment]]] = None
+    def update_fragments(self, fragments: list[ChangelogFragment],
+                         load_extra_fragments:
+                             Callable[[str], list[ChangelogFragment]] | None = None
                          ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
@@ -151,7 +153,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.data['ancestor'] = self.ancestor
         store_yaml(self.path, self.data)
 
-    def add_release(self, version: str, codename: Optional[str],
+    def add_release(self, version: str, codename: str | None,
                     release_date: datetime.date, update_existing=False):
         """
         Add a new releases to the changes metadata.
@@ -247,7 +249,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_plugin_resolver(
-            self, plugins: Optional[List[PluginDescription]] = None) -> PluginResolver:
+            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
         """
         Create a plugin resolver.
 
@@ -262,7 +264,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_fragment_resolver(
-            self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
+            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -282,7 +284,7 @@ class ChangesMetadata(ChangesBase):
         super().__init__(config, path)
         self.load()
 
-    def load(self, data_override: Optional[dict] = None) -> None:
+    def load(self, data_override: dict | None = None) -> None:
         """
         Load the change metadata from disk.
         """
@@ -299,8 +301,8 @@ class ChangesMetadata(ChangesBase):
 
             self.known_fragments |= set(config.get('fragments', []))
 
-    def update_plugins(self, plugins: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_plugins(self, plugins: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
@@ -338,17 +340,17 @@ class ChangesMetadata(ChangesBase):
                     self.known_plugins -= set(
                         '%s/%s' % (plugin_type, plugin) for plugin in invalid_plugins)
 
-    def update_objects(self, objects: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_objects(self, objects: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
         return
 
-    def update_fragments(self, fragments: List[ChangelogFragment],
-                         load_extra_fragments: Optional[
-                             Callable[[str], List[ChangelogFragment]]] = None
+    def update_fragments(self, fragments: list[ChangelogFragment],
+                         load_extra_fragments:
+                             Callable[[str], list[ChangelogFragment]] | None = None
                          ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
@@ -400,7 +402,7 @@ class ChangesMetadata(ChangesBase):
         return True
 
     def get_plugin_resolver(
-            self, plugins: Optional[List[PluginDescription]] = None) -> PluginResolver:
+            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
         """
         Create a plugin resolver.
 
@@ -420,7 +422,7 @@ class ChangesMetadata(ChangesBase):
         return LegacyObjectResolver()
 
     def get_fragment_resolver(
-            self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
+            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -440,7 +442,7 @@ class ChangesData(ChangesBase):
 
     config: ChangelogConfig
 
-    def __init__(self, config: ChangelogConfig, path: str, data_override: Optional[dict] = None):
+    def __init__(self, config: ChangelogConfig, path: str, data_override: dict | None = None):
         """
         Create modern change metadata.
 
@@ -450,7 +452,7 @@ class ChangesData(ChangesBase):
         self.config = config
         self.load(data_override=data_override)
 
-    def load(self, data_override: Optional[dict] = None) -> None:
+    def load(self, data_override: dict | None = None) -> None:
         """
         Load the change metadata from disk.
         """
@@ -471,13 +473,13 @@ class ChangesData(ChangesBase):
 
             self.known_fragments |= set(config.get('fragments', []))
 
-    def update_plugins(self, plugins: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_plugins(self, plugins: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
         """
-        valid_plugins: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
+        valid_plugins: dict[str, dict[str, PluginDescription]] = collections.defaultdict(dict)
 
         for plugin in plugins:
             if plugin.category == 'plugin':
@@ -522,13 +524,13 @@ class ChangesData(ChangesBase):
                             plugin
                             for plugin in config['plugins'][plugin_type]]
 
-    def update_objects(self, objects: List[PluginDescription],
-                       allow_removals: Optional[bool]) -> None:
+    def update_objects(self, objects: list[PluginDescription],
+                       allow_removals: bool | None) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
-        valid_objects: Dict[str, Dict[str, PluginDescription]] = collections.defaultdict(dict)
+        valid_objects: dict[str, dict[str, PluginDescription]] = collections.defaultdict(dict)
 
         for ansible_object in objects:
             if ansible_object.category == 'object':
@@ -557,9 +559,9 @@ class ChangesData(ChangesBase):
                             ansible_object
                             for ansible_object in config['objects'][object_type]]
 
-    def update_fragments(self, fragments: List[ChangelogFragment],
-                         load_extra_fragments: Optional[
-                             Callable[[str], List[ChangelogFragment]]] = None
+    def update_fragments(self, fragments: list[ChangelogFragment],
+                         load_extra_fragments:
+                             Callable[[str], list[ChangelogFragment]] | None = None
                          ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
@@ -674,7 +676,7 @@ class ChangesData(ChangesBase):
             'namespace': entry.get('namespace'),
         })
 
-    def _add_fragment_content(self, version: str, changes: Dict[str, Any],
+    def _add_fragment_content(self, version: str, changes: dict[str, Any],
                               section: str, lines: Any):
         """
         Add contents of a changelog fragment. Helps implementing add_fragment().
@@ -724,7 +726,7 @@ class ChangesData(ChangesBase):
         return LegacyPluginResolver.resolve_plugin(plugin)
 
     def get_plugin_resolver(
-            self, plugins: Optional[List[PluginDescription]] = None) -> PluginResolver:
+            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
         """
         Create a plugin resolver.
 
@@ -739,7 +741,7 @@ class ChangesData(ChangesBase):
         return ChangesDataObjectResolver()
 
     def get_fragment_resolver(
-            self, fragments: Optional[List[ChangelogFragment]] = None) -> FragmentResolver:
+            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -747,11 +749,11 @@ class ChangesData(ChangesBase):
         """
         return ChangesDataFragmentResolver()
 
-    def _version_or_none(self, version: Optional[str]) -> Optional[Any]:
+    def _version_or_none(self, version: str | None) -> Any | None:
         return self.version_constructor(version) if version is not None else None
 
-    def prune_versions(self, versions_after: Optional[str],
-                       versions_until: Optional[str]) -> None:
+    def prune_versions(self, versions_after: str | None,
+                       versions_until: str | None) -> None:
         """
         Remove all versions which are not after ``versions_after`` (if provided),
         or which are after ``versions_until`` (if provided).
@@ -773,7 +775,7 @@ class ChangesData(ChangesBase):
                 continue
 
     @staticmethod
-    def concatenate(changes_datas: List['ChangesData']) -> 'ChangesData':
+    def concatenate(changes_datas: list['ChangesData']) -> 'ChangesData':
         """
         Concatenate one or more ``ChangesData`` objects.
 
@@ -814,7 +816,7 @@ def load_changes(config: ChangelogConfig) -> ChangesBase:
     return ChangesData(config, path)
 
 
-def _filter_version_exact(version: str, version_added: Optional[str]) -> bool:
+def _filter_version_exact(version: str, version_added: str | None) -> bool:
     return bool(version_added) and any([
         version.startswith('%s.' % version_added),
         version.startswith('%s-' % version_added),  # needed for semver
@@ -824,12 +826,12 @@ def _filter_version_exact(version: str, version_added: Optional[str]) -> bool:
 
 
 def _create_filter_version_range(prev_version: str, current_version: str, config: ChangelogConfig
-                                 ) -> Callable[[Optional[str]], bool]:
+                                 ) -> Callable[[str | None], bool]:
     version_constructor = get_version_constructor(config)
     prev_version_ = version_constructor(prev_version)
     current_version_ = version_constructor(current_version)
 
-    def f(version_added: Optional[str]) -> bool:
+    def f(version_added: str | None) -> bool:
         if not version_added:
             return False
         version_added_ = version_constructor(version_added)
@@ -839,10 +841,10 @@ def _create_filter_version_range(prev_version: str, current_version: str, config
 
 
 def _add_plugins_filters(changes: ChangesBase,
-                         plugins: List[PluginDescription],
-                         objects: List[PluginDescription],
+                         plugins: list[PluginDescription],
+                         objects: list[PluginDescription],
                          version: str,
-                         prev_version: Optional[str],
+                         prev_version: str | None,
                          ) -> None:
     if prev_version is None:
         def version_filter(obj: PluginDescription) -> bool:
@@ -873,10 +875,10 @@ def _add_plugins_filters(changes: ChangesBase,
 
 
 def _add_fragments(changes: ChangesBase,
-                   fragments: List[ChangelogFragment],
+                   fragments: list[ChangelogFragment],
                    version: str,
                    show_release_summary_warning: bool
-                   ) -> List[ChangelogFragment]:
+                   ) -> list[ChangelogFragment]:
     fragments_added = []
     has_release_summary = False
     for fragment in fragments:
@@ -896,15 +898,15 @@ def _add_fragments(changes: ChangesBase,
 
 def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,too-many-locals
                 changes: ChangesBase,
-                plugins: List[PluginDescription],
-                fragments: List[ChangelogFragment],
+                plugins: list[PluginDescription],
+                fragments: list[ChangelogFragment],
                 version: str,
-                codename: Optional[str],
+                codename: str | None,
                 date: datetime.date,
                 save_changes: bool = True,
                 update_existing: bool = False,
-                objects: Optional[List[PluginDescription]] = None,
-                prev_version: Optional[str] = None,
+                objects: list[PluginDescription] | None = None,
+                prev_version: str | None = None,
                 show_release_summary_warning: bool = True,
                 ) -> None:
     """

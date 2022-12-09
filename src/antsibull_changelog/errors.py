@@ -8,6 +8,8 @@
 Error classes.
 """
 
+from __future__ import annotations
+
 
 class ChangelogError(Exception):
     """

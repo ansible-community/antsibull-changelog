@@ -9,6 +9,8 @@
 Collect and store information on Ansible plugins and modules.
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -16,7 +18,7 @@ import shutil
 import subprocess
 import tempfile
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import packaging.version
 
@@ -37,12 +39,12 @@ class PluginDescription:
     category: str
     type: str
     name: str
-    namespace: Optional[str]
+    namespace: str | None
     description: str
-    version_added: Optional[str]
+    version_added: str | None
 
-    def __init__(self, plugin_type: str, name: str, namespace: Optional[str],
-                 description: str, version_added: Optional[str],
+    def __init__(self, plugin_type: str, name: str, namespace: str | None,
+                 description: str, version_added: str | None,
                  category: str = 'plugin'):
         # pylint: disable=too-many-arguments
         """
@@ -56,8 +58,8 @@ class PluginDescription:
         self.version_added = version_added
 
     @staticmethod
-    def from_dict(data: Dict[str, Dict[str, Dict[str, Any]]],
-                  category: str = 'plugin') -> 'List[PluginDescription]':
+    def from_dict(data: dict[str, dict[str, dict[str, Any]]],
+                  category: str = 'plugin') -> list[PluginDescription]:
         """
         Return a list of ``PluginDescription`` objects from the given data.
 
@@ -80,7 +82,7 @@ class PluginDescription:
         return plugins
 
 
-def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filename: str) -> str:
+def extract_namespace(paths: PathsConfig, collection_name: str | None, filename: str) -> str:
     """
     Given a filename of a module, will extract the module's namespace.
     """
@@ -94,7 +96,7 @@ def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filena
     path = os.path.relpath(filename, rel_to)
     path = os.path.split(path)[0]
     # Extract namespace from relative path
-    namespace_list: List[str] = []
+    namespace_list: list[str] = []
     while True:
         (path, last), prev = os.path.split(path), path
         if path == prev:
@@ -105,10 +107,10 @@ def extract_namespace(paths: PathsConfig, collection_name: Optional[str], filena
 
 
 def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
-                        collection_name: Optional[str],
-                        plugin_type: str, name: str, data: Dict[str, Any],
+                        collection_name: str | None,
+                        plugin_type: str, name: str, data: dict[str, Any],
                         category: str = 'plugin',
-                        is_ansible_core_2_13: bool = False) -> Dict[str, Any]:
+                        is_ansible_core_2_13: bool = False) -> dict[str, Any]:
     """
     Convert ``ansible-doc --json`` output to plugin metadata.
 
@@ -120,7 +122,7 @@ def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-argument
     :arg category: Set to ``object`` for roles and playbooks
     :arg is_ansible_core_2_13: Set to ``True`` for ``--metadata-dump`` output
     """
-    namespace: Optional[str] = None
+    namespace: str | None = None
     if collection_name and name.startswith(collection_name + '.'):
         name = name[len(collection_name) + 1:]
     docs: dict = data.get('doc') or {}
@@ -137,7 +139,7 @@ def jsondoc_to_metadata(paths: PathsConfig,  # pylint: disable=too-many-argument
             else:
                 namespace = ''
         else:
-            filename: Optional[str] = docs.get('filename')
+            filename: str | None = docs.get('filename')
             if filename:
                 namespace = extract_namespace(paths, collection_name, filename)
             if '.' in name:
@@ -167,9 +169,9 @@ def get_plugins_path(paths: PathsConfig, plugin_type: str, category: str = 'plug
 
 
 def list_plugins_walk(paths: PathsConfig,
-                      playbook_dir: Optional[str],  # pylint: disable=unused-argument
+                      playbook_dir: str | None,  # pylint: disable=unused-argument
                       plugin_type: str,
-                      collection_name: Optional[str]) -> List[str]:
+                      collection_name: str | None) -> list[str]:
     """
     Find all plugins of a type in a collection, or in ansible-core/-base. Uses os.walk().
 
@@ -214,10 +216,10 @@ def list_plugins_walk(paths: PathsConfig,
 
 
 def list_plugins_ansibledoc(paths: PathsConfig,
-                            playbook_dir: Optional[str],
+                            playbook_dir: str | None,
                             plugin_type: str,
-                            collection_name: Optional[str],
-                            category: str = 'plugin') -> List[str]:
+                            collection_name: str | None,
+                            category: str = 'plugin') -> list[str]:
     """
     Find all plugins of a type in a collection, or in ansible-core/-base. Uses ansible-doc.
 
@@ -257,8 +259,8 @@ def list_plugins_ansibledoc(paths: PathsConfig,
     return sorted(plugins_list.keys())
 
 
-def run_ansible_doc(paths: PathsConfig, playbook_dir: Optional[str],
-                    plugin_type: str, plugin_names: List[str]) -> dict:
+def run_ansible_doc(paths: PathsConfig, playbook_dir: str | None,
+                    plugin_type: str, plugin_names: list[str]) -> dict:
     """
     Runs ansible-doc to retrieve documentation for a given set of plugins in JSON format.
 
@@ -272,8 +274,8 @@ def run_ansible_doc(paths: PathsConfig, playbook_dir: Optional[str],
     return json.loads(output.decode('utf-8'))
 
 
-def run_ansible_doc_metadata_dump(paths: PathsConfig, playbook_dir: Optional[str],
-                                  collection_name: Optional[str]) -> dict:
+def run_ansible_doc_metadata_dump(paths: PathsConfig, playbook_dir: str | None,
+                                  collection_name: str | None) -> dict:
     """
     Runs ansible-doc to retrieve documentation for all plugins in a collection.
     """
@@ -287,11 +289,11 @@ def run_ansible_doc_metadata_dump(paths: PathsConfig, playbook_dir: Optional[str
 
 
 def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-arguments
-                         playbook_dir: Optional[str],
+                         playbook_dir: str | None,
                          plugin_type: str,
-                         collection_name: Optional[str],
+                         collection_name: str | None,
                          use_ansible_doc: bool = False,
-                         category: str = 'plugin') -> Dict[str, Dict[str, Any]]:
+                         category: str = 'plugin') -> dict[str, dict[str, Any]]:
     """
     Collect plugin metadata for all plugins of a given type.
 
@@ -309,7 +311,7 @@ def load_plugin_metadata(paths: PathsConfig,  # pylint: disable=too-many-argumen
     else:
         plugins_list = list_plugins_walk(paths, playbook_dir, plugin_type, collection_name)
 
-    result: Dict[str, Dict[str, Any]] = {}
+    result: dict[str, dict[str, Any]] = {}
     if not plugins_list:
         return result
 
@@ -354,10 +356,10 @@ class CollectionCopier:
         shutil.rmtree(self.dir, ignore_errors=True)
 
 
-def _load_plugins_2_13(plugins_data: Dict[str, Any],
+def _load_plugins_2_13(plugins_data: dict[str, Any],
                        paths: PathsConfig,
                        collection_name: str,
-                       playbook_dir: Optional[str] = None) -> None:
+                       playbook_dir: str | None = None) -> None:
     data = run_ansible_doc_metadata_dump(paths, playbook_dir, collection_name)['all']
 
     for category, category_types in (
@@ -376,7 +378,7 @@ def _load_plugins_2_13(plugins_data: Dict[str, Any],
                     plugins_data[category][plugin_type][processed_data['name']] = processed_data
 
 
-def _load_collection_plugins_2_13(plugins_data: Dict[str, Any],
+def _load_collection_plugins_2_13(plugins_data: dict[str, Any],
                                   paths: PathsConfig,
                                   collection_details: CollectionDetails) -> None:
     collection_name = '{}.{}'.format(
@@ -388,7 +390,7 @@ def _load_collection_plugins_2_13(plugins_data: Dict[str, Any],
         _load_plugins_2_13(plugins_data, new_paths, collection_name, playbook_dir=playbook_dir)
 
 
-def _load_collection_plugins(plugins_data: Dict[str, Any],
+def _load_collection_plugins(plugins_data: dict[str, Any],
                              paths: PathsConfig,
                              collection_details: CollectionDetails,
                              use_ansible_doc: bool) -> None:
@@ -409,7 +411,7 @@ def _load_collection_plugins(plugins_data: Dict[str, Any],
                 use_ansible_doc=use_ansible_doc, category='object')
 
 
-def _load_ansible_plugins(plugins_data: Dict[str, Any], paths: PathsConfig,
+def _load_ansible_plugins(plugins_data: dict[str, Any], paths: PathsConfig,
                           use_ansible_doc: bool) -> None:
     for plugin_type in get_documentable_plugins():
         plugins_data['plugins'][plugin_type] = load_plugin_metadata(
@@ -439,7 +441,7 @@ def _refresh_plugin_cache(paths: PathsConfig,
                           use_ansible_doc: bool = False):
     LOGGER.info('refreshing plugin cache')
 
-    plugins_data: Dict[str, Any] = {
+    plugins_data: dict[str, Any] = {
         'version': version,
         'plugins': {},
         'objects': {},
@@ -470,7 +472,7 @@ def load_plugins(paths: PathsConfig,
                  collection_details: CollectionDetails,
                  version: str,
                  force_reload: bool = False,
-                 use_ansible_doc: bool = False) -> List[PluginDescription]:
+                 use_ansible_doc: bool = False) -> list[PluginDescription]:
     """
     Load plugins from ansible-doc.
 
@@ -485,7 +487,7 @@ def load_plugins(paths: PathsConfig,
         return []
 
     plugin_cache_path = os.path.join(paths.changelog_dir, '.plugin-cache.yaml')
-    plugins_data: Dict[str, Any] = {}
+    plugins_data: dict[str, Any] = {}
 
     if not force_reload and os.path.exists(plugin_cache_path):
         plugins_data = load_yaml(plugin_cache_path)

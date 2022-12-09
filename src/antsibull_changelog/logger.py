@@ -8,6 +8,8 @@
 Provide global logger.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 
