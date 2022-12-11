@@ -5,11 +5,9 @@
 
 import docutils.utils
 
-from typing import List, Optional, Tuple, Union
-
 
 def check(source: str,
-          filename: Optional[str] = ...,
-          report_level: Union[docutils.utils.Reporter, int] = ...,
-          ignore: Union[dict, None] = ...,
-          debug: bool = ...) -> List[Tuple[int, str]]: ...
+          filename: str | None = ...,
+          report_level: docutils.utils.Reporter | int = ...,
+          ignore: dict | None = ...,
+          debug: bool = ...) -> list[tuple[int, str]]: ...

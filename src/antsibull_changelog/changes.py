@@ -17,7 +17,8 @@ import collections
 import datetime
 import os
 
-from typing import Any, Callable, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 from .changes_resolvers import (
     FragmentResolver,

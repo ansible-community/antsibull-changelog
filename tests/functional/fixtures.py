@@ -16,9 +16,9 @@ import os
 import pathlib
 import textwrap
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Any, Callable
+from typing import Any
 
 import pytest
 import yaml

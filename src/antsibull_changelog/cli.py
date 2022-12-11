@@ -16,7 +16,8 @@ import os
 import sys
 import traceback
 
-from typing import Any, Callable, cast, List
+from collections.abc import Callable
+from typing import Any, cast
 
 try:
     import argcomplete
@@ -545,12 +546,12 @@ def command_release(args: Any) -> int:
         config, changes,
         # Need cast() here because there is currently no way to mark _do_refresh so that
         # it does not convert a non-None value to None for plugins or fragments
-        cast(List[PluginDescription], plugins),
-        cast(List[ChangelogFragment], fragments),
+        cast(list[PluginDescription], plugins),
+        cast(list[ChangelogFragment], fragments),
         version, codename, date,
         update_existing=args.update_existing,
         prev_version=prev_version,
-        objects=cast(List[PluginDescription], plugins),
+        objects=cast(list[PluginDescription], plugins),
     )
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 

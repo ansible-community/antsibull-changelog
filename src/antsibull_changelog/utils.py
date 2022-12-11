@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import re
 
-from collections.abc import Collection
-from typing import Any, Callable
+from collections.abc import Callable, Collection
+from typing import Any
 
 import packaging.version
 import semantic_version
