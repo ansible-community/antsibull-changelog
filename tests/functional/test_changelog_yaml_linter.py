@@ -7,6 +7,8 @@
 Test changelog.yaml linting.
 """
 
+from __future__ import annotations
+
 import glob
 import io
 import json

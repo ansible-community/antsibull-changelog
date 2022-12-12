@@ -8,14 +8,14 @@
 ReStructuredText helpers.
 """
 
-from typing import List
+from __future__ import annotations
 
 
 class RstBuilder:
     """
     Simple reStructuredText (RST) builder.
     """
-    lines: List[str]
+    lines: list[str]
     section_underlines: str
 
     def __init__(self):

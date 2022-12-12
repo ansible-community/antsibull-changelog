@@ -9,9 +9,12 @@
 Utility functions.
 """
 
+from __future__ import annotations
+
 import re
 
-from typing import Any, Callable, Collection, List, Optional, Tuple
+from collections.abc import Callable, Collection
+from typing import Any
 
 import packaging.version
 import semantic_version
@@ -60,17 +63,17 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
 
 def collect_versions(versions: Collection[str],
                      config: ChangelogConfig,
-                     after_version: Optional[str] = None,
-                     until_version: Optional[str] = None,
-                     squash: bool = False) -> List[Tuple[str, List[str]]]:
+                     after_version: str | None = None,
+                     until_version: str | None = None,
+                     squash: bool = False) -> list[tuple[str, list[str]]]:
     """
     Collect all versions of interest and return them as an ordered list,
     latest to earliest. The versions are grouped by versions that should
     result in a changelog entry.
     """
     version_constructor = get_version_constructor(config)
-    result: List[Tuple[str, List[str]]] = []
-    entry: Optional[Tuple[str, List[str]]] = None
+    result: list[tuple[str, list[str]]] = []
+    entry: tuple[str, list[str]] | None = None
     for version in sorted(versions, reverse=True, key=version_constructor):
         if after_version is not None:
             if version_constructor(version) <= version_constructor(after_version):
@@ -79,7 +82,7 @@ def collect_versions(versions: Collection[str],
             if version_constructor(version) > version_constructor(until_version):
                 continue
 
-        version_list: List[str]
+        version_list: list[str]
         if not squash and is_release_version(config, version):
             # next version is a release, it needs its own entry
             version_list = []

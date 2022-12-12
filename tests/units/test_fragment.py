@@ -7,6 +7,8 @@
 Test fragment module.
 """
 
+from __future__ import annotations
+
 import pytest
 
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig

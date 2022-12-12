@@ -5,8 +5,6 @@
 
 import enum
 
-from typing import List, Optional, Tuple, Union
-
 
 class ReportLevel(enum.Enum):
     INFO = 1
@@ -17,4 +15,4 @@ class ReportLevel(enum.Enum):
 
 
 class RstcheckConfig:
-    def __init__(self, report_level: Optional[ReportLevel] = ...): ...
+    def __init__(self, report_level: ReportLevel | None = ...): ...

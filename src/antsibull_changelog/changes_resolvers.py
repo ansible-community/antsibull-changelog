@@ -8,9 +8,11 @@
 Fragment, plugin and object resolvers.
 """
 
+from __future__ import annotations
+
 import abc
 
-from typing import Any, Dict, List
+from typing import Any
 
 from .fragment import ChangelogFragment
 from .plugins import PluginDescription
@@ -23,7 +25,7 @@ class FragmentResolver(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
+    def resolve(self, release: dict) -> list[ChangelogFragment]:
         """
         Return a list of ``ChangelogFragment`` objects from the given release object.
 
@@ -39,7 +41,7 @@ class PluginResolver(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
+    def resolve(self, release: dict) -> dict[str, list[dict[str, Any]]]:
         """
         Return a dictionary of plugin types mapping to lists of plugin descriptions
         for the given release.
@@ -55,9 +57,9 @@ class LegacyFragmentResolver(FragmentResolver):
     Given a list of changelog fragments, allows to resolve from a list of fragment names.
     """
 
-    fragments: Dict[str, ChangelogFragment]
+    fragments: dict[str, ChangelogFragment]
 
-    def __init__(self, fragments: List[ChangelogFragment]):
+    def __init__(self, fragments: list[ChangelogFragment]):
         """
         Create a simple fragment resolver.
         """
@@ -65,14 +67,14 @@ class LegacyFragmentResolver(FragmentResolver):
         for fragment in fragments:
             self.fragments[fragment.name] = fragment
 
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
+    def resolve(self, release: dict) -> list[ChangelogFragment]:
         """
         Return a list of ``ChangelogFragment`` objects from the given release object.
 
         :arg release: A release description
         :return: A list of changelog fragments
         """
-        fragment_names: List[str] = release.get('fragments', [])
+        fragment_names: list[str] = release.get('fragments', [])
         return [self.fragments[fragment] for fragment in fragment_names]
 
 
@@ -82,10 +84,10 @@ class LegacyPluginResolver(PluginResolver):
     Provides a plugin resolved based on a list of ``PluginDescription`` objects.
     """
 
-    plugins: Dict[str, Dict[str, Dict[str, Any]]]
+    plugins: dict[str, dict[str, dict[str, Any]]]
 
     @staticmethod
-    def resolve_plugin(plugin: PluginDescription) -> Dict[str, Any]:
+    def resolve_plugin(plugin: PluginDescription) -> dict[str, Any]:
         """
         Convert a ``PluginDecscription`` object to a plugin description dictionary.
         """
@@ -95,7 +97,7 @@ class LegacyPluginResolver(PluginResolver):
             'description': plugin.description,
         }
 
-    def __init__(self, plugins: List[PluginDescription]):
+    def __init__(self, plugins: list[PluginDescription]):
         """
         Create a simple plugin resolver from a list of ``PluginDescription`` objects.
         """
@@ -106,7 +108,7 @@ class LegacyPluginResolver(PluginResolver):
 
             self.plugins[plugin.type][plugin.name] = self.resolve_plugin(plugin)
 
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
+    def resolve(self, release: dict) -> dict[str, list[dict[str, Any]]]:
         """
         Return a dictionary of plugin types mapping to lists of plugin descriptions
         for the given release.
@@ -131,7 +133,7 @@ class LegacyObjectResolver(PluginResolver):
     Provides a object resolved based on a list of ``PluginDescription`` objects.
     """
 
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
+    def resolve(self, release: dict) -> dict[str, list[dict[str, Any]]]:
         """
         Return a dictionary of object types mapping to lists of object descriptions
         for the given release.
@@ -148,7 +150,7 @@ class ChangesDataFragmentResolver(FragmentResolver):
     A ``FragmentResolver`` class for modern ``ChangesData`` objects.
     """
 
-    def resolve(self, release: dict) -> List[ChangelogFragment]:
+    def resolve(self, release: dict) -> list[ChangelogFragment]:
         """
         Return a list of ``ChangelogFragment`` objects from the given release object.
 
@@ -167,7 +169,7 @@ class ChangesDataPluginResolver(PluginResolver):
     A ``PluginResolver`` class for modern ``ChangesData`` objects.
     """
 
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
+    def resolve(self, release: dict) -> dict[str, list[dict[str, Any]]]:
         """
         Return a dictionary of plugin types mapping to lists of plugin descriptions
         for the given release.
@@ -189,7 +191,7 @@ class ChangesDataObjectResolver(PluginResolver):
     A ``PluginResolver`` class for modern ``ChangesData`` objects.
     """
 
-    def resolve(self, release: dict) -> Dict[str, List[Dict[str, Any]]]:
+    def resolve(self, release: dict) -> dict[str, list[dict[str, Any]]]:
         """
         Return a dictionary of object types mapping to lists of object descriptions
         for the given release.

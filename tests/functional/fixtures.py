@@ -7,6 +7,8 @@
 Fixtures for changelog tests.
 """
 
+from __future__ import annotations
+
 import difflib
 import io
 import json
@@ -14,8 +16,9 @@ import os
 import pathlib
 import textwrap
 
+from collections.abc import Callable, Mapping
 from contextlib import redirect_stderr, redirect_stdout
-from typing import Any, Callable, Dict, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any
 
 import pytest
 import yaml
@@ -63,13 +66,13 @@ class Differences:
     Describe differences between previous state (updated by environment) and filesystem.
     """
 
-    added_dirs: List[str]
-    added_files: List[str]
-    removed_dirs: List[str]
-    removed_files: List[str]
-    changed_files: List[str]
-    file_contents: Dict[str, bytes]
-    file_differences: Dict[str, Tuple[bytes, bytes]]
+    added_dirs: list[str]
+    added_files: list[str]
+    removed_dirs: list[str]
+    removed_files: list[str]
+    changed_files: list[str]
+    file_contents: dict[str, bytes]
+    file_differences: dict[str, tuple[bytes, bytes]]
 
     def __init__(self):
         self.added_dirs = []
@@ -130,8 +133,8 @@ class ChangelogEnvironment:
     paths: PathsConfig
     config: ChangelogConfig
 
-    created_dirs: Set[str]
-    created_files: Dict[str, bytes]
+    created_dirs: set[str]
+    created_files: dict[str, bytes]
 
     def __init__(self, base_path: pathlib.Path, paths: PathsConfig):
         self.base = base_path
@@ -168,7 +171,7 @@ class ChangelogEnvironment:
             os.makedirs(dir, exist_ok=True)
             self.created_dirs.add(dir)
 
-    def set_plugin_cache(self, version: str, plugins: Dict[str, Dict[str, Dict[str, str]]]):
+    def set_plugin_cache(self, version: str, plugins: dict[str, dict[str, dict[str, str]]]):
         data = {
             'version': version,
             'plugins': plugins,
@@ -194,7 +197,7 @@ class ChangelogEnvironment:
             os.remove(path)
         self.created_files.pop(path, None)
 
-    def add_fragment(self, fragment_name: str, content: str, fragment_dir: Optional[str] = None):
+    def add_fragment(self, fragment_name: str, content: str, fragment_dir: str | None = None):
         if fragment_dir is None:
             fragment_dir = os.path.join(self.paths.changelog_dir, self.config.notes_dir)
         else:
@@ -203,14 +206,14 @@ class ChangelogEnvironment:
         self._write(os.path.join(fragment_dir, fragment_name), content.encode('utf-8'))
 
     def add_fragment_generic(self, fragment_name: str, sections: Mapping[str, Mapping[str, Any]],
-                             fragment_dir: Optional[str] = None):
+                             fragment_dir: str | None = None):
         self.add_fragment(
             fragment_name,
             yaml.dump(sections, Dumper=yaml.SafeDumper),
             fragment_dir=fragment_dir)
 
-    def add_fragment_line(self, fragment_name: str, section: str, lines: Union[List[str], str],
-                          fragment_dir: Optional[str] = None):
+    def add_fragment_line(self, fragment_name: str, section: str, lines: list[str] | str,
+                          fragment_dir: str | None = None):
         self.add_fragment_generic(fragment_name, {section: lines}, fragment_dir=fragment_dir)
 
     def _plugin_base(self, plugin_type):
@@ -218,7 +221,7 @@ class ChangelogEnvironment:
             return ['plugins', 'modules']
         return ['plugins', plugin_type]
 
-    def add_plugin(self, plugin_type: str, name: str, content: str, subdirs: List[str] = None):
+    def add_plugin(self, plugin_type: str, name: str, content: str, subdirs: list[str] = None):
         plugin_dir = os.path.join(
             self.paths.base_dir,
             *self._plugin_base(plugin_type),
@@ -226,7 +229,7 @@ class ChangelogEnvironment:
         self.mkdir(plugin_dir)
         self._write(os.path.join(plugin_dir, name), content.encode('utf-8'))
 
-    def run_tool(self, command: str, arguments: List[str], cwd: Optional[str] = None) -> int:
+    def run_tool(self, command: str, arguments: list[str], cwd: str | None = None) -> int:
         old_cwd = os.getcwd()
         if cwd is not None:
             cwd = os.path.join(self.paths.base_dir, cwd)
@@ -238,7 +241,7 @@ class ChangelogEnvironment:
         finally:
             os.chdir(old_cwd)
 
-    def run_tool_w_output(self, command: str, arguments: List[str], cwd: Optional[str] = None) -> Tuple[int, str, str]:
+    def run_tool_w_output(self, command: str, arguments: list[str], cwd: str | None = None) -> tuple[int, str, str]:
         stdout = io.StringIO()
         stderr = io.StringIO()
         with redirect_stdout(stdout):
@@ -246,9 +249,9 @@ class ChangelogEnvironment:
                 rc = self.run_tool(command, arguments, cwd=cwd)
         return rc, stdout.getvalue(), stderr.getvalue()
 
-    def _get_current_state(self) -> Tuple[Set[str], Dict[str, bytes]]:
-        created_dirs: Set[str] = set()
-        created_files: Dict[str, bytes] = dict()
+    def _get_current_state(self) -> tuple[set[str], dict[str, bytes]]:
+        created_dirs: set[str] = set()
+        created_files: dict[str, bytes] = dict()
         for dirpath, _, filenames in os.walk(self.paths.base_dir):
             created_dirs.add(dirpath)
             for filename in filenames:
@@ -299,8 +302,8 @@ class ChangelogEnvironment:
         return result
 
     def _create_ansible_doc_list(self,
-                                 plugin_data: Dict[str, Dict[str, Any]],
-                                 plugin_type: str) -> Dict[str, Any]:
+                                 plugin_data: dict[str, dict[str, Any]],
+                                 plugin_type: str) -> dict[str, Any]:
         if plugin_type == 'role':
             # Role listing works differently
             result = dict()
@@ -319,10 +322,10 @@ class ChangelogEnvironment:
         }
 
     def _create_ansible_doc_info(self,
-                                 plugin_data: Dict[str, Dict[str, Any]],
+                                 plugin_data: dict[str, dict[str, Any]],
                                  plugin_type: str,
-                                 plugin_names: List[str],
-                                 base_dir: str) -> Dict[str, Any]:
+                                 plugin_names: list[str],
+                                 base_dir: str) -> dict[str, Any]:
         result = dict()
         for plugin_name in plugin_names:
             doc = plugin_data[plugin_type][plugin_name].copy()
@@ -351,9 +354,9 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
             return ['lib', 'ansible', 'modules']
         return ['lib', 'ansible', 'plugins', plugin_type]
 
-    def create_fake_subprocess_ansible_doc(self, plugin_data: Dict[str, Dict[str, Any]]
-                                           ) -> Callable[[List[str]], str]:
-        def fake_subprocess_ansible_doc(command: List[str]) -> str:
+    def create_fake_subprocess_ansible_doc(self, plugin_data: dict[str, dict[str, Any]]
+                                           ) -> Callable[[list[str]], str]:
+        def fake_subprocess_ansible_doc(command: list[str]) -> str:
             if command[0].endswith('ansible-doc') and command[1] == '--version':
                 return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
                     ansible_core_version=self.ansible_core_version,
@@ -405,9 +408,9 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         self._write_yaml(galaxy_path, data)
         self.paths.galaxy_path = galaxy_path
 
-    def create_fake_subprocess_ansible_doc(self, plugin_data: Dict[str, Dict[str, Any]]
-                                           ) -> Callable[[List[str]], str]:
-        def fake_subprocess_ansible_doc(command: List[str]) -> str:
+    def create_fake_subprocess_ansible_doc(self, plugin_data: dict[str, dict[str, Any]]
+                                           ) -> Callable[[list[str]], str]:
+        def fake_subprocess_ansible_doc(command: list[str]) -> str:
             base_dir = self.paths.base_dir
             if command[0].endswith('ansible-doc') and command[1] == '--version':
                 return _ANSIBLE_DOC_VERSION_TEMPLATE.format(

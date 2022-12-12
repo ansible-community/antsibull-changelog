@@ -45,15 +45,13 @@ pytest = "*"
 pytest-cov = "*"
 flake8 = "*"
 codecov = "*"
-pyre-check = "^0.9.15"
+pyre-check = "^0.9.17"
 pylint = "*"
 mypy = "*"
 mock = "*"
 types-docutils = "*"
 types-PyYAML = "*"
 types-toml = "*"
-# Needed for TypedDict in rstcheck-core stubs
-typing-extensions = {version = ">=3.7.4", python = "<3.8"}
 
 [tool.isort]
 line_length = 100

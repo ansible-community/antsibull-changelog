@@ -6,15 +6,10 @@
 import enum
 import pathlib
 
-from typing import Literal, Union
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+from typing import Literal, TypedDict
 
 
 class LintError(TypedDict):
-    source_origin: Union[pathlib.Path, Literal["<string>"], Literal["<stdin>"]]
+    source_origin: pathlib.Path | Literal["<string>"] | Literal["<stdin>"]
     line_number: int
     message: str

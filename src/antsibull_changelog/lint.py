@@ -9,9 +9,12 @@
 Linting for changelog.yaml.
 """
 
+from __future__ import annotations
+
+
 import re
 
-from typing import Any, List, Optional, Tuple, Type, cast
+from typing import Any, cast
 
 import packaging.version
 import semantic_version
@@ -30,7 +33,7 @@ class ChangelogYamlLinter:
     Lint a changelogs/changelog.yaml file.
     """
 
-    errors: List[Tuple[str, int, int, str]]
+    errors: list[tuple[str, int, int, str]]
     path: str
 
     def __init__(self, path: str, no_semantic_versioning: bool = False):
@@ -40,7 +43,7 @@ class ChangelogYamlLinter:
         self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
         self.no_semantic_versioning = no_semantic_versioning
 
-    def check_version(self, version: Any, message: str) -> Optional[Any]:
+    def check_version(self, version: Any, message: str) -> Any | None:
         """
         Check that the given version is a valid semantic version.
 
@@ -61,14 +64,14 @@ class ChangelogYamlLinter:
             return None
 
     @staticmethod
-    def _format_yaml_path(yaml_path: List[Any]) -> str:
+    def _format_yaml_path(yaml_path: list[Any]) -> str:
         """
         Format path to YAML element as string.
         """
         return "{0}".format(" -> ".join([repr(component) for component in yaml_path]))
 
-    def verify_type(self, value: Any, allowed_types: Tuple[Type[Any], ...],
-                    yaml_path: List[Any], allow_none=False) -> bool:
+    def verify_type(self, value: Any, allowed_types: tuple[type[Any], ...],
+                    yaml_path: list[Any], allow_none=False) -> bool:
         """
         Verify that a value is of a given type.
 
@@ -97,7 +100,7 @@ class ChangelogYamlLinter:
         )))
         return False
 
-    def verify_plugin(self, plugin: dict, yaml_path: List[Any], is_module: bool) -> None:
+    def verify_plugin(self, plugin: dict, yaml_path: list[Any], is_module: bool) -> None:
         """
         Verify that a given dictionary is a plugin or module description.
 
@@ -248,7 +251,7 @@ class ChangelogYamlLinter:
                 self.verify_type(fragment, (str, ),
                                  ['releases', version_str, 'fragments', idx])
 
-    def lint(self) -> List[Tuple[str, int, int, str]]:
+    def lint(self) -> list[tuple[str, int, int, str]]:
         """
         Load and lint the changelog.yaml file.
         """
@@ -288,7 +291,7 @@ class ChangelogYamlLinter:
 
 def lint_changelog_yaml(path: str,
                         no_semantic_versioning: bool = False,
-                        ) -> List[Tuple[str, int, int, str]]:
+                        ) -> list[tuple[str, int, int, str]]:
     """
     Lint a changelogs/changelog.yaml file.
     """
