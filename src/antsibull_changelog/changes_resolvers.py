@@ -11,7 +11,6 @@ Fragment, plugin and object resolvers.
 from __future__ import annotations
 
 import abc
-
 from typing import Any
 
 from .fragment import ChangelogFragment

@@ -12,7 +12,6 @@ from __future__ import annotations
 import os
 
 import mock
-
 from fixtures import ansible_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 

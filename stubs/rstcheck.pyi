@@ -5,7 +5,6 @@
 
 import docutils.utils
 
-
 def check(source: str,
           filename: str | None = ...,
           report_level: docutils.utils.Reporter | int = ...,

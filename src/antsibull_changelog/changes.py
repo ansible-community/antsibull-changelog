@@ -16,19 +16,18 @@ import abc
 import collections
 import datetime
 import os
-
 from collections.abc import Callable
 from typing import Any, cast
 
 from .changes_resolvers import (
-    FragmentResolver,
-    PluginResolver,
-    LegacyFragmentResolver,
-    LegacyPluginResolver,
-    LegacyObjectResolver,
     ChangesDataFragmentResolver,
+    ChangesDataObjectResolver,
     ChangesDataPluginResolver,
-    ChangesDataObjectResolver
+    FragmentResolver,
+    LegacyFragmentResolver,
+    LegacyObjectResolver,
+    LegacyPluginResolver,
+    PluginResolver,
 )
 from .config import ChangelogConfig
 from .fragment import ChangelogFragment, load_fragments

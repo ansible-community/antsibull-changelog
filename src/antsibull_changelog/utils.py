@@ -12,7 +12,6 @@ Utility functions.
 from __future__ import annotations
 
 import re
-
 from collections.abc import Callable, Collection
 from typing import Any
 

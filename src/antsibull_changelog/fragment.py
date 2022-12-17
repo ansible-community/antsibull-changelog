@@ -11,12 +11,10 @@ Changelog fragment loading, modification and linting.
 
 from __future__ import annotations
 
-
 import os
-
 from typing import Any
 
-from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
+from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, PathsConfig
 from .errors import ChangelogError
 from .logger import LOGGER

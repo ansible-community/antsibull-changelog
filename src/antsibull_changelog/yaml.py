@@ -18,11 +18,11 @@ _SafeLoader: Any
 _SafeDumper: Any
 try:
     # use C version if possible for speedup
-    from yaml import CSafeLoader as _SafeLoader
     from yaml import CSafeDumper as _SafeDumper
+    from yaml import CSafeLoader as _SafeLoader
 except ImportError:
-    from yaml import SafeLoader as _SafeLoader
     from yaml import SafeDumper as _SafeDumper
+    from yaml import SafeLoader as _SafeLoader
 
 
 def load_yaml(path: str) -> Any:

@@ -15,7 +15,6 @@ import json
 import os
 import pathlib
 import textwrap
-
 from collections.abc import Callable, Mapping
 from contextlib import redirect_stderr, redirect_stdout
 from typing import Any
@@ -25,7 +24,6 @@ import yaml
 
 from antsibull_changelog.cli import run as run_changelog_tool
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
-
 
 # When debugging failed tests and you want to see what exactly changed, you can set this
 # variable to True. Then for all changed files, a colorized diff will be printed.

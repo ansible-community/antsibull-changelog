@@ -12,16 +12,14 @@ from __future__ import annotations
 
 import collections.abc
 import re
-
 from collections.abc import Mapping
 from typing import Any
 
 import packaging.version
 import semantic_version
 
-from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
+from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig
-
 
 ISO_DATE_REGEX = re.compile('^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$')
 

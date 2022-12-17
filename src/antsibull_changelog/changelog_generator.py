@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import collections
 import os
-
 from collections.abc import MutableMapping
 from typing import Any, cast
 

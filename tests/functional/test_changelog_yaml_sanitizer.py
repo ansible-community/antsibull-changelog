@@ -20,7 +20,6 @@ from antsibull_changelog.config import ChangelogConfig, CollectionDetails, Paths
 from antsibull_changelog.sanitize import sanitize_changes
 from antsibull_changelog.yaml import load_yaml, store_yaml
 
-
 # Set to True to generate sanitize files instead of using them
 STORE_RESULT = False
 

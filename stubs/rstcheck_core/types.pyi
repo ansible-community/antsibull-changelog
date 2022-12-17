@@ -5,9 +5,7 @@
 
 import enum
 import pathlib
-
 from typing import Literal, TypedDict
-
 
 class LintError(TypedDict):
     source_origin: pathlib.Path | Literal["<string>"] | Literal["<stdin>"]

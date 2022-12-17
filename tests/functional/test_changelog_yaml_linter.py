@@ -15,14 +15,12 @@ import json
 import os.path
 import re
 import sys
-
 from contextlib import redirect_stdout
 
 import pytest
 
-from antsibull_changelog.lint import lint_changelog_yaml
 from antsibull_changelog.cli import command_lint_changelog_yaml
-
+from antsibull_changelog.lint import lint_changelog_yaml
 
 # Collect files
 PATTERNS = ['*.yml', '*.yaml']

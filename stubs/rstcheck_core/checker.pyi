@@ -8,7 +8,6 @@ import pathlib
 
 from . import config, types
 
-
 def check_file(
     source_file: pathlib.Path,
     rstcheck_config: config.RstcheckConfig,

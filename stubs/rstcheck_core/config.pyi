@@ -5,7 +5,6 @@
 
 import enum
 
-
 class ReportLevel(enum.Enum):
     INFO = 1
     WARNING = 2

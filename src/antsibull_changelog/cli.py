@@ -15,7 +15,6 @@ import datetime
 import os
 import sys
 import traceback
-
 from collections.abc import Callable
 from typing import Any, cast
 
@@ -39,13 +38,13 @@ except ImportError:
 
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
-from .changes import ChangesBase, load_changes, add_release
+from .changes import ChangesBase, add_release, load_changes
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .errors import ChangelogError
-from .fragment import load_fragments, ChangelogFragment, ChangelogFragmentLinter
+from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
-from .plugins import load_plugins, PluginDescription
+from .plugins import PluginDescription, load_plugins
 
 
 def set_paths(force: str | None = None,

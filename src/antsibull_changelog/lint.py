@@ -11,19 +11,16 @@ Linting for changelog.yaml.
 
 from __future__ import annotations
 
-
 import re
-
 from typing import Any, cast
 
 import packaging.version
 import semantic_version
 
-from .ansible import get_documentable_plugins, OBJECT_TYPES, OTHER_PLUGIN_TYPES
+from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .fragment import ChangelogFragment, ChangelogFragmentLinter
 from .yaml import load_yaml
-
 
 ISO_DATE_REGEX = re.compile('^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$')
 

@@ -17,13 +17,15 @@ import re
 import shutil
 import subprocess
 import tempfile
-
 from typing import Any
 
 import packaging.version
 
 from .ansible import (
-    get_ansible_release, get_documentable_plugins, get_documentable_objects, PLUGIN_EXCEPTIONS,
+    PLUGIN_EXCEPTIONS,
+    get_ansible_release,
+    get_documentable_objects,
+    get_documentable_plugins,
 )
 from .config import CollectionDetails, PathsConfig
 from .logger import LOGGER

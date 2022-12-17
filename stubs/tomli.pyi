@@ -6,5 +6,4 @@
 from collections.abc import Callable
 from typing import Any
 
-
 def loads(__s: str, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]: ...
