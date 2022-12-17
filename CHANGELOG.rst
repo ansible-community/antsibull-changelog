@@ -5,6 +5,19 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.18.0
+=======
+
+Release Summary
+---------------
+
+Maintenance release that drops support for older Python versions.
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- Drop support for Python 3.6, 3.7, and 3.8 (https://github.com/ansible-community/antsibull-changelog/pull/93).
+
 v0.17.0
 =======
 

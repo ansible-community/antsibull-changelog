@@ -119,6 +119,15 @@ releases:
     - 0.17.0.yml
     - 90-ansible-trivial.yml
     release_date: '2022-11-02'
+  0.18.0:
+    changes:
+      breaking_changes:
+      - Drop support for Python 3.6, 3.7, and 3.8 (https://github.com/ansible-community/antsibull-changelog/pull/93).
+      release_summary: Maintenance release that drops support for older Python versions.
+    fragments:
+    - 0.18.0.yml
+    - python.yml
+    release_date: '2022-12-17'
   0.2.0:
     changes:
       minor_changes:
