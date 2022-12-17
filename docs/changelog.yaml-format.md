@@ -193,7 +193,9 @@ For every module, plugin or object, the description is a dictionary with the fol
 
 1. `name`: the name of the module resp. plugin. It must not be the FQCN, but the name inside the collection.
 2. `description`: the value of `short_description` in the module's resp. plugin's `DOCUMENTATION`.
-3. `namespace`: must be `null` for plugins and objects. For modules, must be `''` for modules directly in `plugins/modules/`, or the dot-separated list of directories the module is in inside the `plugins/modules/` directory. This is mostly relevant for large collections such as community.general and community.network. For example, the `community.general.docker_container` module is in the directory `plugins/modules/cloud/docker/`, hence its namespace must be `cloud.docker`. The namespace is used to group new modules by their namespace inside the collection.
+3. `namespace`: must be `null` for plugins and objects. For modules, must be `''` for modules directly in `plugins/modules/`, or the dot-separated list of directories the module is in inside the `plugins/modules/` directory.
+
+   This was mostly relevant for large collections such as community.general (up to 5.x.y) and community.network (up to 4.x.y). For example, the `community.general.ovh_ip_failover` module is in the directory `plugins/modules/cloud/ovh/` in community.general 5.x.y, hence its namespace must be `cloud.ovh`. The namespace is used to group new modules by their namespace inside the collection.
 
 The `modules` list, and the `plugins` and `objects` dictionary could look as follows:
 
