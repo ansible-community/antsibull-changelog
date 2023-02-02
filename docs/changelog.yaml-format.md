@@ -24,7 +24,7 @@ The tool does not output anything and exits with exit code 0 in case the file is
 
 ## changelog.yaml
 
-The file must be named `changelogs.yaml` and stored in the `changelogs/` subdirectory of the collection root (i.e. the directory containing `galaxy.yml`). It must be a [YAML 1.1](https://yaml.org/spec/1.1/) file.
+The file must be named `changelog.yaml` and stored in the `changelogs/` subdirectory of the collection root (i.e. the directory containing `galaxy.yml`). It must be a [YAML 1.1](https://yaml.org/spec/1.1/) file.
 
 At the top level, there are two entries:
 
