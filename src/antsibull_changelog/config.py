@@ -205,6 +205,7 @@ class CollectionDetails:
         if self.galaxy_yaml_loaded:
             return
         if not self.paths.is_collection:
+            # pylint:disable-next=broad-exception-raised
             raise Exception('Internal error: cannot get collection details for non-collection')
 
         if what_for is None:
@@ -419,7 +420,7 @@ class ChangelogConfig:
                 })
         if self.title is not None:
             config['title'] = self.title
-        should_always_refresh = (self.changes_format == 'classic')
+        should_always_refresh = self.changes_format == 'classic'
         if self.always_refresh != ('full' if should_always_refresh else 'none'):
             config['always_refresh'] = self.always_refresh
         if self.keep_fragments != self.prevent_known_fragments:
