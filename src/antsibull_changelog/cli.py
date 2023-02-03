@@ -373,6 +373,7 @@ def _get_refresh_config(args: Any,
             elif part == 'fragments-without-archives':
                 refresh_fragments = 'without-archives'
             else:
+                # pylint:disable-next=broad-exception-raised
                 raise Exception(
                     'The config value always_refresh contains an invalid value "{0}"'.format(
                         part))
@@ -408,7 +409,7 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
                                    version=changes.latest_version,
                                    force_reload=args.reload_plugins,
                                    use_ansible_doc=args.use_ansible_doc)
-        allow_removals = (refresh_plugins == 'allow-removal')
+        allow_removals = refresh_plugins == 'allow-removal'
 
         changes.update_plugins(plugins, allow_removals=allow_removals)
         changes.update_objects(plugins, allow_removals=allow_removals)
@@ -417,8 +418,8 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
         if fragments is None:
             fragments = load_fragments(paths, config)
         archive_path_template = config.archive_path_template
-        has_archives = (archive_path_template is not None)
-        with_archives = (refresh_fragments == 'with-archives')
+        has_archives = archive_path_template is not None
+        with_archives = refresh_fragments == 'with-archives'
 
         if config.keep_fragments or (has_archives and with_archives):
             all_fragments = list(fragments)
