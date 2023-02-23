@@ -5,6 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 # antsibull-changelog -- Ansible Changelog Tool
+[![Discuss on Matrix at #community:ansible.com](https://img.shields.io/matrix/community:ansible.com.svg?server_fqdn=ansible-accounts.ems.host&label=Discuss%20on%20Matrix%20at%20%23community:ansible.com&logo=matrix)](https://matrix.to/#/#community:ansible.com)
 [![Python linting badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20linting/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+linting%22+branch%3Amain)
 [![Python testing badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20testing/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+testing%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
