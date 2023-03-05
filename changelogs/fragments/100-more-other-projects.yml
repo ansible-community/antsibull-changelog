@@ -1,0 +1,5 @@
+minor_changes:
+  - Allow to extract other project versions for Python projects from PEP 621 conformant ``pyproject.toml``
+    (https://github.com/ansible-community/antsibull-changelog/pull/100).
+  - Allow to extract other project versions for JavaScript / TypeScript projects form ``package.json``
+    (https://github.com/ansible-community/antsibull-changelog/pull/100).

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import json
 import os
 import sys
 import traceback
@@ -448,13 +449,28 @@ def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
     with open(project_toml_path, 'r', encoding='utf-8') as f:
         data = (toml if HAS_TOML else tomli).loads(f.read())
 
+    # PEP 621 project metadata (https://peps.python.org/pep-0621/#version)
+    if data.get('version'):
+        return data.get('version')
+
     tool_config = data.get('tool') or {}
 
+    # Python Poetry (https://python-poetry.org/docs/pyproject/#version)
     if 'poetry' in tool_config:
         poetry_config = tool_config['poetry']
         return poetry_config.get('version')
 
     return None
+
+
+def _get_package_json_version(package_json_path: str) -> str | None:
+    '''
+    Try to extract version from package.json.
+    '''
+    with open(package_json_path, 'rb') as f:
+        data = json.load(f)
+
+    return data.get('version')
 
 
 def _get_project_version(paths: PathsConfig) -> str | None:
@@ -464,6 +480,10 @@ def _get_project_version(paths: PathsConfig) -> str | None:
     project_toml_path = os.path.join(paths.base_dir, 'pyproject.toml')
     if os.path.isfile(project_toml_path):
         return _get_pyproject_toml_version(project_toml_path)
+
+    package_json_path = os.path.join(paths.base_dir, 'package.json')
+    if os.path.isfile(package_json_path):
+        return _get_package_json_version(package_json_path)
 
     return None
 
