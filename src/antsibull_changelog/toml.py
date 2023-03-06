@@ -46,7 +46,7 @@ def load_toml(path: str) -> Any:
         with open(path, 'rb') as f:
             return tomllib.load(f)
     if HAS_TOMLI:
-        with open(path, 'rb') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             return tomli.loads(f.read())
     if HAS_TOML:
         with open(path, 'r', encoding='utf-8') as f:
