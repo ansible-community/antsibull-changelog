@@ -468,7 +468,7 @@ def _get_package_json_version(package_json_path: str) -> str | None:
     '''
     Try to extract version from package.json.
     '''
-    with open(package_json_path, 'rb') as f:
+    with open(package_json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
     return data.get('version')
