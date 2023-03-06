@@ -1,0 +1,2 @@
+minor_changes:
+  - "Support Python 3.11's ``tomllib`` to load ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/issues/101, https://github.com/ansible-community/antsibull-changelog/pull/102)."
