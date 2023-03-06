@@ -33,14 +33,14 @@ except ImportError:
 
 def has_toml_loader_available() -> bool:
     """
-    Load and parse YAML file ``path``.
+    Return whether a supported TOML loader is available.
     """
     return HAS_TOMLLIB or HAS_TOML or HAS_TOMLI
 
 
 def load_toml(path: str) -> Any:
     """
-    Load and parse YAML file ``path``.
+    Load and parse YOML file ``path``.
     """
     if HAS_TOMLLIB:
         with open(path, 'rb') as f:
