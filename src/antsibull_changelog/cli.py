@@ -433,7 +433,7 @@ def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
     Try to extract version from pyproject.toml.
     '''
     if not has_toml_loader_available():
-        raise ChangelogError('Need tomllib/toml/tomli library to read pyproject.toml')
+        raise ChangelogError('Need tomllib/tomli/toml library to read pyproject.toml')
 
     data = load_toml(project_toml_path)
 

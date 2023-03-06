@@ -45,11 +45,11 @@ def load_toml(path: str) -> Any:
     if HAS_TOMLLIB:
         with open(path, 'rb') as f:
             return tomllib.load(f)
+    if HAS_TOMLI:
+        with open(path, 'rb') as f:
+            return tomli.load(f)
     if HAS_TOML:
         with open(path, 'r', encoding='utf-8') as f:
             return toml.loads(f.read())
-    if HAS_TOMLI:
-        with open(path, 'r', encoding='utf-8') as f:
-            return tomli.loads(f.read())
     # pylint:disable-next=broad-exception-raised
-    raise Exception('Need tomllib/toml/tomli library to read TOML file')
+    raise Exception('Need tomllib/tomli/toml library to read TOML file')
