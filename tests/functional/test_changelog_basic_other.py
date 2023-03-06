@@ -11,18 +11,13 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 
 import mock
-import pytest
 
 from fixtures import other_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
 import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
-
-
-has_tomllib = pytest.mark.skipif("sys.version_info >= (3, 11)")
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -658,7 +653,6 @@ Minor Changes
 ''')
 
 
-@has_tomllib
 def test_changelog_release_pyproject_toml(  # pylint: disable=redefined-outer-name
         other_changelog):  # noqa: F811
     other_changelog.config.changelog_filename_version_depth = 2
@@ -739,7 +733,6 @@ Minor Changes
 ''')
 
 
-@has_tomllib
 def test_changelog_release_pyproject_toml_poetry(  # pylint: disable=redefined-outer-name
         other_changelog):  # noqa: F811
     other_changelog.config.changelog_filename_version_depth = 2
