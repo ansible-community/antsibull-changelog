@@ -40,7 +40,7 @@ def has_toml_loader_available() -> bool:
 
 def load_toml(path: str) -> Any:
     """
-    Load and parse YOML file ``path``.
+    Load and parse TOML file ``path``.
     """
     if HAS_TOMLLIB:
         with open(path, 'rb') as f:
