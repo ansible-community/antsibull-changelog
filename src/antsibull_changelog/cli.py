@@ -450,8 +450,9 @@ def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
         data = (toml if HAS_TOML else tomli).loads(f.read())
 
     # PEP 621 project metadata (https://peps.python.org/pep-0621/#version)
-    if data.get('version'):
-        return data.get('version')
+    project_data = data.get('project')
+    if isinstance(project_data, dict) and project_data.get('version'):
+        return project_data.get('version')
 
     tool_config = data.get('tool') or {}
 
