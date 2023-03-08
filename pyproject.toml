@@ -43,6 +43,7 @@ PyYAML = "*"
 [tool.poetry.dev-dependencies]
 pytest = "*"
 pytest-cov = "*"
+pytest-error-for-skips = "*"
 flake8 = "*"
 codecov = "*"
 pyre-check = "^0.9.17"

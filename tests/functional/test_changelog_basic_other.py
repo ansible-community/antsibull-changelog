@@ -9,9 +9,11 @@ Test basic changelog functionality: Ansible collections
 
 from __future__ import annotations
 
+import json
 import os
 
 import mock
+
 from fixtures import other_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
@@ -564,3 +566,252 @@ Minor Changes
     ]) == 0
 
     assert other_changelog.diff().unchanged
+
+
+def test_changelog_release_package_json(  # pylint: disable=redefined-outer-name
+        other_changelog):  # noqa: F811
+    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.use_semantic_versioning = True
+    other_changelog.set_config(other_changelog.config)
+    other_changelog.add_fragment_line(
+        '1.0.0.yml', 'release_summary', 'This is the first proper release.')
+    other_changelog.add_fragment_line(
+        'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
+    other_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'])
+
+    # Create package.json file
+    other_changelog.add_file('package.json', json.dumps({
+        'name': 'random-project',
+        'version': '1.0.0',
+        'description': 'A Random Project',
+        'main': 'index.js',
+        'scripts': {
+            'test': "echo 'Error: no test specified' && exit 1",
+        },
+        'keywords': [],
+        'author': '',
+        'license': 'GPL-3.0-or-later',
+    }).encode('utf-8'))
+
+    # Release
+    assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
+
+    diff = other_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.0.0.yml',
+        'changelogs/fragments/baz-new-option.yaml',
+        'changelogs/fragments/test-new-option.yml',
+    ]
+    assert diff.changed_files == []
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0']
+    assert changelog['releases']['1.0.0']['release_date'] == '2020-01-02'
+    assert changelog['releases']['1.0.0']['changes'] == {
+        'release_summary': 'This is the first proper release.',
+        'minor_changes': [
+            'baz lookup - no longer ignores the ``bar`` option.',
+            'test - has a new option ``foo``.',
+        ],
+    }
+    assert changelog['releases']['1.0.0']['fragments'] == [
+        '1.0.0.yml',
+        'baz-new-option.yaml',
+        'test-new-option.yml',
+    ]
+    assert 'modules' not in changelog['releases']['1.0.0']
+    assert 'plugins' not in changelog['releases']['1.0.0']
+    assert 'codename' not in changelog['releases']['1.0.0']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''==================================
+A Random Project 1.0 Release Notes
+==================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+''')
+
+
+def test_changelog_release_pyproject_toml(  # pylint: disable=redefined-outer-name
+        other_changelog):  # noqa: F811
+    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.use_semantic_versioning = True
+    other_changelog.set_config(other_changelog.config)
+    other_changelog.add_fragment_line(
+        '1.0.0.yml', 'release_summary', 'This is the first proper release.')
+    other_changelog.add_fragment_line(
+        'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
+    other_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'])
+
+    # Create package.json file
+    other_changelog.add_file('pyproject.toml', r'''
+[project]
+name = "random-project"
+version = "1.0.0"
+description = "A Random Project"
+license = "GPL-3.0-or-later"
+'''.encode('utf-8'))
+
+    # Release
+    assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
+
+    diff = other_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.0.0.yml',
+        'changelogs/fragments/baz-new-option.yaml',
+        'changelogs/fragments/test-new-option.yml',
+    ]
+    assert diff.changed_files == []
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0']
+    assert changelog['releases']['1.0.0']['release_date'] == '2020-01-02'
+    assert changelog['releases']['1.0.0']['changes'] == {
+        'release_summary': 'This is the first proper release.',
+        'minor_changes': [
+            'baz lookup - no longer ignores the ``bar`` option.',
+            'test - has a new option ``foo``.',
+        ],
+    }
+    assert changelog['releases']['1.0.0']['fragments'] == [
+        '1.0.0.yml',
+        'baz-new-option.yaml',
+        'test-new-option.yml',
+    ]
+    assert 'modules' not in changelog['releases']['1.0.0']
+    assert 'plugins' not in changelog['releases']['1.0.0']
+    assert 'codename' not in changelog['releases']['1.0.0']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''==================================
+A Random Project 1.0 Release Notes
+==================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+''')
+
+
+def test_changelog_release_pyproject_toml_poetry(  # pylint: disable=redefined-outer-name
+        other_changelog):  # noqa: F811
+    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.use_semantic_versioning = True
+    other_changelog.set_config(other_changelog.config)
+    other_changelog.add_fragment_line(
+        '1.0.0.yml', 'release_summary', 'This is the first proper release.')
+    other_changelog.add_fragment_line(
+        'test-new-option.yml', 'minor_changes', ['test - has a new option ``foo``.'])
+    other_changelog.add_fragment_line(
+        'baz-new-option.yaml', 'minor_changes',
+        ['baz lookup - no longer ignores the ``bar`` option.'])
+
+    # Create package.json file
+    other_changelog.add_file('pyproject.toml', r'''
+[build-system]
+requires = ["poetry-core>=1.0.7"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "random-project"
+version = "1.0.0"
+description = "A Random Project"
+license = "GPL-3.0-or-later"
+'''.encode('utf-8'))
+
+    # Release
+    assert other_changelog.run_tool('release', ['-v', '--date', '2020-01-02']) == 0
+
+    diff = other_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ['CHANGELOG.rst', 'changelogs/changelog.yaml']
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        'changelogs/fragments/1.0.0.yml',
+        'changelogs/fragments/baz-new-option.yaml',
+        'changelogs/fragments/test-new-option.yml',
+    ]
+    assert diff.changed_files == []
+
+    changelog = diff.parse_yaml('changelogs/changelog.yaml')
+    assert changelog['ancestor'] is None
+    assert list(changelog['releases']) == ['1.0.0']
+    assert changelog['releases']['1.0.0']['release_date'] == '2020-01-02'
+    assert changelog['releases']['1.0.0']['changes'] == {
+        'release_summary': 'This is the first proper release.',
+        'minor_changes': [
+            'baz lookup - no longer ignores the ``bar`` option.',
+            'test - has a new option ``foo``.',
+        ],
+    }
+    assert changelog['releases']['1.0.0']['fragments'] == [
+        '1.0.0.yml',
+        'baz-new-option.yaml',
+        'test-new-option.yml',
+    ]
+    assert 'modules' not in changelog['releases']['1.0.0']
+    assert 'plugins' not in changelog['releases']['1.0.0']
+    assert 'codename' not in changelog['releases']['1.0.0']
+
+    assert diff.file_contents['CHANGELOG.rst'].decode('utf-8') == (
+        r'''==================================
+A Random Project 1.0 Release Notes
+==================================
+
+.. contents:: Topics
+
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+''')

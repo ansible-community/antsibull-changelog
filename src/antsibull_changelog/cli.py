@@ -25,18 +25,6 @@ try:
 except ImportError:
     HAS_ARGCOMPLETE = False
 
-try:
-    import toml
-    HAS_TOML = True
-except ImportError:
-    HAS_TOML = False
-
-try:
-    import tomli
-    HAS_TOMLI = True
-except ImportError:
-    HAS_TOMLI = False
-
 from .ansible import get_ansible_release
 from .changelog_generator import generate_changelog
 from .changes import ChangesBase, add_release, load_changes
@@ -46,6 +34,7 @@ from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
+from .toml import has_toml_loader_available, load_toml
 
 
 def set_paths(force: str | None = None,
@@ -443,11 +432,10 @@ def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
     '''
     Try to extract version from pyproject.toml.
     '''
-    if not HAS_TOML and not HAS_TOMLI:
-        raise ChangelogError('Need toml/tomli library to read pyproject.toml')
+    if not has_toml_loader_available():
+        raise ChangelogError('Need tomllib/tomli/toml library to read pyproject.toml')
 
-    with open(project_toml_path, 'r', encoding='utf-8') as f:
-        data = (toml if HAS_TOML else tomli).loads(f.read())
+    data = load_toml(project_toml_path)
 
     # PEP 621 project metadata (https://peps.python.org/pep-0621/#version)
     project_data = data.get('project')

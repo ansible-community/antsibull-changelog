@@ -227,6 +227,11 @@ class ChangelogEnvironment:
         self.mkdir(plugin_dir)
         self._write(os.path.join(plugin_dir, name), content.encode('utf-8'))
 
+    def add_file(self, filename: str, content: bytes):
+        path = os.path.join(self.paths.base_dir, filename)
+        self.mkdir(os.path.dirname(path))
+        self._write(path, content)
+
     def run_tool(self, command: str, arguments: list[str], cwd: str | None = None) -> int:
         old_cwd = os.getcwd()
         if cwd is not None:
