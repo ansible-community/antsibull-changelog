@@ -1,0 +1,2 @@
+minor_changes:
+  - "Use more specific exceptions than ``Exception`` for some cases in internal code (https://github.com/ansible-community/antsibull-changelog/pull/103)."

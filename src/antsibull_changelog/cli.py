@@ -363,8 +363,7 @@ def _get_refresh_config(args: Any,
             elif part == 'fragments-without-archives':
                 refresh_fragments = 'without-archives'
             else:
-                # pylint:disable-next=broad-exception-raised
-                raise Exception(
+                raise ValueError(
                     'The config value always_refresh contains an invalid value "{0}"'.format(
                         part))
     return refresh_plugins, refresh_fragments
