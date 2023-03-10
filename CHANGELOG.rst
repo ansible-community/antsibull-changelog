@@ -5,6 +5,22 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.19.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Allow to extract other project versions for JavaScript / TypeScript projects from ``package.json`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
+- Allow to extract other project versions for Python projects from PEP 621 conformant ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
+- Support Python 3.11's ``tomllib`` to load ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/issues/101, https://github.com/ansible-community/antsibull-changelog/pull/102).
+- Use more specific exceptions than ``Exception`` for some cases in internal code (https://github.com/ansible-community/antsibull-changelog/pull/103).
+
 v0.18.0
 =======
 
