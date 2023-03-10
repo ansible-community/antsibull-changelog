@@ -433,8 +433,7 @@ def _get_ansible_core_version(paths: PathsConfig) -> packaging.version.Version:
         match = re.match(regex, output)
         if match:
             return packaging.version.Version(match.group(1))
-    # pylint:disable-next=broad-exception-raised
-    raise Exception(
+    raise RuntimeError(
         f'Cannot extract ansible-core version from ansible-doc --version output:\n{output}')
 
 

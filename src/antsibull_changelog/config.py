@@ -205,8 +205,7 @@ class CollectionDetails:
         if self.galaxy_yaml_loaded:
             return
         if not self.paths.is_collection:
-            # pylint:disable-next=broad-exception-raised
-            raise Exception('Internal error: cannot get collection details for non-collection')
+            raise RuntimeError('Internal error: cannot get collection details for non-collection')
 
         if what_for is None:
             what_for = 'load field "{0}"'.format(needed_var)
