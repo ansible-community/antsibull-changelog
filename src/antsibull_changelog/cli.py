@@ -77,7 +77,7 @@ def set_paths(force: str | None = None,
         raise ChangelogError(  # pylint: disable=raise-missing-from
             "Only the 'init' command can be used outside an Ansible checkout and outside a "
             "collection repository, or inside one without changelogs/config.yaml.\n"
-            "If you are in a collection without galaxy.yml, specify `--is-collection no` "
+            "If you are in a collection without galaxy.yml, specify `--is-collection yes` "
             "on the command line.")
 
 
