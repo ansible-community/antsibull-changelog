@@ -488,7 +488,7 @@ def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
     if not config.is_collection and not config.is_other_project and not (version and codename):
         if version or codename:
             # Only one is supplied: error out instead of simply ignoring that one
-            raise ChangelogError(  # pylint: disable=raise-missing-from
+            raise ChangelogError(
                 'For ansible-core releases both --version and --codename must be supplied if at'
                 ' least one of them has been supplied'
             )
