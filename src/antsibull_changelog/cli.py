@@ -77,7 +77,7 @@ def set_paths(force: str | None = None,
         raise ChangelogError(  # pylint: disable=raise-missing-from
             "Only the 'init' command can be used outside an Ansible checkout and outside a "
             "collection repository, or inside one without changelogs/config.yaml.\n"
-            "If you are in a collection without galaxy.yml, specify `--is-collection no` "
+            "If you are in a collection without galaxy.yml, specify `--is-collection yes` "
             "on the command line.")
 
 
@@ -486,6 +486,12 @@ def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
     codename: str | None = args.codename
 
     if not config.is_collection and not config.is_other_project and not (version and codename):
+        if version or codename:
+            # Only one is supplied: error out instead of simply ignoring that one
+            raise ChangelogError(
+                'For ansible-core releases both --version and --codename must be supplied if at'
+                ' least one of them has been supplied'
+            )
         # Both version and codename are required for ansible-core
         try:
             return get_ansible_release()
