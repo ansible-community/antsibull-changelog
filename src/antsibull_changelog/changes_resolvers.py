@@ -78,7 +78,6 @@ class LegacyFragmentResolver(FragmentResolver):
 
 
 class LegacyPluginResolver(PluginResolver):
-    # pylint: disable=too-few-public-methods
     """
     Provides a plugin resolved based on a list of ``PluginDescription`` objects.
     """

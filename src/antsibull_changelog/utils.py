@@ -45,7 +45,7 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     if config.use_semantic_versioning:
         try:
             return not bool(semantic_version.Version(version).prerelease)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             raise ChangelogError(
                 'unsupported semantic version format: %s (%s)' % (version, exc)) from exc
 
@@ -91,14 +91,13 @@ def collect_versions(versions: Collection[str],
             version_list = []
             entry = (version, version_list)
             result.append(entry)
-        elif not squash and not is_release_version(config, entry[0]): \
-                # pylint: disable=unsubscriptable-object
+        elif not squash and not is_release_version(config, entry[0]):
             # current version is a pre-release, next version needs its own entry
             version_list = []
             entry = (version, version_list)
             result.append(entry)
         else:
-            version_list = entry[1]  # pylint: disable=unsubscriptable-object
+            version_list = entry[1]
 
         version_list.append(version)
 

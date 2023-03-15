@@ -350,7 +350,7 @@ class CollectionCopier:
             new_paths = PathsConfig.force_collection(
                 collection_dir, ansible_doc_bin=self.paths.ansible_doc_path)
             return self.dir, new_paths
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             shutil.rmtree(self.dir, ignore_errors=True)
             raise
 

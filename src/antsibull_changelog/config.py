@@ -211,7 +211,7 @@ class CollectionDetails:
             what_for = 'load field "{0}"'.format(needed_var)
         try:
             galaxy_yaml = load_galaxy_metadata(self.paths)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             msg = 'Cannot find galaxy.yml to {0}: {1}'.format(what_for, exc)
             if help_text is not None:
                 msg = '{0}. {1}'.format(msg, help_text)
