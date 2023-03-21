@@ -3,24 +3,5 @@
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-coverage:
-  status:
-    project:
-      default:
-        # basic
-        target: auto
-        threshold: 0%
-        base: auto
-        # flags:
-        #   - unit
-        #   - integration
-        # paths:
-        #   - "src"
-        branches:
-          - main
-        if_not_found: success
-        if_ci_failed: error
-        informational: true
-        only_pulls: false
 github_checks:
   annotations: false
