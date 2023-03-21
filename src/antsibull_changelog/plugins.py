@@ -502,6 +502,9 @@ def load_plugins(paths: PathsConfig,
         plugins_data = _refresh_plugin_cache(paths, collection_details, version, use_ansible_doc)
         store_yaml(plugin_cache_path, plugins_data)
 
+    if 'foobar' in plugins_data:
+        print(2)
+
     plugins = PluginDescription.from_dict(plugins_data['plugins'])
     if 'objects' in plugins_data:
         plugins.extend(PluginDescription.from_dict(plugins_data['objects'], category='object'))
