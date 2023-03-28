@@ -147,7 +147,7 @@ class PathsConfig:
                     return PathsConfig(False, base_dir, None, ansible_doc_bin,
                                        is_other_project=True)
             previous, base_dir = base_dir, os.path.dirname(base_dir)
-            if previous == base_dir:
+            if previous in (base_dir, os.environ.get('__ANTSIBULL_CHANGELOG_CI_ROOT', base_dir)):
                 raise ChangelogError('Cannot identify collection, ansible-core/-base'
                                      ' checkout, or other project.')
 
