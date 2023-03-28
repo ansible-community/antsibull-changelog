@@ -3,56 +3,83 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 [build-system]
-requires = ["poetry-core>=1.0.7"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "antsibull-changelog"
 version = "0.19.0.post0"
 description = "Changelog tool for Ansible-base and Ansible collections"
-authors = ["Felix Fontein <felix@fontein.de>", "Toshio Kuratomi <a.badger@gmail.com>", "Matt Clay <matt@mystile.com>"]
-license = "GPL-3.0-or-later"
 readme = "README.md"
-repository = "https://github.com/ansible-community/antsibull-changelog"
-documentation = "https://github.com/ansible-community/antsibull-changelog/tree/main/docs/"
-packages = [
-    { include = "antsibull_changelog", from = "src" },
-    { include = "tests", format = "sdist" }
+requires-python = ">= 3.9.0"
+license = "GPL-3.0-or-later"
+license-files.globs = ["LICENSES/*.txt"]
+authors = [
+  { name = "Felix Fontein", email = "felix@fontein.de" },
+  { name = "Toshio Kuratomi", email = "a.badger@gmail.com" },
+  { name = "Matt Clay", email = "matt@mystile.com" },
+]
+maintainers = [
+  { name = "Felix Fontein", email = "felix@fontein.de" },
+  { name = "Maxwell G", email = "maxwell@gtmx.me" },
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers"
+    "Framework :: Ansible",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Typing :: Typed",
+]
+dependencies = [
+    "docutils",
+    "packaging",
+    "PyYAML",
+    "rstcheck >= 3.0.0, < 7.0.0",
+    "semantic_version",
 ]
 
-[tool.poetry.urls]
+[project.urls]
+"Source code" = "https://github.com/ansible-community/antsibull-changelog/"
+"Documentation" = "https://github.com/ansible-community/antsibull-changelog/tree/main/docs/"
 "Code of Conduct" = "https://docs.ansible.com/ansible/latest/community/code_of_conduct.html"
 "Bug tracker" = "https://github.com/ansible-community/antsibull-changelog/issues"
 "Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.rst"
 
-[tool.poetry.scripts]
+[project.scripts]
 antsibull-changelog = "antsibull_changelog.cli:main"
 
-[tool.poetry.dependencies]
-python = "^3.9.0"
-packaging = "*"
-semantic_version = "*"
-docutils = "*"
-rstcheck = ">= 3.0.0, < 7.0.0"
-PyYAML = "*"
 
-[tool.poetry.dev-dependencies]
-pytest = "*"
-pytest-cov = "*"
-pytest-error-for-skips = "*"
-flake8 = "*"
-codecov = "*"
-pyre-check = "^0.9.17"
-pylint = "*"
-mypy = "*"
-mock = "*"
-types-docutils = "*"
-types-PyYAML = "*"
-types-toml = "*"
+[project.optional-dependencies]
+test = [
+    "mock",
+    "pytest",
+    "pytest-cov",
+    "pytest-error-for-skips",
+]
+typing = [
+    "mypy",
+    # https://github.com/facebook/pyre-check/issues/398
+    "pyre-check ~= 0.9.15",
+    "types-docutils",
+    "types-PyYAML",
+    "types-toml",
+]
+codeqa = [
+    "flake8 >= 3.8.0",
+    "pylint",
+    "reuse",
+]
+dev = [
+    # Used by nox sessions
+    "antsibull-changelog[codeqa]",
+    "antsibull-changelog[test]",
+    "antsibull-changelog[typing]",
+    # misc
+    "nox",
+]
 
 [tool.isort]
 line_length = 100

@@ -6,8 +6,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 # antsibull-changelog -- Ansible Changelog Tool
 [![Discuss on Matrix at #community:ansible.com](https://img.shields.io/matrix/community:ansible.com.svg?server_fqdn=ansible-accounts.ems.host&label=Discuss%20on%20Matrix%20at%20%23community:ansible.com&logo=matrix)](https://matrix.to/#/#community:ansible.com)
-[![Python linting badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20linting/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+linting%22+branch%3Amain)
-[![Python testing badge](https://github.com/ansible-community/antsibull-changelog/workflows/Python%20testing/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22Python+testing%22+branch%3Amain)
+[![Nox badge](https://github.com/ansible-community/antsibull-changelog/workflows/nox/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22nox%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
 
 A changelog generator used by ansible-core and Ansible collections.
@@ -31,46 +30,26 @@ It can be installed with pip:
 For more information, see the
 [documentation](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
 
-## Using directly from git clone
+## Development
 
-Scripts are created by poetry at build time.  So if you want to run from
-a checkout, you'll have to run them under poetry:
+Install and run `nox` to run all tests. That's it for simple contributions!
+`nox` will create virtual environments in `.nox` inside the checked out project
+and install the requirements needed to run the tests there.
 
-    python3 -m pip install poetry
-    poetry install  # Installs dependencies into a virtualenv
-    poetry run antsibull-changelog --help
+## Creating a new release:
 
-If you want to create a new release:
-
-    poetry build
-    poetry publish  # Uploads to pypi.  Be sure you really want to do this
-
-Note: When installing a package published by poetry, it is best to use pip >= 19.0.
-Installing with pip-18.1 and below could create scripts which use pkg_resources
-which can slow down startup time (in some environments by quite a large amount).
-
-If you prefer to work with `pip install -e`, you can use [dephell](https://pypi.org/project/dephell/)
-to create a `setup.py` file from `pyproject.toml`:
-
-    dephell deps convert --from-path pyproject.toml --from-format poetry --to-path setup.py --to-format setuppy
-
-Then you can install antsibull-changelog with `pip install -e .`.
-
-## Build a release
-
-First update the `version` entry in `pyproject.toml`. Then generate the changelog:
-
-    antsibull-changelog release
-
-Then build the build artefact:
-
-    poetry build
-
-Finally, publish to PyPi:
-
-    poetry publish
-
-Then tag the current state with the release version and push the tag to the repository.
+1. Run `nox -e bump -- <version> <release_summary_message>`. This:
+   * Bumps the package version in `pyproject.toml`.
+   * Creates `changelogs/fragments/<version>.yml` with a `release_summary` section.
+   * Runs `antsibull-changelog release` and adds the changed files to git.
+   * Commits with message `Release <version>.` and runs `git tag -a -m 'antsibull <version>' <version>`.
+2. Run `git push` to the appropriate remotes.
+3. Once CI passes on GitHub, run `nox -e publish`. This:
+   * Runs `hatch publish`;
+   * Runs `git push --follow-tags`;
+   * Bumps the version to `<version>.post0`;
+   * Adds the changed file to git and run `git commit -m 'Post-release version bump.'`;
+4. Run `git push --follow-tags` to the appropriate remotes and create a GitHub release.
 
 ## License
 
