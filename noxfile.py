@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: 2023 Maxwell G <maxwell@gtmx.me>
 
 import os
+from functools import partial
 from pathlib import Path
 
 import nox
@@ -16,7 +17,7 @@ ALLOW_EDITABLE = os.environ.get("ALLOW_EDITABLE", str(not IN_CI)).lower() in (
 
 # Always install latest pip version
 os.environ["VIRTUALENV_DOWNLOAD"] = "1"
-nox.options.sessions = "lint", "test", "coverage"
+nox.options.sessions = "lint", "test", "integration", "coverage"
 
 
 def install(session: nox.Session, *args, editable=False, **kwargs):
@@ -53,9 +54,58 @@ def test(session: nox.Session):
 
 
 @nox.session
+def integration(session: nox.Session):
+    """
+    Run integration tests for `antsibull-changelog lint` and
+    `antsibull-changelog lint-changelog-yaml` against antsibull-changelog
+    changelog and community.general's changelogs
+    """
+    install(session, ".", "coverage[toml]", editable=True)
+    tmp = Path(session.create_tmp())
+    covfile = tmp / ".coverage"
+    env = {"COVERAGE_FILE": f"{covfile}", **session.env}
+    cov_run = partial(
+        session.run,
+        "coverage",
+        "run",
+        "--branch",
+        "-p",
+        "--source",
+        "antsibull_changelog",
+        "-m",
+        "antsibull_changelog.cli",
+        env=env,
+    )
+
+    cov_run(
+        "lint-changelog-yaml",
+        "--no-semantic-versioning",
+        "changelogs/changelog.yaml",
+    )
+
+    with session.chdir(tmp):
+        session.run(
+            "git",
+            "clone",
+            "https://github.com/ansible-collections/community.general",
+            "--branch=stable-4",
+            "--depth=1",
+            external=True,
+        )
+    with session.chdir(tmp / "community.general"):
+        cov_run(
+            "lint-changelog-yaml",
+            "--no-semantic-versioning",
+            "changelogs/changelog.yaml",
+        )
+
+    session.run("coverage", "report", env=env)
+
+
+@nox.session
 def coverage(session: nox.Session):
     install(session, "coverage[toml]")
-    combined = map(str, Path().glob(".nox/test*/tmp/.coverage"))
+    combined = map(str, Path().glob(".nox/*/tmp/.coverage"))
     # Combine the results into a single .coverage file in the root
     session.run("coverage", "combine", "--keep", *combined)
     # Create a coverage.xml for codecov

@@ -56,3 +56,27 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           working-directory: antsibull-changelog
+  nox-integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: antsibull-changelog
+    steps:
+      - name: Check out antsibull-changelog
+        uses: actions/checkout@v3
+        with:
+          path: antsibull-changelog
+      - name: Setup nox
+        uses: wntrblm/nox@2022.11.21
+        with:
+          python-versions: "3.11"
+      - name: Run integration tests
+        run: |
+          nox -v -e integration
+      - name: Report coverage
+        run: |
+          nox -v -e coverage
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          working-directory: antsibull-changelog
