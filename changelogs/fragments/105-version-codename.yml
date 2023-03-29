@@ -1,2 +1,0 @@
-bugfixes:
-  - "When releasing ansible-core and only one of ``--version`` and ``--codename`` is supplied, error out instead of ignoring the supplied value (https://github.com/ansible-community/antsibull-changelog/issues/104, https://github.com/ansible-community/antsibull-changelog/pull/105)."

@@ -5,6 +5,24 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.20.0
+=======
+
+Release Summary
+---------------
+
+Bugfix and maintenance release using a new build system.
+
+Major Changes
+-------------
+
+- Change pyproject build backend from ``poetry-core`` to ``hatchling``. ``pip install antsibull`` works exactly the same as before, but some users may be affected depending on how they build/install the project (https://github.com/ansible-community/antsibull-changelog/pull/109).
+
+Bugfixes
+--------
+
+- When releasing ansible-core and only one of ``--version`` and ``--codename`` is supplied, error out instead of ignoring the supplied value (https://github.com/ansible-community/antsibull-changelog/issues/104, https://github.com/ansible-community/antsibull-changelog/pull/105).
+
 v0.19.0
 =======
 

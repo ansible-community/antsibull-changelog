@@ -165,6 +165,22 @@ releases:
       bugfixes:
       - Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
     release_date: '2020-06-10'
+  0.20.0:
+    changes:
+      bugfixes:
+      - When releasing ansible-core and only one of ``--version`` and ``--codename``
+        is supplied, error out instead of ignoring the supplied value (https://github.com/ansible-community/antsibull-changelog/issues/104,
+        https://github.com/ansible-community/antsibull-changelog/pull/105).
+      major_changes:
+      - Change pyproject build backend from ``poetry-core`` to ``hatchling``. ``pip
+        install antsibull`` works exactly the same as before, but some users may be
+        affected depending on how they build/install the project (https://github.com/ansible-community/antsibull-changelog/pull/109).
+      release_summary: Bugfix and maintenance release using a new build system.
+    fragments:
+    - 0.20.0.yml
+    - 105-version-codename.yml
+    - 109-build-system.yml
+    release_date: '2023-03-29'
   0.3.0:
     changes:
       minor_changes:
