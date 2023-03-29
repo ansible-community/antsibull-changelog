@@ -106,6 +106,10 @@ def integration(session: nox.Session):
         str(cg_destination / "changelogs" / "changelog.yaml"),
     )
 
+    combined = map(str, tmp.glob(".coverage.*"))
+    session.run("coverage", "combine", *combined, env=env)
+    session.run("coverage", "report", env=env)
+
 
 @nox.session
 def coverage(session: nox.Session):
