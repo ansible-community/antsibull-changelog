@@ -59,6 +59,9 @@ test = [
     "pytest-cov",
     "pytest-error-for-skips",
 ]
+coverage = [
+    "coverage[toml]",
+]
 typing = [
     "mypy",
     # https://github.com/facebook/pyre-check/issues/398
@@ -76,6 +79,7 @@ dev = [
     # Used by nox sessions
     "antsibull-changelog[codeqa]",
     "antsibull-changelog[test]",
+    "antsibull-changelog[coverage]",
     "antsibull-changelog[typing]",
     # misc
     "nox",

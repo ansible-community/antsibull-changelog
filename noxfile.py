@@ -35,7 +35,7 @@ def install(session: nox.Session, *args, editable=False, **kwargs):
 @nox.session(python=["3.9", "3.10", "3.11"])
 def test(session: nox.Session):
     install(
-        session, ".[test]", "coverage[toml]", editable=True
+        session, ".[test, coverage]", editable=True
     )
     covfile = Path(session.create_tmp(), ".coverage")
     more_args = []
@@ -60,7 +60,7 @@ def integration(session: nox.Session):
     `antsibull-changelog lint-changelog-yaml` against antsibull-changelog
     changelog and community.general's changelogs
     """
-    install(session, ".", "coverage[toml]", editable=True)
+    install(session, ".[coverage]", editable=True)
     tmp = Path(session.create_tmp())
     covfile = tmp / ".coverage"
     env = {"COVERAGE_FILE": f"{covfile}", **session.env}
@@ -104,7 +104,7 @@ def integration(session: nox.Session):
 
 @nox.session
 def coverage(session: nox.Session):
-    install(session, "coverage[toml]")
+    install(session, ".[coverage]", editable=True)
     combined = map(str, Path().glob(".nox/*/tmp/.coverage"))
     # Combine the results into a single .coverage file in the root
     session.run("coverage", "combine", "--keep", *combined)
