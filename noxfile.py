@@ -49,7 +49,7 @@ def test(session: nox.Session):
         "term-missing",
         *more_args,
         *session.posargs,
-        env={"COVERAGE_FILE": f"{covfile}", **os.environ},
+        env={"COVERAGE_FILE": f"{covfile}", **session.env},
     )
 
 
@@ -105,8 +105,6 @@ def integration(session: nox.Session):
         "lint-changelog-yaml",
         str(cg_destination / "changelogs" / "changelog.yaml"),
     )
-
-    session.run("coverage", "report", env=env)
 
 
 @nox.session
