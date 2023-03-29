@@ -90,21 +90,22 @@ def integration(session: nox.Session):
     )
 
     # Lint community.general's changelogs/changelog.yaml
-    with session.chdir(tmp):
-        session.run(
-            "git",
-            "clone",
-            "https://github.com/ansible-collections/community.general",
-            "--branch=stable-4",
-            "--depth=1",
-            external=True,
-        )
-    with session.chdir(tmp / "community.general"):
-        cov_run(
-            "lint-changelog-yaml",
-            "--no-semantic-versioning",
-            "changelogs/changelog.yaml",
-        )
+    cg_destination = tmp / "community.general"
+    if not cg_destination.exists():
+        with session.chdir(tmp):
+            session.run(
+                "git",
+                "clone",
+                "https://github.com/ansible-collections/community.general",
+                "--branch=stable-4",
+                "--depth=1",
+                external=True,
+            )
+    cov_run(
+        "lint-changelog-yaml",
+        "--no-semantic-versioning",
+        str(cg_destination / "changelogs" / "changelog.yaml"),
+    )
 
     session.run("coverage", "report", env=env)
 
