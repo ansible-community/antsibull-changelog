@@ -77,12 +77,19 @@ def integration(session: nox.Session):
         env=env,
     )
 
+    # Lint own changelog fragments
+    cov_run(
+        "lint",
+    )
+
+    # Lint own changelogs/changelog.yaml
     cov_run(
         "lint-changelog-yaml",
         "--no-semantic-versioning",
         "changelogs/changelog.yaml",
     )
 
+    # Lint community.general's changelogs/changelog.yaml
     with session.chdir(tmp):
         session.run(
             "git",
