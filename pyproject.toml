@@ -86,6 +86,7 @@ dev = [
 ]
 
 [tool.isort]
+profile = "black"
 line_length = 100
 multi_line_output = 3
 include_trailing_comma = true
@@ -95,3 +96,10 @@ source = [
     "src",
    "*/site-packages",
 ]
+
+[tool.mypy]
+mypy_path = "stubs/"
+
+[[tool.mypy.overrides]]
+module = "semantic_version"
+ignore_missing_imports = true
