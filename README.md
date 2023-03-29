@@ -36,6 +36,19 @@ Install and run `nox` to run all tests. That's it for simple contributions!
 `nox` will create virtual environments in `.nox` inside the checked out project
 and install the requirements needed to run the tests there.
 
+To run specific tests:
+
+1. `nox -e test` to only run unit tests;
+2. `nox -e integration` to only run integration tests; this runs
+   `antsibull-changelog lint` against antsibull-changelog and community.general
+   (after cloning its repository) and records coverage data.
+3. `nox -e coverage` to display combined coverage results after running `nox -e
+   test integration`;
+4. `nox -e lint` to run all linters and formatters at once;
+5. `nox -e formatters` to run `isort`;
+6. `nox -e codeqa` to run `flake8`, `pylint`, and `reuse lint`;
+7. `nox -e typing` to run `mypy` and `pyre`
+
 ## Creating a new release:
 
 1. Run `nox -e bump -- <version> <release_summary_message>`. This:
