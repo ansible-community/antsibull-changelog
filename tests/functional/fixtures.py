@@ -136,6 +136,7 @@ class ChangelogEnvironment:
 
     def __init__(self, base_path: pathlib.Path, paths: PathsConfig):
         self.base = base_path
+        os.environ['__ANTSIBULL_CHANGELOG_CI_ROOT'] = str(base_path)
 
         self.paths = paths
         self.config = ChangelogConfig.default(paths, CollectionDetails(paths))
