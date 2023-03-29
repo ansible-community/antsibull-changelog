@@ -249,7 +249,7 @@ def bump(session: nox.Session):
         "tag",
         "-a",
         "-m",
-        f"antsibull-docs-parser {version}",
+        f"antsibull-changelog {version}",
         "--edit",
         version,
         external=True,
