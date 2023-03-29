@@ -103,7 +103,6 @@ def integration(session: nox.Session):
             )
     cov_run(
         "lint-changelog-yaml",
-        "--no-semantic-versioning",
         str(cg_destination / "changelogs" / "changelog.yaml"),
     )
 
