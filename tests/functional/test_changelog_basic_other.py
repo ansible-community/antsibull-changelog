@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import json
 import os
+from unittest import mock
 
-import mock
 from fixtures import other_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 

@@ -10,8 +10,8 @@ Test basic changelog functionality: lint fragments
 from __future__ import annotations
 
 import os
+from unittest import mock
 
-import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
