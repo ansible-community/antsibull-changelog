@@ -54,7 +54,6 @@ antsibull-changelog = "antsibull_changelog.cli:main"
 
 [project.optional-dependencies]
 test = [
-    "mock",
     "pytest",
     "pytest-cov",
     "pytest-error-for-skips",
