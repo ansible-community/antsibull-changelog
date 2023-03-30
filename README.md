@@ -43,7 +43,7 @@ To run specific tests:
    `antsibull-changelog lint` against antsibull-changelog and community.general
    (after cloning its repository) and records coverage data.
 3. `nox -e coverage` to display combined coverage results after running `nox -e
-   test integration`;
+   test integration` and `nox -e test`;
 4. `nox -e lint` to run all linters and formatters at once;
 5. `nox -e formatters` to run `isort`;
 6. `nox -e codeqa` to run `flake8`, `pylint`, and `reuse lint`;
