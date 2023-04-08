@@ -254,7 +254,7 @@ def bump(session: nox.Session):
         version,
         external=True,
     )
-    session.run("hatch", "build")
+    session.run("hatch", "build", "--clean")
 
 
 @nox.session

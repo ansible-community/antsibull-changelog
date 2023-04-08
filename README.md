@@ -56,7 +56,7 @@ To run specific tests:
    * Creates `changelogs/fragments/<version>.yml` with a `release_summary` section.
    * Runs `antsibull-changelog release` and adds the changed files to git.
    * Commits with message `Release <version>.` and runs `git tag -a -m 'antsibull-changelog <version>' <version>`.
-   * Runs `hatch build`.
+   * Runs `hatch build --clean`.
 2. Run `git push` to the appropriate remotes.
 3. Once CI passes on GitHub, run `nox -e publish`. This:
    * Runs `hatch publish`;
