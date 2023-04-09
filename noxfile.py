@@ -147,6 +147,7 @@ def codeqa(session: nox.Session):
         "pylint", "--rcfile", ".pylintrc.automated", "src/antsibull_changelog"
     )
     session.run("reuse", "lint")
+    session.run("antsibull-changelog", "lint")
 
 
 @nox.session
