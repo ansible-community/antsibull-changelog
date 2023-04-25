@@ -152,7 +152,8 @@ def codeqa(session: nox.Session):
 
 @nox.session
 def typing(session: nox.Session):
-    install(session, ".[typing]", editable=True)
+    # pyre does not work when we don't install ourself in editable mode 🙄.
+    install(session, "-e", ".[typing]")
     session.run("mypy", "src/antsibull_changelog")
 
     purelib = session.run(
