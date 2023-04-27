@@ -53,13 +53,22 @@ antsibull-changelog = "antsibull_changelog.cli:main"
 
 
 [project.optional-dependencies]
+codeqa = [
+    "flake8 >= 3.8.0",
+    "pylint",
+    "reuse",
+]
+coverage = [
+    "coverage[toml]",
+]
+formatters = [
+    "black",
+    "isort",
+]
 test = [
     "pytest",
     "pytest-cov",
     "pytest-error-for-skips",
-]
-coverage = [
-    "coverage[toml]",
 ]
 typing = [
     "mypy",
@@ -69,16 +78,12 @@ typing = [
     "types-PyYAML",
     "types-toml",
 ]
-codeqa = [
-    "flake8 >= 3.8.0",
-    "pylint",
-    "reuse",
-]
 dev = [
     # Used by nox sessions
     "antsibull-changelog[codeqa]",
-    "antsibull-changelog[test]",
     "antsibull-changelog[coverage]",
+    "antsibull-changelog[formatters]",
+    "antsibull-changelog[test]",
     "antsibull-changelog[typing]",
     # misc
     "nox",
@@ -86,7 +91,7 @@ dev = [
 
 [tool.isort]
 profile = "black"
-line_length = 100
+line_length = 89
 multi_line_output = 3
 include_trailing_comma = true
 

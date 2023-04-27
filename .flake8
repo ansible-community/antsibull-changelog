@@ -8,3 +8,5 @@ count = True
 max-complexity = 10
 max-line-length = 100
 statistics = True
+# These rules conflict with black
+ignore = E203, W503
