@@ -21,7 +21,7 @@ import semantic_version
 from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig
 
-ISO_DATE_REGEX = re.compile('^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$')
+ISO_DATE_REGEX = re.compile("^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$")
 
 
 class Sanitizer:  # pylint: disable=too-few-public-methods
@@ -76,10 +76,9 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                     result[key] = entries
         return result
 
-    def _sanitize_modules(self, data: list,
-                          are_modules: bool = True) -> list:
+    def _sanitize_modules(self, data: list, are_modules: bool = True) -> list:
         result: list = []
-        if self.config.changes_format == 'classic':
+        if self.config.changes_format == "classic":
             for entry in data:
                 if isinstance(entry, str):
                     result.append(entry)
@@ -87,23 +86,25 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             for entry in data:
                 if not isinstance(entry, collections.abc.Mapping):
                     continue
-                name = entry.get('name')
+                name = entry.get("name")
                 if not isinstance(name, str):
                     continue
-                description = entry.get('description')
+                description = entry.get("description")
                 if not isinstance(description, str):
                     continue
                 if are_modules:
-                    namespace = entry.get('namespace')
+                    namespace = entry.get("namespace")
                     if not isinstance(namespace, str):
                         continue
                 else:
                     namespace = None
-                result.append({
-                    'name': name,
-                    'description': description,
-                    'namespace': namespace,
-                })
+                result.append(
+                    {
+                        "name": name,
+                        "description": description,
+                        "namespace": namespace,
+                    }
+                )
         return result
 
     def _sanitize_plugins(self, data: Mapping) -> dict[str, list]:
@@ -134,49 +135,51 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
                 result.append(entry)
         return result
 
-    def _sanitize_modules_plugins(self, release: Mapping, result: dict[str, Any]) -> None:
-        modules = release.get('modules')
+    def _sanitize_modules_plugins(
+        self, release: Mapping, result: dict[str, Any]
+    ) -> None:
+        modules = release.get("modules")
         if isinstance(modules, list):
             sanitized_modules = self._sanitize_modules(modules)
             if sanitized_modules:
-                result['modules'] = sanitized_modules
+                result["modules"] = sanitized_modules
 
-        plugins = release.get('plugins')
+        plugins = release.get("plugins")
         if isinstance(plugins, collections.abc.Mapping):
             sanitized_plugins = self._sanitize_plugins(plugins)
             if sanitized_plugins:
-                result['plugins'] = sanitized_plugins
+                result["plugins"] = sanitized_plugins
 
-        objects = release.get('objects')
+        objects = release.get("objects")
         if isinstance(objects, collections.abc.Mapping):
             sanitized_objects = self._sanitize_objects(objects)
             if sanitized_objects:
-                result['objects'] = sanitized_objects
+                result["objects"] = sanitized_objects
 
     def _sanitize_release(self, release: Mapping) -> dict[str, Any]:
         result: dict[str, Any] = {}
 
-        release_date = self._sanitize_date(release.get('release_date'))
+        release_date = self._sanitize_date(release.get("release_date"))
         if release_date is not None:
-            result['release_date'] = release_date
+            result["release_date"] = release_date
 
-        codename = release.get('codename')
+        codename = release.get("codename")
         if isinstance(codename, str):
-            result['codename'] = codename
+            result["codename"] = codename
 
-        changes = release.get('changes')
+        changes = release.get("changes")
         if isinstance(changes, collections.abc.Mapping):
             sanitized_changes = self._sanitize_changes(changes)
             if sanitized_changes:
-                result['changes'] = sanitized_changes
+                result["changes"] = sanitized_changes
 
         self._sanitize_modules_plugins(release, result)
 
-        fragments = release.get('fragments')
+        fragments = release.get("fragments")
         if isinstance(fragments, list):
             sanitized_fragments = self._sanitize_fragments(fragments)
             if sanitized_fragments:
-                result['fragments'] = sanitized_fragments
+                result["fragments"] = sanitized_fragments
 
         return result
 
@@ -185,7 +188,9 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
             return {}
         result = {}
         for key, value in releases.items():
-            if not self._is_version(key) or not isinstance(value, collections.abc.Mapping):
+            if not self._is_version(key) or not isinstance(
+                value, collections.abc.Mapping
+            ):
                 continue
             result[key] = self._sanitize_release(value)
         return result
@@ -196,13 +201,10 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
         """
         if not isinstance(data, collections.abc.Mapping):
             # FUBAR: return an empty changelog
-            return {
-                'ancestor': None,
-                'releases': {}
-            }
+            return {"ancestor": None, "releases": {}}
         result = {
-            'ancestor': self._sanitize_ancestor(data.get('ancestor')),
-            'releases': self._sanitize_releases(data.get('releases')),
+            "ancestor": self._sanitize_ancestor(data.get("ancestor")),
+            "releases": self._sanitize_releases(data.get("releases")),
         }
         return result
 

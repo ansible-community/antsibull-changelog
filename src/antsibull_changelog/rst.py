@@ -15,6 +15,7 @@ class RstBuilder:
     """
     Simple reStructuredText (RST) builder.
     """
+
     lines: list[str]
     section_underlines: str
 
@@ -23,7 +24,7 @@ class RstBuilder:
         Create RST builder.
         """
         self.lines = []
-        self.section_underlines = '''=-~^.*+:`'"_#'''
+        self.section_underlines = """=-~^.*+:`'"_#"""
 
     def set_title(self, title: str) -> None:
         """
@@ -34,7 +35,7 @@ class RstBuilder:
         self.lines.append(self.section_underlines[0] * len(title))
         self.lines.append(title)
         self.lines.append(self.section_underlines[0] * len(title))
-        self.lines.append('')
+        self.lines.append("")
 
     def add_section(self, name: str, depth: int = 0) -> None:
         """
@@ -45,7 +46,7 @@ class RstBuilder:
         """
         self.lines.append(name)
         self.lines.append(self.section_underlines[depth] * len(name))
-        self.lines.append('')
+        self.lines.append("")
 
     def add_raw_rst(self, content: str) -> None:
         """
@@ -60,12 +61,12 @@ class RstBuilder:
         lines = content.splitlines()
         for line_no, line in enumerate(lines):
             if line_no > 0 and not line:
-                self.lines.append('')
+                self.lines.append("")
                 continue
-            self.lines.append('%s %s' % (' ' if line_no else '-', line))
+            self.lines.append("%s %s" % (" " if line_no else "-", line))
 
     def generate(self) -> str:
         """
         Generate RST content.
         """
-        return '\n'.join(self.lines)
+        return "\n".join(self.lines)

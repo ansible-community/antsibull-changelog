@@ -18,6 +18,7 @@ import tempfile
 try:
     import rstcheck_core.checker
     import rstcheck_core.config
+
     HAS_RSTCHECK_CORE = True
 except ImportError:
     HAS_RSTCHECK_CORE = False
@@ -25,25 +26,30 @@ except ImportError:
     import rstcheck
 
 
-def check_rst_content(content: str, filename: str | None = None
-                      ) -> list[tuple[int, int, str]]:
-    '''
+def check_rst_content(
+    content: str, filename: str | None = None
+) -> list[tuple[int, int, str]]:
+    """
     Check the content with rstcheck. Return list of errors and warnings.
 
     The entries in the return list are tuples with line number, column number, and
     error/warning message.
-    '''
+    """
     if HAS_RSTCHECK_CORE:
-        filename = os.path.basename(filename or 'file.rst') or 'file.rst'
+        filename = os.path.basename(filename or "file.rst") or "file.rst"
         with tempfile.TemporaryDirectory() as tempdir:
             rst_path = os.path.join(tempdir, filename)
-            with open(rst_path, 'w', encoding='utf-8') as f:
+            with open(rst_path, "w", encoding="utf-8") as f:
                 f.write(content)
             config = rstcheck_core.config.RstcheckConfig(
                 report_level=rstcheck_core.config.ReportLevel.WARNING,
             )
-            core_results = rstcheck_core.checker.check_file(pathlib.Path(rst_path), config)
-            return [(result['line_number'], 0, result['message']) for result in core_results]
+            core_results = rstcheck_core.checker.check_file(
+                pathlib.Path(rst_path), config
+            )
+            return [
+                (result["line_number"], 0, result["message"]) for result in core_results
+            ]
     else:
         results = rstcheck.check(  # pylint: disable=no-member,used-before-assignment
             content,

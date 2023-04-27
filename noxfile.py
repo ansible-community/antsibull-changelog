@@ -34,9 +34,7 @@ def install(session: nox.Session, *args, editable=False, **kwargs):
 
 @nox.session(python=["3.9", "3.10", "3.11"])
 def test(session: nox.Session):
-    install(
-        session, ".[test, coverage]", editable=True
-    )
+    install(session, ".[test, coverage]", editable=True)
     covfile = Path(session.create_tmp(), ".coverage")
     more_args = []
     if session.python == "3.11":
@@ -144,9 +142,7 @@ def formatters(session: nox.Session):
 def codeqa(session: nox.Session):
     install(session, ".[codeqa]", editable=True)
     session.run("flake8", "src/antsibull_changelog", *session.posargs)
-    session.run(
-        "pylint", "--rcfile", ".pylintrc.automated", "src/antsibull_changelog"
-    )
+    session.run("pylint", "--rcfile", ".pylintrc.automated", "src/antsibull_changelog")
     session.run("reuse", "lint")
     session.run("antsibull-changelog", "lint")
 

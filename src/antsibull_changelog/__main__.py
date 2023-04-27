@@ -16,6 +16,6 @@ import sys
 
 from .cli import run
 
-args = ['{0} -m antsibull_changelog'.format(sys.executable)] + sys.argv[1:]
+args = ["{0} -m antsibull_changelog".format(sys.executable)] + sys.argv[1:]
 
 sys.exit(run(args))

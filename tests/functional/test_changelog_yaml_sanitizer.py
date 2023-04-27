@@ -25,7 +25,7 @@ STORE_RESULT = False
 
 
 # Collect files
-PATTERNS = ['*.yml', '*.yaml']
+PATTERNS = ["*.yml", "*.yaml"]
 BASE_DIR = os.path.dirname(__file__)
 GOOD_TESTS = []
 BAD_TESTS = []
@@ -33,44 +33,44 @@ BAD_TESTS = []
 
 def load_tests():
     for pattern in PATTERNS:
-        for filename in glob.glob(os.path.join(BASE_DIR, 'good', pattern)):
+        for filename in glob.glob(os.path.join(BASE_DIR, "good", pattern)):
             GOOD_TESTS.append(filename)
-        for filename in glob.glob(os.path.join(BASE_DIR, 'bad', pattern)):
-            json_filename = os.path.splitext(filename)[0] + '.json'
+        for filename in glob.glob(os.path.join(BASE_DIR, "bad", pattern)):
+            json_filename = os.path.splitext(filename)[0] + ".json"
             if os.path.exists(json_filename):
                 BAD_TESTS.append((filename, json_filename))
             else:
-                pytest.fail('Missing {0} for {1}'.format(json_filename, filename))
+                pytest.fail("Missing {0} for {1}".format(json_filename, filename))
 
 
 load_tests()
 
 
 # Test good files
-@pytest.mark.parametrize('yaml_filename', GOOD_TESTS)
+@pytest.mark.parametrize("yaml_filename", GOOD_TESTS)
 def test_good_changelog_yaml_files(yaml_filename):
-    paths = PathsConfig.force_collection(base_dir='/')
+    paths = PathsConfig.force_collection(base_dir="/")
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
     data = load_yaml(yaml_filename)
     result = sanitize_changes(data, config)
-    if 'ancestor' not in data and result['ancestor'] is None:
-        result.pop('ancestor')
+    if "ancestor" not in data and result["ancestor"] is None:
+        result.pop("ancestor")
     assert result == data
 
 
-@pytest.mark.parametrize('yaml_filename, json_filename', BAD_TESTS)
+@pytest.mark.parametrize("yaml_filename, json_filename", BAD_TESTS)
 def test_bad_changelog_yaml_files(yaml_filename, json_filename):
-    paths = PathsConfig.force_collection(base_dir='/')
+    paths = PathsConfig.force_collection(base_dir="/")
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
     try:
         data = load_yaml(yaml_filename)
         if not STORE_RESULT:
-            sanitized_data = load_yaml(yaml_filename + '-sanitized')
+            sanitized_data = load_yaml(yaml_filename + "-sanitized")
     except Exception:
         # We are only interested in parsable YAML
         return
     result = sanitize_changes(data, config)
     if STORE_RESULT:
-        store_yaml(yaml_filename + '-sanitized', result)
+        store_yaml(yaml_filename + "-sanitized", result)
     else:
         assert result == sanitized_data

@@ -47,9 +47,10 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
             return not bool(semantic_version.Version(version).prerelease)
         except Exception as exc:
             raise ChangelogError(
-                'unsupported semantic version format: %s (%s)' % (version, exc)) from exc
+                "unsupported semantic version format: %s (%s)" % (version, exc)
+            ) from exc
 
-    tag_format = 'v%s' % version
+    tag_format = "v%s" % version
 
     if re.search(config.pre_release_tag_re, tag_format):
         return False
@@ -57,14 +58,16 @@ def is_release_version(config: ChangelogConfig, version: str) -> bool:
     if re.search(config.release_tag_re, tag_format):
         return True
 
-    raise ChangelogError('unsupported version format: %s' % version)
+    raise ChangelogError("unsupported version format: %s" % version)
 
 
-def collect_versions(versions: Collection[str],
-                     config: ChangelogConfig,
-                     after_version: str | None = None,
-                     until_version: str | None = None,
-                     squash: bool = False) -> list[tuple[str, list[str]]]:
+def collect_versions(
+    versions: Collection[str],
+    config: ChangelogConfig,
+    after_version: str | None = None,
+    until_version: str | None = None,
+    squash: bool = False,
+) -> list[tuple[str, list[str]]]:
     """
     Collect all versions of interest and return them as an ordered list,
     latest to earliest. The versions are grouped by versions that should

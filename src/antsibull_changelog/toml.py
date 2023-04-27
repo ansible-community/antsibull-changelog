@@ -14,18 +14,21 @@ from typing import Any
 
 try:
     import tomllib
+
     HAS_TOMLLIB = True
 except ImportError:
     HAS_TOMLLIB = False
 
 try:
     import toml
+
     HAS_TOML = True
 except ImportError:
     HAS_TOML = False
 
 try:
     import tomli
+
     HAS_TOMLI = True
 except ImportError:
     HAS_TOMLI = False
@@ -43,12 +46,12 @@ def load_toml(path: str) -> Any:
     Load and parse TOML file ``path``.
     """
     if HAS_TOMLLIB:
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             return tomllib.load(f)
     if HAS_TOMLI:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             return tomli.loads(f.read())
     if HAS_TOML:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             return toml.loads(f.read())
-    raise RuntimeError('Need tomllib/tomli/toml library to read TOML file')
+    raise RuntimeError("Need tomllib/tomli/toml library to read TOML file")

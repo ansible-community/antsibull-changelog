@@ -21,6 +21,7 @@ from typing import Any, cast
 
 try:
     import argcomplete
+
     HAS_ARGCOMPLETE = True
 except ImportError:
     HAS_ARGCOMPLETE = False
@@ -37,11 +38,13 @@ from .plugins import PluginDescription, load_plugins
 from .toml import has_toml_loader_available, load_toml
 
 
-def set_paths(force: str | None = None,
-              is_collection: bool | None = None,
-              ansible_doc_bin: str | None = None,
-              is_other_project: bool | None = None,
-              fallback_to_other_project: bool = False) -> PathsConfig:
+def set_paths(
+    force: str | None = None,
+    is_collection: bool | None = None,
+    ansible_doc_bin: str | None = None,
+    is_other_project: bool | None = None,
+    fallback_to_other_project: bool = False,
+) -> PathsConfig:
     """
     Create ``PathsConfig``.
 
@@ -61,24 +64,29 @@ def set_paths(force: str | None = None,
         return PathsConfig.force_collection(force, ansible_doc_bin=ansible_doc_bin)
 
     try:
-        return PathsConfig.detect(is_collection=is_collection,
-                                  is_other_project=is_other_project,
-                                  ansible_doc_bin=ansible_doc_bin,
-                                  fallback_to_other_project=fallback_to_other_project)
+        return PathsConfig.detect(
+            is_collection=is_collection,
+            is_other_project=is_other_project,
+            ansible_doc_bin=ansible_doc_bin,
+            fallback_to_other_project=fallback_to_other_project,
+        )
     except ChangelogError:
         if is_collection is True:
             raise ChangelogError(  # pylint: disable=raise-missing-from
                 "Only the 'init' command can be used outside a collection repository, "
-                "or inside one without changelogs/config.yaml.")
+                "or inside one without changelogs/config.yaml."
+            )
         if is_collection is False:
             raise ChangelogError(  # pylint: disable=raise-missing-from
                 "Only the 'init' command can be used outside an Ansible checkout, "
-                "or inside one without changelogs/config.yaml.")
+                "or inside one without changelogs/config.yaml."
+            )
         raise ChangelogError(  # pylint: disable=raise-missing-from
             "Only the 'init' command can be used outside an Ansible checkout and outside a "
             "collection repository, or inside one without changelogs/config.yaml.\n"
             "If you are in a collection without galaxy.yml, specify `--is-collection yes` "
-            "on the command line.")
+            "on the command line."
+        )
 
 
 def parse_boolean_arg(value: Any) -> bool:
@@ -88,11 +96,11 @@ def parse_boolean_arg(value: Any) -> bool:
     if isinstance(value, bool):
         return value
     value = str(value)
-    if value.lower() in ('yes', 'true'):
+    if value.lower() in ("yes", "true"):
         return True
-    if value.lower() in ('no', 'false'):
+    if value.lower() in ("no", "false"):
         return False
-    raise argparse.ArgumentTypeError('Cannot interpret as boolean')
+    raise argparse.ArgumentTypeError("Cannot interpret as boolean")
 
 
 def create_argparser(program_name: str) -> argparse.ArgumentParser:
@@ -100,127 +108,157 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     Create CLI argument parser.
     """
     parser = argparse.ArgumentParser(
-        prog=program_name,
-        description='Changelog generator and linter.')
+        prog=program_name, description="Changelog generator and linter."
+    )
 
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument('-v', '--verbose',
-                        action='count',
-                        default=0,
-                        help='increase verbosity of output')
+    common.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="increase verbosity of output",
+    )
 
     is_collection = argparse.ArgumentParser(add_help=False)
-    is_collection.add_argument('--is-collection',
-                               type=parse_boolean_arg,
-                               help='override whether this is a collection or not '
-                                    '(needed when galaxy.yml does not exist)')
+    is_collection.add_argument(
+        "--is-collection",
+        type=parse_boolean_arg,
+        help="override whether this is a collection or not "
+        "(needed when galaxy.yml does not exist)",
+    )
 
     collection_details = argparse.ArgumentParser(add_help=False)
-    collection_details.add_argument('--collection-namespace',
-                                    help='set collection namespace '
-                                         '(needed when galaxy.yml does not exist)')
-    collection_details.add_argument('--collection-name',
-                                    help='set collection name '
-                                         '(needed when galaxy.yml does not exist)')
-    collection_details.add_argument('--collection-flatmap',
-                                    type=parse_boolean_arg,
-                                    help='override collection flatmapping flag '
-                                         '(needed when galaxy.yml does not exist)')
+    collection_details.add_argument(
+        "--collection-namespace",
+        help="set collection namespace " "(needed when galaxy.yml does not exist)",
+    )
+    collection_details.add_argument(
+        "--collection-name",
+        help="set collection name " "(needed when galaxy.yml does not exist)",
+    )
+    collection_details.add_argument(
+        "--collection-flatmap",
+        type=parse_boolean_arg,
+        help="override collection flatmapping flag "
+        "(needed when galaxy.yml does not exist)",
+    )
 
-    subparsers = parser.add_subparsers(metavar='COMMAND')
+    subparsers = parser.add_subparsers(metavar="COMMAND")
 
-    init_parser = subparsers.add_parser('init',
-                                        parents=[common],
-                                        help='set up changelog infrastructure for '
-                                             'collection, or an other project')
+    init_parser = subparsers.add_parser(
+        "init",
+        parents=[common],
+        help="set up changelog infrastructure for " "collection, or an other project",
+    )
     init_parser.set_defaults(func=command_init)
-    init_parser.add_argument('root',
-                             metavar='PROJECT_ROOT',
-                             help='path to collection or project root')
-    init_parser.add_argument('--is-other-project',
-                             action='store_true',
-                             help='project root belongs to an other project, and '
-                                  'not to an Ansible collection')
+    init_parser.add_argument(
+        "root", metavar="PROJECT_ROOT", help="path to collection or project root"
+    )
+    init_parser.add_argument(
+        "--is-other-project",
+        action="store_true",
+        help="project root belongs to an other project, and "
+        "not to an Ansible collection",
+    )
 
-    lint_parser = subparsers.add_parser('lint',
-                                        parents=[common],
-                                        help='check changelog fragments for syntax errors')
+    lint_parser = subparsers.add_parser(
+        "lint", parents=[common], help="check changelog fragments for syntax errors"
+    )
     lint_parser.set_defaults(func=command_lint)
-    lint_parser.add_argument('fragments',
-                             metavar='FRAGMENT',
-                             nargs='*',
-                             help='path to fragment to test')
+    lint_parser.add_argument(
+        "fragments", metavar="FRAGMENT", nargs="*", help="path to fragment to test"
+    )
 
-    lint_changelog_yaml_parser = subparsers.add_parser('lint-changelog-yaml',
-                                                       parents=[common],
-                                                       help='check syntax of'
-                                                            ' changelogs/changelog.yaml file')
+    lint_changelog_yaml_parser = subparsers.add_parser(
+        "lint-changelog-yaml",
+        parents=[common],
+        help="check syntax of" " changelogs/changelog.yaml file",
+    )
     lint_changelog_yaml_parser.set_defaults(func=command_lint_changelog_yaml)
-    lint_changelog_yaml_parser.add_argument('changelog_yaml_path',
-                                            metavar='/path/to/changelog.yaml',
-                                            help='path to changelogs/changelog.yaml')
+    lint_changelog_yaml_parser.add_argument(
+        "changelog_yaml_path",
+        metavar="/path/to/changelog.yaml",
+        help="path to changelogs/changelog.yaml",
+    )
 
-    lint_changelog_yaml_parser.add_argument('--no-semantic-versioning', action='store_true',
-                                            help='assume that use_semantic_versioning=false in the'
-                                                 ' changelog config. Do not use this for Ansible'
-                                                 ' collections!')
+    lint_changelog_yaml_parser.add_argument(
+        "--no-semantic-versioning",
+        action="store_true",
+        help="assume that use_semantic_versioning=false in the"
+        " changelog config. Do not use this for Ansible"
+        " collections!",
+    )
 
     common_build = argparse.ArgumentParser(add_help=False)
-    common_build.add_argument('--reload-plugins',
-                              action='store_true',
-                              help='force reload of plugin cache')
-    common_build.add_argument('--ansible-doc-bin',
-                              help='path to ansible-doc (overrides autodetect)')
-    common_build.add_argument('--use-ansible-doc',
-                              action='store_true',
-                              help='always use ansible-doc to find plugins')
-    common_build.add_argument('--refresh',
-                              action='store_true',
-                              help='update existing entries from fragment files (if '
-                                   'keep_fragments is true), and update plugin descriptions '
-                                   '(should be combined with --reload-plugins)')
-    common_build.add_argument('--refresh-plugins',
-                              choices=['allow-removal', 'prevent-removal'],
-                              nargs='?',
-                              default=None,
-                              const='allow-removal',
-                              help='update plugin descriptions '
-                                   '(should be combined with --reload-plugins); '
-                                   'default is allow-removal')
-    common_build.add_argument('--refresh-fragments',
-                              choices=['without-archives', 'with-archives'],
-                              nargs='?',
-                              default=None,
-                              const='with-archives',
-                              help='update existing entries from fragment files (if '
-                                   'keep_fragments is true, or for with-archives if '
-                                   'archives are used); default is with-archives')
+    common_build.add_argument(
+        "--reload-plugins", action="store_true", help="force reload of plugin cache"
+    )
+    common_build.add_argument(
+        "--ansible-doc-bin", help="path to ansible-doc (overrides autodetect)"
+    )
+    common_build.add_argument(
+        "--use-ansible-doc",
+        action="store_true",
+        help="always use ansible-doc to find plugins",
+    )
+    common_build.add_argument(
+        "--refresh",
+        action="store_true",
+        help="update existing entries from fragment files (if "
+        "keep_fragments is true), and update plugin descriptions "
+        "(should be combined with --reload-plugins)",
+    )
+    common_build.add_argument(
+        "--refresh-plugins",
+        choices=["allow-removal", "prevent-removal"],
+        nargs="?",
+        default=None,
+        const="allow-removal",
+        help="update plugin descriptions "
+        "(should be combined with --reload-plugins); "
+        "default is allow-removal",
+    )
+    common_build.add_argument(
+        "--refresh-fragments",
+        choices=["without-archives", "with-archives"],
+        nargs="?",
+        default=None,
+        const="with-archives",
+        help="update existing entries from fragment files (if "
+        "keep_fragments is true, or for with-archives if "
+        "archives are used); default is with-archives",
+    )
 
-    release_parser = subparsers.add_parser('release',
-                                           parents=[common, common_build,
-                                                    is_collection, collection_details],
-                                           help='add a new release to the change metadata')
+    release_parser = subparsers.add_parser(
+        "release",
+        parents=[common, common_build, is_collection, collection_details],
+        help="add a new release to the change metadata",
+    )
     release_parser.set_defaults(func=command_release)
-    release_parser.add_argument('--version',
-                                help='override release version')
-    release_parser.add_argument('--codename',
-                                help='override/set release codename')
-    release_parser.add_argument('--date',
-                                default=str(datetime.date.today()),
-                                help='override release date')
-    release_parser.add_argument('--update-existing',
-                                action='store_true',
-                                help='if the release already exists, updates the release '
-                                     'date and (if relevant) the codename')
-    release_parser.add_argument('--cummulative-release',
-                                action='store_true',
-                                help='include all plugins/modules/... that have been added '
-                                     'since the previous release / ancestor')
+    release_parser.add_argument("--version", help="override release version")
+    release_parser.add_argument("--codename", help="override/set release codename")
+    release_parser.add_argument(
+        "--date", default=str(datetime.date.today()), help="override release date"
+    )
+    release_parser.add_argument(
+        "--update-existing",
+        action="store_true",
+        help="if the release already exists, updates the release "
+        "date and (if relevant) the codename",
+    )
+    release_parser.add_argument(
+        "--cummulative-release",
+        action="store_true",
+        help="include all plugins/modules/... that have been added "
+        "since the previous release / ancestor",
+    )
 
-    generate_parser = subparsers.add_parser('generate',
-                                            parents=[common, common_build,
-                                                     is_collection, collection_details],
-                                            help='generate the changelog')
+    generate_parser = subparsers.add_parser(
+        "generate",
+        parents=[common, common_build, is_collection, collection_details],
+        help="generate the changelog",
+    )
     generate_parser.set_defaults(func=command_generate)
 
     if HAS_ARGCOMPLETE:
@@ -252,7 +290,7 @@ def run(args: list[str]) -> int:
 
         arguments = parser.parse_args(args[1:])
 
-        if getattr(arguments, 'func', None) is None:
+        if getattr(arguments, "func", None) is None:
             parser.print_help()
             return 2
 
@@ -273,7 +311,7 @@ def run(args: list[str]) -> int:
         if verbosity > 0:
             traceback.print_exc()
         else:
-            print('ERROR: Uncaught exception. Run with -v to see traceback.')
+            print("ERROR: Uncaught exception. Run with -v to see traceback.")
         return 1
 
 
@@ -289,7 +327,7 @@ def command_init(args: Any) -> int:
     paths = set_paths(force=root, is_other_project=is_other_project)
 
     if not is_other_project and paths.galaxy_path is None:
-        LOGGER.error('The file galaxy.yml does not exists in the collection root!')
+        LOGGER.error("The file galaxy.yml does not exists in the collection root!")
         return 5
     LOGGER.debug('Checking for existance of "{}"', paths.config_path)
     if os.path.exists(paths.config_path):
@@ -298,10 +336,12 @@ def command_init(args: Any) -> int:
 
     collection_details = CollectionDetails(paths)
 
-    title = 'Project'
+    title = "Project"
     if not is_other_project:
-        title = '{0}.{1}'.format(
-            collection_details.get_namespace().title(), collection_details.get_name().title())
+        title = "{0}.{1}".format(
+            collection_details.get_namespace().title(),
+            collection_details.get_name().title(),
+        )
 
     config = ChangelogConfig.default(paths, collection_details, title=title)
 
@@ -311,7 +351,7 @@ def command_init(args: Any) -> int:
         print('Created fragments directory "{0}"'.format(fragments_dir))
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create fragments directory "{}"', fragments_dir)
-        LOGGER.info('Exception: {}', str(exc))
+        LOGGER.info("Exception: {}", str(exc))
         return 5
 
     try:
@@ -319,14 +359,15 @@ def command_init(args: Any) -> int:
         print('Created config file "{0}"'.format(paths.config_path))
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create config file "{}"', paths.config_path)
-        LOGGER.info('Exception: {}', str(exc))
+        LOGGER.info("Exception: {}", str(exc))
         return 5
 
     return 0
 
 
-def _determine_flatmap(collection_details: CollectionDetails,
-                       config: ChangelogConfig) -> bool:
+def _determine_flatmap(
+    collection_details: CollectionDetails, config: ChangelogConfig
+) -> bool:
     """
     Determine whether flatmapping is used or not for the collection.
     """
@@ -341,64 +382,70 @@ def _determine_flatmap(collection_details: CollectionDetails,
     return flatmap
 
 
-def _get_refresh_config(args: Any,
-                        config: ChangelogConfig) -> tuple[str | None, str | None]:
+def _get_refresh_config(
+    args: Any, config: ChangelogConfig
+) -> tuple[str | None, str | None]:
     refresh_plugins: str | None = args.refresh_plugins
     refresh_fragments: str | None = args.refresh_fragments
     always_refresh = config.always_refresh
-    if args.refresh or always_refresh == 'full':
+    if args.refresh or always_refresh == "full":
         if refresh_plugins is None:
-            refresh_plugins = 'allow-removal'
+            refresh_plugins = "allow-removal"
         if refresh_fragments is None:
-            refresh_fragments = 'with-archives'
-    if always_refresh not in ('full', 'none'):
-        for part in always_refresh.split(','):
+            refresh_fragments = "with-archives"
+    if always_refresh not in ("full", "none"):
+        for part in always_refresh.split(","):
             part = part.strip()
-            if part == 'plugins':
-                refresh_plugins = 'allow-removal'
-            elif part == 'plugins-without-removal':
-                refresh_plugins = 'prevent-removal'
-            elif part == 'fragments':
-                refresh_fragments = 'with-archives'
-            elif part == 'fragments-without-archives':
-                refresh_fragments = 'without-archives'
+            if part == "plugins":
+                refresh_plugins = "allow-removal"
+            elif part == "plugins-without-removal":
+                refresh_plugins = "prevent-removal"
+            elif part == "fragments":
+                refresh_fragments = "with-archives"
+            elif part == "fragments-without-archives":
+                refresh_fragments = "without-archives"
             else:
                 raise ValueError(
                     'The config value always_refresh contains an invalid value "{0}"'.format(
-                        part))
+                        part
+                    )
+                )
     return refresh_plugins, refresh_fragments
 
 
-def _get_archive_loader(archive_path_template: str,
-                        paths: PathsConfig,
-                        config: ChangelogConfig) -> Callable[[str], list[ChangelogFragment]]:
+def _get_archive_loader(
+    archive_path_template: str, paths: PathsConfig, config: ChangelogConfig
+) -> Callable[[str], list[ChangelogFragment]]:
     def load_extra_fragments(version: str) -> list[ChangelogFragment]:
         archive_path = os.path.join(
-            paths.base_dir, archive_path_template.format(version=version))
+            paths.base_dir, archive_path_template.format(version=version)
+        )
         return load_fragments(paths, config, fragments_dir=archive_path)
 
     return load_extra_fragments
 
 
-def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
-                paths: PathsConfig,
-                collection_details: CollectionDetails,
-                config: ChangelogConfig,
-                changes: ChangesBase,
-                plugins: list[PluginDescription] | None = None,
-                fragments: list[ChangelogFragment] | None = None
-                ) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]:
-
+def _do_refresh(  # pylint: disable=too-many-arguments
+    args: Any,
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+    config: ChangelogConfig,
+    changes: ChangesBase,
+    plugins: list[PluginDescription] | None = None,
+    fragments: list[ChangelogFragment] | None = None,
+) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]:
     refresh_plugins, refresh_fragments = _get_refresh_config(args, config)
 
     if refresh_plugins:
         if plugins is None:
-            plugins = load_plugins(paths=paths,
-                                   collection_details=collection_details,
-                                   version=changes.latest_version,
-                                   force_reload=args.reload_plugins,
-                                   use_ansible_doc=args.use_ansible_doc)
-        allow_removals = refresh_plugins == 'allow-removal'
+            plugins = load_plugins(
+                paths=paths,
+                collection_details=collection_details,
+                version=changes.latest_version,
+                force_reload=args.reload_plugins,
+                use_ansible_doc=args.use_ansible_doc,
+            )
+        allow_removals = refresh_plugins == "allow-removal"
 
         changes.update_plugins(plugins, allow_removals=allow_removals)
         changes.update_objects(plugins, allow_removals=allow_removals)
@@ -408,18 +455,24 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
             fragments = load_fragments(paths, config)
         archive_path_template = config.archive_path_template
         has_archives = archive_path_template is not None
-        with_archives = refresh_fragments == 'with-archives'
+        with_archives = refresh_fragments == "with-archives"
 
         if config.keep_fragments or (has_archives and with_archives):
             all_fragments = list(fragments)
             load_extra_fragments = None
             if with_archives and archive_path_template is not None:
-                load_extra_fragments = _get_archive_loader(archive_path_template, paths, config)
+                load_extra_fragments = _get_archive_loader(
+                    archive_path_template, paths, config
+                )
 
-            changes.update_fragments(all_fragments, load_extra_fragments=load_extra_fragments)
+            changes.update_fragments(
+                all_fragments, load_extra_fragments=load_extra_fragments
+            )
         else:
-            LOGGER.warning('Cannot refresh changelog fragments, as keep_fragments '
-                           'is false and archives are not enabled')
+            LOGGER.warning(
+                "Cannot refresh changelog fragments, as keep_fragments "
+                "is false and archives are not enabled"
+            )
 
     if refresh_plugins or refresh_fragments:
         changes.save()
@@ -428,76 +481,84 @@ def _do_refresh(args: Any,  # pylint: disable=too-many-arguments
 
 
 def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
-    '''
+    """
     Try to extract version from pyproject.toml.
-    '''
+    """
     if not has_toml_loader_available():
-        raise ChangelogError('Need tomllib/tomli/toml library to read pyproject.toml')
+        raise ChangelogError("Need tomllib/tomli/toml library to read pyproject.toml")
 
     data = load_toml(project_toml_path)
 
     # PEP 621 project metadata (https://peps.python.org/pep-0621/#version)
-    project_data = data.get('project')
-    if isinstance(project_data, dict) and project_data.get('version'):
-        return project_data.get('version')
+    project_data = data.get("project")
+    if isinstance(project_data, dict) and project_data.get("version"):
+        return project_data.get("version")
 
-    tool_config = data.get('tool') or {}
+    tool_config = data.get("tool") or {}
 
     # Python Poetry (https://python-poetry.org/docs/pyproject/#version)
-    if 'poetry' in tool_config:
-        poetry_config = tool_config['poetry']
-        return poetry_config.get('version')
+    if "poetry" in tool_config:
+        poetry_config = tool_config["poetry"]
+        return poetry_config.get("version")
 
     return None
 
 
 def _get_package_json_version(package_json_path: str) -> str | None:
-    '''
+    """
     Try to extract version from package.json.
-    '''
-    with open(package_json_path, 'r', encoding='utf-8') as f:
+    """
+    with open(package_json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    return data.get('version')
+    return data.get("version")
 
 
 def _get_project_version(paths: PathsConfig) -> str | None:
-    '''
+    """
     Try to extract version for other projects.
-    '''
-    project_toml_path = os.path.join(paths.base_dir, 'pyproject.toml')
+    """
+    project_toml_path = os.path.join(paths.base_dir, "pyproject.toml")
     if os.path.isfile(project_toml_path):
         return _get_pyproject_toml_version(project_toml_path)
 
-    package_json_path = os.path.join(paths.base_dir, 'package.json')
+    package_json_path = os.path.join(paths.base_dir, "package.json")
     if os.path.isfile(package_json_path):
         return _get_package_json_version(package_json_path)
 
     return None
 
 
-def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
-                              collection_details: CollectionDetails,
-                              args: Any) -> tuple[str, str | None]:
-    '''
+def _get_version_and_codename(
+    paths: PathsConfig,
+    config: ChangelogConfig,
+    collection_details: CollectionDetails,
+    args: Any,
+) -> tuple[str, str | None]:
+    """
     Extract version and codename for a release from arguments, autodetect them, or fail.
-    '''
+    """
     version: str | None = args.version
     codename: str | None = args.codename
 
-    if not config.is_collection and not config.is_other_project and not (version and codename):
+    if (
+        not config.is_collection
+        and not config.is_other_project
+        and not (version and codename)
+    ):
         if version or codename:
             # Only one is supplied: error out instead of simply ignoring that one
             raise ChangelogError(
-                'For ansible-core releases both --version and --codename must be supplied if at'
-                ' least one of them has been supplied'
+                "For ansible-core releases both --version and --codename must be supplied if at"
+                " least one of them has been supplied"
             )
         # Both version and codename are required for ansible-core
         try:
             return get_ansible_release()
         except ValueError:
             raise ChangelogError(  # pylint: disable=raise-missing-from
-                'Cannot import ansible.release to determine version and codename')
+                "Cannot import ansible.release to determine version and codename"
+            )
 
     # Codename is not required for collections or other projects
     if version:
@@ -510,7 +571,8 @@ def _get_version_and_codename(paths: PathsConfig, config: ChangelogConfig,
     version = _get_project_version(paths)
     if not version:
         raise ChangelogError(
-            'You need to explicitly specify the version for other projects with --version')
+            "You need to explicitly specify the version for other projects with --version"
+        )
     return version, codename
 
 
@@ -532,37 +594,50 @@ def command_release(args: Any) -> int:
 
     flatmap = _determine_flatmap(collection_details, config)
 
-    version, codename = _get_version_and_codename(paths, config, collection_details, args)
+    version, codename = _get_version_and_codename(
+        paths, config, collection_details, args
+    )
 
     changes = load_changes(config)
 
     prev_version: str | None = None
     if args.cummulative_release:
-        prev_version = changes.latest_version if changes.has_release else changes.ancestor
+        prev_version = (
+            changes.latest_version if changes.has_release else changes.ancestor
+        )
 
     plugins: list[PluginDescription] | None
     fragments: list[ChangelogFragment] | None
 
-    plugins = load_plugins(paths=paths, collection_details=collection_details,
-                           version=version, force_reload=args.reload_plugins,
-                           use_ansible_doc=args.use_ansible_doc)
+    plugins = load_plugins(
+        paths=paths,
+        collection_details=collection_details,
+        version=version,
+        force_reload=args.reload_plugins,
+        use_ansible_doc=args.use_ansible_doc,
+    )
     fragments = load_fragments(paths, config)
     lint_rc = lint_fragments(config, fragments, [])
     if lint_rc != 0:
         LOGGER.error(
-            'Please fix all linting errors before releasing a new version! '
-            'Use `antsibull-changelog lint` to manually lint before releasing.')
+            "Please fix all linting errors before releasing a new version! "
+            "Use `antsibull-changelog lint` to manually lint before releasing."
+        )
         return lint_rc
 
     plugins, fragments = _do_refresh(
-        args, paths, collection_details, config, changes, plugins, fragments)
+        args, paths, collection_details, config, changes, plugins, fragments
+    )
     add_release(
-        config, changes,
+        config,
+        changes,
         # Need cast() here because there is currently no way to mark _do_refresh so that
         # it does not convert a non-None value to None for plugins or fragments
         cast(list[PluginDescription], plugins),
         cast(list[ChangelogFragment], fragments),
-        version, codename, date,
+        version,
+        codename,
+        date,
         update_existing=args.update_existing,
         prev_version=prev_version,
         objects=cast(list[PluginDescription], plugins),
@@ -590,12 +665,18 @@ def command_generate(args: Any) -> int:
 
     changes = load_changes(config)
     if not changes.has_release:
-        print('Cannot create changelog when not at least one release has been added.')
+        print("Cannot create changelog when not at least one release has been added.")
         return 5
-    plugins, fragments = _do_refresh(args, paths, collection_details, config, changes, None, None)
+    plugins, fragments = _do_refresh(
+        args, paths, collection_details, config, changes, None, None
+    )
     if args.reload_plugins and plugins is None:
-        plugins = load_plugins(paths=paths, collection_details=collection_details,
-                               version=changes.latest_version, force_reload=args.reload_plugins)
+        plugins = load_plugins(
+            paths=paths,
+            collection_details=collection_details,
+            version=changes.latest_version,
+            force_reload=args.reload_plugins,
+        )
     generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
 
     return 0
@@ -614,15 +695,20 @@ def command_lint(args: Any) -> int:
     fragment_paths: list[str] = args.fragments
 
     collection_details = CollectionDetails(paths)
-    config = ChangelogConfig.load(paths, collection_details, ignore_is_other_project=True)
+    config = ChangelogConfig.load(
+        paths, collection_details, ignore_is_other_project=True
+    )
 
     exceptions: list[tuple[str, Exception]] = []
     fragments = load_fragments(paths, config, fragment_paths, exceptions)
     return lint_fragments(config, fragments, exceptions)
 
 
-def lint_fragments(config: ChangelogConfig, fragments: list[ChangelogFragment],
-                   exceptions: list[tuple[str, Exception]]) -> int:
+def lint_fragments(
+    config: ChangelogConfig,
+    fragments: list[ChangelogFragment],
+    exceptions: list[tuple[str, Exception]],
+) -> int:
     """
     Lint a given set of changelog fragment objects.
 
@@ -632,14 +718,17 @@ def lint_fragments(config: ChangelogConfig, fragments: list[ChangelogFragment],
     """
     linter = ChangelogFragmentLinter(config)
 
-    errors = [(ex[0], 0, 0, 'yaml parsing error') for ex in exceptions]
+    errors = [(ex[0], 0, 0, "yaml parsing error") for ex in exceptions]
 
     for fragment in fragments:
         errors += linter.lint(fragment)
 
-    messages = sorted(set(
-        '%s:%d:%d: %s' % (os.path.relpath(error[0]), error[1], error[2], error[3])
-        for error in errors))
+    messages = sorted(
+        set(
+            "%s:%d:%d: %s" % (os.path.relpath(error[0]), error[1], error[2], error[3])
+            for error in errors
+        )
+    )
 
     for message in messages:
         print(message)
@@ -654,9 +743,12 @@ def command_lint_changelog_yaml(args: Any) -> int:
     :arg args: Parsed arguments
     """
     errors = lint_changelog_yaml(
-        args.changelog_yaml_path, no_semantic_versioning=args.no_semantic_versioning)
+        args.changelog_yaml_path, no_semantic_versioning=args.no_semantic_versioning
+    )
 
-    messages = sorted(set(f'{error[0]}:{error[1]}:{error[2]}: {error[3]}' for error in errors))
+    messages = sorted(
+        set(f"{error[0]}:{error[1]}:{error[2]}: {error[3]}" for error in errors)
+    )
 
     for message in messages:
         print(message)
@@ -683,7 +775,7 @@ def main() -> int:
         :5: Problem occured which prevented the execution of the command
     """
     if sys.version_info < (3, 6):
-        print('Needs Python 3.6 or later')
+        print("Needs Python 3.6 or later")
         return 4
 
     return run(sys.argv)

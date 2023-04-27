@@ -10,6 +10,8 @@ Classes handling ``changelog.yaml`` (new Ansible and collections)
 and ``.changes.yaml`` (old Ansible) files.
 """
 
+# pylint: disable=too-many-lines
+
 from __future__ import annotations
 
 import abc
@@ -72,8 +74,8 @@ class ChangesBase(metaclass=abc.ABCMeta):
         Empty change metadata.
         """
         return {
-            'ancestor': None,
-            'releases': {},
+            "ancestor": None,
+            "releases": {},
         }
 
     @property
@@ -97,7 +99,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         Dictionary of releases.
         """
-        return cast(dict[str, dict[str, Any]], self.data['releases'])
+        return cast(dict[str, dict[str, Any]], self.data["releases"])
 
     def load(self, data_override: dict | None = None) -> None:
         """
@@ -111,29 +113,32 @@ class ChangesBase(metaclass=abc.ABCMeta):
             self.data = sanitize_changes(load_yaml(self.path), config=self.config)
         else:
             self.data = self.empty()
-        self.ancestor = self.data.get('ancestor')
+        self.ancestor = self.data.get("ancestor")
 
     @abc.abstractmethod
-    def update_plugins(self, plugins: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_plugins(
+        self, plugins: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
         """
 
     @abc.abstractmethod
-    def update_objects(self, objects: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_objects(
+        self, objects: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
 
     @abc.abstractmethod
-    def update_fragments(self, fragments: list[ChangelogFragment],
-                         load_extra_fragments:
-                             Callable[[str], list[ChangelogFragment]] | None = None
-                         ) -> None:
+    def update_fragments(
+        self,
+        fragments: list[ChangelogFragment],
+        load_extra_fragments: Callable[[str], list[ChangelogFragment]] | None = None,
+    ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
         list of fragments.
@@ -150,23 +155,28 @@ class ChangesBase(metaclass=abc.ABCMeta):
         Save the change metadata to disk.
         """
         self.sort()
-        self.data['ancestor'] = self.ancestor
+        self.data["ancestor"] = self.ancestor
         store_yaml(self.path, self.data)
 
-    def add_release(self, version: str, codename: str | None,
-                    release_date: datetime.date, update_existing=False):
+    def add_release(
+        self,
+        version: str,
+        codename: str | None,
+        release_date: datetime.date,
+        update_existing=False,
+    ):
         """
         Add a new releases to the changes metadata.
         """
         if version not in self.releases:
             self.releases[version] = {}
         elif not update_existing:
-            LOGGER.warning('release {} already exists', version)
+            LOGGER.warning("release {} already exists", version)
             return
 
-        self.releases[version]['release_date'] = release_date.isoformat()
+        self.releases[version]["release_date"] = release_date.isoformat()
         if codename is not None:
-            self.releases[version]['codename'] = codename
+            self.releases[version]["codename"] = codename
 
     @abc.abstractmethod
     def add_fragment(self, fragment: ChangelogFragment, version: str):
@@ -187,27 +197,27 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         :return: ``True`` if the plugin was added for this version
         """
-        if plugin.category != 'plugin':
+        if plugin.category != "plugin":
             return False
 
-        composite_name = '%s/%s' % (plugin.type, plugin.name)
+        composite_name = "%s/%s" % (plugin.type, plugin.name)
 
         if composite_name in self.known_plugins:
             return False
 
         self.known_plugins.add(composite_name)
 
-        if plugin.type == 'module':
-            if 'modules' not in self.releases[version]:
-                self.releases[version]['modules'] = []
+        if plugin.type == "module":
+            if "modules" not in self.releases[version]:
+                self.releases[version]["modules"] = []
 
-            modules = self.releases[version]['modules']
+            modules = self.releases[version]["modules"]
             modules.append(self._create_plugin_entry(plugin))
         else:
-            if 'plugins' not in self.releases[version]:
-                self.releases[version]['plugins'] = {}
+            if "plugins" not in self.releases[version]:
+                self.releases[version]["plugins"] = {}
 
-            plugins = self.releases[version]['plugins']
+            plugins = self.releases[version]["plugins"]
 
             if plugin.type not in plugins:
                 plugins[plugin.type] = []
@@ -225,20 +235,20 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         :return: ``True`` if the object was added for this version
         """
-        if ansible_object.category != 'object':
+        if ansible_object.category != "object":
             return False
 
-        composite_name = '%s/%s' % (ansible_object.type, ansible_object.name)
+        composite_name = "%s/%s" % (ansible_object.type, ansible_object.name)
 
         if composite_name in self.known_objects:
             return False
 
         self.known_objects.add(composite_name)
 
-        if 'objects' not in self.releases[version]:
-            self.releases[version]['objects'] = {}
+        if "objects" not in self.releases[version]:
+            self.releases[version]["objects"] = {}
 
-        objects = self.releases[version]['objects']
+        objects = self.releases[version]["objects"]
 
         if ansible_object.type not in objects:
             objects[ansible_object.type] = []
@@ -249,7 +259,8 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_plugin_resolver(
-            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
+        self, plugins: list[PluginDescription] | None = None
+    ) -> PluginResolver:
         """
         Create a plugin resolver.
 
@@ -264,7 +275,8 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_fragment_resolver(
-            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
+        self, fragments: list[ChangelogFragment] | None = None
+    ) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -291,18 +303,22 @@ class ChangesMetadata(ChangesBase):
         super().load(data_override=data_override)
 
         for _, config in self.releases.items():
-            for plugin_type, plugin_names in config.get('plugins', {}).items():
+            for plugin_type, plugin_names in config.get("plugins", {}).items():
                 self.known_plugins |= set(
-                    '%s/%s' % (plugin_type, plugin_name) for plugin_name in plugin_names)
+                    "%s/%s" % (plugin_type, plugin_name) for plugin_name in plugin_names
+                )
 
-            module_names = config.get('modules', [])
+            module_names = config.get("modules", [])
 
-            self.known_plugins |= set('module/%s' % module_name for module_name in module_names)
+            self.known_plugins |= set(
+                "module/%s" % module_name for module_name in module_names
+            )
 
-            self.known_fragments |= set(config.get('fragments', []))
+            self.known_fragments |= set(config.get("fragments", []))
 
-    def update_plugins(self, plugins: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_plugins(
+        self, plugins: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
@@ -315,43 +331,55 @@ class ChangesMetadata(ChangesBase):
         valid_plugins = collections.defaultdict(set)
 
         for plugin in plugins:
-            if plugin.category == 'plugin':
+            if plugin.category == "plugin":
                 valid_plugins[plugin.type].add(plugin.name)
 
         for _, config in self.releases.items():
-            if 'modules' in config:
+            if "modules" in config:
                 invalid_modules = set(
-                    module for module in config['modules']
-                    if module not in valid_plugins['module'])
-                config['modules'] = [
-                    module for module in config['modules']
-                    if module not in invalid_modules]
+                    module
+                    for module in config["modules"]
+                    if module not in valid_plugins["module"]
+                )
+                config["modules"] = [
+                    module
+                    for module in config["modules"]
+                    if module not in invalid_modules
+                ]
                 self.known_plugins -= set(
-                    'module/%s' % module for module in invalid_modules)
+                    "module/%s" % module for module in invalid_modules
+                )
 
-            if 'plugins' in config:
-                for plugin_type in config['plugins']:
+            if "plugins" in config:
+                for plugin_type in config["plugins"]:
                     invalid_plugins = set(
-                        plugin for plugin in config['plugins'][plugin_type]
-                        if plugin not in valid_plugins[plugin_type])
-                    config['plugins'][plugin_type] = [
-                        plugin for plugin in config['plugins'][plugin_type]
-                        if plugin not in invalid_plugins]
+                        plugin
+                        for plugin in config["plugins"][plugin_type]
+                        if plugin not in valid_plugins[plugin_type]
+                    )
+                    config["plugins"][plugin_type] = [
+                        plugin
+                        for plugin in config["plugins"][plugin_type]
+                        if plugin not in invalid_plugins
+                    ]
                     self.known_plugins -= set(
-                        '%s/%s' % (plugin_type, plugin) for plugin in invalid_plugins)
+                        "%s/%s" % (plugin_type, plugin) for plugin in invalid_plugins
+                    )
 
-    def update_objects(self, objects: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_objects(
+        self, objects: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
         return
 
-    def update_fragments(self, fragments: list[ChangelogFragment],
-                         load_extra_fragments:
-                             Callable[[str], list[ChangelogFragment]] | None = None
-                         ) -> None:
+    def update_fragments(
+        self,
+        fragments: list[ChangelogFragment],
+        load_extra_fragments: Callable[[str], list[ChangelogFragment]] | None = None,
+    ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
         list of fragments.
@@ -359,31 +387,37 @@ class ChangesMetadata(ChangesBase):
         valid_fragments = set(fragment.name for fragment in fragments)
 
         for _, config in self.releases.items():
-            if 'fragments' not in config:
+            if "fragments" not in config:
                 continue
 
             invalid_fragments = set(
-                fragment for fragment in config['fragments']
-                if fragment not in valid_fragments)
-            config['fragments'] = [
-                fragment for fragment in config['fragments']
-                if fragment not in invalid_fragments]
+                fragment
+                for fragment in config["fragments"]
+                if fragment not in valid_fragments
+            )
+            config["fragments"] = [
+                fragment
+                for fragment in config["fragments"]
+                if fragment not in invalid_fragments
+            ]
             self.known_fragments -= invalid_fragments
 
     def sort(self) -> None:
         """
         Sort change metadata in place.
         """
-        for _, config in self.data['releases'].items():
-            if 'modules' in config:
-                config['modules'] = sorted(config['modules'])
+        for _, config in self.data["releases"].items():
+            if "modules" in config:
+                config["modules"] = sorted(config["modules"])
 
-            if 'plugins' in config:
-                for plugin_type in config['plugins']:
-                    config['plugins'][plugin_type] = sorted(config['plugins'][plugin_type])
+            if "plugins" in config:
+                for plugin_type in config["plugins"]:
+                    config["plugins"][plugin_type] = sorted(
+                        config["plugins"][plugin_type]
+                    )
 
-            if 'fragments' in config:
-                config['fragments'] = sorted(config['fragments'])
+            if "fragments" in config:
+                config["fragments"] = sorted(config["fragments"])
 
     def add_fragment(self, fragment: ChangelogFragment, version: str) -> bool:
         """
@@ -394,25 +428,28 @@ class ChangesMetadata(ChangesBase):
 
         self.known_fragments.add(fragment.name)
 
-        if 'fragments' not in self.releases[version]:
-            self.releases[version]['fragments'] = []
+        if "fragments" not in self.releases[version]:
+            self.releases[version]["fragments"] = []
 
-        fragments = self.releases[version]['fragments']
+        fragments = self.releases[version]["fragments"]
         fragments.append(fragment.name)
         return True
 
     def get_plugin_resolver(
-            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
+        self, plugins: list[PluginDescription] | None = None
+    ) -> PluginResolver:
         """
         Create a plugin resolver.
 
         If the plugins are not provided and needed by this object, they **will** be loaded.
         """
         if plugins is None:
-            plugins = load_plugins(paths=self.config.paths,
-                                   collection_details=self.config.collection_details,
-                                   version=self.latest_version,
-                                   force_reload=False)
+            plugins = load_plugins(
+                paths=self.config.paths,
+                collection_details=self.config.collection_details,
+                version=self.latest_version,
+                force_reload=False,
+            )
         return LegacyPluginResolver(plugins)
 
     def get_object_resolver(self) -> PluginResolver:
@@ -422,7 +459,8 @@ class ChangesMetadata(ChangesBase):
         return LegacyObjectResolver()
 
     def get_fragment_resolver(
-            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
+        self, fragments: list[ChangelogFragment] | None = None
+    ) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -442,7 +480,9 @@ class ChangesData(ChangesBase):
 
     config: ChangelogConfig
 
-    def __init__(self, config: ChangelogConfig, path: str, data_override: dict | None = None):
+    def __init__(
+        self, config: ChangelogConfig, path: str, data_override: dict | None = None
+    ):
         """
         Create modern change metadata.
 
@@ -459,110 +499,148 @@ class ChangesData(ChangesBase):
         super().load(data_override=data_override)
 
         for _, config in self.releases.items():
-            for plugin_type, plugins in config.get('plugins', {}).items():
+            for plugin_type, plugins in config.get("plugins", {}).items():
                 self.known_plugins |= set(
-                    '%s/%s' % (plugin_type, plugin['name']) for plugin in plugins)
+                    "%s/%s" % (plugin_type, plugin["name"]) for plugin in plugins
+                )
 
-            for object_type, objects in config.get('objects', {}).items():
+            for object_type, objects in config.get("objects", {}).items():
                 self.known_objects |= set(
-                    '%s/%s' % (object_type, ansible_object['name']) for ansible_object in objects)
+                    "%s/%s" % (object_type, ansible_object["name"])
+                    for ansible_object in objects
+                )
 
-            modules = config.get('modules', [])
+            modules = config.get("modules", [])
 
-            self.known_plugins |= set('module/%s' % module['name'] for module in modules)
+            self.known_plugins |= set(
+                "module/%s" % module["name"] for module in modules
+            )
 
-            self.known_fragments |= set(config.get('fragments', []))
+            self.known_fragments |= set(config.get("fragments", []))
 
-    def update_plugins(self, plugins: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_plugins(
+        self, plugins: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
         """
-        valid_plugins: dict[str, dict[str, PluginDescription]] = collections.defaultdict(dict)
+        valid_plugins: dict[
+            str, dict[str, PluginDescription]
+        ] = collections.defaultdict(dict)
 
         for plugin in plugins:
-            if plugin.category == 'plugin':
+            if plugin.category == "plugin":
                 valid_plugins[plugin.type][plugin.name] = plugin
 
         for _, config in self.releases.items():
-            if 'modules' in config:
+            if "modules" in config:
                 invalid_module_names = set(
-                    module['name'] for module in config['modules']
-                    if module['name'] not in valid_plugins['module'])
+                    module["name"]
+                    for module in config["modules"]
+                    if module["name"] not in valid_plugins["module"]
+                )
                 if allow_removals:
-                    config['modules'] = [
-                        self._create_plugin_entry(valid_plugins['module'][module['name']])
-                        for module in config['modules']
-                        if module['name'] not in invalid_module_names]
+                    config["modules"] = [
+                        self._create_plugin_entry(
+                            valid_plugins["module"][module["name"]]
+                        )
+                        for module in config["modules"]
+                        if module["name"] not in invalid_module_names
+                    ]
                     self.known_plugins -= set(
-                        'module/%s' % module_name for module_name in invalid_module_names)
+                        "module/%s" % module_name
+                        for module_name in invalid_module_names
+                    )
                 else:
-                    config['modules'] = [
-                        self._create_plugin_entry(valid_plugins['module'][module['name']])
-                        if module['name'] not in invalid_module_names else
-                        module
-                        for module in config['modules']]
+                    config["modules"] = [
+                        self._create_plugin_entry(
+                            valid_plugins["module"][module["name"]]
+                        )
+                        if module["name"] not in invalid_module_names
+                        else module
+                        for module in config["modules"]
+                    ]
 
-            if 'plugins' in config:
-                for plugin_type in config['plugins']:
+            if "plugins" in config:
+                for plugin_type in config["plugins"]:
                     invalid_plugin_names = set(
-                        plugin['name'] for plugin in config['plugins'][plugin_type]
-                        if plugin['name'] not in valid_plugins[plugin_type])
+                        plugin["name"]
+                        for plugin in config["plugins"][plugin_type]
+                        if plugin["name"] not in valid_plugins[plugin_type]
+                    )
                     if allow_removals:
-                        config['plugins'][plugin_type] = [
-                            self._create_plugin_entry(valid_plugins[plugin_type][plugin['name']])
-                            for plugin in config['plugins'][plugin_type]
-                            if plugin['name'] not in invalid_plugin_names]
+                        config["plugins"][plugin_type] = [
+                            self._create_plugin_entry(
+                                valid_plugins[plugin_type][plugin["name"]]
+                            )
+                            for plugin in config["plugins"][plugin_type]
+                            if plugin["name"] not in invalid_plugin_names
+                        ]
                         self.known_plugins -= set(
-                            '%s/%s' % (plugin_type, plugin_name)
-                            for plugin_name in invalid_plugin_names)
+                            "%s/%s" % (plugin_type, plugin_name)
+                            for plugin_name in invalid_plugin_names
+                        )
                     else:
-                        config['plugins'][plugin_type] = [
-                            self._create_plugin_entry(valid_plugins[plugin_type][plugin['name']])
-                            if plugin['name'] not in invalid_plugin_names else
-                            plugin
-                            for plugin in config['plugins'][plugin_type]]
+                        config["plugins"][plugin_type] = [
+                            self._create_plugin_entry(
+                                valid_plugins[plugin_type][plugin["name"]]
+                            )
+                            if plugin["name"] not in invalid_plugin_names
+                            else plugin
+                            for plugin in config["plugins"][plugin_type]
+                        ]
 
-    def update_objects(self, objects: list[PluginDescription],
-                       allow_removals: bool | None) -> None:
+    def update_objects(
+        self, objects: list[PluginDescription], allow_removals: bool | None
+    ) -> None:
         """
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
-        valid_objects: dict[str, dict[str, PluginDescription]] = collections.defaultdict(dict)
+        valid_objects: dict[
+            str, dict[str, PluginDescription]
+        ] = collections.defaultdict(dict)
 
         for ansible_object in objects:
-            if ansible_object.category == 'object':
+            if ansible_object.category == "object":
                 valid_objects[ansible_object.type][ansible_object.name] = ansible_object
 
         for _, config in self.releases.items():
-            if 'objects' in config:
-                for object_type in config['objects']:
+            if "objects" in config:
+                for object_type in config["objects"]:
                     invalid_object_names = set(
-                        ansible_object['name'] for ansible_object in config['objects'][object_type]
-                        if ansible_object['name'] not in valid_objects[object_type])
+                        ansible_object["name"]
+                        for ansible_object in config["objects"][object_type]
+                        if ansible_object["name"] not in valid_objects[object_type]
+                    )
                     if allow_removals:
-                        config['objects'][object_type] = [
+                        config["objects"][object_type] = [
                             self._create_plugin_entry(
-                                valid_objects[object_type][ansible_object['name']])
-                            for ansible_object in config['objects'][object_type]
-                            if ansible_object['name'] not in invalid_object_names]
+                                valid_objects[object_type][ansible_object["name"]]
+                            )
+                            for ansible_object in config["objects"][object_type]
+                            if ansible_object["name"] not in invalid_object_names
+                        ]
                         self.known_objects -= set(
-                            '%s/%s' % (object_type, object_name)
-                            for object_name in invalid_object_names)
+                            "%s/%s" % (object_type, object_name)
+                            for object_name in invalid_object_names
+                        )
                     else:
-                        config['objects'][object_type] = [
+                        config["objects"][object_type] = [
                             self._create_plugin_entry(
-                                valid_objects[object_type][ansible_object['name']])
-                            if ansible_object['name'] not in invalid_object_names else
-                            ansible_object
-                            for ansible_object in config['objects'][object_type]]
+                                valid_objects[object_type][ansible_object["name"]]
+                            )
+                            if ansible_object["name"] not in invalid_object_names
+                            else ansible_object
+                            for ansible_object in config["objects"][object_type]
+                        ]
 
-    def update_fragments(self, fragments: list[ChangelogFragment],
-                         load_extra_fragments:
-                             Callable[[str], list[ChangelogFragment]] | None = None
-                         ) -> None:
+    def update_fragments(
+        self,
+        fragments: list[ChangelogFragment],
+        load_extra_fragments: Callable[[str], list[ChangelogFragment]] | None = None,
+    ) -> None:
         """
         Update fragment contents, and remove fragment contents which are not in the provided
         list of fragments.
@@ -576,22 +654,29 @@ class ChangesData(ChangesBase):
             valid_fragments = dict(valid_fragments_global)
             if load_extra_fragments:
                 extra_fragments = load_extra_fragments(version)
-                valid_fragments.update({fragment.name: fragment for fragment in extra_fragments})
+                valid_fragments.update(
+                    {fragment.name: fragment for fragment in extra_fragments}
+                )
 
-            config.pop('changes', None)
+            config.pop("changes", None)
 
-            if 'fragments' in config:
+            if "fragments" in config:
                 invalid_fragments = set(
-                    fragment for fragment in config['fragments']
-                    if fragment not in valid_fragments)
-                config['fragments'] = [
-                    fragment for fragment in config['fragments']
-                    if fragment not in invalid_fragments]
+                    fragment
+                    for fragment in config["fragments"]
+                    if fragment not in valid_fragments
+                )
+                config["fragments"] = [
+                    fragment
+                    for fragment in config["fragments"]
+                    if fragment not in invalid_fragments
+                ]
                 self.known_fragments -= invalid_fragments
 
-                config['changes'] = ChangelogFragment.combine([
-                    valid_fragments[fragment] for fragment in config['fragments']],
-                    ignore_obj_adds=True)
+                config["changes"] = ChangelogFragment.combine(
+                    [valid_fragments[fragment] for fragment in config["fragments"]],
+                    ignore_obj_adds=True,
+                )
 
     def sort(self) -> None:
         """
@@ -599,60 +684,69 @@ class ChangesData(ChangesBase):
         """
         super().sort()
 
-        for _, config in self.data['releases'].items():
-            if 'modules' in config:
-                config['modules'] = sorted(config['modules'], key=lambda module: module['name'])
+        for _, config in self.data["releases"].items():
+            if "modules" in config:
+                config["modules"] = sorted(
+                    config["modules"], key=lambda module: module["name"]
+                )
 
-            if 'plugins' in config:
-                for plugin_type in config['plugins']:
-                    config['plugins'][plugin_type] = sorted(
-                        config['plugins'][plugin_type], key=lambda plugin: plugin['name'])
+            if "plugins" in config:
+                for plugin_type in config["plugins"]:
+                    config["plugins"][plugin_type] = sorted(
+                        config["plugins"][plugin_type],
+                        key=lambda plugin: plugin["name"],
+                    )
 
-            if 'objects' in config:
-                for object_type in config['objects']:
-                    config['objects'][object_type] = sorted(
-                        config['objects'][object_type],
-                        key=lambda ansible_object: ansible_object['name'])
+            if "objects" in config:
+                for object_type in config["objects"]:
+                    config["objects"][object_type] = sorted(
+                        config["objects"][object_type],
+                        key=lambda ansible_object: ansible_object["name"],
+                    )
 
-            if 'fragments' in config:
-                config['fragments'] = sorted(config['fragments'])
+            if "fragments" in config:
+                config["fragments"] = sorted(config["fragments"])
 
-            if 'changes' in config:
-                config['changes'] = {
-                    section: sorted(entries) if section != self.config.prelude_name else entries
-                    for section, entries in sorted(config['changes'].items())
+            if "changes" in config:
+                config["changes"] = {
+                    section: sorted(entries)
+                    if section != self.config.prelude_name
+                    else entries
+                    for section, entries in sorted(config["changes"].items())
                 }
 
     def _add_fragment_obj(self, obj_class, obj_type, entry, version: str):
         """
         Add an object or a plugin from a changelog fragment.
         """
-        if obj_class == 'object':
-            composite_name = '%s/%s' % (obj_type, entry['name'])
+        if obj_class == "object":
+            composite_name = "%s/%s" % (obj_type, entry["name"])
             if composite_name in self.known_objects:
                 LOGGER.warning(
-                    'Ignore adding %s object "%s" from changelog fragment' % (
-                        obj_type, entry['name']))
+                    'Ignore adding %s object "%s" from changelog fragment'
+                    % (obj_type, entry["name"])
+                )
                 return
             self.known_objects.add(composite_name)
-            toplevel_type = 'objects'
+            toplevel_type = "objects"
             has_categories = True
-        elif obj_class == 'plugin':
-            composite_name = '%s/%s' % (obj_type, entry['name'])
+        elif obj_class == "plugin":
+            composite_name = "%s/%s" % (obj_type, entry["name"])
             if composite_name in self.known_plugins:
                 LOGGER.warning(
-                    'Ignore adding %s plugin "%s" from changelog fragment' % (
-                        obj_type, entry['name']))
+                    'Ignore adding %s plugin "%s" from changelog fragment'
+                    % (obj_type, entry["name"])
+                )
                 return
             self.known_plugins.add(composite_name)
-            if obj_type == 'module':
-                toplevel_type = 'modules'
+            if obj_type == "module":
+                toplevel_type = "modules"
                 has_categories = False
             else:
-                toplevel_type = 'plugins'
+                toplevel_type = "plugins"
                 has_categories = True
         else:
-            raise ValueError('Invalid value %r for obj_class' % (obj_class, ))
+            raise ValueError("Invalid value %r for obj_class" % (obj_class,))
 
         if has_categories:
             if toplevel_type not in self.releases[version]:
@@ -670,26 +764,31 @@ class ChangesData(ChangesBase):
 
             obj_list = self.releases[version][toplevel_type]
 
-        obj_list.append({
-            'name': entry['name'],
-            'description': entry['description'],
-            'namespace': entry.get('namespace'),
-        })
+        obj_list.append(
+            {
+                "name": entry["name"],
+                "description": entry["description"],
+                "namespace": entry.get("namespace"),
+            }
+        )
 
-    def _add_fragment_content(self, version: str, changes: dict[str, Any],
-                              section: str, lines: Any):
+    def _add_fragment_content(
+        self, version: str, changes: dict[str, Any], section: str, lines: Any
+    ):
         """
         Add contents of a changelog fragment. Helps implementing add_fragment().
         """
         if section == self.config.prelude_name:
             if section in changes:
-                raise ValueError('Found prelude section "{0}" more than once!'.format(section))
+                raise ValueError(
+                    'Found prelude section "{0}" more than once!'.format(section)
+                )
             changes[section] = lines
         elif section == self.config.trivial_section_name:
             # Ignore trivial section entries
             return
-        elif section.startswith('add') and '.' in section:
-            obj_class, obj_type = section[4:].split('.', 1)
+        elif section.startswith("add") and "." in section:
+            obj_class, obj_type = section[4:].split(".", 1)
             for entry in lines:
                 self._add_fragment_obj(obj_class, obj_type, entry, version)
         elif section not in self.config.sections:
@@ -703,22 +802,25 @@ class ChangesData(ChangesBase):
         """
         Add a changelog fragment to the change metadata.
         """
-        if fragment.name in self.known_fragments and self.config.prevent_known_fragments:
+        if (
+            fragment.name in self.known_fragments
+            and self.config.prevent_known_fragments
+        ):
             return False
 
         self.known_fragments.add(fragment.name)
 
-        if 'changes' not in self.releases[version]:
-            self.releases[version]['changes'] = {}
-        changes = self.releases[version]['changes']
+        if "changes" not in self.releases[version]:
+            self.releases[version]["changes"] = {}
+        changes = self.releases[version]["changes"]
 
-        if 'fragments' not in self.releases[version]:
-            self.releases[version]['fragments'] = []
+        if "fragments" not in self.releases[version]:
+            self.releases[version]["fragments"] = []
 
         for section, lines in fragment.content.items():
             self._add_fragment_content(version, changes, section, lines)
 
-        self.releases[version]['fragments'].append(fragment.name)
+        self.releases[version]["fragments"].append(fragment.name)
         return True
 
     @staticmethod
@@ -726,7 +828,8 @@ class ChangesData(ChangesBase):
         return LegacyPluginResolver.resolve_plugin(plugin)
 
     def get_plugin_resolver(
-            self, plugins: list[PluginDescription] | None = None) -> PluginResolver:
+        self, plugins: list[PluginDescription] | None = None
+    ) -> PluginResolver:
         """
         Create a plugin resolver.
 
@@ -741,7 +844,8 @@ class ChangesData(ChangesBase):
         return ChangesDataObjectResolver()
 
     def get_fragment_resolver(
-            self, fragments: list[ChangelogFragment] | None = None) -> FragmentResolver:
+        self, fragments: list[ChangelogFragment] | None = None
+    ) -> FragmentResolver:
         """
         Create a fragment resolver.
 
@@ -752,30 +856,33 @@ class ChangesData(ChangesBase):
     def _version_or_none(self, version: str | None) -> Any | None:
         return self.version_constructor(version) if version is not None else None
 
-    def prune_versions(self, versions_after: str | None,
-                       versions_until: str | None) -> None:
+    def prune_versions(
+        self, versions_after: str | None, versions_until: str | None
+    ) -> None:
         """
         Remove all versions which are not after ``versions_after`` (if provided),
         or which are after ``versions_until`` (if provided).
         """
         versions_after = self._version_or_none(versions_after)
         versions_until = self._version_or_none(versions_until)
-        for version in list(self.data['releases']):
+        for version in list(self.data["releases"]):
             version_obj = self.version_constructor(version)
             if versions_after is not None and version_obj <= versions_after:
-                del self.data['releases'][version]
+                del self.data["releases"][version]
                 current_ancestor = self.ancestor
                 if current_ancestor is None:
                     self.ancestor = version
-                elif self.version_constructor(current_ancestor) < self.version_constructor(version):
+                elif self.version_constructor(
+                    current_ancestor
+                ) < self.version_constructor(version):
                     self.ancestor = version
                 continue
             if versions_until is not None and version_obj > versions_until:
-                del self.data['releases'][version]
+                del self.data["releases"][version]
                 continue
 
     @staticmethod
-    def concatenate(changes_datas: list['ChangesData']) -> 'ChangesData':
+    def concatenate(changes_datas: list["ChangesData"]) -> "ChangesData":
         """
         Concatenate one or more ``ChangesData`` objects.
 
@@ -789,7 +896,7 @@ class ChangesData(ChangesBase):
         ancestor = None
         no_ancestor = False
         for changes in changes_datas:
-            data['releases'].update(changes.data['releases'])
+            data["releases"].update(changes.data["releases"])
             if not no_ancestor:
                 changes_ancestor = changes.ancestor
                 if changes_ancestor is None:
@@ -802,7 +909,7 @@ class ChangesData(ChangesBase):
                     changes_ancestor_ = last.version_constructor(changes_ancestor)
                     if ancestor_ > changes_ancestor_:
                         ancestor = changes_ancestor
-        data['ancestor'] = ancestor
+        data["ancestor"] = ancestor
         return ChangesData(last.config, last.path, data)
 
 
@@ -811,22 +918,25 @@ def load_changes(config: ChangelogConfig) -> ChangesBase:
     Load changes metadata.
     """
     path = os.path.join(config.paths.changelog_dir, config.changes_file)
-    if config.changes_format == 'classic':
+    if config.changes_format == "classic":
         return ChangesMetadata(config, path)
     return ChangesData(config, path)
 
 
 def _filter_version_exact(version: str, version_added: str | None) -> bool:
-    return bool(version_added) and any([
-        version.startswith('%s.' % version_added),
-        version.startswith('%s-' % version_added),  # needed for semver
-        version.startswith('%s+' % version_added),  # needed for semver
-        version == version_added
-    ])
+    return bool(version_added) and any(
+        [
+            version.startswith("%s." % version_added),
+            version.startswith("%s-" % version_added),  # needed for semver
+            version.startswith("%s+" % version_added),  # needed for semver
+            version == version_added,
+        ]
+    )
 
 
-def _create_filter_version_range(prev_version: str, current_version: str, config: ChangelogConfig
-                                 ) -> Callable[[str | None], bool]:
+def _create_filter_version_range(
+    prev_version: str, current_version: str, config: ChangelogConfig
+) -> Callable[[str | None], bool]:
     version_constructor = get_version_constructor(config)
     prev_version_ = version_constructor(prev_version)
     current_version_ = version_constructor(current_version)
@@ -840,31 +950,38 @@ def _create_filter_version_range(prev_version: str, current_version: str, config
     return f
 
 
-def _add_plugins_filters(changes: ChangesBase,
-                         plugins: list[PluginDescription],
-                         objects: list[PluginDescription],
-                         version: str,
-                         prev_version: str | None,
-                         ) -> None:
+def _add_plugins_filters(
+    changes: ChangesBase,
+    plugins: list[PluginDescription],
+    objects: list[PluginDescription],
+    version: str,
+    prev_version: str | None,
+) -> None:
     if prev_version is None:
+
         def version_filter(obj: PluginDescription) -> bool:
             return _filter_version_exact(version, obj.version_added)
+
     else:
-        inner_version_filter = _create_filter_version_range(prev_version, version, changes.config)
+        inner_version_filter = _create_filter_version_range(
+            prev_version, version, changes.config
+        )
 
         def version_filter(obj: PluginDescription) -> bool:
             return inner_version_filter(obj.version_added)
 
     # filter out plugins which were not added in this release
     plugins = [
-        plugin for plugin in plugins
-        if version_filter(plugin) and plugin.category == 'plugin'
+        plugin
+        for plugin in plugins
+        if version_filter(plugin) and plugin.category == "plugin"
     ]
 
     # filter out objects which were not added in this release
     objects = [
-        ansible_object for ansible_object in objects
-        if version_filter(ansible_object) and ansible_object.category == 'object'
+        ansible_object
+        for ansible_object in objects
+        if version_filter(ansible_object) and ansible_object.category == "object"
     ]
 
     for plugin in plugins:
@@ -874,11 +991,12 @@ def _add_plugins_filters(changes: ChangesBase,
         changes.add_object(ansible_object, version)
 
 
-def _add_fragments(changes: ChangesBase,
-                   fragments: list[ChangelogFragment],
-                   version: str,
-                   show_release_summary_warning: bool
-                   ) -> list[ChangelogFragment]:
+def _add_fragments(
+    changes: ChangesBase,
+    fragments: list[ChangelogFragment],
+    version: str,
+    show_release_summary_warning: bool,
+) -> list[ChangelogFragment]:
     fragments_added = []
     has_release_summary = False
     for fragment in fragments:
@@ -889,26 +1007,29 @@ def _add_fragments(changes: ChangesBase,
 
     if not has_release_summary and show_release_summary_warning:
         LOGGER.warning(
-            'Found no {} section in the changelog for this release. While this is not required,'
-            ' we suggest to add one with basic information on the release.'.format(
-                changes.config.prelude_name))
+            "Found no {} section in the changelog for this release. While this is not required,"
+            " we suggest to add one with basic information on the release.".format(
+                changes.config.prelude_name
+            )
+        )
 
     return fragments_added
 
 
-def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,too-many-locals
-                changes: ChangesBase,
-                plugins: list[PluginDescription],
-                fragments: list[ChangelogFragment],
-                version: str,
-                codename: str | None,
-                date: datetime.date,
-                save_changes: bool = True,
-                update_existing: bool = False,
-                objects: list[PluginDescription] | None = None,
-                prev_version: str | None = None,
-                show_release_summary_warning: bool = True,
-                ) -> None:
+def add_release(  # pylint: disable=too-many-arguments,too-many-locals
+    config: ChangelogConfig,
+    changes: ChangesBase,
+    plugins: list[PluginDescription],
+    fragments: list[ChangelogFragment],
+    version: str,
+    codename: str | None,
+    date: datetime.date,
+    save_changes: bool = True,
+    update_existing: bool = False,
+    objects: list[PluginDescription] | None = None,
+    prev_version: str | None = None,
+    show_release_summary_warning: bool = True,
+) -> None:
     """
     Add a release to the change metadata.
 
@@ -934,14 +1055,19 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,t
     version_constructor = get_version_constructor(config)
     version_constructor(version)
 
-    LOGGER.info('release version {} is a {} version', version,
-                'release' if is_release_version(config, version) else 'pre-release')
+    LOGGER.info(
+        "release version {} is a {} version",
+        version,
+        "release" if is_release_version(config, version) else "pre-release",
+    )
 
     changes.add_release(version, codename, date, update_existing=update_existing)
 
     _add_plugins_filters(changes, plugins, objects, version, prev_version)
 
-    fragments_added = _add_fragments(changes, fragments, version, show_release_summary_warning)
+    fragments_added = _add_fragments(
+        changes, fragments, version, show_release_summary_warning
+    )
 
     if save_changes:
         changes.save()
@@ -955,7 +1081,8 @@ def add_release(config: ChangelogConfig,  # pylint: disable=too-many-arguments,t
         else:
             # Move fragments
             archive_path = os.path.join(
-                config.paths.base_dir, archive_path_template.format(version=version))
+                config.paths.base_dir, archive_path_template.format(version=version)
+            )
             os.makedirs(archive_path, exist_ok=True)
             for fragment in fragments_added:
                 fragment.move_to(archive_path)

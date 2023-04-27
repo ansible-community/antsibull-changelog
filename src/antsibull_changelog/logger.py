@@ -25,18 +25,17 @@ class FormattingAdapter(logging.LoggerAdapter):
 
     def __init__(self, logger):
         super().__init__(logger, {})
-        self.logger_args = ['exc_info', 'extra', 'stack_info']
+        self.logger_args = ["exc_info", "extra", "stack_info"]
 
     def log(self, level, msg, *args, **kwargs):
         """
         Forward log calls with formatted message.
         """
         if self.isEnabledFor(level):
-            log_kwargs = {
-                key: kwargs[key] for key in self.logger_args if key in kwargs
-            }
+            log_kwargs = {key: kwargs[key] for key in self.logger_args if key in kwargs}
             self.logger._log(  # pylint: disable=protected-access
-                level, msg.format(*args, **kwargs), (), **log_kwargs)
+                level, msg.format(*args, **kwargs), (), **log_kwargs
+            )
 
     def addHandler(self, *args, **kwargs):  # pylint: disable=invalid-name
         """
@@ -45,7 +44,7 @@ class FormattingAdapter(logging.LoggerAdapter):
         self.logger.addHandler(*args, **kwargs)
 
 
-LOGGER = FormattingAdapter(logging.getLogger('changelog'))
+LOGGER = FormattingAdapter(logging.getLogger("changelog"))
 
 _LOGGER_SET_UP = False
 
@@ -57,7 +56,7 @@ def setup_logger(verbosity: int) -> None:
     global _LOGGER_SET_UP  # pylint: disable=global-statement
 
     if not _LOGGER_SET_UP:
-        formatter = logging.Formatter('%(levelname)s %(message)s')
+        formatter = logging.Formatter("%(levelname)s %(message)s")
 
         handler = logging.StreamHandler(sys.stdout)
         handler.setFormatter(formatter)

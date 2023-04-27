@@ -73,7 +73,7 @@ class LegacyFragmentResolver(FragmentResolver):
         :arg release: A release description
         :return: A list of changelog fragments
         """
-        fragment_names: list[str] = release.get('fragments', [])
+        fragment_names: list[str] = release.get("fragments", [])
         return [self.fragments[fragment] for fragment in fragment_names]
 
 
@@ -90,9 +90,9 @@ class LegacyPluginResolver(PluginResolver):
         Convert a ``PluginDecscription`` object to a plugin description dictionary.
         """
         return {
-            'name': plugin.name,
-            'namespace': plugin.namespace,
-            'description': plugin.description,
+            "name": plugin.name,
+            "namespace": plugin.namespace,
+            "description": plugin.description,
         }
 
     def __init__(self, plugins: list[PluginDescription]):
@@ -115,13 +115,17 @@ class LegacyPluginResolver(PluginResolver):
         :return: A map of plugin types to lists of plugin descriptions
         """
         result = {}
-        if 'modules' in release:
-            result['module'] = [self.plugins['module'][module_name]
-                                for module_name in release['modules']]
-        if 'plugins' in release:
-            for plugin_type, plugin_names in release['plugins'].items():
-                result[plugin_type] = [self.plugins[plugin_type][plugin_name]
-                                       for plugin_name in plugin_names]
+        if "modules" in release:
+            result["module"] = [
+                self.plugins["module"][module_name]
+                for module_name in release["modules"]
+            ]
+        if "plugins" in release:
+            for plugin_type, plugin_names in release["plugins"].items():
+                result[plugin_type] = [
+                    self.plugins[plugin_type][plugin_name]
+                    for plugin_name in plugin_names
+                ]
         return result
 
 
@@ -155,7 +159,7 @@ class ChangesDataFragmentResolver(FragmentResolver):
         :arg release: A release description
         :return: A list of changelog fragments
         """
-        changes = release.get('changes')
+        changes = release.get("changes")
         if changes is None:
             return []
         return [ChangelogFragment.from_dict(changes)]
@@ -176,10 +180,10 @@ class ChangesDataPluginResolver(PluginResolver):
         :return: A map of plugin types to lists of plugin descriptions
         """
         result = {}
-        if 'modules' in release:
-            result['module'] = release['modules']
-        if 'plugins' in release:
-            result.update(release['plugins'])
+        if "modules" in release:
+            result["module"] = release["modules"]
+        if "plugins" in release:
+            result.update(release["plugins"])
         return result
 
 
@@ -198,6 +202,6 @@ class ChangesDataObjectResolver(PluginResolver):
         :return: A map of object types to lists of object descriptions
         """
         result = {}
-        if 'objects' in release:
-            result.update(release['objects'])
+        if "objects" in release:
+            result.update(release["objects"])
         return result

@@ -16,6 +16,7 @@ import packaging.version
 
 try:
     from ansible import constants as C
+
     HAS_ANSIBLE_CONSTANTS = True
 except ImportError:
     HAS_ANSIBLE_CONSTANTS = False
@@ -24,19 +25,20 @@ except ImportError:
 ansible_release: Any
 try:
     from ansible import release as ansible_release
+
     HAS_ANSIBLE_RELEASE = True
 except ImportError:
     ansible_release = None
     HAS_ANSIBLE_RELEASE = False
 
 
-OBJECT_TYPES = ('role', 'playbook')
+OBJECT_TYPES = ("role", "playbook")
 
-OTHER_PLUGIN_TYPES = ('module', 'test', 'filter')
+OTHER_PLUGIN_TYPES = ("module", "test", "filter")
 
 # These are pairs (plugin_type, plugin_filename) inside ansible-core which are *not*
 # plugins, but files used by plugins.
-PLUGIN_EXCEPTIONS = (('cache', 'base.py'), ('module', 'async_wrapper.py'))
+PLUGIN_EXCEPTIONS = (("cache", "base.py"), ("module", "async_wrapper.py"))
 
 
 def get_documentable_plugins() -> tuple[str, ...]:
@@ -46,8 +48,19 @@ def get_documentable_plugins() -> tuple[str, ...]:
     if HAS_ANSIBLE_CONSTANTS:
         return C.DOCUMENTABLE_PLUGINS
     return (
-        'become', 'cache', 'callback', 'cliconf', 'connection', 'httpapi', 'inventory',
-        'lookup', 'netconf', 'shell', 'vars', 'module', 'strategy',
+        "become",
+        "cache",
+        "callback",
+        "cliconf",
+        "connection",
+        "httpapi",
+        "inventory",
+        "lookup",
+        "netconf",
+        "shell",
+        "vars",
+        "module",
+        "strategy",
     )
 
 
@@ -57,9 +70,11 @@ def get_documentable_objects() -> tuple[str, ...]:
     """
     if not HAS_ANSIBLE_RELEASE:
         return ()
-    if packaging.version.Version(ansible_release.__version__) < packaging.version.Version('2.11.0'):
+    if packaging.version.Version(
+        ansible_release.__version__
+    ) < packaging.version.Version("2.11.0"):
         return ()
-    return ('role', )
+    return ("role",)
 
 
 def get_ansible_release() -> tuple[str, str]:
@@ -69,5 +84,5 @@ def get_ansible_release() -> tuple[str, str]:
     :return: Tuple with version and codename
     """
     if not HAS_ANSIBLE_RELEASE:
-        raise ValueError('Cannot import ansible.release')
+        raise ValueError("Cannot import ansible.release")
     return ansible_release.__version__, ansible_release.__codename__
