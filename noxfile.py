@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2023 Maxwell G <maxwell@gtmx.me>
 
+import contextlib
 import os
+import tempfile
 from functools import partial
 from pathlib import Path
 
@@ -204,6 +206,27 @@ def check_no_modifications(session: nox.Session) -> None:
         )
 
 
+@contextlib.contextmanager
+def isolated_src(session: nox.Session):
+    """
+    Create an isolated directory that only contains the latest git HEAD
+    """
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        tmp = Path(_tmpdir)
+        session.run(
+            "git",
+            "archive",
+            "HEAD",
+            f"--output={tmp / 'HEAD.tar'}",
+            "--prefix=build/",
+            external=True,
+        )
+        with session.chdir(tmp):
+            session.run("tar", "-xf", "HEAD.tar", external=True)
+        with session.chdir(tmp / "build"):
+            yield
+
+
 @nox.session
 def bump(session: nox.Session):
     check_no_modifications(session)
@@ -253,7 +276,9 @@ def bump(session: nox.Session):
         version,
         external=True,
     )
-    session.run("hatch", "build", "--clean")
+    dist = Path.cwd() / "dist"
+    with isolated_src(session):
+        session.run("hatch", "build", "--clean", str(dist))
 
 
 @nox.session
