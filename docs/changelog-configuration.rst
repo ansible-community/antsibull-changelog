@@ -60,6 +60,8 @@ The default value is ``classic`` for existing configurations, and ``combined`` f
 
 Determines whether ``changes_file`` contains only references to changelog fragments or plugins (was used internally by Ansible until version 2.9), or whether all fragments and plugin data is stored inside the file (used by Ansible 2.10 and in collections). Should never be set to ``classic``, except when using the changelog generator for Ansible 2.9 or earlier.
 
+Note that support for ``classic`` is **DEPRECATED** and will be removed in a future release. The field will from then on be required.
+
 ``flatmap`` (optional boolean)
 ------------------------------
 

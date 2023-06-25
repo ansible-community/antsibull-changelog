@@ -10,6 +10,7 @@ Test basic changelog functionality: Ansible 2.9 format.
 from __future__ import annotations
 
 import os
+import warnings
 from unittest import mock
 
 from fixtures import ansible_changelog  # noqa: F401; pylint: disable=unused-variable
@@ -40,13 +41,28 @@ sections:
     )
     ansible_changelog.set_plugin_cache("2.9", {})
 
-    assert (
-        ansible_changelog.run_tool(
-            "release",
-            ["-v", "--date", "2020-01-02", "--version", "2.9", "--codename", "meow"],
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+
+        assert (
+            ansible_changelog.run_tool(
+                "release",
+                [
+                    "-v",
+                    "--date",
+                    "2020-01-02",
+                    "--version",
+                    "2.9",
+                    "--codename",
+                    "meow",
+                ],
+            )
+            == 0
         )
-        == 0
-    )
+
+        assert len(w) == 1
+        assert issubclass(w[-1].category, DeprecationWarning)
+        assert "Support for 'classic' changelogs" in str(w[-1].message)
 
     diff = ansible_changelog.diff()
     assert diff.added_dirs == []
