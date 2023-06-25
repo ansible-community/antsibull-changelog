@@ -5,3 +5,6 @@
 
 github_checks:
   annotations: false
+
+fixes:
+  - "antsibull-changelog/::"
