@@ -181,6 +181,17 @@ releases:
     - 105-version-codename.yml
     - 109-build-system.yml
     release_date: '2023-03-29'
+  0.21.0:
+    changes:
+      deprecated_features:
+      - Support for ``classic`` changelogs is deprecated and will be removed soon.
+        If you need to build changelogs for Ansible 2.9 or before, please use an older
+        version (https://github.com/ansible-community/antsibull-changelog/pull/123).
+      release_summary: Maintenance release with a deprecation.
+    fragments:
+    - 0.21.0.yml
+    - 123-deprecate-classic.yml
+    release_date: '2023-06-27'
   0.3.0:
     changes:
       minor_changes:

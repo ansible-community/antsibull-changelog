@@ -5,6 +5,19 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.21.0
+=======
+
+Release Summary
+---------------
+
+Maintenance release with a deprecation.
+
+Deprecated Features
+-------------------
+
+- Support for ``classic`` changelogs is deprecated and will be removed soon. If you need to build changelogs for Ansible 2.9 or before, please use an older version (https://github.com/ansible-community/antsibull-changelog/pull/123).
+
 v0.20.0
 =======
 
