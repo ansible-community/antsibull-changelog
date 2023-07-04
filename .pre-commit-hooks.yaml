@@ -1,0 +1,21 @@
+---
+# Copyright (C) 2023 Maxwell G <maxwell@gtmx.me>
+# SPDX-License-Identifier: GPL-3.0-or-later
+# GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- id: antsibull-changelog-lint
+  name: antsibull-changelog lint
+  description: Lint antsibull-changelog fragments
+  entry: antsibull-changelog lint
+  language: python
+  # This is the conventional path.
+  # Users can override in their own pre-commit-config.
+  files: '^changelogs/fragments/.*\.ya?ml$'
+
+- id: antsibull-changelog-lint-changelog-yaml
+  name: antsibull-changelog lint-changelog-yaml
+  description: Lint antsibull-changelog changelog.yaml
+  entry: antsibull-changelog lint-changelog-yaml
+  language: python
+  files: '^changelogs/changelog.ya?ml$'
