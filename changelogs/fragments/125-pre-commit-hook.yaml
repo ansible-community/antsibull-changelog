@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - Add ``antsibull-changelog-lint`` and
+    ``antsibull-changelog-lint-changelog-yaml`` pre-commit.com hooks
+    (https://github.com/ansible-community/antsibull-changelog/pull/125).
