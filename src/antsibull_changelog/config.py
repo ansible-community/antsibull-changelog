@@ -298,6 +298,14 @@ class CollectionDetails:
             )
         return self.flatmap
 
+    def update_galaxy(self, version: str) -> None:
+        """
+        Load and update galaxy.yaml file.
+        """
+        config = load_yaml(self.paths.galaxy_path)
+        config["version"] = str(version)
+        store_yaml(self.paths.galaxy_path, config)
+
 
 DEFAULT_SECTIONS = [
     ["major_changes", "Major Changes"],

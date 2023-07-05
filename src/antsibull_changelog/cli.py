@@ -35,7 +35,6 @@ from .errors import ChangelogError
 from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
-from .update_galaxy import UpdateGalaxy
 from .plugins import PluginDescription, load_plugins
 from .toml import has_toml_loader_available, load_toml
 
@@ -616,7 +615,7 @@ def command_release(args: Any) -> int:
         paths, config, collection_details, args
     )
     if args.update_galaxy_file:
-        UpdateGalaxy(paths.galaxy_path, version)
+        collection_details.update_galaxy(version=version)
     changes = load_changes(config)
 
     prev_version: str | None = None
