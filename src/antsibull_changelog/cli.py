@@ -35,6 +35,7 @@ from .errors import ChangelogError
 from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
+from .update_galaxy import UpdateGalaxy
 from .plugins import PluginDescription, load_plugins
 from .toml import has_toml_loader_available, load_toml
 
@@ -239,6 +240,11 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.set_defaults(func=command_release)
     release_parser.add_argument("--version", help="override release version")
     release_parser.add_argument("--codename", help="override/set release codename")
+    release_parser.add_argument(
+        "--update-galaxy-file",
+        action="store_true",
+        help="override/set version in galaxy.yml",
+    )
     release_parser.add_argument(
         "--date", default=str(datetime.date.today()), help="override release date"
     )
@@ -609,7 +615,8 @@ def command_release(args: Any) -> int:
     version, codename = _get_version_and_codename(
         paths, config, collection_details, args
     )
-
+    if args.update_galaxy_file:
+        UpdateGalaxy(paths.galaxy_path, version)
     changes = load_changes(config)
 
     prev_version: str | None = None
