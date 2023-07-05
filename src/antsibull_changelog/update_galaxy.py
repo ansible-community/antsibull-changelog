@@ -23,7 +23,7 @@ class UpdateGalaxy:
     galaxy_path: str | None
     version: str | None
 
-    def __init__(self, galaxy_path: str, version: str):
+    def __init__(self, galaxy_path: str | PathLike[str], version: str):
         self.galaxy_path = galaxy_path
         self.version = version
         self.update_galaxy_file()
