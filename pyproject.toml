@@ -53,6 +53,19 @@ antsibull-changelog = "antsibull_changelog.cli:main"
 
 
 [project.optional-dependencies]
+#
+# User facing
+#
+
+# Use for getting the current version from pyproject.toml
+toml = [
+    "tomli; python_version<'3.11'",
+]
+
+#
+# Development. Not user facing.
+#
+
 codeqa = [
     "flake8 >= 3.8.0",
     "pylint",

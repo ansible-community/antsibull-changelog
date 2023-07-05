@@ -27,6 +27,14 @@ It can be installed with pip:
 
     pip install antsibull-changelog
 
+For python projects, `antsibull-changelog release` can retrieve the current
+version from `pyproject.toml`.
+You can install the project with
+
+    pip install antsibull-changelog[toml]
+
+to pull in the necessary toml parser for this feature.
+
 For more information, see the
 [documentation](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
 
