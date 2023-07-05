@@ -10,6 +10,8 @@ Update version in galaxy.yml.
 
 from __future__ import annotations
 
+from os import PathLike
+
 from .yaml import load_yaml, store_yaml
 
 
