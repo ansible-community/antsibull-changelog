@@ -616,6 +616,7 @@ def command_release(args: Any) -> int:
     )
     if args.update_galaxy_file:
         collection_details.update_galaxy(version=version)
+
     changes = load_changes(config)
 
     prev_version: str | None = None
