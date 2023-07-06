@@ -302,12 +302,11 @@ class CollectionDetails:
         """
         Load and update galaxy.yaml file.
         """
-        if self.paths.galaxy_path:
-            config = load_yaml(self.paths.galaxy_path)
-            config["version"] = str(version)
-            store_yaml(self.paths.galaxy_path, config)
-        else:
+        if not self.paths.galaxy_path:
             raise ChangelogError("Cannot find galaxy.yml file in path.")
+        config = load_yaml(self.paths.galaxy_path)
+        config["version"] = str(version)
+        store_yaml(self.paths.galaxy_path, config)
 
 
 DEFAULT_SECTIONS = [
