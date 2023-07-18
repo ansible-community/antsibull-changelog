@@ -37,6 +37,7 @@ from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
 from .toml import has_toml_loader_available, load_toml
+from .update_galaxy import update_galaxy
 
 
 def set_paths(
@@ -614,9 +615,8 @@ def command_release(args: Any) -> int:
     version, codename = _get_version_and_codename(
         paths, config, collection_details, args
     )
-    if args.update_galaxy_file:
-        collection_details.update_galaxy(version=version)
-
+    if args.update_galaxy_file and paths.galaxy_path:
+        update_galaxy(galaxy_path=paths.galaxy_path, version=version)
     changes = load_changes(config)
 
     prev_version: str | None = None
