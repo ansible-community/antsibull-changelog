@@ -243,7 +243,8 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.add_argument(
         "--update-galaxy-file",
         action="store_true",
-        help="re-write galaxy.yml with the supplied version. Note that this will remove comments and formatting",
+        help="re-write galaxy.yml with the supplied version. "
+        "Note that this will remove comments and formatting",
     )
     release_parser.add_argument(
         "--date", default=str(datetime.date.today()), help="override release date"
