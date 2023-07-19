@@ -16,16 +16,18 @@ from typing import TYPE_CHECKING
 from .yaml import load_yaml, store_yaml
 
 if TYPE_CHECKING:
-   from _typeshed import StrOrBytesPath
+    from _typeshed import StrOrBytesPath
 
 
 def update_galaxy(galaxy_path: StrOrBytesPath, version: str) -> None:
     """
     Load and update galaxy.yaml file.
     """
-    if galaxy_path:
-        config = load_yaml(galaxy_path)
+    if not galaxy_path:
+        raise ChangelogError("Cannot find galaxy.yml file in path.")
+
+    config = load_yaml(galaxy_path)
+
+    if config["version"] != version:
         config["version"] = version
         store_yaml(galaxy_path, config)
-    else:
-        raise ChangelogError("Cannot find galaxy.yml file in path.")
