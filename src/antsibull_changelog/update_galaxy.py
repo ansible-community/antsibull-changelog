@@ -19,7 +19,7 @@ if TYPE_CHECKING:
    from _typeshed import StrOrBytesPath
 
 
-def update_galaxy(galaxy_path: str, version: str) -> None:
+def update_galaxy(galaxy_path: StrOrBytesPath, version: str) -> None:
     """
     Load and update galaxy.yaml file.
     """
