@@ -28,8 +28,9 @@ def update_galaxy(galaxy_path: str, version: str) -> None:
 
         if config["version"] == version:
             return
-            config["version"] = version
-            store_yaml(galaxy_path, config)
+
+        config["version"] = version
+        store_yaml(galaxy_path, config)
 
     except Exception:  # pylint: disable=broad-except
         LOGGER.error("Unable to load the galaxy.yml file.")
