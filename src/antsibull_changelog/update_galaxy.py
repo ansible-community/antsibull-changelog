@@ -10,9 +10,9 @@ Update the galaxy the yaml file.
 
 from __future__ import annotations
 
-from .logger import LOGGER
 from typing import TYPE_CHECKING
 
+from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
 
 if TYPE_CHECKING:
