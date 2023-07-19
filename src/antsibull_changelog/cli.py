@@ -616,8 +616,12 @@ def command_release(args: Any) -> int:
     version, codename = _get_version_and_codename(
         paths, config, collection_details, args
     )
-    if args.update_galaxy_file and paths.galaxy_path:
+
+    if args.update_galaxy_file:
+        if not paths.galaxy_path:
+            LOGGER.error("Cannot find galaxy.yml file in path.")
         update_galaxy(galaxy_path=paths.galaxy_path, version=version)
+
     changes = load_changes(config)
 
     prev_version: str | None = None

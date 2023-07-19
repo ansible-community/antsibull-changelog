@@ -10,7 +10,7 @@ Update the galaxy the yaml file.
 
 from __future__ import annotations
 
-from .errors import ChangelogError
+from .logger import LOGGER
 from typing import TYPE_CHECKING
 
 from .yaml import load_yaml, store_yaml
@@ -23,10 +23,10 @@ def update_galaxy(galaxy_path: StrOrBytesPath, version: str) -> None:
     """
     Load and update galaxy.yaml file.
     """
-    if not galaxy_path:
-        raise ChangelogError("Cannot find galaxy.yml file in path.")
-
-    config = load_yaml(galaxy_path)
+    try:
+        config = load_yaml(galaxy_path)
+    except Exception:  # pylint: disable=broad-except
+        LOGGER.error("Unable to load the galaxy.yml file.")
 
     if config["version"] != version:
         config["version"] = version
