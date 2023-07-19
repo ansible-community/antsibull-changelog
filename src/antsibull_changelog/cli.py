@@ -620,7 +620,8 @@ def command_release(args: Any) -> int:
     if args.update_galaxy_file:
         if not paths.galaxy_path:
             LOGGER.error("Cannot find galaxy.yml file in path.")
-        update_galaxy(galaxy_path=paths.galaxy_path, version=version)
+        else:
+            update_galaxy(galaxy_path=paths.galaxy_path, version=version)
 
     changes = load_changes(config)
 
