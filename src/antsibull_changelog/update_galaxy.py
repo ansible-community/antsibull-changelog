@@ -26,7 +26,8 @@ def update_galaxy(galaxy_path: str, version: str) -> None:
     try:
         config = load_yaml(galaxy_path)
 
-        if config["version"] != version:
+        if config["version"] == version:
+            return
             config["version"] = version
             store_yaml(galaxy_path, config)
 
