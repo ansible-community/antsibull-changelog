@@ -11,7 +11,12 @@ Update the galaxy the yaml file.
 from __future__ import annotations
 
 from .errors import ChangelogError
+from typing import TYPE_CHECKING
+
 from .yaml import load_yaml, store_yaml
+
+if TYPE_CHECKING:
+   from _typeshed import StrOrBytesPath
 
 
 def update_galaxy(galaxy_path: str, version: str) -> None:
