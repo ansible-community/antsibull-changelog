@@ -25,7 +25,7 @@ def update_galaxy(galaxy_path: StrOrBytesPath, version: str) -> None:
     """
     if galaxy_path:
         config = load_yaml(galaxy_path)
-        config["version"] = str(version)
+        config["version"] = version
         store_yaml(galaxy_path, config)
     else:
         raise ChangelogError("Cannot find galaxy.yml file in path.")
