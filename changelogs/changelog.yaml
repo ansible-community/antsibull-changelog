@@ -192,6 +192,19 @@ releases:
     - 0.21.0.yml
     - 123-deprecate-classic.yml
     release_date: '2023-06-27'
+  0.22.0:
+    changes:
+      minor_changes:
+      - Add ``antsibull-changelog-lint`` and ``antsibull-changelog-lint-changelog-yaml``
+        pre-commit.com hooks (https://github.com/ansible-community/antsibull-changelog/pull/125).
+      - Add ``toml`` extra to pull in a toml parser to use to guess the version based
+        on ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/126).
+      release_summary: New feature release
+    fragments:
+    - 0.22.0.yml
+    - 125-pre-commit-hook.yaml
+    - 126-toml-extra.yaml
+    release_date: '2023-07-25'
   0.3.0:
     changes:
       minor_changes:

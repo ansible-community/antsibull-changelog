@@ -1,5 +1,0 @@
----
-minor_changes:
-  - Add ``toml`` extra to pull in a toml parser to use to guess the version
-    based on ``pyproject.toml``
-    (https://github.com/ansible-community/antsibull-changelog/pull/126).

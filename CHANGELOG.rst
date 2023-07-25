@@ -5,6 +5,20 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.22.0
+=======
+
+Release Summary
+---------------
+
+New feature release
+
+Minor Changes
+-------------
+
+- Add ``antsibull-changelog-lint`` and ``antsibull-changelog-lint-changelog-yaml`` pre-commit.com hooks (https://github.com/ansible-community/antsibull-changelog/pull/125).
+- Add ``toml`` extra to pull in a toml parser to use to guess the version based on ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/126).
+
 v0.21.0
 =======
 
