@@ -28,4 +28,4 @@ def update_galaxy(galaxy_path: str, version: str) -> None:
         store_yaml(galaxy_path, config)
 
     except Exception:  # pylint: disable=broad-except
-        LOGGER.error("Unable to load the galaxy.yml file.")
+        LOGGER.error("Unable to load and/or update the galaxy.yml file.")
