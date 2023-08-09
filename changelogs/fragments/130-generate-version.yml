@@ -1,0 +1,2 @@
+minor_changes:
+  - "Allow to generate changelog for a specific version (https://github.com/ansible-community/antsibull-changelog/pull/130)."

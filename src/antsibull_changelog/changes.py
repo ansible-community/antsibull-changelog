@@ -184,6 +184,17 @@ class ChangesBase(metaclass=abc.ABCMeta):
         Add a new changelog fragment to the change metadata for the given version.
         """
 
+    def restrict_to(self, version: str) -> None:
+        """
+        Restrict to all versions up to the specified one.
+        """
+        version_obj = self.version_constructor(version)
+        if version not in self.releases:
+            raise ValueError(f"Unknown version {version}")
+        for a_version in list(self.releases):
+            if self.version_constructor(a_version) > version_obj:
+                del self.releases[a_version]
+
     @staticmethod
     def _create_plugin_entry(plugin: PluginDescription) -> Any:
         return plugin.name
