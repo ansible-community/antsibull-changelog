@@ -271,6 +271,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         "--output",
         help="write the changelog to this file instead of the default file",
     )
+    generate_parser.add_argument(
+        "--only-latest",
+        action="store_true",
+        help="only write the changelog entry for the latest version, without a preamble."
+        " Should only be used with --output.",
+    )
 
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
@@ -679,6 +685,7 @@ def command_generate(args: Any) -> int:
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
     version: str | None = args.version
     output: str | None = args.output
+    only_latest: bool = args.only_latest
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -717,6 +724,7 @@ def command_generate(args: Any) -> int:
         fragments,
         flatmap=flatmap,
         changelog_path=output,
+        only_latest=only_latest,
     )
 
     return 0
