@@ -1168,6 +1168,112 @@ New Modules
 
     assert collection_changelog.diff().unchanged
 
+    # Generate changelog for 'foobar' - should fail
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "foobar",
+            ],
+        )
+        == 5
+    )
+
+    # Generate changelog for 1.10.0 - should fail
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "1.10.0",
+            ],
+        )
+        == 5
+    )
+
+    # Generate changelog for 1.1.0
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "1.1.0",
+            ],
+        )
+        == 0
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ["CHANGELOG.rst"]
+
+    assert diff.file_contents["CHANGELOG.rst"].decode("utf-8") == (
+        r"""=========================
+Ansible 1.1 Release Notes
+=========================
+
+.. contents:: Topics
+
+
+v1.1.0
+======
+
+Release Summary
+---------------
+
+Final release of 1.1.0.
+
+Minor Changes
+-------------
+
+- A minor change.
+- Another new fragment.
+
+Bugfixes
+--------
+
+- A bugfix.
+
+New Modules
+-----------
+
+- acme.test.test_new - This is ANOTHER test module
+- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new3 - This is yet another test module.
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- acme.test.bar - A foo_bar lookup
+
+New Modules
+-----------
+
+- acme.test.test - This is a TEST module
+"""
+    )
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
     collection_changelog,

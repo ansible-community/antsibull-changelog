@@ -261,6 +261,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         help="generate the changelog",
     )
     generate_parser.set_defaults(func=command_generate)
+    generate_parser.add_argument(
+        "version",
+        metavar="VERSION",
+        help="generate changelog for this version instead of for the latest version",
+        nargs="?",
+    )
 
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
@@ -667,6 +673,7 @@ def command_generate(args: Any) -> int:
     """
     ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
+    version: str | None = args.version
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -678,6 +685,12 @@ def command_generate(args: Any) -> int:
     flatmap = _determine_flatmap(collection_details, config)
 
     changes = load_changes(config)
+    if version is not None:
+        try:
+            changes.restrict_to(version)
+        except ValueError as exc:
+            print(f"Cannot restrict to version '{version}': {exc}")
+            return 5
     if not changes.has_release:
         print("Cannot create changelog when not at least one release has been added.")
         return 5
