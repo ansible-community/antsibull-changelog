@@ -502,22 +502,27 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
     flatmap: bool = True,
+    changelog_path: str | None = None,
 ):
     """
     Generate the changelog as reStructuredText.
 
     :arg plugins: Will be loaded if necessary. Only provide when you already have them
     :arg fragments: Will be loaded if necessary. Only provide when you already have them
-    :type flatmap: Whether the collection uses flatmapping or not
+    :arg flatmap: Whether the collection uses flatmapping or not
+    :arg changelog_path: Write the output to this path instead of the default path.
     """
-    major_minor_version = ".".join(
-        changes.latest_version.split(".")[: config.changelog_filename_version_depth]
-    )
-    if "%s" in config.changelog_filename_template:
-        changelog_filename = config.changelog_filename_template % (major_minor_version,)
-    else:
-        changelog_filename = config.changelog_filename_template
-    changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
+    if changelog_path is None:
+        major_minor_version = ".".join(
+            changes.latest_version.split(".")[: config.changelog_filename_version_depth]
+        )
+        if "%s" in config.changelog_filename_template:
+            changelog_filename = config.changelog_filename_template % (
+                major_minor_version,
+            )
+        else:
+            changelog_filename = config.changelog_filename_template
+        changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
 
     generator = ChangelogGenerator(config, changes, plugins, fragments, flatmap)
     rst = generator.generate()

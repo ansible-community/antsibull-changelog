@@ -267,6 +267,10 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         help="generate changelog for this version instead of for the latest version",
         nargs="?",
     )
+    generate_parser.add_argument(
+        "--output",
+        help="write the changelog to this file instead of the default file",
+    )
 
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
@@ -674,6 +678,7 @@ def command_generate(args: Any) -> int:
     ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
     version: str | None = args.version
+    output: str | None = args.output
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -704,7 +709,15 @@ def command_generate(args: Any) -> int:
             version=changes.latest_version,
             force_reload=args.reload_plugins,
         )
-    generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
+    generate_changelog(
+        paths,
+        config,
+        changes,
+        plugins,
+        fragments,
+        flatmap=flatmap,
+        changelog_path=output,
+    )
 
     return 0
 
