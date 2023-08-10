@@ -205,6 +205,19 @@ releases:
     - 125-pre-commit-hook.yaml
     - 126-toml-extra.yaml
     release_date: '2023-07-25'
+  0.23.0:
+    changes:
+      minor_changes:
+      - Allow to generate changelog for a specific version (https://github.com/ansible-community/antsibull-changelog/pull/130).
+      - Allow to generate only the last entry without preamble with the ``generate``
+        command (https://github.com/ansible-community/antsibull-changelog/pull/131).
+      - Allow to write ``generate`` output to a user-provided file (https://github.com/ansible-community/antsibull-changelog/pull/131).
+      release_summary: Feature release.
+    fragments:
+    - 0.23.0.yml
+    - 130-generate-version.yml
+    - 131-generate.yml
+    release_date: '2023-08-10'
   0.3.0:
     changes:
       minor_changes:

@@ -1,3 +1,0 @@
-minor_changes:
-  - "Allow to write ``generate`` output to a user-provided file (https://github.com/ansible-community/antsibull-changelog/pull/131)."
-  - "Allow to generate only the last entry without preamble with the ``generate`` command (https://github.com/ansible-community/antsibull-changelog/pull/131)."

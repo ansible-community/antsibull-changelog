@@ -5,6 +5,21 @@ Ansible Changelog Tool Release Notes
 .. contents:: Topics
 
 
+v0.23.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Allow to generate changelog for a specific version (https://github.com/ansible-community/antsibull-changelog/pull/130).
+- Allow to generate only the last entry without preamble with the ``generate`` command (https://github.com/ansible-community/antsibull-changelog/pull/131).
+- Allow to write ``generate`` output to a user-provided file (https://github.com/ansible-community/antsibull-changelog/pull/131).
+
 v0.22.0
 =======
 
