@@ -1274,6 +1274,54 @@ New Modules
 """
     )
 
+    # Generate changelog for 1.1.0 only
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "--output",
+                "changelog-1.1.0.rst",
+                "--only-latest",
+                "1.1.0",
+            ],
+        )
+        == 0
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ["changelog-1.1.0.rst"]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    assert diff.file_contents["changelog-1.1.0.rst"].decode("utf-8") == (
+        r"""Release Summary
+---------------
+
+Final release of 1.1.0.
+
+Minor Changes
+-------------
+
+- A minor change.
+- Another new fragment.
+
+Bugfixes
+--------
+
+- A bugfix.
+
+New Modules
+-----------
+
+- acme.test.test_new - This is ANOTHER test module
+- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new3 - This is yet another test module.
+"""
+    )
+
 
 def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-name
     collection_changelog,

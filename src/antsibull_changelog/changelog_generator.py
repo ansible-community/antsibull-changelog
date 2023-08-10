@@ -279,6 +279,7 @@ class ChangelogGenerator:
         squash: bool = False,
         after_version: str | None = None,
         until_version: str | None = None,
+        only_latest: bool = False,
     ) -> None:
         """
         Append changelog to a reStructuredText (RST) builder.
@@ -287,6 +288,7 @@ class ChangelogGenerator:
         :arg squash: Squash all releases into one entry
         :arg after_version: If given, only consider versions after this one
         :arg until_version: If given, do not consider versions following this one
+        :arg only_latest: If set to ``True``, only generate the latest entry
         """
         release_entries = self.collect(
             squash=squash, after_version=after_version, until_version=until_version
@@ -294,10 +296,15 @@ class ChangelogGenerator:
 
         for release in release_entries:
             self.append_changelog_entry(
-                builder, release, start_level=start_level, add_version=not squash
+                builder,
+                release,
+                start_level=start_level,
+                add_version=not squash and not only_latest,
             )
+            if only_latest:
+                break
 
-    def generate(self) -> str:
+    def generate(self, only_latest: bool = False) -> str:
         """
         Generate the changelog as reStructuredText.
         """
@@ -308,24 +315,26 @@ class ChangelogGenerator:
         )
 
         builder = RstBuilder()
-        title = self.config.title or "Ansible"
-        if major_minor_version:
-            title = "%s %s" % (title, major_minor_version)
-        if codename:
-            title = '%s "%s"' % (title, codename)
-        builder.set_title("%s Release Notes" % (title,))
-        builder.add_raw_rst(".. contents:: Topics\n")
 
-        if self.changes.ancestor and self.config.mention_ancestor:
-            builder.add_raw_rst(
-                "This changelog describes changes after version {0}.\n".format(
-                    self.changes.ancestor
+        if not only_latest:
+            title = self.config.title or "Ansible"
+            if major_minor_version:
+                title = "%s %s" % (title, major_minor_version)
+            if codename:
+                title = '%s "%s"' % (title, codename)
+            builder.set_title("%s Release Notes" % (title,))
+            builder.add_raw_rst(".. contents:: Topics\n")
+
+            if self.changes.ancestor and self.config.mention_ancestor:
+                builder.add_raw_rst(
+                    "This changelog describes changes after version {0}.\n".format(
+                        self.changes.ancestor
+                    )
                 )
-            )
-        else:
-            builder.add_raw_rst("")
+            else:
+                builder.add_raw_rst("")
 
-        self.generate_to(builder, 0)
+        self.generate_to(builder, 0, only_latest=only_latest)
 
         return builder.generate()
 
@@ -502,25 +511,32 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
     flatmap: bool = True,
+    changelog_path: str | None = None,
+    only_latest: bool = False,
 ):
     """
     Generate the changelog as reStructuredText.
 
     :arg plugins: Will be loaded if necessary. Only provide when you already have them
     :arg fragments: Will be loaded if necessary. Only provide when you already have them
-    :type flatmap: Whether the collection uses flatmapping or not
+    :arg flatmap: Whether the collection uses flatmapping or not
+    :arg changelog_path: Write the output to this path instead of the default path.
+    :arg only_latest: Only write the last changelog entry without any preamble
     """
-    major_minor_version = ".".join(
-        changes.latest_version.split(".")[: config.changelog_filename_version_depth]
-    )
-    if "%s" in config.changelog_filename_template:
-        changelog_filename = config.changelog_filename_template % (major_minor_version,)
-    else:
-        changelog_filename = config.changelog_filename_template
-    changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
+    if changelog_path is None:
+        major_minor_version = ".".join(
+            changes.latest_version.split(".")[: config.changelog_filename_version_depth]
+        )
+        if "%s" in config.changelog_filename_template:
+            changelog_filename = config.changelog_filename_template % (
+                major_minor_version,
+            )
+        else:
+            changelog_filename = config.changelog_filename_template
+        changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
 
     generator = ChangelogGenerator(config, changes, plugins, fragments, flatmap)
-    rst = generator.generate()
+    rst = generator.generate(only_latest=only_latest)
 
     with open(changelog_path, "wb") as changelog_fd:
         changelog_fd.write(rst.encode("utf-8"))
