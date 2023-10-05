@@ -48,7 +48,7 @@ jobs:
       - name: Setup nox
         uses: wntrblm/nox@2023.04.22
         with:
-          python-versions: "3.9, 3.10, 3.11"
+          python-versions: "3.9, 3.10, 3.11, 3.12"
       - name: Run unit tests
         run: |
           nox -v -e test
