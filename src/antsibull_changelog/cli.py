@@ -323,7 +323,7 @@ def run(args: list[str]) -> int:
     except SystemExit as e:
         # All cases that sys.exit is called directly or indirectly in the above
         # code (that we are aware of) always return an int.
-        return cast(int, e.code)  # pyre-ignore[22]
+        return cast(int, e.code)
     except Exception:  # pylint: disable=broad-except
         if verbosity > 0:
             traceback.print_exc()
