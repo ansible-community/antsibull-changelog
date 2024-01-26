@@ -76,7 +76,7 @@ coverage = [
     "coverage[toml]",
 ]
 formatters = [
-    "black",
+    "black>=24",
     "isort",
 ]
 test = [

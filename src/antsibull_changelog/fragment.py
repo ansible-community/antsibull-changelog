@@ -135,7 +135,7 @@ class ChangelogFragmentLinter:
         section: str,
         obj_class: str,
         obj_type: str,
-        entries: list
+        entries: list,
         # pylint: disable=too-many-arguments
     ) -> None:
         """
