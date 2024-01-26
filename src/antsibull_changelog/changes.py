@@ -536,9 +536,9 @@ class ChangesData(ChangesBase):
         Update plugin descriptions, and remove plugins which are not in the provided list
         of plugins.
         """
-        valid_plugins: dict[
-            str, dict[str, PluginDescription]
-        ] = collections.defaultdict(dict)
+        valid_plugins: dict[str, dict[str, PluginDescription]] = (
+            collections.defaultdict(dict)
+        )
 
         for plugin in plugins:
             if plugin.category == "plugin":
@@ -565,11 +565,13 @@ class ChangesData(ChangesBase):
                     )
                 else:
                     config["modules"] = [
-                        self._create_plugin_entry(
-                            valid_plugins["module"][module["name"]]
+                        (
+                            self._create_plugin_entry(
+                                valid_plugins["module"][module["name"]]
+                            )
+                            if module["name"] not in invalid_module_names
+                            else module
                         )
-                        if module["name"] not in invalid_module_names
-                        else module
                         for module in config["modules"]
                     ]
 
@@ -594,11 +596,13 @@ class ChangesData(ChangesBase):
                         )
                     else:
                         config["plugins"][plugin_type] = [
-                            self._create_plugin_entry(
-                                valid_plugins[plugin_type][plugin["name"]]
+                            (
+                                self._create_plugin_entry(
+                                    valid_plugins[plugin_type][plugin["name"]]
+                                )
+                                if plugin["name"] not in invalid_plugin_names
+                                else plugin
                             )
-                            if plugin["name"] not in invalid_plugin_names
-                            else plugin
                             for plugin in config["plugins"][plugin_type]
                         ]
 
@@ -609,9 +613,9 @@ class ChangesData(ChangesBase):
         Update object descriptions, and remove objects which are not in the provided list
         of objects.
         """
-        valid_objects: dict[
-            str, dict[str, PluginDescription]
-        ] = collections.defaultdict(dict)
+        valid_objects: dict[str, dict[str, PluginDescription]] = (
+            collections.defaultdict(dict)
+        )
 
         for ansible_object in objects:
             if ansible_object.category == "object":
@@ -639,11 +643,13 @@ class ChangesData(ChangesBase):
                         )
                     else:
                         config["objects"][object_type] = [
-                            self._create_plugin_entry(
-                                valid_objects[object_type][ansible_object["name"]]
+                            (
+                                self._create_plugin_entry(
+                                    valid_objects[object_type][ansible_object["name"]]
+                                )
+                                if ansible_object["name"] not in invalid_object_names
+                                else ansible_object
                             )
-                            if ansible_object["name"] not in invalid_object_names
-                            else ansible_object
                             for ansible_object in config["objects"][object_type]
                         ]
 
@@ -720,9 +726,11 @@ class ChangesData(ChangesBase):
 
             if "changes" in config:
                 config["changes"] = {
-                    section: sorted(entries)
-                    if section != self.config.prelude_name
-                    else entries
+                    section: (
+                        sorted(entries)
+                        if section != self.config.prelude_name
+                        else entries
+                    )
                     for section, entries in sorted(config["changes"].items())
                 }
 
