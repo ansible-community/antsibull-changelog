@@ -28,14 +28,19 @@ except ImportError:
     HAS_ARGCOMPLETE = False
 
 from .ansible import get_ansible_release
-from .changelog_generator import generate_changelog
 from .changes import ChangesBase, add_release, load_changes
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .errors import ChangelogError
-from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
+from .fragment import (
+    ChangelogFragment,
+    ChangelogFragmentLinter,
+    FragmentFormat,
+    load_fragments,
+)
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
+from .rendering.changelog import generate_changelog
 from .toml import has_toml_loader_available, load_toml
 
 
@@ -670,7 +675,16 @@ def command_release(args: Any) -> int:
         prev_version=prev_version,
         objects=cast(list[PluginDescription], plugins),
     )
-    generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
+    document_format = FragmentFormat.RESTRUCTURED_TEXT
+    generate_changelog(
+        paths,
+        config,
+        changes,
+        document_format,
+        plugins=plugins,
+        fragments=fragments,
+        flatmap=flatmap,
+    )
 
     return 0
 
@@ -716,12 +730,14 @@ def command_generate(args: Any) -> int:
             version=changes.latest_version,
             force_reload=args.reload_plugins,
         )
+    document_format = FragmentFormat.RESTRUCTURED_TEXT
     generate_changelog(
         paths,
         config,
         changes,
-        plugins,
-        fragments,
+        document_format,
+        plugins=plugins,
+        fragments=fragments,
         flatmap=flatmap,
         changelog_path=output,
         only_latest=only_latest,

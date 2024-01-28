@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-FileCopyrightText: 2022, Ansible Project
+# SPDX-FileCopyrightText: 2024, Ansible Project
 
 """
 Code for conversion to MarkDown.
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import typing as t
-from html import escape as _html_escape_basic
+from html import escape as _html_escape
 from urllib.parse import quote as _urllib_quote
 
 from docutils import nodes, writers
@@ -25,15 +25,21 @@ from .utils import _DOCUTILS_PUBLISH_SETTINGS, RenderResult, SupportedParser
 _MD_ESCAPE = re.compile(r"""([!"#$%&'()*+,:;<=>?@[\\\]^_`{|}~.-])""")
 
 
-def _md_escape(text: str) -> str:
+def md_escape(text: str) -> str:
+    """
+    Escape a text for MarkDown.
+    """
     return _MD_ESCAPE.sub(r"\\\1", text)
 
 
-def _html_escape(text: str) -> str:
-    return _html_escape_basic(text).replace("&quot;", '"')
+def html_escape(text: str) -> str:
+    """
+    Escape a text for HTML.
+    """
+    return _html_escape(text).replace("&quot;", '"')
 
 
-class GlobalContext:  # pylint: disable=too-few-public-methods
+class GlobalContext:
     """
     The global conversion context.
     """
@@ -41,8 +47,11 @@ class GlobalContext:  # pylint: disable=too-few-public-methods
     # How labels are mapped to link fragments
     labels: dict[str, str]
 
+    fragments: set[str]
+
     def __init__(self):
         self.labels = {}
+        self.fragments = set()
 
     def register_label(self, label: str) -> str:
         """
@@ -52,7 +61,22 @@ class GlobalContext:  # pylint: disable=too-few-public-methods
             return self.labels[label]
         fragment = _urllib_quote(label, safe="")
         self.labels[label] = fragment
+        self.fragments.add(fragment)
         return fragment
+
+    def register_new_fragment(self, fragment: str) -> str:
+        """
+        Register a new fragment.
+
+        If it already exists, will be modified until a new one is found.
+        """
+        counter = 0
+        appendix = ""
+        while (full_fragment := f"{fragment}{appendix}") in self.fragments:
+            counter += 1
+            appendix = f"-{counter}"
+        self.fragments.add(full_fragment)
+        return full_fragment
 
 
 class Context:
@@ -331,7 +355,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
     def visit_title(self, node: nodes.title) -> None:
         level = self._context.section_depth + 1
         title = node.astext()
-        text = f'{"#" * level} {_md_escape(title)}\n\n'
+        text = f'{"#" * level} {md_escape(title)}\n\n'
         if self._context.section_depth == 0:
             self._context.top.add_top(text)
         else:
@@ -362,7 +386,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
     def visit_Text(self, node: nodes.Text) -> None:
         text = node.astext()
         if self._context.top.escape:
-            text = _md_escape(text)
+            text = md_escape(text)
         self._context.top.add_main(text)
 
     # pylint: disable-next=missing-function-docstring,invalid-name
@@ -404,7 +428,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
         if name == "reference":
             ref = self._context.global_context.register_label(ref)
             ref = f"#{ref}"
-        self._context.top.add_main(f"]({_md_escape(ref)})")
+        self._context.top.add_main(f"]({md_escape(ref)})")
 
     # Node: bullet_list
 
@@ -517,12 +541,12 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
     def visit_system_message(self, node: nodes.system_message) -> None:
         self._context.top.ensure_newline()
         self._context.top.add_main("\n<details>\n")
-        message_type = _html_escape(node["type"])
+        message_type = html_escape(node["type"])
         message_level = node["level"]
         source = node["source"]
         if node.hasattr("line"):
             source = f'{source}, line {node["line"]}'
-        source = _html_escape(source)
+        source = html_escape(source)
         self._context.top.add_main(
             f"<summary><strong>{message_type}/{message_level}</strong> ({source})</summary>\n\n"
         )
@@ -584,16 +608,16 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
             # We can only handle width and height with a HTML <img> tag
             attributes = []
             if alt:
-                attributes.append(f'alt="{_html_escape(alt)}"')
+                attributes.append(f'alt="{html_escape(alt)}"')
             if width:
-                attributes.append(f'width="{_html_escape(str(width))}"')
+                attributes.append(f'width="{html_escape(str(width))}"')
             if height:
-                attributes.append(f'height="{_html_escape(str(height))}"')
+                attributes.append(f'height="{html_escape(str(height))}"')
             self._context.top.add_main(
-                f'<img src="{_html_escape(uri)}" {" ".join(attributes)}>\n'
+                f'<img src="{html_escape(uri)}" {" ".join(attributes)}>\n'
             )
         else:
-            self._context.top.add_main(f"![{_md_escape(alt)}]({_md_escape(uri)})\n")
+            self._context.top.add_main(f"![{md_escape(alt)}]({md_escape(uri)})\n")
         raise nodes.SkipNode
 
     # Node: transition

@@ -11,6 +11,7 @@ Changelog fragment loading, modification and linting.
 
 from __future__ import annotations
 
+import enum
 import os
 from typing import Any
 
@@ -22,6 +23,15 @@ from .rstcheck import check_rst_content
 from .yaml import load_yaml
 
 
+class FragmentFormat(enum.Enum):
+    """
+    Supported fragment formats.
+    """
+
+    RESTRUCTURED_TEXT = "restructuredtext"
+    MARKDOWN = "markdown"
+
+
 class ChangelogFragment:
     """
     A changelog fragment.
@@ -30,14 +40,21 @@ class ChangelogFragment:
     content: dict[str, list[str] | str]
     path: str
     name: str
+    fragment_format: FragmentFormat
 
-    def __init__(self, content: dict[str, list[str] | str], path: str):
+    def __init__(
+        self,
+        content: dict[str, list[str] | str],
+        path: str,
+        fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT,
+    ):
         """
         Create changelog fragment.
         """
         self.content = content
         self.path = path
         self.name = os.path.basename(path)
+        self.fragment_format = fragment_format
 
     def remove(self) -> None:
         """
@@ -68,21 +85,25 @@ class ChangelogFragment:
             )
 
     @staticmethod
-    def load(path: str) -> "ChangelogFragment":
+    def load(
+        path: str, fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT
+    ) -> "ChangelogFragment":
         """
         Load a ``ChangelogFragment`` from a file.
         """
         content = load_yaml(path)
-        return ChangelogFragment(content, path)
+        return ChangelogFragment(content, path, fragment_format=fragment_format)
 
     @staticmethod
     def from_dict(
-        data: dict[str, list[str] | str], path: str = ""
+        data: dict[str, list[str] | str],
+        path: str = "",
+        fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT,
     ) -> "ChangelogFragment":
         """
         Create a ``ChangelogFragment`` from a dictionary.
         """
-        return ChangelogFragment(data, path)
+        return ChangelogFragment(data, path, fragment_format=fragment_format)
 
     @staticmethod
     def combine(
@@ -327,6 +348,15 @@ class ChangelogFragmentLinter:
                 errors.append((fragment.path, 0, 0, "invalid section: %s" % section))
 
     @staticmethod
+    def _check_content(
+        text: str, text_format: FragmentFormat, filename: str
+    ) -> list[str]:
+        if text_format == FragmentFormat.RESTRUCTURED_TEXT:
+            results = check_rst_content(text, filename=filename)
+            return [result[2] for result in results]
+        raise ValueError("No validation possible for MarkDown fragments")
+
+    @staticmethod
     def _lint_lines(
         errors: list[tuple[str, int, int, str]],
         fragment: ChangelogFragment,
@@ -352,10 +382,14 @@ class ChangelogFragmentLinter:
                     )
                     continue
 
-                results = check_rst_content(line, filename=fragment.path)
+                results = ChangelogFragmentLinter._check_content(
+                    line, fragment.fragment_format, fragment.path
+                )
                 errors += [(fragment.path, 0, 0, result[2]) for result in results]
         elif isinstance(lines, str):
-            results = check_rst_content(lines, filename=fragment.path)
+            results = ChangelogFragmentLinter._check_content(
+                lines, fragment.fragment_format, fragment.path
+            )
             errors += [(fragment.path, 0, 0, result[2]) for result in results]
 
     def lint(self, fragment: ChangelogFragment) -> list[tuple[str, int, int, str]]:

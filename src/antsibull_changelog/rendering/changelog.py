@@ -1,98 +1,56 @@
-# Author: Matt Clay <matt@mystile.com>
 # Author: Felix Fontein <felix@fontein.de>
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or
 # https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-FileCopyrightText: 2020, Ansible Project
+# SPDX-FileCopyrightText: 2024, Ansible Project
 
 """
-Generate reStructuredText changelog from ChangesBase instance.
+Rendering a changelog.
 """
 
 from __future__ import annotations
 
 import collections
 import os
-from collections.abc import MutableMapping
+from collections.abc import Mapping, MutableMapping
 from typing import Any, cast
 
-from .changes import ChangesBase, FragmentResolver, PluginResolver
-from .config import ChangelogConfig, PathsConfig
-from .fragment import ChangelogFragment, FragmentFormat
-from .logger import LOGGER
-from .plugins import PluginDescription
-from .rst import RstBuilder
-from .utils import collect_versions
+from ..changelog_generator import ChangelogEntry
+from ..changes import ChangesBase, FragmentResolver, PluginResolver
+from ..config import ChangelogConfig, PathsConfig
+from ..fragment import ChangelogFragment, FragmentFormat
+from ..logger import LOGGER
+from ..plugins import PluginDescription
+from ..utils import collect_versions
+from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
+from .md_document import MDDocumentRenderer
+from .rst_document import RSTDocumentRenderer
 
 
-class ChangelogEntry:
+def add_section_content(
+    entry: ChangelogEntry, renderer: AbstractRenderer, section_name: str
+) -> None:
     """
-    Data for a changelog entry.
+    Add a section's content of fragments to the changelog.
     """
+    if section_name not in entry.changes:
+        return
 
-    version: str
-    text_format: FragmentFormat
+    content = entry.changes[section_name]
 
-    modules: list[Any]
-    plugins: dict[Any, Any]
-    objects: dict[Any, Any]
-    changes: dict[str, str | list[str]]
-    preludes: list[tuple[str, str]]
-
-    def __init__(self, version: str):
-        self.version = version
-        self.text_format = FragmentFormat.RESTRUCTURED_TEXT
-        self.modules = []
-        self.plugins = {}
-        self.objects = {}
-        self.changes = {}
-        self.preludes = []
-
-    def has_no_changes(self, section_names: list[str] | None = None) -> bool:
-        """
-        Determine whether there are changes.
-
-        If ``section_names`` is not supplied, all sections will be checked.
-        """
-        if section_names is None:
-            return all(not content for content in self.changes)
-        return all(not self.changes.get(section_name) for section_name in section_names)
-
-    @property
-    def empty(self) -> bool:
-        """
-        Determine whether the entry has no content at all.
-        """
-        return (
-            not self.modules
-            and not self.plugins
-            and not self.objects
-            and not self.preludes
-            and self.has_no_changes()
-        )
-
-    def add_section_content(self, builder: RstBuilder, section_name: str) -> None:
-        """
-        Add a section's content of fragments to the changelog.
-        """
-        if section_name not in self.changes:
-            return
-
-        content = self.changes[section_name]
-
-        if isinstance(content, list):
-            for rst in sorted(content):
-                builder.add_list_item(rst)
-        else:
-            builder.add_raw_rst(content)
+    if isinstance(content, list):
+        for text in sorted(content):
+            renderer.add_fragment(text, text_format=entry.text_format)
+    else:
+        renderer.add_text(content, text_format=entry.text_format)
 
 
 class ChangelogGenerator:
     """
-    Generate changelog as reStructuredText.
+    Render changelog.
 
     This class can be both used to create a full changelog, or to append a
-    changelog to an existing RstBuilder. This is for example useful to create
+    changelog to an existing renderer. This is for example useful to create
     a combined ACD changelog.
     """
 
@@ -226,22 +184,23 @@ class ChangelogGenerator:
 
     def append_changelog_entry(
         self,
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         changelog_entry: ChangelogEntry,
-        start_level: int = 0,
         add_version: bool = False,
     ) -> None:
         """
-        Append changelog entry to a reStructuredText (RST) builder.
-
-        :arg start_level: Level to add to headings in the generated RST
+        Append changelog entry to a renderer.
         """
+        section_renderer: SectionRenderer | None = None
         if add_version:
-            builder.add_section("v%s" % changelog_entry.version, start_level)
+            section_renderer = renderer.add_section("v%s" % changelog_entry.version)
+            renderer = section_renderer
 
         for section_name in self.config.sections:
             self._add_section(
-                builder, changelog_entry, section_name, start_level=start_level
+                renderer,
+                changelog_entry,
+                section_name,
             )
 
         fqcn_prefix = None
@@ -255,38 +214,36 @@ class ChangelogGenerator:
                 fqcn_prefix = "ansible.builtin"
 
         self._add_plugins(
-            builder,
+            renderer,
             changelog_entry.plugins,
             fqcn_prefix=fqcn_prefix,
-            start_level=start_level,
         )
         self._add_modules(
-            builder,
+            renderer,
             changelog_entry.modules,
             flatmap=self.flatmap,
             fqcn_prefix=fqcn_prefix,
-            start_level=start_level,
         )
         self._add_objects(
-            builder,
+            renderer,
             changelog_entry.objects,
             fqcn_prefix=fqcn_prefix,
-            start_level=start_level,
         )
+
+        if section_renderer:
+            section_renderer.close()
 
     def generate_to(  # pylint: disable=too-many-arguments
         self,
-        builder: RstBuilder,
-        start_level: int = 0,
+        renderer: AbstractRenderer,
         squash: bool = False,
         after_version: str | None = None,
         until_version: str | None = None,
         only_latest: bool = False,
     ) -> None:
         """
-        Append changelog to a reStructuredText (RST) builder.
+        Append changelog to a renderer.
 
-        :arg start_level: Level to add to headings in the generated RST
         :arg squash: Squash all releases into one entry
         :arg after_version: If given, only consider versions after this one
         :arg until_version: If given, do not consider versions following this one
@@ -298,17 +255,16 @@ class ChangelogGenerator:
 
         for release in release_entries:
             self.append_changelog_entry(
-                builder,
+                renderer,
                 release,
-                start_level=start_level,
                 add_version=not squash and not only_latest,
             )
             if only_latest:
                 break
 
-    def generate(self, only_latest: bool = False) -> str:
+    def generate(self, renderer: DocumentRenderer, only_latest: bool = False) -> None:
         """
-        Generate the changelog as reStructuredText.
+        Generate the changelog.
         """
         latest_version = self.changes.latest_version
         codename = self.changes.releases[latest_version].get("codename")
@@ -316,36 +272,30 @@ class ChangelogGenerator:
             latest_version.split(".")[: self.config.changelog_filename_version_depth]
         )
 
-        builder = RstBuilder()
-
         if not only_latest:
             title = self.config.title or "Ansible"
             if major_minor_version:
                 title = "%s %s" % (title, major_minor_version)
             if codename:
                 title = '%s "%s"' % (title, codename)
-            builder.set_title("%s Release Notes" % (title,))
-            builder.add_raw_rst(".. contents:: Topics\n")
+            renderer.set_title("%s Release Notes" % (title,))
+            renderer.add_toc("Topics")
 
             if self.changes.ancestor and self.config.mention_ancestor:
-                builder.add_raw_rst(
-                    "This changelog describes changes after version {0}.\n".format(
+                renderer.add_text(
+                    "This changelog describes changes after version {0}.".format(
                         self.changes.ancestor
-                    )
+                    ),
+                    text_format=FragmentFormat.RESTRUCTURED_TEXT,
                 )
-            else:
-                builder.add_raw_rst("")
 
-        self.generate_to(builder, 0, only_latest=only_latest)
-
-        return builder.generate()
+        self.generate_to(renderer, only_latest=only_latest)
 
     def _add_section(
         self,
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         changelog_entry: ChangelogEntry,
         section_name: str,
-        start_level: int,
     ) -> None:
         """
         Add a section of fragments to the changelog.
@@ -354,18 +304,17 @@ class ChangelogGenerator:
             return
 
         section_title = self.config.sections[section_name]
-        builder.add_section(section_title, start_level + 1)
+        section = renderer.add_section(section_title)
 
-        changelog_entry.add_section_content(builder, section_name)
+        add_section_content(changelog_entry, renderer, section_name)
 
-        builder.add_raw_rst("")
+        section.close()
 
     @staticmethod
     def _add_plugins(
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         plugins_database: dict[str, list[dict[str, Any]]],
         fqcn_prefix: str | None,
-        start_level: int = 0,
     ) -> None:
         """
         Add new plugins to the changelog.
@@ -373,26 +322,30 @@ class ChangelogGenerator:
         if not plugins_database:
             return
 
-        have_section = False
+        plugins_section: SectionRenderer | None = None
 
         for plugin_type in sorted(plugins_database):
             plugins = plugins_database.get(plugin_type)
             if not plugins:
                 continue
 
-            if not have_section:
-                have_section = True
-                builder.add_section("New Plugins", start_level + 1)
+            if not plugins_section:
+                plugins_section = renderer.add_section("New Plugins")
 
-            builder.add_section(plugin_type.title(), start_level + 2)
+            plugin_section = plugins_section.add_section(plugin_type.title())
 
-            ChangelogGenerator.add_plugins(builder, plugins, fqcn_prefix)
+            ChangelogGenerator.add_plugins(plugin_section, plugins, fqcn_prefix)
 
-            builder.add_raw_rst("")
+            plugin_section.close()
+
+        if plugins_section:
+            plugins_section.close()
 
     @staticmethod
     def add_plugins(
-        builder: RstBuilder, plugins: list[dict[str, Any]], fqcn_prefix: str | None
+        renderer: AbstractRenderer,
+        plugins: list[dict[str, Any]],
+        fqcn_prefix: str | None,
     ) -> None:
         """
         Add new plugins of one type to the changelog.
@@ -401,15 +354,17 @@ class ChangelogGenerator:
             plugin_name = plugin["name"]
             if fqcn_prefix:
                 plugin_name = "%s.%s" % (fqcn_prefix, plugin_name)
-            builder.add_raw_rst("- %s - %s" % (plugin_name, plugin["description"]))
+            renderer.add_fragment(
+                "%s - %s" % (plugin_name, plugin["description"]),
+                text_format=FragmentFormat.RESTRUCTURED_TEXT,
+            )
 
     @staticmethod
     def _add_modules(
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         modules: list[dict[str, Any]],
         flatmap: bool,
         fqcn_prefix: str | None,
-        start_level: int = 0,
     ) -> None:
         """
         Add new modules to the changelog.
@@ -417,18 +372,16 @@ class ChangelogGenerator:
         if not modules:
             return
 
-        builder.add_section("New Modules", start_level + 1)
-        ChangelogGenerator.add_modules(
-            builder, modules, flatmap, fqcn_prefix, start_level + 2
-        )
+        section = renderer.add_section("New Modules")
+        ChangelogGenerator.add_modules(section, modules, flatmap, fqcn_prefix)
+        section.close()
 
     @staticmethod
     def add_modules(
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         modules: list[dict[str, Any]],
         flatmap: bool,
         fqcn_prefix: str | None,
-        level: int,
     ) -> None:
         """
         Add new modules to the changelog.
@@ -438,38 +391,65 @@ class ChangelogGenerator:
             modules_by_namespace[module["namespace"]].append(module)
 
         previous_section = None
+        section_renderer: SectionRenderer | None = None
         for namespace in sorted(modules_by_namespace):
             parts = namespace.split(".")
 
             section = parts.pop(0).replace("_", " ").title()
 
-            if section != previous_section and section:
-                builder.add_section(section, level)
+            if section != previous_section and section_renderer:
+                section_renderer.close()
+                section_renderer = None
+
+            if section and section_renderer is None:
+                section_renderer = renderer.add_section(section)
 
             previous_section = section
 
             subsection = ".".join(parts)
 
+            subsection_renderer: SectionRenderer | None = None
             if subsection:
-                builder.add_section(subsection, level + 1)
+                subsection_renderer = (section_renderer or renderer).add_section(
+                    subsection
+                )
 
-            for module in modules_by_namespace[namespace]:
-                module_name = module["name"]
-                if not flatmap and namespace:
-                    module_name = "%s.%s" % (namespace, module_name)
-                if fqcn_prefix:
-                    module_name = "%s.%s" % (fqcn_prefix, module_name)
+            entry_renderer = subsection_renderer or section_renderer or renderer
+            ChangelogGenerator._add_namespaced_modules(
+                entry_renderer, modules_by_namespace, namespace, flatmap, fqcn_prefix
+            )
 
-                builder.add_raw_rst("- %s - %s" % (module_name, module["description"]))
+            if subsection_renderer:
+                subsection_renderer.close()
 
-            builder.add_raw_rst("")
+        if section_renderer:
+            section_renderer.close()
+
+    @staticmethod
+    def _add_namespaced_modules(
+        renderer: AbstractRenderer,
+        modules_by_namespace: Mapping[str, list[dict[str, Any]]],
+        namespace: str,
+        flatmap: bool,
+        fqcn_prefix: str | None,
+    ) -> None:
+        for module in modules_by_namespace[namespace]:
+            module_name = module["name"]
+            if not flatmap and namespace:
+                module_name = "%s.%s" % (namespace, module_name)
+            if fqcn_prefix:
+                module_name = "%s.%s" % (fqcn_prefix, module_name)
+
+            renderer.add_fragment(
+                "%s - %s" % (module_name, module["description"]),
+                text_format=FragmentFormat.RESTRUCTURED_TEXT,
+            )
 
     @staticmethod
     def _add_objects(
-        builder: RstBuilder,
+        renderer: AbstractRenderer,
         objects_database: dict[str, list[dict[str, Any]]],
         fqcn_prefix: str | None,
-        start_level: int = 0,
     ) -> None:
         """
         Add new objects to the changelog.
@@ -482,15 +462,17 @@ class ChangelogGenerator:
             if not objects:
                 continue
 
-            builder.add_section("New " + object_type.title() + "s", start_level + 1)
+            section_renderer = renderer.add_section("New " + object_type.title() + "s")
 
-            ChangelogGenerator.add_objects(builder, objects, fqcn_prefix)
+            ChangelogGenerator.add_objects(section_renderer, objects, fqcn_prefix)
 
-            builder.add_raw_rst("")
+            section_renderer.close()
 
     @staticmethod
     def add_objects(
-        builder: RstBuilder, objects: list[dict[str, Any]], fqcn_prefix: str | None
+        renderer: AbstractRenderer,
+        objects: list[dict[str, Any]],
+        fqcn_prefix: str | None,
     ) -> None:
         """
         Add new objects of one type to the changelog.
@@ -501,15 +483,60 @@ class ChangelogGenerator:
             object_name = ansible_object["name"]
             if fqcn_prefix:
                 object_name = "%s.%s" % (fqcn_prefix, object_name)
-            builder.add_raw_rst(
-                "- %s - %s" % (object_name, ansible_object["description"])
+            renderer.add_fragment(
+                "%s - %s" % (object_name, ansible_object["description"]),
+                text_format=FragmentFormat.RESTRUCTURED_TEXT,
             )
+
+
+def create_document_renderer(
+    document_format: FragmentFormat, start_level: int = 0
+) -> DocumentRenderer:
+    """
+    Create a document renderer for a given format.
+    """
+    if document_format == FragmentFormat.RESTRUCTURED_TEXT:
+        return RSTDocumentRenderer(start_level=start_level)
+    if document_format == FragmentFormat.MARKDOWN:
+        return MDDocumentRenderer(start_level=start_level)
+    raise ValueError(f"Unsupported format {document_format}")
+
+
+def get_format_extension(document_format: FragmentFormat) -> str:
+    """
+    Get the default document extension for a given format.
+    """
+    if document_format == FragmentFormat.RESTRUCTURED_TEXT:
+        return ".rst"
+    if document_format == FragmentFormat.MARKDOWN:
+        return ".md"
+    raise ValueError(f"Unsupported format {document_format}")
+
+
+def _create_changelog_path(
+    paths: PathsConfig,
+    config: ChangelogConfig,
+    changes: ChangesBase,
+    document_format: FragmentFormat,
+) -> str:
+    major_minor_version = ".".join(
+        changes.latest_version.split(".")[: config.changelog_filename_version_depth]
+    )
+    if "%s" in config.changelog_filename_template:
+        changelog_filename = config.changelog_filename_template % (major_minor_version,)
+    else:
+        changelog_filename = config.changelog_filename_template
+    fn, ext = os.path.splitext(changelog_filename)
+    ext = get_format_extension(document_format)
+    return os.path.join(paths.changelog_dir, f"{fn}{ext}")
 
 
 def generate_changelog(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     config: ChangelogConfig,
     changes: ChangesBase,
+    document_format: FragmentFormat,
+    /,
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
     flatmap: bool = True,
@@ -519,26 +546,31 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     """
     Generate the changelog as reStructuredText.
 
-    :arg plugins: Will be loaded if necessary. Only provide when you already have them
-    :arg fragments: Will be loaded if necessary. Only provide when you already have them
-    :arg flatmap: Whether the collection uses flatmapping or not
-    :arg changelog_path: Write the output to this path instead of the default path.
-    :arg only_latest: Only write the last changelog entry without any preamble
+    :kwarg plugins: Will be loaded if necessary. Only provide when you already have them
+    :kwarg fragments: Will be loaded if necessary. Only provide when you already have them
+    :kwarg flatmap: Whether the collection uses flatmapping or not
+    :kwarg changelog_path: Write the output to this path instead of the default path.
+    :kwarg only_latest: Only write the last changelog entry without any preamble
     """
     if changelog_path is None:
-        major_minor_version = ".".join(
-            changes.latest_version.split(".")[: config.changelog_filename_version_depth]
-        )
-        if "%s" in config.changelog_filename_template:
-            changelog_filename = config.changelog_filename_template % (
-                major_minor_version,
-            )
-        else:
-            changelog_filename = config.changelog_filename_template
-        changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
+        changelog_path = _create_changelog_path(paths, config, changes, document_format)
 
     generator = ChangelogGenerator(config, changes, plugins, fragments, flatmap)
-    rst = generator.generate(only_latest=only_latest)
+    renderer = create_document_renderer(
+        document_format, start_level=1 if only_latest else 0
+    )
+    generator.generate(renderer, only_latest=only_latest)
 
-    with open(changelog_path, "wb") as changelog_fd:
-        changelog_fd.write(rst.encode("utf-8"))
+    text = renderer.render()
+
+    with open(changelog_path, "w", encoding="utf-8") as changelog_fd:
+        changelog_fd.write(text)
+
+
+__ALL__ = (
+    "add_section_content",
+    "ChangelogGenerator",
+    "create_document_renderer",
+    "get_format_extension",
+    "generate_changelog",
+)

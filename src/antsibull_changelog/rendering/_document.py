@@ -1,0 +1,183 @@
+# Author: Felix Fontein <felix@fontein.de>
+# GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2024, Ansible Project
+
+"""
+Common code for rendering a document.
+"""
+
+from __future__ import annotations
+
+import abc
+
+from ..fragment import FragmentFormat
+from .document import AbstractRenderer, DocumentRenderer
+
+
+class BaseContent(abc.ABC):
+    """
+    Abstract content object.
+    """
+
+    closed: bool
+
+    def __init__(self, already_closed=False):
+        self.closed = already_closed
+
+    def generate(self) -> None:
+        """
+        Generate data for this content (if dynamic).
+        """
+
+    @abc.abstractmethod
+    def append_lines(self, lines: list[str], start_level: int = 0) -> None:
+        """
+        Append the lines for this content.
+        """
+
+
+class DocumentRendererEx(DocumentRenderer):
+    """
+    Abstract extended document renderer
+    """
+
+    start_level: int
+    title: str | None
+
+    def __init__(self, start_level: int):
+        self.start_level = start_level
+        self.title = None
+
+    @abc.abstractmethod
+    def render_text(self, text: str, text_format: FragmentFormat) -> str:
+        """
+        Render a text as ReStructured Text.
+        """
+
+    def set_title(self, title: str) -> None:
+        if self.title is not None:
+            raise ValueError("Document title already set")
+        self.title = title
+
+
+class TextRenderer(BaseContent):
+    """
+    Render text.
+    """
+
+    text: str
+    text_format: FragmentFormat
+    root: DocumentRendererEx
+    indent_first: str
+    indent_next: str
+
+    # pylint: disable-next=too-many-arguments
+    def __init__(
+        self,
+        text: str,
+        text_format: FragmentFormat,
+        /,
+        root: DocumentRendererEx,
+        indent_first: str = "",
+        indent_next: str = "",
+    ):
+        super().__init__(already_closed=True)
+        self.text = text
+        self.text_format = text_format
+        self.root = root
+        self.indent_first = indent_first
+        self.indent_next = indent_next
+
+    def append_lines(self, lines: list[str], start_level: int = 0) -> None:
+        text = self.root.render_text(self.text, self.text_format)
+        indent = self.indent_first
+        for line in text.splitlines():
+            if not line and indent != self.indent_first:
+                lines.append("")
+            else:
+                lines.append(f"{indent}{line}")
+            indent = self.indent_next
+
+
+class AbstractRendererEx(BaseContent, AbstractRenderer):
+    """
+    Abstract RST renderer.
+    """
+
+    content: list[BaseContent]
+    root: DocumentRendererEx
+    _fragment_ident: str
+
+    def __init__(self, root: DocumentRendererEx, fragment_ident: str):
+        super().__init__()
+        self.content = []
+        self.root = root
+        self._fragment_ident = fragment_ident
+
+    def _check_content_closed(self) -> None:
+        for content in self.content:
+            if not content.closed:
+                raise ValueError(f"Content {content} is not closed")
+
+    @abc.abstractmethod
+    def _get_level(self) -> int:
+        pass
+
+    def _generate_all(self) -> None:
+        self.generate()
+        for content in self.content:
+            content.generate()
+
+    def add_text(self, text: str, text_format: FragmentFormat) -> None:
+        if self.closed:
+            raise ValueError("{self} is already closed")
+        self.content.append(TextRenderer(text, text_format, root=self.root))
+
+    def add_fragment(self, text: str, text_format: FragmentFormat) -> None:
+        if self.closed:
+            raise ValueError("{self} is already closed")
+        self.content.append(
+            TextRenderer(
+                text,
+                text_format,
+                root=self.root,
+                indent_first=self._fragment_ident,
+                indent_next="  ",
+            )
+        )
+
+
+def render_document(
+    document_renderer: DocumentRendererEx,
+    abstract_renderer: AbstractRendererEx,
+) -> str:
+    """
+    Renders the document to a string.
+
+    :arg document_renderer: View of the document as an extended document renderer.
+    :arg abstract_renderer: View of the document as an extended abstract renderer.
+    """
+    # Check
+    abstract_renderer._check_content_closed()  # pylint: disable=protected-access
+    if document_renderer.start_level == 0 and document_renderer.title is None:
+        raise ValueError("Title must be specified if start_level == 0")
+
+    # Make sure everything is generated
+    abstract_renderer.generate()
+    for content in abstract_renderer.content:
+        content.generate()
+
+    # Generate lines
+    lines: list[str] = []
+    abstract_renderer.append_lines(
+        lines,
+        start_level=abstract_renderer._get_level(),  # pylint: disable=protected-access
+    )
+
+    # Return lines
+    return "\n".join(lines) + "\n"  # add trailing newline
+
+
+__all__ = ("BaseContent", "DocumentRendererEx", "TextRenderer", "AbstractRendererEx")
