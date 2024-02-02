@@ -276,6 +276,13 @@ def get_plugin_name(
 
 
 class ChangelogGenerator(ChangelogGeneratorBase):
+    # antsibull_changelog.rendering.changelog.ChangelogGenerator is a modified
+    # copy of this class adjust to the document rendering framework in
+    # antsibull_changelog.rendering. To avoid pylint complaining too much, we
+    # disable 'duplicate-code' for this class.
+
+    # pylint: disable=duplicate-code
+
     """
     Generate changelog as reStructuredText.
 
