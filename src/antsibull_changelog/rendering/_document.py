@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import abc
 
-from ..fragment import FragmentFormat
+from ..config import TextFormat
 from .document import AbstractRenderer, DocumentRenderer
 
 
@@ -51,7 +51,7 @@ class DocumentRendererEx(DocumentRenderer):
         self.title = None
 
     @abc.abstractmethod
-    def render_text(self, text: str, text_format: FragmentFormat) -> str:
+    def render_text(self, text: str, text_format: TextFormat) -> str:
         """
         Render a text as ReStructured Text.
         """
@@ -68,7 +68,7 @@ class TextRenderer(BaseContent):
     """
 
     text: str
-    text_format: FragmentFormat
+    text_format: TextFormat
     root: DocumentRendererEx
     indent_first: str
     indent_next: str
@@ -77,7 +77,7 @@ class TextRenderer(BaseContent):
     def __init__(
         self,
         text: str,
-        text_format: FragmentFormat,
+        text_format: TextFormat,
         /,
         root: DocumentRendererEx,
         indent_first: str = "",
@@ -130,12 +130,12 @@ class AbstractRendererEx(BaseContent, AbstractRenderer):
         for content in self.content:
             content.generate()
 
-    def add_text(self, text: str, text_format: FragmentFormat) -> None:
+    def add_text(self, text: str, text_format: TextFormat) -> None:
         if self.closed:
             raise ValueError("{self} is already closed")
         self.content.append(TextRenderer(text, text_format, root=self.root))
 
-    def add_fragment(self, text: str, text_format: FragmentFormat) -> None:
+    def add_fragment(self, text: str, text_format: TextFormat) -> None:
         if self.closed:
             raise ValueError("{self} is already closed")
         self.content.append(

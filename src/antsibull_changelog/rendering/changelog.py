@@ -21,8 +21,9 @@ from ..changelog_generator import (
     get_plugin_name,
 )
 from ..changes import ChangesBase
-from ..config import ChangelogConfig, PathsConfig
-from ..fragment import ChangelogFragment, FragmentFormat
+from ..config import ChangelogConfig, PathsConfig, TextFormat
+from ..fragment import ChangelogFragment
+from ..logger import LOGGER
 from ..plugins import PluginDescription
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
@@ -155,7 +156,7 @@ class ChangelogGenerator(ChangelogGeneratorBase):
                     "This changelog describes changes after version {0}.".format(
                         self.changes.ancestor
                     ),
-                    text_format=FragmentFormat.RESTRUCTURED_TEXT,
+                    text_format=TextFormat.RESTRUCTURED_TEXT,
                 )
 
         self.generate_to(renderer, only_latest=only_latest)
@@ -223,7 +224,7 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             plugin_name = get_plugin_name(plugin["name"], fqcn_prefix=fqcn_prefix)
             renderer.add_fragment(
                 "%s - %s" % (plugin_name, plugin["description"]),
-                text_format=FragmentFormat.RESTRUCTURED_TEXT,
+                text_format=TextFormat.RESTRUCTURED_TEXT,
             )
 
     @staticmethod
@@ -309,7 +310,7 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             )
             renderer.add_fragment(
                 "%s - %s" % (module_name, module["description"]),
-                text_format=FragmentFormat.RESTRUCTURED_TEXT,
+                text_format=TextFormat.RESTRUCTURED_TEXT,
             )
 
     @staticmethod
@@ -352,31 +353,20 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             )
             renderer.add_fragment(
                 "%s - %s" % (object_name, ansible_object["description"]),
-                text_format=FragmentFormat.RESTRUCTURED_TEXT,
+                text_format=TextFormat.RESTRUCTURED_TEXT,
             )
 
 
 def create_document_renderer(
-    document_format: FragmentFormat, start_level: int = 0
+    document_format: TextFormat, start_level: int = 0
 ) -> DocumentRenderer:
     """
     Create a document renderer for a given format.
     """
-    if document_format == FragmentFormat.RESTRUCTURED_TEXT:
+    if document_format == TextFormat.RESTRUCTURED_TEXT:
         return RSTDocumentRenderer(start_level=start_level)
-    if document_format == FragmentFormat.MARKDOWN:
+    if document_format == TextFormat.MARKDOWN:
         return MDDocumentRenderer(start_level=start_level)
-    raise ValueError(f"Unsupported format {document_format}")
-
-
-def get_format_extension(document_format: FragmentFormat) -> str:
-    """
-    Get the default document extension for a given format.
-    """
-    if document_format == FragmentFormat.RESTRUCTURED_TEXT:
-        return ".rst"
-    if document_format == FragmentFormat.MARKDOWN:
-        return ".md"
     raise ValueError(f"Unsupported format {document_format}")
 
 
@@ -384,7 +374,7 @@ def _create_changelog_path(
     paths: PathsConfig,
     config: ChangelogConfig,
     changes: ChangesBase,
-    document_format: FragmentFormat,
+    document_format: TextFormat,
 ) -> str:
     major_minor_version = ".".join(
         changes.latest_version.split(".")[: config.changelog_filename_version_depth]
@@ -394,7 +384,7 @@ def _create_changelog_path(
     else:
         changelog_filename = config.changelog_filename_template
     fn, ext = os.path.splitext(changelog_filename)
-    ext = get_format_extension(document_format)
+    ext = f".{document_format.to_extension()}"
     return os.path.join(paths.changelog_dir, f"{fn}{ext}")
 
 
@@ -402,7 +392,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     config: ChangelogConfig,
     changes: ChangesBase,
-    document_format: FragmentFormat,
+    document_format: TextFormat,
     /,
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
@@ -429,6 +419,8 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     generator.generate(renderer, only_latest=only_latest)
 
     text = renderer.render()
+    for warning in renderer.get_warnings():
+        LOGGER.warning(warning)
 
     with open(changelog_path, "w", encoding="utf-8") as changelog_fd:
         changelog_fd.write(text)

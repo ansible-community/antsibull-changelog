@@ -11,25 +11,15 @@ Changelog fragment loading, modification and linting.
 
 from __future__ import annotations
 
-import enum
 import os
 from typing import Any
 
 from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
-from .config import ChangelogConfig, PathsConfig
+from .config import ChangelogConfig, PathsConfig, TextFormat
 from .errors import ChangelogError
 from .logger import LOGGER
 from .rstcheck import check_rst_content
 from .yaml import load_yaml
-
-
-class FragmentFormat(enum.Enum):
-    """
-    Supported fragment formats.
-    """
-
-    RESTRUCTURED_TEXT = "restructuredtext"
-    MARKDOWN = "markdown"
 
 
 class ChangelogFragment:
@@ -40,13 +30,13 @@ class ChangelogFragment:
     content: dict[str, list[str] | str]
     path: str
     name: str
-    fragment_format: FragmentFormat
+    fragment_format: TextFormat
 
     def __init__(
         self,
         content: dict[str, list[str] | str],
         path: str,
-        fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT,
+        fragment_format: TextFormat = TextFormat.RESTRUCTURED_TEXT,
     ):
         """
         Create changelog fragment.
@@ -86,7 +76,7 @@ class ChangelogFragment:
 
     @staticmethod
     def load(
-        path: str, fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT
+        path: str, fragment_format: TextFormat = TextFormat.RESTRUCTURED_TEXT
     ) -> "ChangelogFragment":
         """
         Load a ``ChangelogFragment`` from a file.
@@ -98,7 +88,7 @@ class ChangelogFragment:
     def from_dict(
         data: dict[str, list[str] | str],
         path: str = "",
-        fragment_format: FragmentFormat = FragmentFormat.RESTRUCTURED_TEXT,
+        fragment_format: TextFormat = TextFormat.RESTRUCTURED_TEXT,
     ) -> "ChangelogFragment":
         """
         Create a ``ChangelogFragment`` from a dictionary.
@@ -348,10 +338,8 @@ class ChangelogFragmentLinter:
                 errors.append((fragment.path, 0, 0, "invalid section: %s" % section))
 
     @staticmethod
-    def _check_content(
-        text: str, text_format: FragmentFormat, filename: str
-    ) -> list[str]:
-        if text_format == FragmentFormat.RESTRUCTURED_TEXT:
+    def _check_content(text: str, text_format: TextFormat, filename: str) -> list[str]:
+        if text_format == TextFormat.RESTRUCTURED_TEXT:
             results = check_rst_content(text, filename=filename)
             return [result[2] for result in results]
         raise ValueError("No validation possible for MarkDown fragments")

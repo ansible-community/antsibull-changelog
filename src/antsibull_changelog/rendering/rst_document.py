@@ -10,7 +10,7 @@ Functionality for rendering a ReStructuredText document.
 
 from __future__ import annotations
 
-from ..fragment import FragmentFormat
+from ..config import TextFormat
 from ._document import (
     AbstractRendererEx,
     BaseContent,
@@ -121,11 +121,11 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
     def _get_level(self) -> int:
         return self.start_level
 
-    def render_text(self, text: str, text_format: FragmentFormat) -> str:
+    def render_text(self, text: str, text_format: TextFormat) -> str:
         """
         Render a text as ReStructured Text.
         """
-        if text_format == FragmentFormat.RESTRUCTURED_TEXT:
+        if text_format == TextFormat.RESTRUCTURED_TEXT:
             return text
         raise ValueError(
             f"Text format {text_format} is currently not supported in RST documents!"
@@ -144,6 +144,9 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
 
     def render(self) -> str:
         return render_document(self, self)
+
+    def get_warnings(self) -> list[str]:
+        return []
 
 
 __all__ = ("RSTDocumentRenderer",)

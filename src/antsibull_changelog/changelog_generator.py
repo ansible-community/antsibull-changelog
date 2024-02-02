@@ -18,8 +18,8 @@ from collections.abc import MutableMapping
 from typing import Any, cast
 
 from .changes import ChangesBase, FragmentResolver, PluginResolver
-from .config import ChangelogConfig, PathsConfig
-from .fragment import ChangelogFragment, FragmentFormat
+from .config import ChangelogConfig, PathsConfig, TextFormat
+from .fragment import ChangelogFragment
 from .logger import LOGGER
 from .plugins import PluginDescription
 from .rst import RstBuilder
@@ -32,7 +32,7 @@ class ChangelogEntry:
     """
 
     version: str
-    text_format: FragmentFormat
+    text_format: TextFormat
 
     modules: list[Any]
     plugins: dict[Any, Any]
@@ -42,7 +42,7 @@ class ChangelogEntry:
 
     def __init__(self, version: str):
         self.version = version
-        self.text_format = FragmentFormat.RESTRUCTURED_TEXT
+        self.text_format = TextFormat.RESTRUCTURED_TEXT
         self.modules = []
         self.plugins = {}
         self.objects = {}

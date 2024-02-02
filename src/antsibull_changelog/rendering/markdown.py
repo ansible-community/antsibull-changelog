@@ -340,7 +340,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
         """
         context = self._context.top
         context.close()
-        return context.get_text()
+        return context.get_text().lstrip("\n").rstrip("\n")
 
     def _add_label(self, label: str) -> None:
         if label in self._context.created_labels:

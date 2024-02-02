@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import abc
 
-from ..fragment import FragmentFormat
+from ..config import TextFormat
 
 
 class AbstractRenderer(abc.ABC):
@@ -33,13 +33,13 @@ class AbstractRenderer(abc.ABC):
         """
 
     @abc.abstractmethod
-    def add_text(self, text: str, text_format: FragmentFormat) -> None:
+    def add_text(self, text: str, text_format: TextFormat) -> None:
         """
         Add a text.
         """
 
     @abc.abstractmethod
-    def add_fragment(self, text: str, text_format: FragmentFormat) -> None:
+    def add_fragment(self, text: str, text_format: TextFormat) -> None:
         """
         Add a fragment (as a list item).
         """
@@ -84,6 +84,14 @@ class DocumentRenderer(AbstractRenderer):
         Render the document to a string.
 
         All sections must be closed before calling this.
+        """
+
+    @abc.abstractmethod
+    def get_warnings(self) -> list[str]:
+        """
+        Retrieve a list of warnings encountered while rendering.
+
+        Must only be called after calling ``render()``.
         """
 
 

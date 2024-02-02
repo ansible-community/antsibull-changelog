@@ -15,7 +15,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import cast
 
-from ..fragment import FragmentFormat
+from ..config import TextFormat
 from ._document import (
     AbstractRendererEx,
     BaseContent,
@@ -82,7 +82,10 @@ class MDTOCRenderer(BaseContent):
         )
 
     def _append_toc_entry(self, lines: list[str], entry: TOCEntry, indent: str) -> None:
-        lines.append(f"{indent}- {md_escape(entry.section.title)}")
+        lines.append(
+            f'{indent}- <a href="#{html_escape(entry.section.ref_id)}">'
+            f"{md_escape(entry.section.title)}</a>"
+        )
         next_indent = f"{indent}  "
         for child in entry.children:
             self._append_toc_entry(lines, child, next_indent)
@@ -158,7 +161,7 @@ def _get_slug(text: str) -> str:
     text = unicodedata.normalize("NFD", text)
     text = _SPACE_LIKE.sub("-", text)
     text = _DISALLOWED_LETTER.sub("", text)
-    return text
+    return text.lower()
 
 
 class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
@@ -178,11 +181,11 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
     def _get_level(self) -> int:
         return self.start_level
 
-    def render_text(self, text: str, text_format: FragmentFormat) -> str:
+    def render_text(self, text: str, text_format: TextFormat) -> str:
         """
         Render a text as MarkDown.
         """
-        if text_format == FragmentFormat.MARKDOWN:
+        if text_format == TextFormat.MARKDOWN:
             return text
         result = render_as_markdown(
             text,
@@ -207,6 +210,16 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
 
     def render(self) -> str:
         return render_document(self, self)
+
+    def get_warnings(self) -> list[str]:
+        result = []
+        if self.unsupported_class_names:
+            classnames = ", ".join(sorted(self.unsupported_class_names))
+            result.append(
+                "Found unsupported docutils class names that could not be converted"
+                f" to MarkDown: {classnames}"
+            )
+        return result
 
 
 __all__ = ("MDDocumentRenderer",)

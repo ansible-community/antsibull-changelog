@@ -3,7 +3,7 @@
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-changelog_filename_template: ../CHANGELOG.rst
+changelog_filename_template: ../CHANGELOG
 changelog_filename_version_depth: 0
 changes_file: changelog.yaml
 changes_format: combined
@@ -33,3 +33,6 @@ sections:
   - Known Issues
 use_semantic_versioning: true
 title: Ansible Changelog Tool
+output_formats:
+  - rst
+  - md

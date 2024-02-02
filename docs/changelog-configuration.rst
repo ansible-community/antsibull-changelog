@@ -188,6 +188,14 @@ The default value is ``false`` for existing configurations, and ``true`` for new
 When set to ``true``, uses FQCN (Fully Qualified Collection Names) when mentioning new plugins and modules. This means that `namespace.name.` is prepended to the plugin resp. module names.
 
 
+``output_format`` (list of strings)
+-----------------------------------
+
+The default is ``["rst"]``.
+
+A list of output formats to write the changelog as. Supported formats are ``rst`` for ReStructuredText and ``md`` for MarkDown.
+
+
 Deprecated options
 ==================
 

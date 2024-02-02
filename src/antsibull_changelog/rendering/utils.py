@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from docutils.core import publish_parts
 from docutils.utils import Reporter as DocutilsReporter
 
-from ..fragment import FragmentFormat
+from ..config import TextFormat
 
 SupportedParser = t.Union[t.Literal["restructuredtext"], t.Literal["markdown"]]
 
@@ -32,13 +32,13 @@ _DOCUTILS_PUBLISH_SETTINGS = {
 }
 
 
-def get_parser_name(text_format: FragmentFormat) -> SupportedParser:
+def get_parser_name(text_format: TextFormat) -> SupportedParser:
     """
-    Convert a FragmentFormat to a docutils parser name.
+    Convert a TextFormat to a docutils parser name.
     """
-    if text_format == FragmentFormat.MARKDOWN:
+    if text_format == TextFormat.MARKDOWN:
         return "markdown"
-    if text_format == FragmentFormat.RESTRUCTURED_TEXT:
+    if text_format == TextFormat.RESTRUCTURED_TEXT:
         return "restructuredtext"
     raise ValueError(f"Unsupported format {format}")
 
