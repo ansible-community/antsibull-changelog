@@ -12,16 +12,18 @@ from __future__ import annotations
 
 import collections
 import os
-from collections.abc import Mapping, MutableMapping
-from typing import Any, cast
+from collections.abc import Mapping
+from typing import Any
 
-from ..changelog_generator import ChangelogEntry
-from ..changes import ChangesBase, FragmentResolver, PluginResolver
+from ..changelog_generator import (
+    ChangelogEntry,
+    ChangelogGeneratorBase,
+    get_plugin_name,
+)
+from ..changes import ChangesBase
 from ..config import ChangelogConfig, PathsConfig
 from ..fragment import ChangelogFragment, FragmentFormat
-from ..logger import LOGGER
 from ..plugins import PluginDescription
-from ..utils import collect_versions
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
 from .rst_document import RSTDocumentRenderer
@@ -45,7 +47,7 @@ def add_section_content(
         renderer.add_text(content, text_format=entry.text_format)
 
 
-class ChangelogGenerator:
+class ChangelogGenerator(ChangelogGeneratorBase):
     """
     Render changelog.
 
@@ -53,11 +55,6 @@ class ChangelogGenerator:
     changelog to an existing renderer. This is for example useful to create
     a combined ACD changelog.
     """
-
-    config: ChangelogConfig
-    changes: ChangesBase
-    plugin_resolver: PluginResolver
-    fragment_resolver: FragmentResolver
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -70,117 +67,9 @@ class ChangelogGenerator:
         """
         Create a changelog generator.
         """
-        self.config = config
-        self.changes = changes
-        self.flatmap = flatmap
-
-        self.plugin_resolver = changes.get_plugin_resolver(plugins)
-        self.object_resolver = changes.get_object_resolver()
-        self.fragment_resolver = changes.get_fragment_resolver(fragments)
-
-    @staticmethod
-    def _get_entry_config(
-        release_entries: MutableMapping[str, ChangelogEntry], entry_version: str
-    ) -> ChangelogEntry:
-        """
-        Create (if not existing) and return release entry for a given version.
-        """
-        if entry_version not in release_entries:
-            release_entries[entry_version] = ChangelogEntry(entry_version)
-
-        return release_entries[entry_version]
-
-    def _update_modules_plugins_objects(
-        self, entry_config: ChangelogEntry, release: dict
-    ) -> None:
-        """
-        Update a release entry given a release information dict.
-        """
-        plugins = self.plugin_resolver.resolve(release)
-        objects = self.object_resolver.resolve(release)
-
-        if "module" in plugins:
-            entry_config.modules += plugins.pop("module")
-
-        for plugin_type, plugin_list in plugins.items():
-            if plugin_type not in entry_config.plugins:
-                entry_config.plugins[plugin_type] = []
-
-            entry_config.plugins[plugin_type] += plugin_list
-
-        for object_type, object_list in objects.items():
-            if object_type not in entry_config.objects:
-                entry_config.objects[object_type] = []
-
-            entry_config.objects[object_type] += object_list
-
-    def _collect_entry(
-        self, entry_config: ChangelogEntry, entry_version: str, versions: list[str]
-    ) -> None:
-        """
-        Do actual work of collecting data for a changelog entry.
-        """
-        entry_fragment = None
-
-        dest_changes = entry_config.changes
-
-        for version in versions:
-            release = self.changes.releases[version]
-
-            for fragment in self.fragment_resolver.resolve(release):
-                for section, lines in fragment.content.items():
-                    if section == self.config.prelude_name:
-                        prelude_content = cast(str, lines)
-                        entry_config.preludes.append((version, prelude_content))
-
-                        if entry_fragment:
-                            LOGGER.info(
-                                "skipping prelude in version {} due to newer "
-                                "prelude in version {}",
-                                version,
-                                entry_version,
-                            )
-                            continue
-
-                        # lines is a str in this case!
-                        entry_fragment = prelude_content
-                        dest_changes[section] = prelude_content
-                    else:
-                        content = dest_changes.get(section)
-                        if isinstance(content, list):
-                            content.extend(lines)
-                        else:
-                            dest_changes[section] = list(lines)
-
-            self._update_modules_plugins_objects(entry_config, release)
-
-    def collect(
-        self,
-        squash: bool = False,
-        after_version: str | None = None,
-        until_version: str | None = None,
-    ) -> list[ChangelogEntry]:
-        """
-        Collect release entries.
-
-        :arg squash: Squash all releases into one entry
-        :arg after_version: If given, only consider versions after this one
-        :arg until_version: If given, do not consider versions following this one
-        :return: An ordered mapping of versions to release entries
-        """
-        release_entries: MutableMapping[str, ChangelogEntry] = collections.OrderedDict()
-
-        for entry_version, versions in collect_versions(
-            self.changes.releases,
-            self.config,
-            after_version=after_version,
-            until_version=until_version,
-            squash=squash,
-        ):
-            entry_config = self._get_entry_config(release_entries, entry_version)
-            self._collect_entry(entry_config, entry_version, versions)
-
-        return list(release_entries.values())
+        super().__init__(
+            config, changes, plugins=plugins, fragments=fragments, flatmap=flatmap
+        )
 
     def append_changelog_entry(
         self,
@@ -203,16 +92,7 @@ class ChangelogGenerator:
                 section_name,
             )
 
-        fqcn_prefix = None
-        if self.config.use_fqcn:
-            if self.config.paths.is_collection:
-                fqcn_prefix = "%s.%s" % (
-                    self.config.collection_details.get_namespace(),
-                    self.config.collection_details.get_name(),
-                )
-            else:
-                fqcn_prefix = "ansible.builtin"
-
+        fqcn_prefix = self.get_fqcn_prefix()
         self._add_plugins(
             renderer,
             changelog_entry.plugins,
@@ -266,19 +146,8 @@ class ChangelogGenerator:
         """
         Generate the changelog.
         """
-        latest_version = self.changes.latest_version
-        codename = self.changes.releases[latest_version].get("codename")
-        major_minor_version = ".".join(
-            latest_version.split(".")[: self.config.changelog_filename_version_depth]
-        )
-
         if not only_latest:
-            title = self.config.title or "Ansible"
-            if major_minor_version:
-                title = "%s %s" % (title, major_minor_version)
-            if codename:
-                title = '%s "%s"' % (title, codename)
-            renderer.set_title("%s Release Notes" % (title,))
+            renderer.set_title(self.get_title())
             renderer.add_toc("Topics")
 
             if self.changes.ancestor and self.config.mention_ancestor:
@@ -351,9 +220,7 @@ class ChangelogGenerator:
         Add new plugins of one type to the changelog.
         """
         for plugin in sorted(plugins, key=lambda plugin: plugin["name"]):
-            plugin_name = plugin["name"]
-            if fqcn_prefix:
-                plugin_name = "%s.%s" % (fqcn_prefix, plugin_name)
+            plugin_name = get_plugin_name(plugin["name"], fqcn_prefix=fqcn_prefix)
             renderer.add_fragment(
                 "%s - %s" % (plugin_name, plugin["description"]),
                 text_format=FragmentFormat.RESTRUCTURED_TEXT,
@@ -434,12 +301,12 @@ class ChangelogGenerator:
         fqcn_prefix: str | None,
     ) -> None:
         for module in modules_by_namespace[namespace]:
-            module_name = module["name"]
-            if not flatmap and namespace:
-                module_name = "%s.%s" % (namespace, module_name)
-            if fqcn_prefix:
-                module_name = "%s.%s" % (fqcn_prefix, module_name)
-
+            module_name = get_plugin_name(
+                module["name"],
+                fqcn_prefix=fqcn_prefix,
+                namespace=namespace,
+                flatmap=flatmap,
+            )
             renderer.add_fragment(
                 "%s - %s" % (module_name, module["description"]),
                 text_format=FragmentFormat.RESTRUCTURED_TEXT,
@@ -480,9 +347,9 @@ class ChangelogGenerator:
         for ansible_object in sorted(
             objects, key=lambda ansible_object: ansible_object["name"]
         ):
-            object_name = ansible_object["name"]
-            if fqcn_prefix:
-                object_name = "%s.%s" % (fqcn_prefix, object_name)
+            object_name = get_plugin_name(
+                ansible_object["name"], fqcn_prefix=fqcn_prefix
+            )
             renderer.add_fragment(
                 "%s - %s" % (object_name, ansible_object["description"]),
                 text_format=FragmentFormat.RESTRUCTURED_TEXT,

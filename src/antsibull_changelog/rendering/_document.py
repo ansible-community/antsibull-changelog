@@ -149,6 +149,35 @@ class AbstractRendererEx(BaseContent, AbstractRenderer):
         )
 
 
+def _render(abstract_renderer: AbstractRendererEx, start_level: int = 0) -> str:
+    # Make sure everything is generated
+    abstract_renderer.generate()
+    for content in abstract_renderer.content:
+        content.generate()
+
+    # Generate lines
+    lines: list[str] = []
+    abstract_renderer.append_lines(lines, start_level=start_level)
+
+    # Return lines
+    return "\n".join(lines) + "\n"  # add trailing newline
+
+
+def render_section(
+    abstract_renderer: AbstractRendererEx,
+) -> str:
+    """
+    Renders the section to a string.
+
+    :arg abstract_renderer: View of the section as an extended abstract renderer.
+    """
+    # Check
+    if not abstract_renderer.closed:
+        raise ValueError(f"Section {abstract_renderer} is not closed")
+
+    return _render(abstract_renderer)
+
+
 def render_document(
     document_renderer: DocumentRendererEx,
     abstract_renderer: AbstractRendererEx,
@@ -164,20 +193,17 @@ def render_document(
     if document_renderer.start_level == 0 and document_renderer.title is None:
         raise ValueError("Title must be specified if start_level == 0")
 
-    # Make sure everything is generated
-    abstract_renderer.generate()
-    for content in abstract_renderer.content:
-        content.generate()
-
-    # Generate lines
-    lines: list[str] = []
-    abstract_renderer.append_lines(
-        lines,
-        start_level=abstract_renderer._get_level(),  # pylint: disable=protected-access
+    return _render(
+        abstract_renderer,
+        start_level=document_renderer.start_level,
     )
 
-    # Return lines
-    return "\n".join(lines) + "\n"  # add trailing newline
 
-
-__all__ = ("BaseContent", "DocumentRendererEx", "TextRenderer", "AbstractRendererEx")
+__all__ = (
+    "BaseContent",
+    "DocumentRendererEx",
+    "TextRenderer",
+    "AbstractRendererEx",
+    "render_section",
+    "render_document",
+)

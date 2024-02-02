@@ -16,6 +16,7 @@ from ._document import (
     BaseContent,
     DocumentRendererEx,
     render_document,
+    render_section,
 )
 from .document import SectionRenderer
 from .rst import column_width, rst_escape
@@ -102,21 +103,7 @@ class RSTSectionRenderer(RSTAbstractRenderer, SectionRenderer):
             content.append_lines(lines, start_level=start_level)
 
     def render(self) -> str:
-        # Check
-        if not self.closed:
-            raise ValueError(f"Section {self} is not closed")
-
-        # Make sure everything is generated
-        self.generate()
-        for content in self.content:
-            content.generate()
-
-        # Generate lines
-        lines: list[str] = []
-        self.append_lines(lines)
-
-        # Return lines
-        return "\n".join(lines) + "\n"  # add trailing newline
+        return render_section(self)
 
 
 class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
