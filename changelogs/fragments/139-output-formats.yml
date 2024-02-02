@@ -1,0 +1,2 @@
+minor_changes:
+  - "Allow to render changelogs as MarkDown. The output formats written can be controlled with the ``output_formats`` option in the config file (https://github.com/ansible-community/antsibull-changelog/pull/139)."
