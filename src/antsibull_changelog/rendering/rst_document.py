@@ -161,6 +161,7 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
             line = "=" * column_width(title)
             if self.document_label:
                 lines.append(f".. _{self.document_label}:")
+                lines.append("")
             lines.append(line)
             lines.append(title)
             lines.append(line)

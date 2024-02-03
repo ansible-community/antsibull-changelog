@@ -16,6 +16,7 @@ from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-
 from fixtures import create_plugin
 
 import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
+from antsibull_changelog.config import TextFormat
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -55,6 +56,10 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
+    collection_changelog.config.output_formats = {
+        TextFormat.RESTRUCTURED_TEXT,
+        TextFormat.MARKDOWN,
+    }
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "1.0.0.yml", "release_summary", "This is the first proper release."
@@ -68,7 +73,11 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.added_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         "changelogs/fragments/1.0.0.yml",
@@ -106,6 +115,23 @@ This is the first proper release.
 """
     )
 
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
     assert collection_changelog.run_tool("generate", ["-v", "--refresh"]) == 0
     assert collection_changelog.diff().unchanged
 
@@ -136,7 +162,11 @@ This is the first proper release.
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.changed_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
 
     changelog = diff.parse_yaml("changelogs/changelog.yaml")
     assert changelog["releases"]["1.0.0"]["release_date"] == "2020-01-03"
@@ -159,6 +189,23 @@ This is the first proper release.
 """
     )
 
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible \"primetime\" Release Notes
+
+**Topics**
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
     # Version 1.1.0
 
     collection_changelog.set_galaxy(
@@ -175,7 +222,11 @@ This is the first proper release.
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.changed_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
 
     changelog = diff.parse_yaml("changelogs/changelog.yaml")
     assert changelog["ancestor"] is None
@@ -205,6 +256,27 @@ Release Summary
 ---------------
 
 This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+- <a href="#v1-1-0">v1\.1\.0</a>
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-1-0"></a>
+## v1\.1\.0
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
 """
     )
 
