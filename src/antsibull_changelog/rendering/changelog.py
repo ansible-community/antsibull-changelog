@@ -430,6 +430,5 @@ __ALL__ = (
     "add_section_content",
     "ChangelogGenerator",
     "create_document_renderer",
-    "get_format_extension",
     "generate_changelog",
 )

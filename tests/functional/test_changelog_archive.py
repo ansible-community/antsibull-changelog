@@ -59,7 +59,6 @@ Ansible 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -99,7 +98,6 @@ Ansible 1.0 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -164,7 +162,6 @@ Ansible 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -214,7 +211,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -271,7 +267,6 @@ Ansible 1.2 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.2.0
 ======
@@ -353,7 +348,6 @@ Ansible 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -394,7 +388,6 @@ Ansible 1.0 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======

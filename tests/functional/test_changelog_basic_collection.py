@@ -96,7 +96,6 @@ Ansible Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -150,7 +149,6 @@ Ansible "primetime" Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -196,7 +194,6 @@ Ansible Release Notes
 =====================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -339,7 +336,6 @@ Ansible 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -457,7 +453,6 @@ Ansible 1.0 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -589,7 +584,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0-beta-1
 =============
@@ -772,7 +766,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -1053,7 +1046,6 @@ Ansible 1.2 Release Notes
 
 .. contents:: Topics
 
-
 v1.2.0
 ======
 
@@ -1217,7 +1209,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -1608,7 +1599,6 @@ Test Collection Release Notes
 =============================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -2036,7 +2026,6 @@ My Amazing Collection Release Notes
 ===================================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======

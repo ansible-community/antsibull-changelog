@@ -14,6 +14,7 @@ import abc
 
 from ..config import TextFormat
 from .document import AbstractRenderer, DocumentRenderer
+from .utils import ensure_newline_after_last_content
 
 
 class BaseContent(abc.ABC):
@@ -60,6 +61,20 @@ class DocumentRendererEx(DocumentRenderer):
         if self.title is not None:
             raise ValueError("Document title already set")
         self.title = title
+
+
+class ParagraphBreak(BaseContent):
+    """
+    Paragraph break.
+    """
+
+    def __init__(
+        self,
+    ):
+        super().__init__(already_closed=True)
+
+    def append_lines(self, lines: list[str], start_level: int = 0) -> None:
+        ensure_newline_after_last_content(lines)
 
 
 class TextRenderer(BaseContent):
@@ -125,8 +140,7 @@ class AbstractRendererEx(BaseContent, AbstractRenderer):
     def _get_level(self) -> int:
         pass
 
-    def _generate_all(self) -> None:
-        self.generate()
+    def generate(self) -> None:
         for content in self.content:
             content.generate()
 
@@ -147,6 +161,9 @@ class AbstractRendererEx(BaseContent, AbstractRenderer):
                 indent_next="  ",
             )
         )
+
+    def ensure_paragraph_break(self) -> None:
+        self.content.append(ParagraphBreak())
 
 
 def _render(abstract_renderer: AbstractRendererEx, start_level: int = 0) -> str:

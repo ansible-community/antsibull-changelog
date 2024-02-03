@@ -94,6 +94,7 @@ class MDTOCRenderer(BaseContent):
         toc = self.toc
         if toc is None:
             raise ValueError("Forgot to call generate()")
+        ensure_newline_after_last_content(lines)
         if self.title:
             lines.append(f"**{md_escape(self.title)}**")
         for entry in toc:

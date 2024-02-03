@@ -44,6 +44,12 @@ class AbstractRenderer(abc.ABC):
         Add a fragment (as a list item).
         """
 
+    @abc.abstractmethod
+    def ensure_paragraph_break(self) -> None:
+        """
+        Ensure that a paragraph break happens.
+        """
+
 
 class SectionRenderer(AbstractRenderer):
     """

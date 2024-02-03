@@ -101,7 +101,6 @@ A Random Project Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -166,7 +165,6 @@ A Random Project "primetime" Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -210,7 +208,6 @@ A Random Project Release Notes
 ==============================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -296,7 +293,6 @@ A Random Project 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -348,7 +344,6 @@ A Random Project 1.0 Release Notes
 ==================================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -421,7 +416,6 @@ A Random Project 1.1 Release Notes
 ==================================
 
 .. contents:: Topics
-
 
 v1.1.0-beta-1
 =============
@@ -524,7 +518,6 @@ A Random Project 1.1 Release Notes
 
 .. contents:: Topics
 
-
 v1.1.0
 ======
 
@@ -623,7 +616,6 @@ A Random Project 1.2 Release Notes
 ==================================
 
 .. contents:: Topics
-
 
 v1.2.0
 ======
@@ -764,7 +756,6 @@ A Random Project 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -854,7 +845,6 @@ A Random Project 1.0 Release Notes
 ==================================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -949,7 +939,6 @@ A Random Project 1.0 Release Notes
 ==================================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======

@@ -93,7 +93,6 @@ Ansible 2.9 "meow" Release Notes
 
 .. contents:: Topics
 
-
 v2.9
 ====
 
@@ -145,7 +144,6 @@ Ansible 2.9 "meow" Release Notes
 ================================
 
 .. contents:: Topics
-
 
 v2.9.1
 ======
@@ -271,7 +269,6 @@ Ansible 2.9 "meow" Release Notes
 
 .. contents:: Topics
 
-
 v2.9
 ====
 
@@ -386,7 +383,6 @@ Ansible 2.9 "meow" Release Notes
 ================================
 
 .. contents:: Topics
-
 
 v2.9
 ====
@@ -508,7 +504,6 @@ Ansible 2.9 "woof" Release Notes
 ================================
 
 .. contents:: Topics
-
 
 v2.9.1b1
 ========
@@ -665,7 +660,6 @@ Ansible 2.9 "woof!" Release Notes
 =================================
 
 .. contents:: Topics
-
 
 v2.9.1
 ======
@@ -1036,7 +1030,6 @@ Ansible 2.9 "meow" Release Notes
 ================================
 
 .. contents:: Topics
-
 
 v2.9
 ====

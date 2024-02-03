@@ -32,22 +32,24 @@ class RSTTOCRenderer(BaseContent):
 
     title: str | None
     max_depth: int | None
+    level: int
 
-    def __init__(self, title: str | None, max_depth: int | None):
+    def __init__(self, title: str | None, max_depth: int | None, level: int):
         super().__init__(already_closed=True)
         self.title = title
         self.max_depth = max_depth
+        self.level = level
 
     def append_lines(self, lines: list[str], start_level: int = 0) -> None:
+        ensure_newline_after_last_content(lines)
         if self.title:
             lines.append(f".. contents:: {rst_escape(self.title)}")
         else:
             lines.append(".. contents::")
-        if start_level:
+        if self.level > 0:
             lines.append("  :local:")
         if self.max_depth is not None:
-            lines.append("  :depth: {self.max_depth}")
-        lines.append("")
+            lines.append(f"  :depth: {self.max_depth}")
         lines.append("")
 
 
@@ -69,7 +71,7 @@ class RSTAbstractRenderer(AbstractRendererEx):
     def add_toc(self, title: str | None = None, max_depth: int | None = None) -> None:
         if self.closed:
             raise ValueError("{self} is already closed")
-        self.content.append(RSTTOCRenderer(title, max_depth))
+        self.content.append(RSTTOCRenderer(title, max_depth, self._get_level()))
 
 
 class RSTSectionRenderer(RSTAbstractRenderer, SectionRenderer):
@@ -112,11 +114,15 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
     """
 
     unsupported_class_names: set[str]
+    raw_preamble: str | None
+    document_label: str | None
 
     def __init__(self, start_level: int = 0):
         super().__init__(root=self)
         DocumentRendererEx.__init__(self, start_level=start_level)
         self.unsupported_class_names = set()
+        self.raw_preamble = None
+        self.document_label = None
 
     def _get_level(self) -> int:
         return self.start_level
@@ -131,10 +137,30 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
             f"Text format {text_format} is currently not supported in RST documents!"
         )
 
+    def set_raw_preamble(self, preamble: str) -> None:
+        """
+        Set a raw preamble to be inserted before the document's title and label.
+        """
+        if self.raw_preamble is not None:
+            raise ValueError("Raw preamble already set")
+        self.raw_preamble = preamble
+
+    def set_document_label(self, document_label: str) -> None:
+        """
+        Set a RST label for the document itself.
+        """
+        if self.document_label is not None:
+            raise ValueError("Document label already set")
+        self.document_label = document_label
+
     def append_lines(self, lines: list[str], start_level: int = 0) -> None:
+        if self.raw_preamble is not None:
+            lines.append(self.raw_preamble)
         if self.title is not None:
             title = rst_escape(self.title)
             line = "=" * column_width(title)
+            if self.document_label:
+                lines.append(f".. _{self.document_label}:")
             lines.append(line)
             lines.append(title)
             lines.append(line)
