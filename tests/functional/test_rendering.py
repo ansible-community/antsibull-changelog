@@ -62,6 +62,8 @@ A list:
 
   This is still item 2.
 * Item 3.
+*
+* Item 5 after an empty item.
 
 An enumeration:
 
@@ -106,6 +108,8 @@ Some code:
 A sub-sub-title
 ~~~~~~~~~~~~~~~
 
+Something problematic: :pep:`1000000`
+
 Some text...
 
   Some block quote.
@@ -118,6 +122,11 @@ Some unformatted code::
 
     foo bar!
     baz bam.
+
+A sub-sub-title
+~~~~~~~~~~~~~~~
+
+The same sub-sub-title again.
 """,
         "restructuredtext",
         r"""# Main title
@@ -129,8 +138,10 @@ Some text\.
 - [1   This is a subtitle](\#this\-is\-a\-subtitle)
 - [2   Another subtitle](\#another\-subtitle)
   - [2\.1   A sub\-sub\-title](\#a\-sub\-sub\-title)
+  - [2\.2   A sub\-sub\-title](\#a\-sub\-sub\-title\-1)
 <a id="label"></a>
 <a id="label-2"></a>
+
 <a id="this-is-a-subtitle"></a>
 ## 1   This is a subtitle
 
@@ -148,6 +159,8 @@ A list\:
   
   This is still item 2\.
 - Item 3\.
+- \ 
+- Item 5 after an empty item\.
 
 An enumeration\:
 1. Entry 1
@@ -166,6 +179,7 @@ An enumeration\:
         ```
         ````
      1. Another entry
+
 <a id="another-subtitle"></a>
 ## 2   Another subtitle
 
@@ -181,8 +195,20 @@ def main(argv):
 > Some note\.
 > 
 > This note has two paragraphs\.
+
 <a id="a-sub-sub-title"></a>
 ### 2\.1   A sub\-sub\-title
+
+
+Something problematic\: <a href="#system-message-1"><span class="problematic">\:pep\:\`1000000\`</span></a>
+
+<details>
+<summary><strong>ERROR/3</strong> (&lt;string&gt;, line 77)</summary>
+
+
+PEP number must be a number from 0 to 9999\; \"1000000\" is invalid\.
+
+</details>
 
 
 Some text\.\.\.
@@ -198,7 +224,13 @@ Some unformatted code\:
 ```
 foo bar!
 baz bam.
-```""",
+```
+
+<a id="a-sub-sub-title-1"></a>
+### 2\.2   A sub\-sub\-title
+
+
+The same sub\-sub\-title again\.""",
         set(),
     ),
     (
@@ -234,6 +266,43 @@ Unknown directive type \"unknown\-shit\"\.
 ```
 
 </details>""",
+        set(),
+    ),
+    (
+        "image",
+        r"""Image:
+
+.. image:: image.png
+    :alt: An image
+
+Image w/o alt:
+
+.. image:: https://example.com/image.png
+
+Image w/o alt, with size:
+
+.. image:: https://example.com/image.png
+    :width: 100px
+    :height: 50px
+
+Image with size:
+
+.. image:: https://example.com/image.png
+    :alt: An image
+    :width: 150px
+""",
+        "restructuredtext",
+        r"""Image\:
+![An image](image\.png)
+
+Image w/o alt\:
+![](https\://example\.com/image\.png)
+
+Image w/o alt\, with size\:
+<img src="https://example.com/image.png" width="100px" height="50px">
+
+Image with size\:
+<img src="https://example.com/image.png" alt="An image" width="150px">""",
         set(),
     ),
     (

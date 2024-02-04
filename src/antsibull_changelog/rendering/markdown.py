@@ -127,6 +127,18 @@ class Context:
         if self._main and not self._main[-1].endswith("\n"):
             self._main.append("\n")
 
+    def ensure_double_newline(self) -> None:
+        """
+        Ensure that the main part ends with two newlines, if it is not empty.
+        """
+        if self._main:
+            last = "".join(self._main[:-2])
+            if not last.endswith("\n\n"):
+                if last.endswith("\n"):
+                    self._main.append("\n")
+                else:
+                    self._main.append("\n\n")
+
     def append(
         self,
         context: "Context",
@@ -364,14 +376,11 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
             self._context.top.add_main(text)
         raise nodes.SkipNode
 
-    # pylint: disable-next=missing-function-docstring,unused-argument
-    def depart_title(self, node: nodes.title) -> None:
-        self._context.top.add_main("\n")
-
     # Node: section
 
     # pylint: disable-next=missing-function-docstring
     def visit_section(self, node: nodes.section) -> None:
+        self._context.top.ensure_double_newline()
         if "ids" in node.attributes:
             for ref in node.attributes["ids"]:
                 self._add_label(ref)

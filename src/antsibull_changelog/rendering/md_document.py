@@ -61,8 +61,9 @@ class MDTOCRenderer(BaseContent):
         self.max_depth = max_depth
         self.toc = None
 
+    @staticmethod
     def _collect_toc_entries(
-        self, content: list[BaseContent], max_depth: int | None
+        content: list[BaseContent], max_depth: int | None
     ) -> list[TOCEntry]:
         result = []
         for c in content:
@@ -70,7 +71,7 @@ class MDTOCRenderer(BaseContent):
                 if max_depth in (0, 1):
                     children = []
                 else:
-                    children = self._collect_toc_entries(
+                    children = MDTOCRenderer._collect_toc_entries(
                         c.content, None if max_depth is None else (max_depth - 1)
                     )
                 result.append(TOCEntry(c, children))
