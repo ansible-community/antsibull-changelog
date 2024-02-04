@@ -6,6 +6,8 @@
 
 """
 ReStructuredText helpers.
+
+This module is DEPRECATED! It will be removed in a future version.
 """
 
 from __future__ import annotations
@@ -14,6 +16,8 @@ from __future__ import annotations
 class RstBuilder:
     """
     Simple reStructuredText (RST) builder.
+
+    This class is DEPRECATED! It will be removed in a future version.
     """
 
     lines: list[str]

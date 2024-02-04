@@ -75,6 +75,8 @@ class ChangelogEntry:
     def add_section_content(self, builder: RstBuilder, section_name: str) -> None:
         """
         Add a section's content of fragments to the changelog.
+
+        This function is DEPRECATED! It will be removed in a future version.
         """
         if section_name not in self.changes:
             return
@@ -289,6 +291,8 @@ class ChangelogGenerator(ChangelogGeneratorBase):
     This class can be both used to create a full changelog, or to append a
     changelog to an existing RstBuilder. This is for example useful to create
     a combined ACD changelog.
+
+    This class is DEPRECATED! It will be removed in a future version.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -578,6 +582,8 @@ def generate_changelog(  # pylint: disable=too-many-arguments
 ):
     """
     Generate the changelog as reStructuredText.
+
+    This function is DEPRECATED! It will be removed in a future version.
 
     :arg plugins: Will be loaded if necessary. Only provide when you already have them
     :arg fragments: Will be loaded if necessary. Only provide when you already have them
