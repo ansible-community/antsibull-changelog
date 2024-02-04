@@ -172,12 +172,14 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
 
     global_context: GlobalContext
     unsupported_class_names: set[str]
+    warnings: list[str]
 
     def __init__(self, start_level: int = 0):
         super().__init__(root=self)
         DocumentRendererEx.__init__(self, start_level=start_level)
         self.global_context = GlobalContext()
         self.unsupported_class_names = set()
+        self.warnings = []
 
     def _get_level(self) -> int:
         return self.start_level
@@ -194,6 +196,7 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
             global_context=self.global_context,
         )
         self.unsupported_class_names.update(result.unsupported_class_names)
+        self.warnings.extend(result.warnings)
         return result.output
 
     def get_ref_id(self, title: str) -> str:
@@ -220,6 +223,7 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
                 "Found unsupported docutils class names that could not be converted"
                 f" to MarkDown: {classnames}"
             )
+        result.extend(self.warnings)
         return result
 
 

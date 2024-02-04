@@ -103,12 +103,6 @@ Some code:
   
   This note has two paragraphs.
 
-.. Trigger a system message:
-
-.. unknown-shit::
-
-  Something.
-
 A sub-sub-title
 ~~~~~~~~~~~~~~~
 
@@ -187,20 +181,6 @@ def main(argv):
 > Some note\.
 > 
 > This note has two paragraphs\.
-
-<details>
-<summary><strong>ERROR/3</strong> (&lt;string&gt;, line 74)</summary>
-
-
-Unknown directive type \"unknown\-shit\"\.
-```
-.. unknown-shit::
-
-  Something.
-```
-
-</details>
-
 <a id="a-sub-sub-title"></a>
 ### 2\.1   A sub\-sub\-title
 
@@ -219,6 +199,41 @@ Some unformatted code\:
 foo bar!
 baz bam.
 ```""",
+        set(),
+    ),
+    (
+        "system-messages",
+        r"""
+==========
+Main title
+==========
+
+Some text.
+
+.. Trigger a system message:
+
+.. unknown-shit::
+
+  Something.
+""",
+        "restructuredtext",
+        r"""# Main title
+
+
+Some text\.
+
+<details>
+<summary><strong>ERROR/3</strong> (&lt;string&gt;, line 10)</summary>
+
+
+Unknown directive type \"unknown\-shit\"\.
+```
+.. unknown-shit::
+
+  Something.
+```
+
+</details>""",
         set(),
     ),
     (
@@ -279,5 +294,6 @@ A list table\:""",
 )
 def test_render_markdown(title, input, input_parser, output, unsupported_class_names):
     result = render_as_markdown(input, parser_name=input_parser)
+    print(get_document_structure(input, parser_name=input_parser).output)
     assert result.output == output
     assert result.unsupported_class_names == unsupported_class_names

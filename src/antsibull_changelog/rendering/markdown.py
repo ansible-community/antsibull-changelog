@@ -12,6 +12,7 @@ Code for conversion to MarkDown.
 
 from __future__ import annotations
 
+import io
 import re
 import typing as t
 from html import escape as _html_escape
@@ -20,7 +21,7 @@ from urllib.parse import quote as _urllib_quote
 from docutils import nodes, writers
 from docutils.core import publish_parts
 
-from .utils import _DOCUTILS_PUBLISH_SETTINGS, RenderResult, SupportedParser
+from .utils import RenderResult, SupportedParser, get_docutils_publish_settings
 
 _MD_ESCAPE = re.compile(r"""([!"#$%&'()*+,:;<=>?@[\\\]^_`{|}~.-])""")
 
@@ -689,15 +690,20 @@ def render_as_markdown(
     if global_context is None:
         global_context = GlobalContext()
     document_context = DocumentContext(global_context)
+    warnings_stream = io.StringIO()
     parts = publish_parts(
         source=source,
         source_path=source_path,
         destination_path=destination_path,
         parser_name=parser_name,
         writer=MarkDownWriter(document_context),
-        settings_overrides=_DOCUTILS_PUBLISH_SETTINGS,
+        settings_overrides=get_docutils_publish_settings(warnings_stream),
     )
-    return RenderResult(parts["whole"], document_context.unknown_node_types)
+    return RenderResult(
+        parts["whole"],
+        document_context.unknown_node_types,
+        warnings_stream.getvalue().splitlines(),
+    )
 
 
 __all__ = ("GlobalContext", "render_as_markdown")
