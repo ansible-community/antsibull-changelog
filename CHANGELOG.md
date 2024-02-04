@@ -297,6 +297,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 * Add support for special changelog fragment sections which add new plugins and/or objects to the changelog for this version\. This is mainly useful for <code>test</code> and <code>filter</code> plugins\, and for <code>playbook</code> and <code>role</code> objects\, which are not yet automatically detected and mentioned in <code>changelogs/changelog\.yaml</code> or the generated RST changelog\.
 
   The format of these sections and their content is as follows\:
+
   ```
   ---
   add plugin.filter:

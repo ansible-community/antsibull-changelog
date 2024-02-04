@@ -132,7 +132,7 @@ class Context:
         Ensure that the main part ends with two newlines, if it is not empty.
         """
         if self._main:
-            last = "".join(self._main[:-2])
+            last = "".join(self._main[-2:])
             if not last.endswith("\n\n"):
                 if last.endswith("\n"):
                     self._main.append("\n")
@@ -321,7 +321,6 @@ def _add_skip(class_names: list[str]) -> t.Callable[[_Class], _Class]:
         "document": ("", ""),
         "inline": ("", ""),
         "generated": ("", ""),
-        "paragraph": ("\n", "\n"),
         "literal": ("<code>", "</code>"),
         "emphasis": ("<em>", "</em>"),
         "strong": ("<strong>", "</strong>"),
@@ -361,6 +360,16 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
         self._context.created_labels.add(label)
         ref = self._context.global_context.register_label(label)
         self._context.top.add_main(f'<a id="{ref}"></a>\n')
+
+    # Node: paragraph
+
+    # pylint: disable-next=missing-function-docstring,unused-argument
+    def visit_paragraph(self, node: nodes.section) -> None:
+        self._context.top.ensure_double_newline()
+
+    # pylint: disable-next=missing-function-docstring,unused-argument
+    def depart_paragraph(self, node: nodes.section) -> None:
+        self._context.top.ensure_double_newline()
 
     # Node: title
 
@@ -444,7 +453,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
     # pylint: disable-next=missing-function-docstring,unused-argument
     def visit_bullet_list(self, node: nodes.bullet_list) -> None:
-        self._context.top.ensure_newline()
+        self._context.top.ensure_double_newline()
         self._context.push_context(ListContext("- "))
 
     # pylint: disable-next=missing-function-docstring,unused-argument
@@ -455,7 +464,7 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
     # pylint: disable-next=missing-function-docstring,unused-argument
     def visit_enumerated_list(self, node: nodes.enumerated_list) -> None:
-        self._context.top.ensure_newline()
+        self._context.top.ensure_double_newline()
         self._context.push_context(ListContext("1. "))
 
     # pylint: disable-next=missing-function-docstring,unused-argument
@@ -474,11 +483,14 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
             """
 
             def close(self) -> None:
-                text = self.get_text().lstrip("\n")
+                text = self.get_text().strip("\n")
                 self.replace_main()
                 indent = list_context.first_indent
-                for line in text.splitlines():
-                    self.add_main(f"{indent}{line}\n")
+                for i, line in enumerate(text.splitlines()):
+                    if i and not line.rstrip(" "):
+                        self.add_main("\n")
+                    else:
+                        self.add_main(f"{indent}{line}\n")
                     indent = list_context.next_indent
                 if not self._main:
                     self.add_main(f"{indent}\\ \n")
@@ -536,8 +548,10 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
             def close(self) -> None:
                 self.ensure_newline()
-                lines = self.get_text().splitlines()
-                self.replace_main([f"> {line}\n" for line in lines])
+                lines = self.get_text().rstrip("\n").splitlines()
+                self.replace_main(
+                    [(f"> {line}\n" if line else ">\n") for line in lines]
+                )
 
         self._context.push_context(BlockQuoteContext())
 
@@ -549,8 +563,8 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
     # pylint: disable-next=missing-function-docstring
     def visit_system_message(self, node: nodes.system_message) -> None:
-        self._context.top.ensure_newline()
-        self._context.top.add_main("\n<details>\n")
+        self._context.top.ensure_double_newline()
+        self._context.top.add_main("<details>\n")
         message_type = html_escape(node["type"])
         message_level = node["level"]
         source = node["source"]
@@ -563,8 +577,8 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
     # pylint: disable-next=missing-function-docstring,unused-argument
     def depart_system_message(self, node: nodes.system_message) -> None:
-        self._context.top.ensure_newline()
-        self._context.top.add_main("\n</details>\n\n")
+        self._context.top.ensure_double_newline()
+        self._context.top.add_main("</details>\n\n")
 
     # Node: system_message
 
@@ -576,8 +590,8 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
             """
 
             def close(self) -> None:
-                self.ensure_newline()
-                lines = self.get_text().splitlines()
+                self.ensure_double_newline()
+                lines = self.get_text().rstrip("\n").splitlines()
                 # See https://github.com/orgs/community/discussions/16925 for the syntax
                 self.replace_main(["> [!NOTE]\n"] + [f"> {line}\n" for line in lines])
 
@@ -634,8 +648,8 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
 
     # pylint: disable-next=missing-function-docstring,unused-argument
     def visit_transition(self, node: nodes.transition) -> None:
-        self._context.top.ensure_newline()
-        self._context.top.add_main("\n---\n\n")
+        self._context.top.ensure_double_newline()
+        self._context.top.add_main("---\n\n")
         raise nodes.SkipNode
 
     # Node: title_reference
