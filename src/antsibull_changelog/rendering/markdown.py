@@ -20,6 +20,8 @@ from urllib.parse import quote as _urllib_quote
 
 from docutils import nodes, writers
 from docutils.core import publish_parts
+from docutils.writers.html5_polyglot import HTMLTranslator
+from docutils.writers.html5_polyglot import Writer as HTMLWriter
 
 from .utils import RenderResult, SupportedParser, get_docutils_publish_settings
 
@@ -679,11 +681,23 @@ class Translator(nodes.NodeVisitor):  # pylint: disable=too-many-public-methods
         if "refid" in node.attributes:
             self._context.top.add_main("</a>")
 
+    # Node: problematic
+
+    # pylint: disable-next=missing-function-docstring
+    def visit_table(self, node):
+        translator = HTMLTranslator(self.document)
+        node.walkabout(translator)
+        self._context.top.add_main("".join(translator.body).strip())
+        raise nodes.SkipNode
+
 
 class MarkDownWriter(writers.Writer):
     """
     Create a MarkDown document from a docutils node tree.
     """
+
+    # Needed to be able to run HTMLTranslator on nodes
+    settings_spec = HTMLWriter.settings_spec
 
     def __init__(self, document_context: DocumentContext):
         writers.Writer.__init__(self)

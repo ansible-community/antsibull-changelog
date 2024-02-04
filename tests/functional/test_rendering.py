@@ -354,8 +354,46 @@ A list table:
 
 Regular table\:
 
-A list table\:""",
-        {"table"},
+<table>
+<thead>
+<tr><th class="head"><p>Foo</p></th>
+<th class="head"><p>Bar</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>A</p></td>
+<td><p>B</p></td>
+</tr>
+<tr><td><p>C</p></td>
+<td><p>D
+DD</p>
+<p>DDD</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+A list table\:
+
+<table style="width: 100%;">
+<thead>
+<tr><th class="head"><p>Foo</p></th>
+<th class="head"><p>Bar</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>A</p></td>
+<td><p>B</p></td>
+</tr>
+<tr><td><p>C</p></td>
+<td><p>D</p>
+<p>DD</p>
+<p>DDD</p>
+</td>
+</tr>
+</tbody>
+</table>""",
+        set(),
     ),
 ]
 
