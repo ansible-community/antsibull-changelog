@@ -352,3 +352,11 @@ def test_collection_details(tmp_path):
     assert details.get_name() == "asdf"
     assert details.get_version() == "1.0.0"
     assert details.get_flatmap() is False
+
+
+def test_config_loading_bad_output_format(ansible_config_path):
+    ansible_config_path.write_text("output_formats: [foobar]")
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(ChangelogError):
+        ChangelogConfig.load(paths, collection_details)

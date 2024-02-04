@@ -137,6 +137,14 @@ This is the first proper release\.
 
     assert (
         collection_changelog.run_tool(
+            "generate", ["-v", "--refresh", "--output", "CHANGELOG.md"]
+        )
+        == 5
+    )
+    assert collection_changelog.diff().unchanged
+
+    assert (
+        collection_changelog.run_tool(
             "release", ["-v", "--codename", "primetime", "--date", "2020-01-03"]
         )
         == 0
@@ -1382,6 +1390,57 @@ New Modules
 - acme.test.test_new - This is ANOTHER test module
 - acme.test.test_new2 - This is ANOTHER test module!!!11
 - acme.test.test_new3 - This is yet another test module.
+"""
+    )
+
+    # Generate changelog for 1.0.0 only as MD
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "--output",
+                "changelog-1.0.0.md",
+                "--output-format",
+                "md",
+                "--only-latest",
+                "1.0.0",
+            ],
+        )
+        == 0
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ["changelog-1.0.0.md"]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    assert diff.file_contents["changelog-1.0.0.md"].decode("utf-8") == (
+        r"""<a id="release-summary"></a>
+## Release Summary
+
+This is the first proper release\.
+
+<a id="minor-changes"></a>
+## Minor Changes
+
+* baz lookup \- no longer ignores the <code>bar</code> option\.
+* test \- has a new option <code>foo</code>\.
+
+<a id="new-plugins"></a>
+## New Plugins
+
+<a id="lookup"></a>
+### Lookup
+
+* acme\.test\.bar \- A foo\_bar lookup
+
+<a id="new-modules"></a>
+## New Modules
+
+* acme\.test\.test \- This is a TEST module
 """
     )
 

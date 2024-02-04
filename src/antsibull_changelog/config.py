@@ -458,7 +458,12 @@ class ChangelogConfig:
 
         self.output_formats = set()
         for extension in self.config.get("output_formats", ["rst"]):
-            self.output_formats.add(TextFormat.from_extension(extension))
+            try:
+                self.output_formats.add(TextFormat.from_extension(extension))
+            except ValueError as exc:
+                raise ChangelogError(
+                    f"Found unknown extension in output_formats: {exc}"
+                ) from exc
 
         self._validate_config(ignore_is_other_project)
 
