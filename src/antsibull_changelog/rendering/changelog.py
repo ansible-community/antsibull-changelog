@@ -426,7 +426,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
         changelog_fd.write(text)
 
 
-__ALL__ = (
+__all__ = (
     "add_section_content",
     "ChangelogGenerator",
     "create_document_renderer",

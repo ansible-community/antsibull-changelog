@@ -41,4 +41,4 @@ def column_width(string: str) -> int:
     return _column_width(string)
 
 
-__ALL__ = ("rst_escape", "column_width")
+__all__ = ("rst_escape", "column_width")
