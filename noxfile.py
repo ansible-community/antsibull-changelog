@@ -244,7 +244,13 @@ def bump(session: nox.Session):
         )
         with open(fragment_file, "w") as fp:
             print(fragment, file=fp)
-        session.run("git", "add", "pyproject.toml", fragment_file, external=True)
+        session.run(
+            "git",
+            "add",
+            "src/antsibull_changelog/__init__.py",
+            fragment_file,
+            external=True,
+        )
         session.run("git", "commit", "-m", f"Prepare {version}.", external=True)
     session.run("antsibull-changelog", "release")
     session.run(
@@ -253,9 +259,9 @@ def bump(session: nox.Session):
         "CHANGELOG.rst",
         "changelogs/changelog.yaml",
         "changelogs/fragments/",
-        # pyproject.toml is not committed in the last step
+        # __init__.py is not committed in the last step
         # when the release_summary fragment is created manually
-        "pyproject.toml",
+        "src/antsibull_changelog/__init__.py",
         external=True,
     )
     install(session, ".")  # Smoke test
@@ -281,5 +287,5 @@ def publish(session: nox.Session):
     install(session, "hatch")
     session.run("hatch", "publish", *session.posargs)
     session.run("hatch", "version", "post")
-    session.run("git", "add", "pyproject.toml", external=True)
+    session.run("git", "add", "src/antsibull_changelog/__init__.py", external=True)
     session.run("git", "commit", "-m", "Post-release version bump.", external=True)
