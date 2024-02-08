@@ -14,6 +14,8 @@ import argparse
 import datetime
 import json
 import os
+import shutil
+import subprocess
 import sys
 import traceback
 import warnings
@@ -517,6 +519,18 @@ def _get_pyproject_toml_version(project_toml_path: str) -> str | None:
     if "poetry" in tool_config:
         poetry_config = tool_config["poetry"]
         return poetry_config.get("version")
+
+    if (
+        "version" in tool_config.get("hatch", {})
+        and (hatch_bin := shutil.which("hatch"))
+        and (
+            # Hatch with dynamic version (https://hatch.pypa.io/latest/version/)
+            version := subprocess.run(  # pylint: disable=subprocess-run-check
+                [hatch_bin, "version"], text=True, capture_output=True
+            ).stdout.strip()
+        )
+    ):
+        return version
 
     return None
 
