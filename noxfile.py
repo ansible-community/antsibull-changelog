@@ -252,7 +252,7 @@ def bump(session: nox.Session):
             external=True,
         )
         session.run("git", "commit", "-m", f"Prepare {version}.", external=True)
-    session.run("antsibull-changelog", "release")
+    session.run("antsibull-changelog", "release", "--version", version)
     session.run(
         "git",
         "add",
