@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 [project]
 name = "antsibull-changelog"
 dynamic = ["version"]
-description = "Changelog tool for Ansible-base and Ansible collections"
+description = "Changelog tool for Ansible-core and Ansible collections"
 readme = "README.md"
 requires-python = ">= 3.9.0"
 license = "GPL-3.0-or-later"
