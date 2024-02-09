@@ -30,14 +30,14 @@ except ImportError:
     HAS_ARGCOMPLETE = False
 
 from .ansible import get_ansible_release
-from .changelog_generator import generate_changelog
 from .changes import ChangesBase, add_release, load_changes
-from .config import ChangelogConfig, CollectionDetails, PathsConfig
+from .config import ChangelogConfig, CollectionDetails, PathsConfig, TextFormat
 from .errors import ChangelogError
 from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
 from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
+from .rendering.changelog import generate_changelog
 from .toml import has_toml_loader_available, load_toml
 
 
@@ -278,6 +278,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         action="store_true",
         help="only write the changelog entry for the latest version, without a preamble."
         " Should only be used with --output.",
+    )
+    generate_parser.add_argument(
+        "--output-format",
+        help="If specified, will write the changelog in the given format. Must be specified"
+        " if --output is specified and the configuration file mentions multiple output"
+        " formats.",
     )
 
     if HAS_ARGCOMPLETE:
@@ -684,12 +690,23 @@ def command_release(args: Any) -> int:
         prev_version=prev_version,
         objects=cast(list[PluginDescription], plugins),
     )
-    generate_changelog(paths, config, changes, plugins, fragments, flatmap=flatmap)
+    for document_format in sorted(
+        config.output_formats, key=lambda of: of.to_extension()
+    ):
+        generate_changelog(
+            paths,
+            config,
+            changes,
+            document_format,
+            plugins=plugins,
+            fragments=fragments,
+            flatmap=flatmap,
+        )
 
     return 0
 
 
-def command_generate(args: Any) -> int:
+def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
     """
     (Re-)generate the reStructuredText version of the changelog.
 
@@ -700,6 +717,7 @@ def command_generate(args: Any) -> int:
     version: str | None = args.version
     output: str | None = args.output
     only_latest: bool = args.only_latest
+    output_format: str | None = args.output_format
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
@@ -730,16 +748,29 @@ def command_generate(args: Any) -> int:
             version=changes.latest_version,
             force_reload=args.reload_plugins,
         )
-    generate_changelog(
-        paths,
-        config,
-        changes,
-        plugins,
-        fragments,
-        flatmap=flatmap,
-        changelog_path=output,
-        only_latest=only_latest,
+    if output and len(config.output_formats) > 1:
+        print(
+            "When an explicit output path is specified and more than one output format"
+            " is configured, you need to explicitly specify an output format"
+        )
+        return 5
+    output_formats = (
+        [TextFormat.from_extension(output_format)]
+        if output_format
+        else sorted(config.output_formats, key=lambda of: of.to_extension())
     )
+    for document_format in output_formats:
+        generate_changelog(
+            paths,
+            config,
+            changes,
+            document_format,
+            plugins=plugins,
+            fragments=fragments,
+            flatmap=flatmap,
+            changelog_path=output,
+            only_latest=only_latest,
+        )
 
     return 0
 

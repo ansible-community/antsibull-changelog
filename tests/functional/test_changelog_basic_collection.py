@@ -16,6 +16,7 @@ from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-
 from fixtures import create_plugin
 
 import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
+from antsibull_changelog.config import TextFormat
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -55,6 +56,10 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
+    collection_changelog.config.output_formats = {
+        TextFormat.RESTRUCTURED_TEXT,
+        TextFormat.MARKDOWN,
+    }
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "1.0.0.yml", "release_summary", "This is the first proper release."
@@ -68,7 +73,11 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
-    assert diff.added_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.added_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
     assert diff.removed_dirs == []
     assert diff.removed_files == [
         "changelogs/fragments/1.0.0.yml",
@@ -96,7 +105,6 @@ Ansible Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -107,7 +115,32 @@ This is the first proper release.
 """
     )
 
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
     assert collection_changelog.run_tool("generate", ["-v", "--refresh"]) == 0
+    assert collection_changelog.diff().unchanged
+
+    assert (
+        collection_changelog.run_tool(
+            "generate", ["-v", "--refresh", "--output", "CHANGELOG.md"]
+        )
+        == 5
+    )
     assert collection_changelog.diff().unchanged
 
     assert (
@@ -137,7 +170,11 @@ This is the first proper release.
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.changed_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
 
     changelog = diff.parse_yaml("changelogs/changelog.yaml")
     assert changelog["releases"]["1.0.0"]["release_date"] == "2020-01-03"
@@ -150,7 +187,6 @@ Ansible "primetime" Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -158,6 +194,23 @@ Release Summary
 ---------------
 
 This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible \"primetime\" Release Notes
+
+**Topics**
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
 """
     )
 
@@ -177,7 +230,11 @@ This is the first proper release.
     assert diff.added_files == []
     assert diff.removed_dirs == []
     assert diff.removed_files == []
-    assert diff.changed_files == ["CHANGELOG.rst", "changelogs/changelog.yaml"]
+    assert diff.changed_files == [
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+        "changelogs/changelog.yaml",
+    ]
 
     changelog = diff.parse_yaml("changelogs/changelog.yaml")
     assert changelog["ancestor"] is None
@@ -197,7 +254,6 @@ Ansible Release Notes
 
 .. contents:: Topics
 
-
 v1.1.0
 ======
 
@@ -208,6 +264,27 @@ Release Summary
 ---------------
 
 This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+- <a href="#v1-1-0">v1\.1\.0</a>
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-1-0"></a>
+## v1\.1\.0
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
 """
     )
 
@@ -339,7 +416,6 @@ Ansible 1.0 Release Notes
 
 .. contents:: Topics
 
-
 v1.0.0
 ======
 
@@ -457,7 +533,6 @@ Ansible 1.0 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -589,7 +664,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0-beta-1
 =============
@@ -772,7 +846,6 @@ Ansible 1.1 Release Notes
 =========================
 
 .. contents:: Topics
-
 
 v1.1.0
 ======
@@ -1053,7 +1126,6 @@ Ansible 1.2 Release Notes
 
 .. contents:: Topics
 
-
 v1.2.0
 ======
 
@@ -1218,7 +1290,6 @@ Ansible 1.1 Release Notes
 
 .. contents:: Topics
 
-
 v1.1.0
 ======
 
@@ -1319,6 +1390,57 @@ New Modules
 - acme.test.test_new - This is ANOTHER test module
 - acme.test.test_new2 - This is ANOTHER test module!!!11
 - acme.test.test_new3 - This is yet another test module.
+"""
+    )
+
+    # Generate changelog for 1.0.0 only as MD
+    assert (
+        collection_changelog.run_tool(
+            "generate",
+            [
+                "-vvv",
+                "--output",
+                "changelog-1.0.0.md",
+                "--output-format",
+                "md",
+                "--only-latest",
+                "1.0.0",
+            ],
+        )
+        == 0
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ["changelog-1.0.0.md"]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+
+    assert diff.file_contents["changelog-1.0.0.md"].decode("utf-8") == (
+        r"""<a id="release-summary"></a>
+## Release Summary
+
+This is the first proper release\.
+
+<a id="minor-changes"></a>
+## Minor Changes
+
+* baz lookup \- no longer ignores the <code>bar</code> option\.
+* test \- has a new option <code>foo</code>\.
+
+<a id="new-plugins"></a>
+## New Plugins
+
+<a id="lookup"></a>
+### Lookup
+
+* acme\.test\.bar \- A foo\_bar lookup
+
+<a id="new-modules"></a>
+## New Modules
+
+* acme\.test\.test \- This is a TEST module
 """
     )
 
@@ -1608,7 +1730,6 @@ Test Collection Release Notes
 =============================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======
@@ -2036,7 +2157,6 @@ My Amazing Collection Release Notes
 ===================================
 
 .. contents:: Topics
-
 
 v1.0.0
 ======

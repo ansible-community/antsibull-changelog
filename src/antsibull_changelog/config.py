@@ -12,12 +12,43 @@ Configuration classes for paths and changelogs.
 from __future__ import annotations
 
 import collections
+import enum
 import os
 from collections.abc import Mapping
 
 from .errors import ChangelogError
 from .logger import LOGGER
 from .yaml import load_yaml, store_yaml
+
+
+class TextFormat(enum.Enum):
+    """
+    Supported text formats.
+    """
+
+    RESTRUCTURED_TEXT = "restructuredtext"
+    MARKDOWN = "markdown"
+
+    def to_extension(self) -> str:
+        """
+        Convert a text format to the associated extension (without leading dot).
+        """
+        if self == TextFormat.RESTRUCTURED_TEXT:
+            return "rst"
+        if self == TextFormat.MARKDOWN:
+            return "md"
+        raise ValueError(f"Unknown text format {self}")
+
+    @staticmethod
+    def from_extension(extension: str) -> TextFormat:
+        """
+        Convert a file extension (without leading dot) to the corresponding text format.
+        """
+        if extension == "rst":
+            return TextFormat.RESTRUCTURED_TEXT
+        if extension == "md":
+            return TextFormat.MARKDOWN
+        raise ValueError(f"Unknown extension {extension!r}")
 
 
 def _is_other_project_config(config_path: str) -> bool:
@@ -346,6 +377,7 @@ class ChangelogConfig:
     use_semantic_versioning: bool
     is_other_project: bool
     sections: Mapping[str, str]
+    output_formats: set[TextFormat]
 
     def __init__(
         self,
@@ -423,6 +455,15 @@ class ChangelogConfig:
         ):
             sections[section_name] = section_title
         self.sections = sections
+
+        self.output_formats = set()
+        for extension in self.config.get("output_formats", ["rst"]):
+            try:
+                self.output_formats.add(TextFormat.from_extension(extension))
+            except ValueError as exc:
+                raise ChangelogError(
+                    f"Found unknown extension in output_formats: {exc}"
+                ) from exc
 
         self._validate_config(ignore_is_other_project)
 
@@ -504,6 +545,10 @@ class ChangelogConfig:
                 continue
             sections.append([key, value])
         config["sections"] = sections
+
+        config["output_formats"] = sorted(
+            text_format.to_extension() for text_format in self.output_formats
+        )
 
         store_yaml(self.paths.config_path, config)
 

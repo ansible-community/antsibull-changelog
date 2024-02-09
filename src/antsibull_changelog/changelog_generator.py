@@ -11,13 +11,14 @@ Generate reStructuredText changelog from ChangesBase instance.
 
 from __future__ import annotations
 
+import abc
 import collections
 import os
 from collections.abc import MutableMapping
 from typing import Any, cast
 
 from .changes import ChangesBase, FragmentResolver, PluginResolver
-from .config import ChangelogConfig, PathsConfig
+from .config import ChangelogConfig, PathsConfig, TextFormat
 from .fragment import ChangelogFragment
 from .logger import LOGGER
 from .plugins import PluginDescription
@@ -31,6 +32,7 @@ class ChangelogEntry:
     """
 
     version: str
+    text_format: TextFormat
 
     modules: list[Any]
     plugins: dict[Any, Any]
@@ -40,6 +42,7 @@ class ChangelogEntry:
 
     def __init__(self, version: str):
         self.version = version
+        self.text_format = TextFormat.RESTRUCTURED_TEXT
         self.modules = []
         self.plugins = {}
         self.objects = {}
@@ -72,6 +75,8 @@ class ChangelogEntry:
     def add_section_content(self, builder: RstBuilder, section_name: str) -> None:
         """
         Add a section's content of fragments to the changelog.
+
+        This function is DEPRECATED! It will be removed in a future version.
         """
         if section_name not in self.changes:
             return
@@ -85,13 +90,23 @@ class ChangelogEntry:
             builder.add_raw_rst(content)
 
 
-class ChangelogGenerator:
+def get_entry_config(
+    release_entries: MutableMapping[str, ChangelogEntry], entry_version: str
+) -> ChangelogEntry:
     """
-    Generate changelog as reStructuredText.
+    Create (if not existing) and return release entry for a given version.
+    """
+    if entry_version not in release_entries:
+        release_entries[entry_version] = ChangelogEntry(entry_version)
 
-    This class can be both used to create a full changelog, or to append a
-    changelog to an existing RstBuilder. This is for example useful to create
-    a combined ACD changelog.
+    return release_entries[entry_version]
+
+
+class ChangelogGeneratorBase(abc.ABC):
+    """
+    Abstract base class for changelog generators.
+
+    Provides some useful helpers.
     """
 
     config: ChangelogConfig
@@ -103,6 +118,7 @@ class ChangelogGenerator:
         self,
         config: ChangelogConfig,
         changes: ChangesBase,
+        /,
         plugins: list[PluginDescription] | None = None,
         fragments: list[ChangelogFragment] | None = None,
         flatmap: bool = True,
@@ -117,18 +133,6 @@ class ChangelogGenerator:
         self.plugin_resolver = changes.get_plugin_resolver(plugins)
         self.object_resolver = changes.get_object_resolver()
         self.fragment_resolver = changes.get_fragment_resolver(fragments)
-
-    @staticmethod
-    def _get_entry_config(
-        release_entries: MutableMapping[str, ChangelogEntry], entry_version: str
-    ) -> ChangelogEntry:
-        """
-        Create (if not existing) and return release entry for a given version.
-        """
-        if entry_version not in release_entries:
-            release_entries[entry_version] = ChangelogEntry(entry_version)
-
-        return release_entries[entry_version]
 
     def _update_modules_plugins_objects(
         self, entry_config: ChangelogEntry, release: dict
@@ -217,10 +221,94 @@ class ChangelogGenerator:
             until_version=until_version,
             squash=squash,
         ):
-            entry_config = self._get_entry_config(release_entries, entry_version)
+            entry_config = get_entry_config(release_entries, entry_version)
             self._collect_entry(entry_config, entry_version, versions)
 
         return list(release_entries.values())
+
+    def get_fqcn_prefix(self) -> str | None:
+        """
+        Returns the FQCN prefix (collection name) for plugins/modules.
+        """
+        fqcn_prefix = None
+        if self.config.use_fqcn:
+            if self.config.paths.is_collection:
+                fqcn_prefix = "%s.%s" % (
+                    self.config.collection_details.get_namespace(),
+                    self.config.collection_details.get_name(),
+                )
+            else:
+                fqcn_prefix = "ansible.builtin"
+        return fqcn_prefix
+
+    def get_title(self) -> str:
+        """
+        Return changelog's title.
+        """
+        latest_version = self.changes.latest_version
+        codename = self.changes.releases[latest_version].get("codename")
+        major_minor_version = ".".join(
+            latest_version.split(".")[: self.config.changelog_filename_version_depth]
+        )
+
+        title = self.config.title or "Ansible"
+        if major_minor_version:
+            title = "%s %s" % (title, major_minor_version)
+        if codename:
+            title = '%s "%s"' % (title, codename)
+        return "%s Release Notes" % (title,)
+
+
+def get_plugin_name(
+    name: str,
+    /,
+    fqcn_prefix: str | None = None,
+    namespace: str | None = None,
+    flatmap: bool = False,
+) -> str:
+    """
+    Given a module or plugin name, prepends FQCN prefix (collection name) and/or namespace,
+    if appropriate.
+    """
+    if not flatmap and namespace:
+        name = "%s.%s" % (namespace, name)
+    if fqcn_prefix:
+        name = "%s.%s" % (fqcn_prefix, name)
+    return name
+
+
+class ChangelogGenerator(ChangelogGeneratorBase):
+    # antsibull_changelog.rendering.changelog.ChangelogGenerator is a modified
+    # copy of this class adjust to the document rendering framework in
+    # antsibull_changelog.rendering. To avoid pylint complaining too much, we
+    # disable 'duplicate-code' for this class.
+
+    # pylint: disable=duplicate-code
+
+    """
+    Generate changelog as reStructuredText.
+
+    This class can be both used to create a full changelog, or to append a
+    changelog to an existing RstBuilder. This is for example useful to create
+    a combined ACD changelog.
+
+    This class is DEPRECATED! It will be removed in a future version.
+    """
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        config: ChangelogConfig,
+        changes: ChangesBase,
+        plugins: list[PluginDescription] | None = None,
+        fragments: list[ChangelogFragment] | None = None,
+        flatmap: bool = True,
+    ):
+        """
+        Create a changelog generator.
+        """
+        super().__init__(
+            config, changes, plugins=plugins, fragments=fragments, flatmap=flatmap
+        )
 
     def append_changelog_entry(
         self,
@@ -242,16 +330,7 @@ class ChangelogGenerator:
                 builder, changelog_entry, section_name, start_level=start_level
             )
 
-        fqcn_prefix = None
-        if self.config.use_fqcn:
-            if self.config.paths.is_collection:
-                fqcn_prefix = "%s.%s" % (
-                    self.config.collection_details.get_namespace(),
-                    self.config.collection_details.get_name(),
-                )
-            else:
-                fqcn_prefix = "ansible.builtin"
-
+        fqcn_prefix = self.get_fqcn_prefix()
         self._add_plugins(
             builder,
             changelog_entry.plugins,
@@ -308,21 +387,10 @@ class ChangelogGenerator:
         """
         Generate the changelog as reStructuredText.
         """
-        latest_version = self.changes.latest_version
-        codename = self.changes.releases[latest_version].get("codename")
-        major_minor_version = ".".join(
-            latest_version.split(".")[: self.config.changelog_filename_version_depth]
-        )
-
         builder = RstBuilder()
 
         if not only_latest:
-            title = self.config.title or "Ansible"
-            if major_minor_version:
-                title = "%s %s" % (title, major_minor_version)
-            if codename:
-                title = '%s "%s"' % (title, codename)
-            builder.set_title("%s Release Notes" % (title,))
+            builder.set_title(self.get_title())
             builder.add_raw_rst(".. contents:: Topics\n")
 
             if self.changes.ancestor and self.config.mention_ancestor:
@@ -396,9 +464,7 @@ class ChangelogGenerator:
         Add new plugins of one type to the changelog.
         """
         for plugin in sorted(plugins, key=lambda plugin: plugin["name"]):
-            plugin_name = plugin["name"]
-            if fqcn_prefix:
-                plugin_name = "%s.%s" % (fqcn_prefix, plugin_name)
+            plugin_name = get_plugin_name(plugin["name"], fqcn_prefix=fqcn_prefix)
             builder.add_raw_rst("- %s - %s" % (plugin_name, plugin["description"]))
 
     @staticmethod
@@ -452,12 +518,12 @@ class ChangelogGenerator:
                 builder.add_section(subsection, level + 1)
 
             for module in modules_by_namespace[namespace]:
-                module_name = module["name"]
-                if not flatmap and namespace:
-                    module_name = "%s.%s" % (namespace, module_name)
-                if fqcn_prefix:
-                    module_name = "%s.%s" % (fqcn_prefix, module_name)
-
+                module_name = get_plugin_name(
+                    module["name"],
+                    fqcn_prefix=fqcn_prefix,
+                    namespace=namespace,
+                    flatmap=flatmap,
+                )
                 builder.add_raw_rst("- %s - %s" % (module_name, module["description"]))
 
             builder.add_raw_rst("")
@@ -496,9 +562,9 @@ class ChangelogGenerator:
         for ansible_object in sorted(
             objects, key=lambda ansible_object: ansible_object["name"]
         ):
-            object_name = ansible_object["name"]
-            if fqcn_prefix:
-                object_name = "%s.%s" % (fqcn_prefix, object_name)
+            object_name = get_plugin_name(
+                ansible_object["name"], fqcn_prefix=fqcn_prefix
+            )
             builder.add_raw_rst(
                 "- %s - %s" % (object_name, ansible_object["description"])
             )
@@ -516,6 +582,8 @@ def generate_changelog(  # pylint: disable=too-many-arguments
 ):
     """
     Generate the changelog as reStructuredText.
+
+    This function is DEPRECATED! It will be removed in a future version.
 
     :arg plugins: Will be loaded if necessary. Only provide when you already have them
     :arg fragments: Will be loaded if necessary. Only provide when you already have them

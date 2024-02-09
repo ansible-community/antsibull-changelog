@@ -144,7 +144,14 @@ def formatters(session: nox.Session):
 def codeqa(session: nox.Session):
     install(session, ".[codeqa]", editable=True)
     session.run("flake8", "src/antsibull_changelog", *session.posargs)
-    session.run("pylint", "--rcfile", ".pylintrc.automated", "src/antsibull_changelog")
+    session.run(
+        "pylint",
+        "--rcfile",
+        ".pylintrc.automated",
+        "src/antsibull_changelog",
+        "--ignore-imports",
+        "yes",
+    )
     session.run("reuse", "lint")
     session.run("antsibull-changelog", "lint")
 

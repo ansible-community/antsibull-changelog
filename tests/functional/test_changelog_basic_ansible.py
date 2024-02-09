@@ -85,7 +85,6 @@ Ansible Base 2.10 "meow" Release Notes
 
 .. contents:: Topics
 
-
 v2.10
 =====
 
@@ -137,7 +136,6 @@ Ansible Base 2.10 "meow" Release Notes
 ======================================
 
 .. contents:: Topics
-
 
 v2.10.1
 =======
@@ -288,7 +286,6 @@ Ansible Base 2.10 "meow" Release Notes
 
 .. contents:: Topics
 
-
 v2.10
 =====
 
@@ -423,7 +420,6 @@ Ansible Base 2.10 "meow" Release Notes
 
 .. contents:: Topics
 
-
 v2.10
 =====
 
@@ -556,7 +552,6 @@ Ansible Base 2.10 "woof" Release Notes
 ======================================
 
 .. contents:: Topics
-
 
 v2.10.1b1
 =========
@@ -729,7 +724,6 @@ Ansible Base 2.10 "woof!" Release Notes
 =======================================
 
 .. contents:: Topics
-
 
 v2.10.1
 =======
@@ -1129,7 +1123,6 @@ Ansible Base 2.10 "meow" Release Notes
 ======================================
 
 .. contents:: Topics
-
 
 v2.10
 =====

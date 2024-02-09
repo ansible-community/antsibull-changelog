@@ -4,7 +4,6 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
-
 v0.23.0
 =======
 
