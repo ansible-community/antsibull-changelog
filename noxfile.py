@@ -263,6 +263,7 @@ def bump(session: nox.Session):
     session.run(
         "git",
         "add",
+        "CHANGELOG.md",
         "CHANGELOG.rst",
         "changelogs/changelog.yaml",
         "changelogs/fragments/",
