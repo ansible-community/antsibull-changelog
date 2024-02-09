@@ -4,6 +4,26 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.24.0
+=======
+
+Release Summary
+---------------
+
+Feature release which now allows to output MarkDown.
+
+Minor Changes
+-------------
+
+- Allow automatically retrieving package version for hatch projects with the ``hatch version`` command (https://github.com/ansible-community/antsibull-changelog/pull/141).
+- Allow to render changelogs as MarkDown. The output formats written can be controlled with the ``output_formats`` option in the config file (https://github.com/ansible-community/antsibull-changelog/pull/139).
+- Officially support Python 3.12 (https://github.com/ansible-community/antsibull-changelog/pull/134).
+
+Deprecated Features
+-------------------
+
+- Some code in ``antsibull_changelog.changelog_entry`` has been deprecated, and the ``antsibull_changelog.rst`` module has been deprecated completely. If you use them in your own code, please take a look at the `PR deprecating them <https://github.com/ansible-community/antsibull-changelog/pull/139>`__ for information on how to stop using them (https://github.com/ansible-community/antsibull-changelog/pull/139).
+
 v0.23.0
 =======
 

@@ -1,4 +1,0 @@
----
-minor_changes:
-  - Officially support Python 3.12
-    (https://github.com/ansible-community/antsibull-changelog/pull/134).

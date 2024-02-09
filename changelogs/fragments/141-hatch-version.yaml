@@ -1,4 +1,0 @@
----
-minor_changes:
-  - "Allow automatically retrieving package version for hatch projects with the ``hatch version`` command
-    (https://github.com/ansible-community/antsibull-changelog/pull/141)."
