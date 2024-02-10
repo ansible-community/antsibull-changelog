@@ -198,11 +198,11 @@ Distribution.
 The categories are the same as the ones in the [Ansible-case changelog
 fragments](https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to).
 
-> [!NOTE]
-> The changelog generator automatically detects new modules and
-> new plugins which are documentable (i.e. where you have `DOCUMENTATION`
-> where `version_added` is there), so you do not need to create changelog
-> entries for them.
+!!! note
+    The changelog generator automatically detects new modules and
+    new plugins which are documentable (i.e. where you have `DOCUMENTATION`
+    where `version_added` is there), so you do not need to create changelog
+    entries for them.
 
 The full list of categories is:
 

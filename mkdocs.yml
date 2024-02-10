@@ -1,0 +1,35 @@
+---
+# Copyright (c) Ansible Project
+# GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+site_name: antsibull-changelog – Ansible Changelog Tool
+site_url: https://ansible.readthedocs.io/projects/antsibull-changelog
+repo_url: https://github.com/ansible-community/antsibull-changelog
+theme:
+  name: ansible
+  features:
+    - content.code.copy
+    - navigation.footer
+  # Disable webfonts
+  font: false
+# REUSE-IgnoreStart
+copyright: >
+  Copyright (C) 2024 Ansible Project Authors |
+  SPDX-License-Identifier: <a style="text-decoration: underline;" href="https://github.com/ansible-community/antsibull-changelog/blob/main/LICENSE">GPL-3.0-or-later</a>
+# REUSE-IgnoreEnd
+markdown_extensions:
+  # Builtin
+  - admonition
+  - toc:
+      permalink: true
+  # pymdownx
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+nav:
+  - index.md
+  - changelogs.md
+  - other-projects.md
+  - changelog-configuration.md
+  - changelog.yaml-format.md

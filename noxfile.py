@@ -297,3 +297,9 @@ def publish(session: nox.Session):
     session.run("hatch", "version", "post")
     session.run("git", "add", "src/antsibull_changelog/__init__.py", external=True)
     session.run("git", "commit", "-m", "Post-release version bump.", external=True)
+
+
+@nox.session
+def mkdocs(session: nox.Session):
+    session.install("-r", "docs-requirements.txt")
+    session.run("mkdocs", *(session.posargs or ["build"]))
