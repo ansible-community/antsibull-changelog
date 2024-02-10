@@ -12,10 +12,10 @@ SPDX-License-Identifier: GPL-3.0-or-later
 A changelog generator used by ansible-core and Ansible collections.
 
 - Using the
-  [`antsibull-changelog` CLI tool for collections](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+  [`antsibull-changelog` CLI tool for collections](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.md).
 - Using the
-  [`antsibull-changelog` CLI tool for other projects](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/other-projects.rst).
-- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog-configuration.rst).
+  [`antsibull-changelog` CLI tool for other projects](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/other-projects.md).
+- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog-configuration.md).
 - Documentation on the
   [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
 
@@ -38,7 +38,7 @@ The `toml` extra is always available, but it is noop on Python >= 3.11,
 as `tomllib` is part of the standard library.
 
 For more information, see the
-[documentation](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.rst).
+[documentation](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.md).
 
 ## Development
 
