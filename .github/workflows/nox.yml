@@ -59,6 +59,8 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           directory: antsibull-changelog
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   nox-integration:
     runs-on: ubuntu-latest
     defaults:
@@ -83,3 +85,5 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           directory: antsibull-changelog
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
