@@ -13,7 +13,7 @@ The format is similar to the `.changes.yaml` file used internally by Ansible unt
 
 Please remember that collection versions **must** use [semantic versioning](https://semver.org/) if included in the Ansible package or RedHat's Automation Hub.
 
-You can use the `antsibull-changelog lint-changelog-yaml` tool included in the `antsibull-changelog package <https://pypi.org/project/antsibull-changelog/>`_ to validate these files:
+You can use the `antsibull-changelog lint-changelog-yaml` tool included in the [antsibull-changelog package](https://pypi.org/project/antsibull-changelog/) to validate these files:
 
     antsibull-changelog lint-changelog-yaml /path/to/changelog.yaml
 
