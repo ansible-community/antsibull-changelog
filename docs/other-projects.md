@@ -36,7 +36,7 @@ configuration file to your needs. The settings of highest interest are:
 
 1. `title`: This is by default `Project`. Please replace this with the
    name of your project.
-2. `output_format`: This is by default `[rst]`. Change this to `[rst, md]`
+2. `output_formats`: This is by default `[rst]`. Change this to `[rst, md]`
    to output both a RST and MarkDown version of the changelog, or to `[md]`
    to only output a MarkDown version.
 3. `use_semantic_versioning`: The default value `true` assumes that

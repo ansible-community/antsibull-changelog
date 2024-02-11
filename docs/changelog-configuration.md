@@ -46,7 +46,7 @@ parts of the version of the release.
 
 > [!NOTE]
 > The file extension (default `.rst`) will always be replaced by the
-> extension matching the output format (see [`output_format`](#output_format-list-of-strings)).
+> extension matching the output format (see [`output_formats`](#output_formats-list-of-strings)).
 > Therefore the extension provided here will always be ignored.
 
 ### `changelog_filename_version_depth` (integer)
@@ -240,7 +240,7 @@ When set to `true`, uses FQCN (Fully Qualified Collection Names) when
 mentioning new plugins and modules. This means that `namespace.name.`
 is prepended to the plugin respectively module names.
 
-### `output_format` (list of strings)
+### `output_formats` (list of strings)
 
 The default is `["rst"]`.
 

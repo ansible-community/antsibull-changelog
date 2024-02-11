@@ -37,7 +37,7 @@ file to your needs. The settings of highest interest are:
 
 1. `title`: This is by default the titlecase of your collection's
    namespace and name. Feel free to insert a nicer name here.
-2. `output_format`: This is by default `[rst]`. Change this to `[rst, md]`
+2. `output_formats`: This is by default `[rst]`. Change this to `[rst, md]`
    to output both a RST and MarkDown version of the changelog, or to `[md]`
    to only output a MarkDown version.
 3. `keep_fragments`: The default value `false` removes the fragment
