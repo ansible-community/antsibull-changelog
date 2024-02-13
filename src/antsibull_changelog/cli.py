@@ -29,6 +29,7 @@ try:
 except ImportError:
     HAS_ARGCOMPLETE = False
 
+from . import __version__ as _version
 from .ansible import get_ansible_release
 from .changes import ChangesBase, add_release, load_changes
 from .config import ChangelogConfig, CollectionDetails, PathsConfig, TextFormat
@@ -113,6 +114,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog=program_name, description="Changelog generator and linter."
     )
+    parser.add_argument("--version", action="version", version=_version)
 
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument(
