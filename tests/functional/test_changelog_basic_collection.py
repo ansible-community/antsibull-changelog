@@ -145,6 +145,36 @@ This is the first proper release\.
 
     assert (
         collection_changelog.run_tool(
+            "generate", ["-v", "--refresh", "--output", "extract.md", "--output-format", "md"]
+        )
+        == 0
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == ["extract.md"]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == []
+    assert diff.file_contents["extract.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+- <a href="#v1-0-0">v1\.0\.0</a>
+  - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+    assert (
+        collection_changelog.run_tool(
             "release", ["-v", "--codename", "primetime", "--date", "2020-01-03"]
         )
         == 0
