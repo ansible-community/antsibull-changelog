@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - "Add ``--version`` flag to print package version and exit
+    (https://github.com/ansible-community/antsibull-changelog/pull/147)."
