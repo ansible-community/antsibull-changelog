@@ -43,11 +43,11 @@ dependencies = [
 ]
 
 [project.urls]
+"Documentation" = "https://ansible.readthedocs.io/projects/antsibull-changelog/"
 "Source code" = "https://github.com/ansible-community/antsibull-changelog/"
-"Documentation" = "https://github.com/ansible-community/antsibull-changelog/tree/main/docs/"
 "Code of Conduct" = "https://docs.ansible.com/ansible/latest/community/code_of_conduct.html"
 "Bug tracker" = "https://github.com/ansible-community/antsibull-changelog/issues"
-"Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.rst"
+"Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.md"
 
 [project.scripts]
 antsibull-changelog = "antsibull_changelog.cli:main"

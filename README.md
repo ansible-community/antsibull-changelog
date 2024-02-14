@@ -37,8 +37,7 @@ to pull in the necessary toml parser for this feature.
 The `toml` extra is always available, but it is noop on Python >= 3.11,
 as `tomllib` is part of the standard library.
 
-For more information, see the
-[documentation](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.md).
+For more information, see the [documentation](https://ansible.readthedocs.io/projects/antsibull-changelog/).
 
 ## Development
 
