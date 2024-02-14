@@ -145,7 +145,8 @@ This is the first proper release\.
 
     assert (
         collection_changelog.run_tool(
-            "generate", ["-v", "--refresh", "--output", "extract.md", "--output-format", "md"]
+            "generate",
+            ["-v", "--refresh", "--output", "extract.md", "--output-format", "md"],
         )
         == 0
     )
