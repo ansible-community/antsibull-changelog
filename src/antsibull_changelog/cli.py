@@ -750,7 +750,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             version=changes.latest_version,
             force_reload=args.reload_plugins,
         )
-    if output and len(config.output_formats) > 1:
+    if output and len(config.output_formats) > 1 and not output_format:
         print(
             "When an explicit output path is specified and more than one output format"
             " is configured, you need to explicitly specify an output format"
