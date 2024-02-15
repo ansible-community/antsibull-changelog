@@ -4,6 +4,24 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.25.0
+=======
+
+Release Summary
+---------------
+
+Bugfix and feature release.
+
+Minor Changes
+-------------
+
+- Add ``--version`` flag to print package version and exit (https://github.com/ansible-community/antsibull-changelog/pull/147).
+
+Bugfixes
+--------
+
+- When multiple output formats are defined and ``antsibull-changelog generate`` is used with both ``--output`` and ``--output-format``, an error was displayed that ``--output-format`` must be specified (https://github.com/ansible-community/antsibull-changelog/issues/149, https://github.com/ansible-community/antsibull-changelog/pull/151).
+
 v0.24.0
 =======
 

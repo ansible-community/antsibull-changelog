@@ -239,6 +239,21 @@ releases:
     - 139-output-formats.yml
     - 141-hatch-version.yaml
     release_date: '2024-02-09'
+  0.25.0:
+    changes:
+      bugfixes:
+      - When multiple output formats are defined and ``antsibull-changelog generate``
+        is used with both ``--output`` and ``--output-format``, an error was displayed
+        that ``--output-format`` must be specified (https://github.com/ansible-community/antsibull-changelog/issues/149,
+        https://github.com/ansible-community/antsibull-changelog/pull/151).
+      minor_changes:
+      - Add ``--version`` flag to print package version and exit (https://github.com/ansible-community/antsibull-changelog/pull/147).
+      release_summary: Bugfix and feature release.
+    fragments:
+    - 0.25.0.yml
+    - 147-version-option.yaml
+    - 151-generate-output-format.yml
+    release_date: '2024-02-15'
   0.3.0:
     changes:
       minor_changes:
