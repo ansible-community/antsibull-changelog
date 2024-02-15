@@ -1,0 +1,2 @@
+bugfixes:
+  - "When multiple output formats are defined and ``antsibull-changelog generate`` is used with both ``--output`` and ``--output-format``, an error was displayed that ``--output-format`` must be specified (https://github.com/ansible-community/antsibull-changelog/issues/149, https://github.com/ansible-community/antsibull-changelog/pull/151)."
