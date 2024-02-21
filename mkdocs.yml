@@ -24,6 +24,7 @@ markdown_extensions:
   - toc:
       permalink: true
   # pymdownx
+  - pymdownx.escapeall
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
@@ -33,3 +34,4 @@ nav:
   - other-projects.md
   - changelog-configuration.md
   - changelog.yaml-format.md
+  - antsibull-changelog Release Notes: changelog.md
