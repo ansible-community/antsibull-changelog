@@ -30,7 +30,7 @@ jobs:
         with:
           path: antsibull-changelog
       - name: Setup nox
-        uses: wntrblm/nox@2023.04.22
+        uses: wntrblm/nox@2024.03.02
         with:
           python-versions: "3.11"
       - run: |
@@ -46,7 +46,7 @@ jobs:
         with:
           path: antsibull-changelog
       - name: Setup nox
-        uses: wntrblm/nox@2023.04.22
+        uses: wntrblm/nox@2024.03.02
         with:
           python-versions: "3.9, 3.10, 3.11, 3.12"
       - name: Run unit tests
@@ -72,7 +72,7 @@ jobs:
         with:
           path: antsibull-changelog
       - name: Setup nox
-        uses: wntrblm/nox@2023.04.22
+        uses: wntrblm/nox@2024.03.02
         with:
           python-versions: "3.11"
       - name: Run integration tests
