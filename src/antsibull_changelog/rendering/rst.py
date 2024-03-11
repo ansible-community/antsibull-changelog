@@ -10,7 +10,7 @@ Functionality for rendering a ReStructuredText document.
 
 from __future__ import annotations
 
-from docutils.utils import column_width as _column_width  # pyre-ignore[21]
+from docutils.utils import column_width as _column_width
 
 
 def rst_escape(value: str, escape_ending_whitespace=False) -> str:
