@@ -119,8 +119,9 @@ This is the first proper release.
         r"""# Ansible Release Notes
 
 **Topics**
+
 - <a href="#v1-0-0">v1\.0\.0</a>
-  - <a href="#release-summary">Release Summary</a>
+    - <a href="#release-summary">Release Summary</a>
 
 <a id="v1-0-0"></a>
 ## v1\.0\.0
@@ -161,8 +162,9 @@ This is the first proper release\.
         r"""# Ansible Release Notes
 
 **Topics**
+
 - <a href="#v1-0-0">v1\.0\.0</a>
-  - <a href="#release-summary">Release Summary</a>
+    - <a href="#release-summary">Release Summary</a>
 
 <a id="v1-0-0"></a>
 ## v1\.0\.0
@@ -232,8 +234,9 @@ This is the first proper release.
         r"""# Ansible \"primetime\" Release Notes
 
 **Topics**
+
 - <a href="#v1-0-0">v1\.0\.0</a>
-  - <a href="#release-summary">Release Summary</a>
+    - <a href="#release-summary">Release Summary</a>
 
 <a id="v1-0-0"></a>
 ## v1\.0\.0
@@ -302,9 +305,10 @@ This is the first proper release.
         r"""# Ansible Release Notes
 
 **Topics**
+
 - <a href="#v1-1-0">v1\.1\.0</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
-  - <a href="#release-summary">Release Summary</a>
+    - <a href="#release-summary">Release Summary</a>
 
 <a id="v1-1-0"></a>
 ## v1\.1\.0

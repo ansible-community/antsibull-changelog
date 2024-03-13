@@ -1,0 +1,2 @@
+bugfixes:
+  - The markdown generated did not render correctly in Ansible Automation Hub

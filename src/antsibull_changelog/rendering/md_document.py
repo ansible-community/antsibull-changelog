@@ -87,7 +87,7 @@ class MDTOCRenderer(BaseContent):
             f'{indent}- <a href="#{html_escape(entry.section.ref_id)}">'
             f"{md_escape(entry.section.title)}</a>"
         )
-        next_indent = f"{indent}  "
+        next_indent = f"{indent}    "
         for child in entry.children:
             self._append_toc_entry(lines, child, next_indent)
 
@@ -98,6 +98,7 @@ class MDTOCRenderer(BaseContent):
         ensure_newline_after_last_content(lines)
         if self.title:
             lines.append(f"**{md_escape(self.title)}**")
+            lines.append("")
         for entry in toc:
             self._append_toc_entry(lines, entry, "")
 
