@@ -19,71 +19,58 @@ env:
   FORCE_COLOR: "1"
 
 jobs:
-  nox-lint:
+  nox:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: antsibull-changelog
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - session: test
+            python-versions: "3.9, 3.10, 3.11, 3.12"
+            codecov: true
+            packages: ""
+
+          - session: integration
+            python-versions: "3.12"
+            codecov: true
+            packages: ""
+
+          - session: lint
+            python-versions: "3.12"
+            codecov: false
+            packages: ""
+    name: "Run nox ${{ matrix.session }} session"
     steps:
       - name: Check out antsibull-changelog
         uses: actions/checkout@v4
         with:
           path: antsibull-changelog
-      - name: Setup nox
-        uses: wntrblm/nox@2024.03.02
-        with:
-          python-versions: "3.11"
-      - run: |
-          nox -v -e lint
-  nox-test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: antsibull-changelog
-    steps:
-      - name: Check out antsibull-changelog
-        uses: actions/checkout@v4
-        with:
-          path: antsibull-changelog
-      - name: Setup nox
-        uses: wntrblm/nox@2024.03.02
-        with:
-          python-versions: "3.9, 3.10, 3.11, 3.12"
-      - name: Run unit tests
+      - name: Install extra packages
+        if: "matrix.packages != ''"
         run: |
-          nox -v -e test
+          sudo apt-get install -y ${{ matrix.packages }}
+      - name: Setup nox
+        uses: wntrblm/nox@2024.03.02
+        with:
+          python-versions: "${{ matrix.python-versions }}"
+      - name: Set up nox environments
+        run: |
+          nox -v -e "${{ matrix.session }}" ${{ matrix.codecov && 'coverage' || '' }} --install-only
+      - name: "Run nox -e ${{ matrix.session }}"
+        run: |
+          nox -v -e "${{ matrix.session }}" --reuse-existing-virtualenvs --no-install
       - name: Report coverage
+        if: ${{ matrix.codecov }}
         run: |
-          nox -v -e coverage
+          nox -v -e coverage --reuse-existing-virtualenvs --no-install
       - name: Upload coverage
+        if: ${{ matrix.codecov }}
         uses: codecov/codecov-action@v3
         with:
           directory: antsibull-changelog
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  nox-integration:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: antsibull-changelog
-    steps:
-      - name: Check out antsibull-changelog
-        uses: actions/checkout@v4
-        with:
-          path: antsibull-changelog
-      - name: Setup nox
-        uses: wntrblm/nox@2024.03.02
-        with:
-          python-versions: "3.11"
-      - name: Run integration tests
-        run: |
-          nox -v -e integration
-      - name: Report coverage
-        run: |
-          nox -v -e coverage
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          directory: antsibull-changelog
+          name: "${{ matrix.session }}"
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

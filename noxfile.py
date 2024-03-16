@@ -162,17 +162,23 @@ def typing(session: nox.Session):
     install(session, "-e", ".[typing]")
     session.run("mypy", "src/antsibull_changelog")
 
-    purelib = session.run(
-        "python",
-        "-c",
-        "import sysconfig; print(sysconfig.get_path('purelib'))",
-        silent=True,
+    purelib = (
+        session.run(
+            "python",
+            "-c",
+            "import sysconfig; print(sysconfig.get_path('purelib'))",
+            silent=True,
+        )
+        or ""
     ).strip()
-    platlib = session.run(
-        "python",
-        "-c",
-        "import sysconfig; print(sysconfig.get_path('platlib'))",
-        silent=True,
+    platlib = (
+        session.run(
+            "python",
+            "-c",
+            "import sysconfig; print(sysconfig.get_path('platlib'))",
+            silent=True,
+        )
+        or ""
     ).strip()
     session.run(
         "pyre",
