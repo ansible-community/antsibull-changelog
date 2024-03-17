@@ -254,6 +254,18 @@ releases:
     - 147-version-option.yaml
     - 151-generate-output-format.yml
     release_date: '2024-02-15'
+  0.26.0:
+    changes:
+      minor_changes:
+      - The Markdown output format is now compatible with `python-markdown <https://python-markdown.github.io/>`_
+        and `mkdocs <https://www.mkdocs.org/>`_, as long as the `pymdownx.escapeall
+        <https://facelessuser.github.io/pymdown-extensions/extensions/escapeall/>`_
+        extension is enabled (https://github.com/ansible-community/antsibull-changelog/pull/153).
+      release_summary: Feature release.
+    fragments:
+    - 0.26.0.yml
+    - 153-pymd-improvements.yaml
+    release_date: '2024-03-17'
   0.3.0:
     changes:
       minor_changes:

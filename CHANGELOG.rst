@@ -4,6 +4,19 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.26.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- The Markdown output format is now compatible with `python-markdown <https://python-markdown.github.io/>`_ and `mkdocs <https://www.mkdocs.org/>`_, as long as the `pymdownx.escapeall <https://facelessuser.github.io/pymdown-extensions/extensions/escapeall/>`_ extension is enabled (https://github.com/ansible-community/antsibull-changelog/pull/153).
+
 v0.25.0
 =======
 
