@@ -61,7 +61,7 @@ To run specific tests:
 ## Creating a new release:
 
 1. Run `nox -e bump -- <version> <release_summary_message>`. This:
-   * Bumps the package version in `pyproject.toml`.
+   * Bumps the package version in `src/antsibull_changelog/__init__.py`.
    * Creates `changelogs/fragments/<version>.yml` with a `release_summary` section.
    * Runs `antsibull-changelog release` and adds the changed files to git.
    * Commits with message `Release <version>.` and runs `git tag -a -m 'antsibull-changelog <version>' <version>`.
