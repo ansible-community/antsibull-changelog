@@ -84,7 +84,7 @@ class PluginDescription:
                         plugin_type=plugin_type,
                         name=plugin_name,
                         namespace=plugin_details.get("namespace"),
-                        description=plugin_details["description"],
+                        description=plugin_details["description"] + ".",
                         version_added=plugin_details["version_added"],
                         category=category,
                     )
