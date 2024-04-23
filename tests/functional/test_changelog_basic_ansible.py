@@ -1113,7 +1113,7 @@ sections:
         assert changelog["releases"]["2.10"]["modules"][0]["namespace"] == ""
         assert (
             changelog["releases"]["2.10"]["modules"][0]["description"]
-            == "A test module"
+            == "A test module."
         )
         assert "version_added" not in changelog["releases"]["2.10"]["modules"][0]
 
@@ -1135,7 +1135,7 @@ This is the first proper release.
 New Modules
 -----------
 
-- test_module - A test module
+- test_module - A test module.
 """
         )
 
