@@ -264,7 +264,7 @@ sections:
     assert changelog["releases"]["2.10"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "",
         },
     ]
@@ -272,7 +272,7 @@ sections:
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo bar lookup",
+                "description": "A foo bar lookup.",
                 "namespace": None,
             },
         ],
@@ -308,12 +308,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo bar lookup
+- bar - A foo bar lookup.
 
 New Modules
 -----------
 
-- test - This is a test module
+- test - This is a test module.
 """
     )
 
@@ -399,7 +399,7 @@ New Modules
     assert changelog["releases"]["2.10"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a TEST module",
+            "description": "This is a TEST module.",
             "namespace": "",
         },
     ]
@@ -407,7 +407,7 @@ New Modules
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo_bar lookup",
+                "description": "A foo_bar lookup.",
                 "namespace": None,
             },
         ],
@@ -441,12 +441,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -539,7 +539,7 @@ New Modules
     assert changelog["releases"]["2.10.1b1"]["modules"] == [
         {
             "name": "test_new",
-            "description": "This is ANOTHER test module",
+            "description": "This is ANOTHER test module.",
             "namespace": "",
         },
     ]
@@ -569,7 +569,7 @@ Minor Changes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
+- test_new - This is ANOTHER test module.
 
 v2.10
 =====
@@ -592,12 +592,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -706,7 +706,7 @@ New Modules
     assert changelog["releases"]["2.10.1"]["modules"] == [
         {
             "name": "test_new2",
-            "description": "This is ANOTHER test module!!!11",
+            "description": "This is ANOTHER test module!!!11.",
             "namespace": "",
         },
         {
@@ -747,8 +747,8 @@ Bugfixes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
-- test_new2 - This is ANOTHER test module!!!11
+- test_new - This is ANOTHER test module.
+- test_new2 - This is ANOTHER test module!!!11.
 - test_new3 - This is yet another test module.
 
 v2.10
@@ -772,12 +772,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
