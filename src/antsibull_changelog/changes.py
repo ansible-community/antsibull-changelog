@@ -699,8 +699,6 @@ class ChangesData(ChangesBase):
         """
         Sort change metadata in place.
         """
-        super().sort()
-
         for _, config in self.data["releases"].items():
             if "modules" in config:
                 config["modules"] = sorted(
