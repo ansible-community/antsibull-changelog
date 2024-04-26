@@ -40,4 +40,10 @@ def store_yaml(path: str, content: Any) -> None:
     with open(path, "w", encoding="utf-8") as stream:
         dumper = _SafeDumper
         dumper.ignore_aliases = lambda *args: True
-        yaml.dump(content, stream, default_flow_style=False, Dumper=dumper)
+        yaml.dump(
+            content,
+            stream,
+            default_flow_style=False,
+            Dumper=dumper,
+            explicit_start=True
+        )
