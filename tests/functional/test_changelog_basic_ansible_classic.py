@@ -291,12 +291,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo bar lookup
+- bar - A foo bar lookup.
 
 New Modules
 -----------
 
-- test - This is a test module
+- test - This is a test module.
 """
     )
 
@@ -405,12 +405,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -521,7 +521,7 @@ Minor Changes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
+- test_new - This is ANOTHER test module.
 
 v2.9
 ====
@@ -544,12 +544,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -683,8 +683,8 @@ Bugfixes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
-- test_new2 - This is ANOTHER test module!!!11
+- test_new - This is ANOTHER test module.
+- test_new2 - This is ANOTHER test module!!!11.
 - test_new3 - This is yet another test module.
 
 v2.9
@@ -708,12 +708,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -1042,7 +1042,7 @@ This is the first proper release.
 New Modules
 -----------
 
-- test_module - A test module
+- test_module - A test module.
 """
         )
 
