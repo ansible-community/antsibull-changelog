@@ -2182,7 +2182,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         assert changelog["releases"]["1.0.0"]["modules"][0]["namespace"] == ""
         assert (
             changelog["releases"]["1.0.0"]["modules"][0]["description"]
-            == "A test module"
+            == "A test module."
         )
         assert "version_added" not in changelog["releases"]["1.0.0"]["modules"][0]
 
@@ -2204,12 +2204,12 @@ This is the first proper release.
 New Modules
 -----------
 
-- acme.test.test_module - A test module
+- acme.test.test_module - A test module.
 
 New Roles
 ---------
 
-- acme.test.test_role - Test role
+- acme.test.test_role - Test role.
 """
         )
 

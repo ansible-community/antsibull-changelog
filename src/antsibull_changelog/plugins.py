@@ -79,11 +79,13 @@ class PluginDescription:
 
         for plugin_type, plugin_data in data.items():
             for plugin_name, plugin_details in plugin_data.items():
-
-                if plugin_details["description"].endswith("."):
-	                description = plugin_details["description"]
+                if plugin_details["description"]:
+                    if plugin_details["description"].endswith("."):
+                        description = plugin_details["description"]
+                    else:
+                        description = plugin_details["description"] + "."
                 else:
-                    description = plugin_details["description"] + "."
+                    description = plugin_details["description"]
                 plugins.append(
                     PluginDescription(
                         plugin_type=plugin_type,
