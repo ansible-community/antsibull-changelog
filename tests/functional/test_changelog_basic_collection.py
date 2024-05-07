@@ -1111,7 +1111,7 @@ New Modules
         },
         {
             "name": "test_new4",
-            "description": "This is yet another test module!.",
+            "description": "This is yet another test module!",
             "namespace": "",
         },
     ]
@@ -1186,7 +1186,7 @@ Test
 New Modules
 -----------
 
-- acme.test.test_new4 - This is yet another test module!.
+- acme.test.test_new4 - This is yet another test module!
 
 Foo
 ~~~

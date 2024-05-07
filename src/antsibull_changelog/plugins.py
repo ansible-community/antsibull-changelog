@@ -80,7 +80,7 @@ class PluginDescription:
         for plugin_type, plugin_data in data.items():
             for plugin_name, plugin_details in plugin_data.items():
                 description = plugin_details["description"]
-                if description and not description.endswith("."):
+                if description and not description.endswith((".", ",", "!", "?")):
                     description += "."
                 plugins.append(
                     PluginDescription(
