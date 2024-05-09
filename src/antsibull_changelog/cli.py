@@ -234,6 +234,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         "keep_fragments is true, or for with-archives if "
         "archives are used); default is with-archives",
     )
+    common_build.add_argument(
+        "--add-plugin-period",
+        action="store_true",
+        help="add period to the end of new plugin short descriptions to "
+        "comply with Ansible changelog fragment format",
+    )
 
     release_parser = subparsers.add_parser(
         "release",
