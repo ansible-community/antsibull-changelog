@@ -477,6 +477,7 @@ def _do_refresh(  # pylint: disable=too-many-arguments
                 version=changes.latest_version,
                 force_reload=args.reload_plugins,
                 use_ansible_doc=args.use_ansible_doc,
+                add_plugin_period=config.add_plugin_period,
             )
         allow_removals = refresh_plugins == "allow-removal"
 
@@ -671,6 +672,7 @@ def command_release(args: Any) -> int:
         version=version,
         force_reload=args.reload_plugins,
         use_ansible_doc=args.use_ansible_doc,
+        add_plugin_period=config.add_plugin_period,
     )
     fragments = load_fragments(paths, config)
     lint_rc = lint_fragments(config, fragments, [])
@@ -755,6 +757,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             collection_details=collection_details,
             version=changes.latest_version,
             force_reload=args.reload_plugins,
+            add_plugin_period=config.add_plugin_period,
         )
     if output and len(config.output_formats) > 1 and not output_format:
         print(

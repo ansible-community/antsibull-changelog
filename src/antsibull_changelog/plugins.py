@@ -67,7 +67,9 @@ class PluginDescription:
 
     @staticmethod
     def from_dict(
-        data: dict[str, dict[str, dict[str, Any]]], category: str = "plugin"
+        data: dict[str, dict[str, dict[str, Any]]],
+        category: str = "plugin",
+        add_plugin_period: bool = False,
     ) -> list[PluginDescription]:
         """
         Return a list of ``PluginDescription`` objects from the given data.
@@ -80,7 +82,8 @@ class PluginDescription:
         for plugin_type, plugin_data in data.items():
             for plugin_name, plugin_details in plugin_data.items():
                 description = plugin_details["description"]
-                if description and not description.endswith((".", ",", "!", "?")):
+                if (add_plugin_period and description and not 
+                        description.endswith((".", ",", "!", "?"))):
                     description += "."
                 plugins.append(
                     PluginDescription(
@@ -546,12 +549,14 @@ def _refresh_plugin_cache(
     return plugins_data
 
 
-def load_plugins(
+def load_plugins(  # pylint: disable=too-many-arguments
+
     paths: PathsConfig,
     collection_details: CollectionDetails,
     version: str,
     force_reload: bool = False,
     use_ansible_doc: bool = False,
+    add_plugin_period: bool = False,
 ) -> list[PluginDescription]:
     """
     Load plugins from ansible-doc.
@@ -585,10 +590,18 @@ def load_plugins(
         )
         store_yaml(plugin_cache_path, plugins_data)
 
-    plugins = PluginDescription.from_dict(plugins_data["plugins"])
+    plugins = PluginDescription.from_dict(
+        plugins_data["plugins"],
+        category="plugins",
+        add_plugin_period=add_plugin_period,
+    )
     if "objects" in plugins_data:
         plugins.extend(
-            PluginDescription.from_dict(plugins_data["objects"], category="object")
+            PluginDescription.from_dict(
+                plugins_data["objects"],
+                category="object",
+                add_plugin_period=add_plugin_period,
+            )
         )
 
     return plugins

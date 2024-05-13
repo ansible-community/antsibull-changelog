@@ -198,7 +198,7 @@ sections:
         {
             "module": {
                 "test": {
-                    "name": "test",
+                    "name": "test-samccann",
                     "description": "This is a test module",
                     "namespace": "",
                     "version_added": "2.10",

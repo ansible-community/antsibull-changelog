@@ -466,8 +466,9 @@ class ChangelogConfig:
                     f"Found unknown extension in output_formats: {exc}"
                 ) from exc
 
-        self._validate_config(ignore_is_other_project)
         self.add_plugin_period = self.config.get("add_plugin_period", False)
+
+        self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
         """
