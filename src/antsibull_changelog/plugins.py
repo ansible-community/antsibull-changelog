@@ -82,8 +82,11 @@ class PluginDescription:
         for plugin_type, plugin_data in data.items():
             for plugin_name, plugin_details in plugin_data.items():
                 description = plugin_details["description"]
-                if (add_plugin_period and description and not 
-                        description.endswith((".", ",", "!", "?"))):
+                if (
+                    add_plugin_period
+                    and description
+                    and not description.endswith((".", ",", "!", "?"))
+                ):
                     description += "."
                 plugins.append(
                     PluginDescription(
@@ -550,7 +553,6 @@ def _refresh_plugin_cache(
 
 
 def load_plugins(  # pylint: disable=too-many-arguments
-
     paths: PathsConfig,
     collection_details: CollectionDetails,
     version: str,
@@ -592,7 +594,6 @@ def load_plugins(  # pylint: disable=too-many-arguments
 
     plugins = PluginDescription.from_dict(
         plugins_data["plugins"],
-        category="plugins",
         add_plugin_period=add_plugin_period,
     )
     if "objects" in plugins_data:

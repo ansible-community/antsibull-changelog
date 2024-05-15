@@ -172,6 +172,7 @@ pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
 notesdir: fragments
 prelude_section_name: release_summary
 new_plugins_after_name: removed_features
+add_plugin_period: true
 sections:
 - ['major_changes', 'Major Changes']
 - ['minor_changes', 'Minor Changes']
@@ -1042,7 +1043,7 @@ This is the first proper release.
 New Modules
 -----------
 
-- test_module - A test module.
+- test_module - A test module
 """
         )
 

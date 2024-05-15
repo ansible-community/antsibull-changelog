@@ -170,6 +170,7 @@ mention_ancestor: false
 notesdir: fragments
 prelude_section_name: release_summary
 new_plugins_after_name: removed_features
+add_plugin_period: true
 sections:
 - ['major_changes', 'Major Changes']
 - ['minor_changes', 'Minor Changes']
@@ -899,6 +900,7 @@ mention_ancestor: false
 notesdir: fragments
 prelude_section_name: release_summary
 new_plugins_after_name: removed_features
+add_plugin_period: true
 sections:
 - ['major_changes', 'Major Changes']
 - ['minor_changes', 'Minor Changes']
