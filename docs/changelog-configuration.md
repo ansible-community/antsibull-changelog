@@ -13,9 +13,10 @@ This document describes all settings that are supported in
 
 ### `add_plugin_period` (boolean)
 
-The default value is `false`.
+The default value is `false` for existing configurations, and `true` for
+new configurations.
 
-If set to `false`, the plugin short description is used. If set to `true`, a period is added to the end of the plugin short description if no other end punctuation is present. Setting to ``true`` complies with the [Ansible changelog format](https://docs.ansible.com/ansible/latest/community/development_process.html#changelogs-how-to-format).
+If set to `false`, the plugin short description is used. If set to `true`, a period is added to the end of the plugin short description if no other end punctuation is present. Setting to `true` complies with the [Ansible changelog format](https://docs.ansible.com/ansible/latest/community/development_process.html#changelogs-how-to-format).
 
 
 ### `always_refresh` (string)
