@@ -172,6 +172,7 @@ pre_release_tag_re: '(?P<pre_release>(?:[ab]|rc)+\d*)$'
 notesdir: fragments
 prelude_section_name: release_summary
 new_plugins_after_name: removed_features
+add_plugin_period: true
 sections:
 - ['major_changes', 'Major Changes']
 - ['minor_changes', 'Minor Changes']
@@ -291,12 +292,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo bar lookup
+- bar - A foo bar lookup.
 
 New Modules
 -----------
 
-- test - This is a test module
+- test - This is a test module.
 """
     )
 
@@ -405,12 +406,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -521,7 +522,7 @@ Minor Changes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
+- test_new - This is ANOTHER test module.
 
 v2.9
 ====
@@ -544,12 +545,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 
@@ -683,8 +684,8 @@ Bugfixes
 New Modules
 -----------
 
-- test_new - This is ANOTHER test module
-- test_new2 - This is ANOTHER test module!!!11
+- test_new - This is ANOTHER test module.
+- test_new2 - This is ANOTHER test module!!!11.
 - test_new3 - This is yet another test module.
 
 v2.9
@@ -708,12 +709,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup
+- bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module
+- test - This is a TEST module.
 """
     )
 

@@ -378,6 +378,7 @@ class ChangelogConfig:
     is_other_project: bool
     sections: Mapping[str, str]
     output_formats: set[TextFormat]
+    add_plugin_period: bool
 
     def __init__(
         self,
@@ -465,6 +466,8 @@ class ChangelogConfig:
                     f"Found unknown extension in output_formats: {exc}"
                 ) from exc
 
+        self.add_plugin_period = self.config.get("add_plugin_period", False)
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -514,6 +517,7 @@ class ChangelogConfig:
             "trivial_section_name": self.trivial_section_name,
             "ignore_other_fragment_extensions": self.ignore_other_fragment_extensions,
             "sanitize_changelog": self.sanitize_changelog,
+            "add_plugin_period": self.add_plugin_period,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -592,6 +596,7 @@ class ChangelogConfig:
             "use_fqcn": True,
             "ignore_other_fragment_extensions": True,
             "sanitize_changelog": True,
+            "add_plugin_period": True,
         }
         if title is not None:
             config["title"] = title
