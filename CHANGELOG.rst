@@ -4,6 +4,19 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.27.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Adds period where needed at end of new plugin short descriptions. Controlled by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87).
+
 v0.26.0
 =======
 
