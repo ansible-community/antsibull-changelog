@@ -101,7 +101,7 @@ Feature release\.
 <a id="minor-changes"></a>
 ### Minor Changes
 
-* Adds period where needed at end of new plugin short descriptions\. Controlled by the <code>add\_plugin\_period</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/87](https\://github\.com/ansible\-community/antsibull\-changelog/issues/87)\)\.
+* Adds period where needed at end of new plugin short descriptions\. Controlled by the <code>add\_plugin\_period</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/87](https\://github\.com/ansible\-community/antsibull\-changelog/issues/87)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/162](https\://github\.com/ansible\-community/antsibull\-changelog/pull/162)\)\.
 
 <a id="v0-26-0"></a>
 ## v0\.26\.0

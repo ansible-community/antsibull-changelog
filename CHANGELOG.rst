@@ -15,7 +15,7 @@ Feature release.
 Minor Changes
 -------------
 
-- Adds period where needed at end of new plugin short descriptions. Controlled by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87).
+- Adds period where needed at end of new plugin short descriptions. Controlled by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87, https://github.com/ansible-community/antsibull-changelog/pull/162).
 
 v0.26.0
 =======
