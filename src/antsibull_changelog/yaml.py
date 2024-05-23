@@ -42,7 +42,7 @@ def load_yaml(path: str) -> Any:
         return yaml.load(stream, Loader=_SafeLoader)
 
 
-def store_yaml(path: str, content: Any, nice: bool) -> None:
+def store_yaml(path: str, content: Any, nice: bool = False) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
