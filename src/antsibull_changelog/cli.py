@@ -41,6 +41,15 @@ from .plugins import PluginDescription, load_plugins
 from .rendering.changelog import generate_changelog
 from .toml import has_toml_loader_available, load_toml
 
+# Return codes:
+
+SUCCESS = 0  # Success
+UNHANDLED_ERROR = 1  # Unhandled error.  See the Traceback for more information.
+BAD_CLI_ARG = 2  # There was a problem with the command line arguments.
+INVALID_FRAGMENT = 3  # Found invalid changelog fragments.
+OLD_PYTHON = 4  # Needs to be run on a newer version of Python.
+COMMAND_FAILED = 5  # Problem occurred which prevented the execution of the command.
+
 
 def set_paths(
     force: str | None = None,
@@ -319,7 +328,7 @@ def run(args: list[str]) -> int:
 
         if getattr(arguments, "func", None) is None:
             parser.print_help()
-            return 2
+            return BAD_CLI_ARG
 
         verbosity = arguments.verbose
         setup_logger(verbosity)
@@ -329,7 +338,7 @@ def run(args: list[str]) -> int:
         LOGGER.error(str(e))
         if verbosity > 2:
             traceback.print_exc()
-        return 5
+        return COMMAND_FAILED
     except SystemExit as e:
         # All cases that sys.exit is called directly or indirectly in the above
         # code (that we are aware of) always return an int.
@@ -339,7 +348,7 @@ def run(args: list[str]) -> int:
             traceback.print_exc()
         else:
             print("ERROR: Uncaught exception. Run with -v to see traceback.")
-        return 1
+        return UNHANDLED_ERROR
 
 
 def command_init(args: Any) -> int:
@@ -355,11 +364,11 @@ def command_init(args: Any) -> int:
 
     if not is_other_project and paths.galaxy_path is None:
         LOGGER.error("The file galaxy.yml does not exists in the collection root!")
-        return 5
+        return COMMAND_FAILED
     LOGGER.debug('Checking for existance of "{}"', paths.config_path)
     if os.path.exists(paths.config_path):
         LOGGER.error('A configuration file already exists at "{}"!', paths.config_path)
-        return 5
+        return COMMAND_FAILED
 
     collection_details = CollectionDetails(paths)
 
@@ -379,7 +388,7 @@ def command_init(args: Any) -> int:
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create fragments directory "{}"', fragments_dir)
         LOGGER.info("Exception: {}", str(exc))
-        return 5
+        return COMMAND_FAILED
 
     try:
         config.store()
@@ -387,9 +396,9 @@ def command_init(args: Any) -> int:
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create config file "{}"', paths.config_path)
         LOGGER.info("Exception: {}", str(exc))
-        return 5
+        return COMMAND_FAILED
 
-    return 0
+    return SUCCESS
 
 
 def _determine_flatmap(
@@ -707,7 +716,7 @@ def command_release(args: Any) -> int:
             flatmap=flatmap,
         )
 
-    return 0
+    return SUCCESS
 
 
 def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
@@ -738,10 +747,10 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             changes.restrict_to(version)
         except ValueError as exc:
             print(f"Cannot restrict to version '{version}': {exc}")
-            return 5
+            return COMMAND_FAILED
     if not changes.has_release:
         print("Cannot create changelog when not at least one release has been added.")
-        return 5
+        return COMMAND_FAILED
     plugins, fragments = _do_refresh(
         args, paths, collection_details, config, changes, None, None
     )
@@ -758,7 +767,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             "When an explicit output path is specified and more than one output format"
             " is configured, you need to explicitly specify an output format"
         )
-        return 5
+        return COMMAND_FAILED
     output_formats = (
         [TextFormat.from_extension(output_format)]
         if output_format
@@ -777,7 +786,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             only_latest=only_latest,
         )
 
-    return 0
+    return SUCCESS
 
 
 def command_lint(args: Any) -> int:
@@ -833,7 +842,7 @@ def lint_fragments(
     for message in messages:
         print(message)
 
-    return 3 if messages else 0
+    return INVALID_FRAGMENT if messages else SUCCESS
 
 
 def command_lint_changelog_yaml(args: Any) -> int:
@@ -853,7 +862,7 @@ def command_lint_changelog_yaml(args: Any) -> int:
     for message in messages:
         print(message)
 
-    return 3 if messages else 0
+    return INVALID_FRAGMENT if messages else SUCCESS
 
 
 def main() -> int:
@@ -865,17 +874,11 @@ def main() -> int:
     heavy lifting.
 
     :returns: A program return code.
-
-    Return codes:
-        :0: Success
-        :1: Unhandled error.  See the Traceback for more information.
-        :2: There was a problem with the command line arguments
-        :3: Found invalid changelog fragments
-        :4: Needs to be run on a newer version of Python
-        :5: Problem occured which prevented the execution of the command
+    See top of file for the return codes.
     """
+
     if sys.version_info < (3, 6):
         print("Needs Python 3.6 or later")
-        return 4
+        return OLD_PYTHON
 
     return run(sys.argv)
