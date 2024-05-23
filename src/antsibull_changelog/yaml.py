@@ -14,7 +14,6 @@ from typing import Any
 
 import yaml
 
-
 _SafeLoader: Any
 _SafeDumper: Any
 try:
@@ -30,6 +29,7 @@ class _IndentedDumper(yaml.SafeDumper):
     """
     Extend YAML dumper to increase indent of list items.
     """
+
     def increase_indent(self, flow=False, indentless=False):
         return super().increase_indent(flow, False)
 
@@ -52,5 +52,5 @@ def store_yaml(path: str, content: Any, nice: bool = False) -> None:
             stream,
             default_flow_style=False,
             Dumper=_IndentedDumper if nice else _SafeDumper,
-            explicit_start=nice
+            explicit_start=nice,
         )
