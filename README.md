@@ -8,6 +8,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 [![Discuss on Matrix at #antsibull:ansible.com](https://img.shields.io/matrix/antsibull:ansible.com.svg?server_fqdn=ansible-accounts.ems.host&label=Discuss%20on%20Matrix%20at%20%23antsibull:ansible.com&logo=matrix)](https://matrix.to/#/#antsibull:ansible.com)
 [![Nox badge](https://github.com/ansible-community/antsibull-changelog/workflows/nox/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22nox%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
+[![REUSE status](https://api.reuse.software/badge/github.com/ansible-community/antsibull-changelog)](https://api.reuse.software/info/github.com/ansible-community/antsibull-changelog)
 
 A changelog generator used by ansible-core and Ansible collections.
 

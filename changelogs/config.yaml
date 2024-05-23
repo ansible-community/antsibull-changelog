@@ -36,4 +36,5 @@ title: Ansible Changelog Tool
 output_formats:
   - rst
   - md
+add_plugin_period: false
 changelog_nice_yaml: false

@@ -429,7 +429,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     assert changelog["releases"]["1.0.0"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "",
         },
     ]
@@ -437,7 +437,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo bar lookup",
+                "description": "A foo bar lookup.",
                 "namespace": None,
             },
         ],
@@ -471,12 +471,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo bar lookup
+- acme.test.bar - A foo bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a test module
+- acme.test.test - This is a test module.
 """
     )
 
@@ -548,7 +548,7 @@ New Modules
     assert changelog["releases"]["1.0.0"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a TEST module",
+            "description": "This is a TEST module.",
             "namespace": "",
         },
     ]
@@ -556,7 +556,7 @@ New Modules
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo_bar lookup",
+                "description": "A foo_bar lookup.",
                 "namespace": None,
             },
         ],
@@ -589,12 +589,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module
+- acme.test.test - This is a TEST module.
 """
     )
 
@@ -685,7 +685,7 @@ New Modules
     assert changelog["releases"]["1.1.0-beta-1"]["modules"] == [
         {
             "name": "test_new",
-            "description": "This is ANOTHER test module",
+            "description": "This is ANOTHER test module.",
             "namespace": "",
         },
     ]
@@ -716,7 +716,7 @@ Minor Changes
 New Modules
 -----------
 
-- acme.test.test_new - This is ANOTHER test module
+- acme.test.test_new - This is ANOTHER test module.
 
 v1.0.0
 ======
@@ -738,12 +738,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module
+- acme.test.test - This is a TEST module.
 """
     )
 
@@ -862,7 +862,7 @@ New Modules
     assert changelog["releases"]["1.1.0"]["modules"] == [
         {
             "name": "test_new2",
-            "description": "This is ANOTHER test module!!!11",
+            "description": "This is ANOTHER test module!!!11.",
             "namespace": "",
         },
         {
@@ -904,8 +904,8 @@ Bugfixes
 New Modules
 -----------
 
-- acme.test.test_new - This is ANOTHER test module
-- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
 - acme.test.test_new3 - This is yet another test module.
 
 v1.0.0
@@ -928,12 +928,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module
+- acme.test.test - This is a TEST module.
 """
     )
 
@@ -1225,8 +1225,8 @@ Bugfixes
 New Modules
 -----------
 
-- acme.test.test_new - This is ANOTHER test module
-- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
 - acme.test.test_new3 - This is yet another test module.
 
 v1.0.0
@@ -1249,12 +1249,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module
+- acme.test.test - This is a TEST module.
 """
     )
 
@@ -1347,8 +1347,8 @@ Bugfixes
 New Modules
 -----------
 
-- acme.test.test_new - This is ANOTHER test module
-- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
 - acme.test.test_new3 - This is yet another test module.
 
 v1.0.0
@@ -1371,12 +1371,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup
+- acme.test.bar - A foo_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module
+- acme.test.test - This is a TEST module.
 """
     )
 
@@ -1422,8 +1422,8 @@ Bugfixes
 New Modules
 -----------
 
-- acme.test.test_new - This is ANOTHER test module
-- acme.test.test_new2 - This is ANOTHER test module!!!11
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
 - acme.test.test_new3 - This is yet another test module.
 """
     )
@@ -1470,12 +1470,12 @@ This is the first proper release\.
 <a id="lookup"></a>
 ### Lookup
 
-* acme\.test\.bar \- A foo\_bar lookup
+* acme\.test\.bar \- A foo\_bar lookup\.
 
 <a id="new-modules"></a>
 ## New Modules
 
-* acme\.test\.test \- This is a TEST module
+* acme\.test\.test \- This is a TEST module\.
 """
     )
 
@@ -1714,37 +1714,37 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
     assert changelog["releases"]["1.0.0"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "",
         },
         {
             "name": "test1",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "test",
         },
         {
             "name": "test2",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "test.foo",
         },
         {
             "name": "test3",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "test.bar",
         },
         {
             "name": "test4",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "foo",
         },
         {
             "name": "test5",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "bar.baz",
         },
         {
             "name": "test6",
-            "description": "This is a test module",
+            "description": "This is a test module.",
             "namespace": "foo.bar.baz",
         },
     ]
@@ -1752,7 +1752,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo bar lookup",
+                "description": "A foo bar lookup.",
                 "namespace": None,
             },
         ],
@@ -1786,12 +1786,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo bar lookup
+- bar - A foo bar lookup.
 
 New Modules
 -----------
 
-- test - This is a test module
+- test - This is a test module.
 
 Bar
 ~~~
@@ -1799,32 +1799,32 @@ Bar
 baz
 ^^^
 
-- test5 - This is a test module
+- test5 - This is a test module.
 
 Foo
 ~~~
 
-- test4 - This is a test module
+- test4 - This is a test module.
 
 bar.baz
 ^^^^^^^
 
-- test6 - This is a test module
+- test6 - This is a test module.
 
 Test
 ~~~~
 
-- test1 - This is a test module
+- test1 - This is a test module.
 
 bar
 ^^^
 
-- test3 - This is a test module
+- test3 - This is a test module.
 
 foo
 ^^^
 
-- test2 - This is a test module
+- test2 - This is a test module.
 """
     )
 
@@ -2182,7 +2182,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
         assert changelog["releases"]["1.0.0"]["modules"][0]["namespace"] == ""
         assert (
             changelog["releases"]["1.0.0"]["modules"][0]["description"]
-            == "A test module"
+            == "A test module."
         )
         assert "version_added" not in changelog["releases"]["1.0.0"]["modules"][0]
 
@@ -2204,12 +2204,12 @@ This is the first proper release.
 New Modules
 -----------
 
-- acme.test.test_module - A test module
+- acme.test.test_module - A test module.
 
 New Roles
 ---------
 
-- acme.test.test_role - Test role
+- acme.test.test_role - Test role.
 """
         )
 

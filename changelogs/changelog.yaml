@@ -266,6 +266,17 @@ releases:
     - 0.26.0.yml
     - 153-pymd-improvements.yaml
     release_date: '2024-03-17'
+  0.27.0:
+    changes:
+      minor_changes:
+      - Adds period where needed at end of new plugin short descriptions. Controlled
+        by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87,
+        https://github.com/ansible-community/antsibull-changelog/pull/162).
+      release_summary: Feature release.
+    fragments:
+    - 0.27.0.yml
+    - 162-add-plugin-period.yaml
+    release_date: '2024-05-20'
   0.3.0:
     changes:
       minor_changes:
