@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - |
+    Adds yaml boundary marker --- to the header of the file.
+    Increases indentation level on list items.
+    Makes changelog.yaml pass ansible-lint

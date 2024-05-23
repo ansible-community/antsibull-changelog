@@ -14,15 +14,19 @@ from typing import Any
 
 import yaml
 
+
 _SafeLoader: Any
+_SafeDumper: Any
 try:
     # use C version if possible for speedup
+    from yaml import CSafeDumper as _SafeDumper
     from yaml import CSafeLoader as _SafeLoader
 except ImportError:
+    from yaml import SafeDumper as _SafeDumper
     from yaml import SafeLoader as _SafeLoader
 
 
-class _SafeDumper(yaml.SafeDumper):
+class _IndentedDumper(yaml.SafeDumper):
     """
     Extend YAML dumper to increase indent of list items.
     """
@@ -38,7 +42,7 @@ def load_yaml(path: str) -> Any:
         return yaml.load(stream, Loader=_SafeLoader)
 
 
-def store_yaml(path: str, content: Any) -> None:
+def store_yaml(path: str, content: Any, nice: bool) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
@@ -47,6 +51,6 @@ def store_yaml(path: str, content: Any) -> None:
             content,
             stream,
             default_flow_style=False,
-            Dumper=_SafeDumper,
-            explicit_start=True
+            Dumper=_IndentedDumper if nice else _SafeDumper,
+            explicit_start=nice
         )
