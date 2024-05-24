@@ -52,10 +52,10 @@ reStructuredText version of the changelog is written to. The placeholder
 `%s` will be replaced by the first `changelog_filename_version_depth`
 parts of the version of the release.
 
-> [!NOTE]
-> The file extension (default `.rst`) will always be replaced by the
-> extension matching the output format (see [`output_formats`](#output_formats-list-of-strings)).
-> Therefore the extension provided here will always be ignored.
+!!! note
+    The file extension (default `.rst`) will always be replaced by the
+    extension matching the output format (see [`output_formats`](#output_formats-list-of-strings)).
+    Therefore the extension provided here will always be ignored.
 
 ### `changelog_filename_version_depth` (integer)
 
@@ -155,6 +155,13 @@ The default value is `fragments`.
 The name of the subdirectory of `changelogs/` that contains the
 changelog fragments.
 
+### `output_formats` (list of strings)
+
+The default is `["rst"]`.
+
+A list of output formats to write the changelog as. Supported formats
+are `rst` for ReStructuredText and `md` for MarkDown.
+
 ### `prelude_name` (string)
 
 The default value is `release_summary`.
@@ -247,13 +254,6 @@ new configurations.
 When set to `true`, uses FQCN (Fully Qualified Collection Names) when
 mentioning new plugins and modules. This means that `namespace.name.`
 is prepended to the plugin respectively module names.
-
-### `output_formats` (list of strings)
-
-The default is `["rst"]`.
-
-A list of output formats to write the changelog as. Supported formats
-are `rst` for ReStructuredText and `md` for MarkDown.
 
 ## Deprecated options
 
