@@ -259,8 +259,8 @@ are `rst` for ReStructuredText and `md` for MarkDown.
 
 The default is `false`.
 
-OWhen set to `true` the chanelog.yaml format will be written with nice yaml
-format that's compatible with `ansible-lint`default rules
+When set to `true` the changelog.yaml format will be written with nice yaml
+format that's compatible with `ansible-lint`default rules.
 
 ## Deprecated options
 
