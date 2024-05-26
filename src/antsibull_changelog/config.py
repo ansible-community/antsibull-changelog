@@ -379,6 +379,7 @@ class ChangelogConfig:
     sections: Mapping[str, str]
     output_formats: set[TextFormat]
     add_plugin_period: bool
+    changelog_nice_yaml: bool
 
     def __init__(
         self,
@@ -468,6 +469,8 @@ class ChangelogConfig:
 
         self.add_plugin_period = self.config.get("add_plugin_period", False)
 
+        self.changelog_nice_yaml = self.config.get("changelog_nice_yaml", False)
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -518,6 +521,7 @@ class ChangelogConfig:
             "ignore_other_fragment_extensions": self.ignore_other_fragment_extensions,
             "sanitize_changelog": self.sanitize_changelog,
             "add_plugin_period": self.add_plugin_period,
+            "changelog_nice_yaml": self.changelog_nice_yaml,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -597,6 +601,7 @@ class ChangelogConfig:
             "ignore_other_fragment_extensions": True,
             "sanitize_changelog": True,
             "add_plugin_period": True,
+            "changelog_nice_yaml": False,
         }
         if title is not None:
             config["title"] = title

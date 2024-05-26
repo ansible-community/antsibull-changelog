@@ -1,0 +1,9 @@
+---
+minor_changes:
+  - |
+    There is now an option ``changelog_nice_yaml`` to prepend the YAML document start
+    marker ``---`` to the header of the ``changelogs/changelog.yaml`` file, and to increases
+    indentation level on list items. This makes the file pass ansible-lint
+    (https://github.com/ansible-community/antsibull-changelog/issues/91,
+    https://github.com/ansible-community/antsibull-changelog/issues/152,
+    https://github.com/ansible-community/antsibull-changelog/pull/160).

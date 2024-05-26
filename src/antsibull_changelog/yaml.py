@@ -25,6 +25,15 @@ except ImportError:
     from yaml import SafeLoader as _SafeLoader
 
 
+class _IndentedDumper(yaml.SafeDumper):
+    """
+    Extend YAML dumper to increase indent of list items.
+    """
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow, False)
+
+
 def load_yaml(path: str) -> Any:
     """
     Load and parse YAML file ``path``.
@@ -33,11 +42,15 @@ def load_yaml(path: str) -> Any:
         return yaml.load(stream, Loader=_SafeLoader)
 
 
-def store_yaml(path: str, content: Any) -> None:
+def store_yaml(path: str, content: Any, nice: bool = False) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
     with open(path, "w", encoding="utf-8") as stream:
-        dumper = _SafeDumper
-        dumper.ignore_aliases = lambda *args: True
-        yaml.dump(content, stream, default_flow_style=False, Dumper=dumper)
+        yaml.dump(
+            content,
+            stream,
+            default_flow_style=False,
+            Dumper=_IndentedDumper if nice else _SafeDumper,
+            explicit_start=nice,
+        )

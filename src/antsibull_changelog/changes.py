@@ -156,7 +156,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         self.sort()
         self.data["ancestor"] = self.ancestor
-        store_yaml(self.path, self.data)
+        store_yaml(self.path, self.data, self.config.changelog_nice_yaml)
 
     def add_release(
         self,

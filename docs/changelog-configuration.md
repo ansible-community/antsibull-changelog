@@ -92,6 +92,17 @@ except when using the changelog generator for Ansible 2.9 or earlier.
 Note that support for `classic` is **DEPRECATED** and will be removed in
 a future release. The field will from then on be required.
 
+### `changelog_nice_yaml` (boolean)
+
+The default is `false`.
+
+When set to `true`, the `changelogs/changelog.yaml` file will be written with a slightly different
+YAML encoding that is compatible with ansible-lint's default rules.
+
+!!! note
+    The exact format used might be adjusted in the future if new releases of ansible-lint
+    adjust their yamllint configuration.
+
 ### `flatmap` (optional boolean)
 
 The default value is `null`.
