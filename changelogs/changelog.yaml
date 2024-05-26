@@ -277,6 +277,29 @@ releases:
     - 0.27.0.yml
     - 162-add-plugin-period.yaml
     release_date: '2024-05-20'
+  0.28.0:
+    changes:
+      minor_changes:
+      - 'There is now an option ``changelog_nice_yaml`` to prepend the YAML document
+        start
+
+        marker ``---`` to the header of the ``changelogs/changelog.yaml`` file, and
+        to increases
+
+        indentation level on list items. This makes the file pass ansible-lint
+
+        (https://github.com/ansible-community/antsibull-changelog/issues/91,
+
+        https://github.com/ansible-community/antsibull-changelog/issues/152,
+
+        https://github.com/ansible-community/antsibull-changelog/pull/160).
+
+        '
+      release_summary: Feature release.
+    fragments:
+    - 0.28.0.yml
+    - 160-changelog-nice-yaml.yml
+    release_date: '2024-05-26'
   0.3.0:
     changes:
       minor_changes:
