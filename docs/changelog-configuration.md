@@ -103,6 +103,13 @@ YAML encoding that is compatible with ansible-lint's default rules.
     The exact format used might be adjusted in the future if new releases of ansible-lint
     adjust their yamllint configuration.
 
+### `changelog_semantic_versioning_sort` (boolean)
+
+The default is `false`.
+
+When set to `true` the changelog entries in `changelogs/changelog.yaml` entries will
+be sorted by semantic version.
+
 ### `flatmap` (optional boolean)
 
 The default value is `null`.

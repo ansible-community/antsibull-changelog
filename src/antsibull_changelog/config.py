@@ -380,6 +380,7 @@ class ChangelogConfig:
     output_formats: set[TextFormat]
     add_plugin_period: bool
     changelog_nice_yaml: bool
+    changelog_semantic_versioning_sort: bool
 
     def __init__(
         self,
@@ -471,6 +472,10 @@ class ChangelogConfig:
 
         self.changelog_nice_yaml = self.config.get("changelog_nice_yaml", False)
 
+        self.changelog_semantic_versioning_sort = self.config.get(
+            "changelog_semantic_versioning_sort", False
+        )
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -522,6 +527,7 @@ class ChangelogConfig:
             "sanitize_changelog": self.sanitize_changelog,
             "add_plugin_period": self.add_plugin_period,
             "changelog_nice_yaml": self.changelog_nice_yaml,
+            "changelog_semantic_versioning_sort": self.changelog_semantic_versioning_sort,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -602,6 +608,7 @@ class ChangelogConfig:
             "sanitize_changelog": True,
             "add_plugin_period": True,
             "changelog_nice_yaml": False,
+            "changelog_semantic_versioning_sort": False,
         }
         if title is not None:
             config["title"] = title

@@ -42,7 +42,7 @@ def load_yaml(path: str) -> Any:
         return yaml.load(stream, Loader=_SafeLoader)
 
 
-def store_yaml(path: str, content: Any, nice: bool = False) -> None:
+def store_yaml(path: str, content: Any, nice: bool = False, sort: bool = False) -> None:
     """
     Store ``content`` as YAML file under ``path``.
     """
@@ -53,4 +53,5 @@ def store_yaml(path: str, content: Any, nice: bool = False) -> None:
             default_flow_style=False,
             Dumper=_IndentedDumper if nice else _SafeDumper,
             explicit_start=nice,
+            sort_keys=not sort,
         )

@@ -15,22 +15,22 @@ notesdir: fragments
 prelude_section_name: release_summary
 prelude_section_title: Release Summary
 sections:
-- - major_changes
-  - Major Changes
-- - minor_changes
-  - Minor Changes
-- - breaking_changes
-  - Breaking Changes / Porting Guide
-- - deprecated_features
-  - Deprecated Features
-- - removed_features
-  - Removed Features (previously deprecated)
-- - security_fixes
-  - Security Fixes
-- - bugfixes
-  - Bugfixes
-- - known_issues
-  - Known Issues
+  - - major_changes
+    - Major Changes
+  - - minor_changes
+    - Minor Changes
+  - - breaking_changes
+    - Breaking Changes / Porting Guide
+  - - deprecated_features
+    - Deprecated Features
+  - - removed_features
+    - Removed Features (previously deprecated)
+  - - security_fixes
+    - Security Fixes
+  - - bugfixes
+    - Bugfixes
+  - - known_issues
+    - Known Issues
 use_semantic_versioning: true
 title: Ansible Changelog Tool
 output_formats:
@@ -38,3 +38,4 @@ output_formats:
   - md
 add_plugin_period: false
 changelog_nice_yaml: false
+changelog_semantic_versioning_sort: false
