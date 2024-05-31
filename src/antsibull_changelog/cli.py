@@ -866,7 +866,7 @@ def main() -> int:
     heavy lifting.
 
     :returns: A program return code.
-    See top of file for the return codes.
+    See constants.py for the return codes.
     """
 
     if sys.version_info < (3, 6):
