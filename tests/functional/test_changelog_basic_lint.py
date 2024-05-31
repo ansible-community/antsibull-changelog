@@ -15,6 +15,7 @@ from unittest import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
+from antsibull_changelog import constants as C
 from antsibull_changelog.config import PathsConfig
 
 
@@ -39,14 +40,14 @@ def test_changelog_fragment_lint_correct(  # pylint: disable=redefined-outer-nam
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
-    assert rc == 0
+    assert rc == C.SUCCESS
     assert stdout == ""
 
     # Lint explicitly named fragment
     rc, stdout, stderr = collection_changelog.run_tool_w_output(
         "lint", ["changelogs/fragments/1.0.0.yml"]
     )
-    assert rc == 0
+    assert rc == C.SUCCESS
     assert stdout == ""
 
 
@@ -93,7 +94,7 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
-    assert rc == 3
+    assert rc == C.INVALID_FRAGMENT
     assert (
         stdout
         == r"""
@@ -124,7 +125,7 @@ changelogs/fragments/wrong-category.yaml:0:0: invalid section: minor_change
     rc, stdout, stderr = collection_changelog.run_tool_w_output(
         "lint", ["changelogs/fragments/non-existing"]
     )
-    assert rc == 3
+    assert rc == C.INVALID_FRAGMENT
     assert (
         stdout
         == r"""

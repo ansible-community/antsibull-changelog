@@ -15,6 +15,8 @@ from unittest import mock
 from fixtures import ansible_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
+from antsibull_changelog import constants as C
+
 
 def test_changelog_release_ansible_empty(  # pylint: disable=redefined-outer-name
     ansible_changelog,
@@ -51,7 +53,7 @@ sections:
             "release",
             ["-v", "--date", "2020-01-02", "--version", "2.10", "--codename", "meow"],
         )
-        == 0
+        == C.SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -95,7 +97,7 @@ This is the first proper release.
 """
     )
 
-    assert ansible_changelog.run_tool("generate", ["-v"]) == 0
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
     assert ansible_changelog.diff().unchanged
 
     # Version 2.10.1
@@ -107,7 +109,7 @@ This is the first proper release.
             "release",
             ["-v", "--date", "2020-02-29", "--version", "2.10.1", "--codename", "meow"],
         )
-        == 0
+        == C.SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -150,7 +152,7 @@ This is the first proper release.
 """
     )
 
-    assert ansible_changelog.run_tool("generate", ["-v", "--refresh"]) == 0
+    assert ansible_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
     assert ansible_changelog.diff().unchanged
 
 
@@ -233,7 +235,7 @@ sections:
             "release",
             ["-v", "--date", "2020-01-02", "--version", "2.10", "--codename", "meow"],
         )
-        == 0
+        == C.SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -319,7 +321,7 @@ New Modules
     )
 
     # Check that regenerate doesn't change anything
-    assert ansible_changelog.run_tool("generate", ["-v"]) == 0
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
     assert ansible_changelog.diff().unchanged
 
     # Update plugin descriptions
@@ -377,7 +379,7 @@ New Modules
 
     # Check that regenerate without --refresh changes
     # (since we specified always_refresh in config)
-    assert ansible_changelog.run_tool("generate", ["-v"]) == 0
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
 
     diff = ansible_changelog.diff()
     assert diff.added_dirs == []
@@ -510,7 +512,7 @@ New Modules
                 "woof",
             ],
         )
-        == 0
+        == C.SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -677,7 +679,7 @@ New Modules
                 "woof!",
             ],
         )
-        == 0
+        == C.SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -796,13 +798,13 @@ New Modules
                 "woof!!!",
             ],
         )
-        == 0
+        == C.SUCCESS
     )
 
     assert ansible_changelog.diff().unchanged
 
     # Lint fragments
-    assert ansible_changelog.run_tool("lint", ["-vv"]) == 0
+    assert ansible_changelog.run_tool("lint", ["-vv"]) == C.SUCCESS
 
     # Add fragment with trivial section
     ansible_changelog.add_fragment_line("trivial.yml", "trivial", ["This is trivial."])
@@ -1043,7 +1045,7 @@ sections:
                     "meow",
                 ],
             )
-            == 0
+            == C.SUCCESS
         )
 
         diff = ansible_changelog.diff()
@@ -1146,7 +1148,7 @@ New Modules
             ansible_changelog.run_tool(
                 "generate", ["-v", "--reload-plugins", "--use-ansible-doc"]
             )
-            == 0
+            == C.SUCCESS
         )
 
         diff = ansible_changelog.diff()
