@@ -46,7 +46,7 @@ def test_changelog_release_keep_fragments(  # pylint: disable=redefined-outer-na
     # Release
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -89,7 +89,7 @@ Minor Changes
     # Refresh
     assert (
         collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -151,7 +151,7 @@ def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-
     # Release
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -191,7 +191,7 @@ Minor Changes
     # Refresh should be ignored
     assert (
         collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     assert collection_changelog.diff().unchanged
 
@@ -206,7 +206,7 @@ Minor Changes
         collection_changelog.run_tool(
             "release", ["-v", "--version", "1.1.0", "--date", "2020-01-02"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -264,7 +264,7 @@ Minor Changes
         collection_changelog.run_tool(
             "release", ["-v", "--version", "1.2.0", "--date", "2020-01-02"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -337,7 +337,7 @@ def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer
     # Release
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -391,7 +391,7 @@ Minor Changes
     # Refresh
     assert (
         collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -437,6 +437,6 @@ Minor Changes
         collection_changelog.run_tool(
             "generate", ["-v", "--refresh-fragments", "without-archives"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     assert collection_changelog.diff().unchanged

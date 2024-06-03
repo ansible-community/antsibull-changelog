@@ -30,7 +30,7 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     )
     assert (
         collection_changelog.run_tool("init", [collection_changelog.paths.base_dir])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -72,7 +72,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
 
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -137,7 +137,9 @@ This is the first proper release\.
 """
     )
 
-    assert collection_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--refresh"]) == C.RC_SUCCESS
+    )
     assert collection_changelog.diff().unchanged
 
     assert (
@@ -153,7 +155,7 @@ This is the first proper release\.
             "generate",
             ["-v", "--refresh", "--output", "extract.md", "--output-format", "md"],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -184,7 +186,7 @@ This is the first proper release\.
         collection_changelog.run_tool(
             "release", ["-v", "--codename", "primetime", "--date", "2020-01-03"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     assert collection_changelog.diff().unchanged
 
@@ -200,7 +202,7 @@ This is the first proper release\.
                 "--update-existing",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
@@ -263,7 +265,7 @@ This is the first proper release\.
 
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-02-29"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -330,7 +332,9 @@ This is the first proper release\.
 """
     )
 
-    assert collection_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--refresh"]) == C.RC_SUCCESS
+    )
     assert collection_changelog.diff().unchanged
 
 
@@ -391,7 +395,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     )
 
     # Lint fragments (should fail)
-    assert collection_changelog.run_tool("lint", ["-vv"]) == C.INVALID_FRAGMENT
+    assert collection_changelog.run_tool("lint", ["-vv"]) == C.RC_INVALID_FRAGMENT
 
     # Release (should fail)
     assert collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == 3
@@ -401,12 +405,12 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     )
 
     # Lint fragments
-    assert collection_changelog.run_tool("lint", ["-vv"]) == C.SUCCESS
+    assert collection_changelog.run_tool("lint", ["-vv"]) == C.RC_SUCCESS
 
     # Release
     assert (
         collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -491,7 +495,7 @@ New Modules
     )
 
     # Check that regenerate doesn't change anything
-    assert collection_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert collection_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert collection_changelog.diff().unchanged
 
     # Update plugin descriptions
@@ -535,13 +539,13 @@ New Modules
     )
 
     # Check that regenerate without --refresh* doesn't change anything
-    assert collection_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert collection_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert collection_changelog.diff().unchanged
 
     # Check that regenerate with --refresh-fragments does not change
     assert (
         collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -550,7 +554,7 @@ New Modules
     # Check that regenerate with --refresh-plugins changes
     assert (
         collection_changelog.run_tool("generate", ["-v", "--refresh-plugins"])
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -671,7 +675,7 @@ New Modules
                 "1.1.0-beta-1",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -832,7 +836,7 @@ New Modules
                 "-vvv",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     # Final release 1.1.0
@@ -847,7 +851,7 @@ New Modules
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -965,7 +969,7 @@ New Modules
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     assert collection_changelog.diff().unchanged
@@ -1091,7 +1095,7 @@ New Modules
                 "1.2.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -1286,7 +1290,7 @@ New Modules
                 "1.2.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     assert collection_changelog.diff().unchanged
@@ -1324,7 +1328,7 @@ New Modules
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -1408,7 +1412,7 @@ New Modules
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -1458,7 +1462,7 @@ New Modules
                 "1.0.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -1697,7 +1701,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "yes",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -2106,7 +2110,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
 
         assert (
             collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-            == C.SUCCESS
+            == C.RC_SUCCESS
         )
 
         diff = collection_changelog.diff()
@@ -2234,7 +2238,7 @@ New Roles
             collection_changelog.run_tool(
                 "generate", ["-v", "--reload-plugins", "--use-ansible-doc"]
             )
-            == C.SUCCESS
+            == C.RC_SUCCESS
         )
 
         diff = collection_changelog.diff()

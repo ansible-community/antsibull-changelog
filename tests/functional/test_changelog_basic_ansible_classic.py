@@ -59,7 +59,7 @@ sections:
                     "meow",
                 ],
             )
-            == C.SUCCESS
+            == C.RC_SUCCESS
         )
 
         assert len(w) == 1
@@ -105,7 +105,7 @@ This is the first proper release.
 """
     )
 
-    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert ansible_changelog.diff().unchanged
 
     # Version 2.9.1
@@ -117,7 +117,7 @@ This is the first proper release.
             "release",
             ["-v", "--date", "2020-02-29", "--version", "2.9.1", "--codename", "meow"],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -160,7 +160,7 @@ This is the first proper release.
 """
     )
 
-    assert ansible_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
+    assert ansible_changelog.run_tool("generate", ["-v", "--refresh"]) == C.RC_SUCCESS
     assert ansible_changelog.diff().unchanged
 
 
@@ -237,7 +237,7 @@ sections:
             "release",
             ["-v", "--date", "2020-01-02", "--version", "2.9", "--codename", "meow"],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -304,7 +304,7 @@ New Modules
     )
 
     # Check that regenerate doesn't change anything
-    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert ansible_changelog.diff().unchanged
 
     # Update plugin descriptions
@@ -362,7 +362,7 @@ New Modules
 
     # Check that regenerate without --refresh changes
     # (since we specified always_refresh in config)
-    assert ansible_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert ansible_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
 
     diff = ansible_changelog.diff()
     assert diff.added_dirs == []
@@ -476,7 +476,7 @@ New Modules
                 "woof",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -631,7 +631,7 @@ New Modules
                 "woof!",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = ansible_changelog.diff()
@@ -734,13 +734,13 @@ New Modules
                 "woof!!!",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     assert ansible_changelog.diff().unchanged
 
     # Lint fragments
-    assert ansible_changelog.run_tool("lint", ["-vv"]) == C.SUCCESS
+    assert ansible_changelog.run_tool("lint", ["-vv"]) == C.RC_SUCCESS
 
 
 FAKE_PLUGINS = {
@@ -961,7 +961,7 @@ sections:
                     "meow",
                 ],
             )
-            == C.SUCCESS
+            == C.RC_SUCCESS
         )
 
         diff = ansible_changelog.diff()
@@ -1054,7 +1054,7 @@ New Modules
             ansible_changelog.run_tool(
                 "generate", ["-v", "--reload-plugins", "--use-ansible-doc"]
             )
-            == C.SUCCESS
+            == C.RC_SUCCESS
         )
 
         diff = ansible_changelog.diff()

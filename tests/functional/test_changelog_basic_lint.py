@@ -40,14 +40,14 @@ def test_changelog_fragment_lint_correct(  # pylint: disable=redefined-outer-nam
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
-    assert rc == C.SUCCESS
+    assert rc == C.RC_SUCCESS
     assert stdout == ""
 
     # Lint explicitly named fragment
     rc, stdout, stderr = collection_changelog.run_tool_w_output(
         "lint", ["changelogs/fragments/1.0.0.yml"]
     )
-    assert rc == C.SUCCESS
+    assert rc == C.RC_SUCCESS
     assert stdout == ""
 
 
@@ -94,7 +94,7 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
-    assert rc == C.INVALID_FRAGMENT
+    assert rc == C.RC_INVALID_FRAGMENT
     assert (
         stdout
         == r"""
@@ -125,7 +125,7 @@ changelogs/fragments/wrong-category.yaml:0:0: invalid section: minor_change
     rc, stdout, stderr = collection_changelog.run_tool_w_output(
         "lint", ["changelogs/fragments/non-existing"]
     )
-    assert rc == C.INVALID_FRAGMENT
+    assert rc == C.RC_INVALID_FRAGMENT
     assert (
         stdout
         == r"""

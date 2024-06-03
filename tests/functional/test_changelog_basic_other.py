@@ -26,7 +26,7 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     # If we do not specify --is-other-project, it should error out
     assert (
         other_changelog.run_tool("init", [other_changelog.paths.base_dir])
-        == C.COMMAND_FAILED
+        == C.RC_COMMAND_FAILED
     )
 
     # If we do specify it, it just work
@@ -34,7 +34,7 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
         other_changelog.run_tool(
             "init", [other_changelog.paths.base_dir, "--is-other-project"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -67,7 +67,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
     # If we do not pass --version, will fail
     assert (
         other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-        == C.COMMAND_FAILED
+        == C.RC_COMMAND_FAILED
     )
 
     # If we pass --version, will succeed
@@ -75,7 +75,7 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
         other_changelog.run_tool(
             "release", ["-v", "--date", "2020-01-02", "--version", "1.0.0"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -118,7 +118,7 @@ This is the first proper release.
 """
     )
 
-    assert other_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
+    assert other_changelog.run_tool("generate", ["-v", "--refresh"]) == C.RC_SUCCESS
     assert other_changelog.diff().unchanged
 
     assert (
@@ -134,7 +134,7 @@ This is the first proper release.
                 "1.0.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     assert other_changelog.diff().unchanged
 
@@ -152,7 +152,7 @@ This is the first proper release.
                 "--update-existing",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
     diff = other_changelog.diff()
     assert diff.added_dirs == []
@@ -188,7 +188,7 @@ This is the first proper release.
         other_changelog.run_tool(
             "release", ["-v", "--date", "2020-02-29", "--version", "1.1.0"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -229,7 +229,7 @@ This is the first proper release.
 """
     )
 
-    assert other_changelog.run_tool("generate", ["-v", "--refresh"]) == C.SUCCESS
+    assert other_changelog.run_tool("generate", ["-v", "--refresh"]) == C.RC_SUCCESS
     assert other_changelog.diff().unchanged
 
 
@@ -252,14 +252,14 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     )
 
     # Lint fragments
-    assert other_changelog.run_tool("lint", ["-vv"]) == C.SUCCESS
+    assert other_changelog.run_tool("lint", ["-vv"]) == C.RC_SUCCESS
 
     # Release
     assert (
         other_changelog.run_tool(
             "release", ["-v", "--date", "2020-01-02", "--version", "1.0.0"]
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -317,7 +317,7 @@ Minor Changes
     )
 
     # Check that regenerate doesn't change anything
-    assert other_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert other_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert other_changelog.diff().unchanged
 
     # Add another fragment
@@ -326,12 +326,13 @@ Minor Changes
     )
 
     # Check that regenerate without --refresh* doesn't change anything
-    assert other_changelog.run_tool("generate", ["-v"]) == C.SUCCESS
+    assert other_changelog.run_tool("generate", ["-v"]) == C.RC_SUCCESS
     assert other_changelog.diff().unchanged
 
     # Check that regenerate with --refresh-fragments does not change
     assert (
-        other_changelog.run_tool("generate", ["-v", "--refresh-fragments"]) == C.SUCCESS
+        other_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -339,7 +340,8 @@ Minor Changes
 
     # Check that regenerate with --refresh-plugins does not change
     assert (
-        other_changelog.run_tool("generate", ["-v", "--refresh-plugins"]) == C.SUCCESS
+        other_changelog.run_tool("generate", ["-v", "--refresh-plugins"])
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -389,7 +391,7 @@ Minor Changes
                 "1.1.0-beta-1",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -474,7 +476,7 @@ Minor Changes
                 "-vvv",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     # Final release 1.1.0
@@ -489,7 +491,7 @@ Minor Changes
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -576,7 +578,7 @@ Minor Changes
                 "1.1.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     assert other_changelog.diff().unchanged
@@ -598,7 +600,7 @@ Minor Changes
                 "1.2.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -683,7 +685,7 @@ Minor Changes
                 "1.2.0",
             ],
         )
-        == C.SUCCESS
+        == C.RC_SUCCESS
     )
 
     assert other_changelog.diff().unchanged
@@ -728,7 +730,8 @@ def test_changelog_release_package_json(  # pylint: disable=redefined-outer-name
 
     # Release
     assert (
-        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == C.SUCCESS
+        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -820,7 +823,8 @@ license = "GPL-3.0-or-later"
 
     # Release
     assert (
-        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == C.SUCCESS
+        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()
@@ -916,7 +920,8 @@ license = "GPL-3.0-or-later"
 
     # Release
     assert (
-        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == C.SUCCESS
+        other_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
     )
 
     diff = other_changelog.diff()

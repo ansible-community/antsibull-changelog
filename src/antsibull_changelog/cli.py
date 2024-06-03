@@ -320,7 +320,7 @@ def run(args: list[str]) -> int:
 
         if getattr(arguments, "func", None) is None:
             parser.print_help()
-            return C.BAD_CLI_ARG
+            return C.RC_BAD_CLI_ARG
 
         verbosity = arguments.verbose
         setup_logger(verbosity)
@@ -330,7 +330,7 @@ def run(args: list[str]) -> int:
         LOGGER.error(str(e))
         if verbosity > 2:
             traceback.print_exc()
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
     except SystemExit as e:
         # All cases that sys.exit is called directly or indirectly in the above
         # code (that we are aware of) always return an int.
@@ -340,7 +340,7 @@ def run(args: list[str]) -> int:
             traceback.print_exc()
         else:
             print("ERROR: Uncaught exception. Run with -v to see traceback.")
-        return C.UNHANDLED_ERROR
+        return C.RC_UNHANDLED_ERROR
 
 
 def command_init(args: Any) -> int:
@@ -356,11 +356,11 @@ def command_init(args: Any) -> int:
 
     if not is_other_project and paths.galaxy_path is None:
         LOGGER.error("The file galaxy.yml does not exists in the collection root!")
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
     LOGGER.debug('Checking for existance of "{}"', paths.config_path)
     if os.path.exists(paths.config_path):
         LOGGER.error('A configuration file already exists at "{}"!', paths.config_path)
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
 
     collection_details = CollectionDetails(paths)
 
@@ -380,7 +380,7 @@ def command_init(args: Any) -> int:
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create fragments directory "{}"', fragments_dir)
         LOGGER.info("Exception: {}", str(exc))
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
 
     try:
         config.store()
@@ -388,9 +388,9 @@ def command_init(args: Any) -> int:
     except Exception as exc:  # pylint: disable=broad-except
         LOGGER.error('Cannot create config file "{}"', paths.config_path)
         LOGGER.info("Exception: {}", str(exc))
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
 
-    return C.SUCCESS
+    return C.RC_SUCCESS
 
 
 def _determine_flatmap(
@@ -708,7 +708,7 @@ def command_release(args: Any) -> int:
             flatmap=flatmap,
         )
 
-    return C.SUCCESS
+    return C.RC_SUCCESS
 
 
 def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
@@ -739,10 +739,10 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             changes.restrict_to(version)
         except ValueError as exc:
             print(f"Cannot restrict to version '{version}': {exc}")
-            return C.COMMAND_FAILED
+            return C.RC_COMMAND_FAILED
     if not changes.has_release:
         print("Cannot create changelog when not at least one release has been added.")
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
     plugins, fragments = _do_refresh(
         args, paths, collection_details, config, changes, None, None
     )
@@ -759,7 +759,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             "When an explicit output path is specified and more than one output format"
             " is configured, you need to explicitly specify an output format"
         )
-        return C.COMMAND_FAILED
+        return C.RC_COMMAND_FAILED
     output_formats = (
         [TextFormat.from_extension(output_format)]
         if output_format
@@ -778,7 +778,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             only_latest=only_latest,
         )
 
-    return C.SUCCESS
+    return C.RC_SUCCESS
 
 
 def command_lint(args: Any) -> int:
@@ -834,7 +834,7 @@ def lint_fragments(
     for message in messages:
         print(message)
 
-    return C.INVALID_FRAGMENT if messages else C.SUCCESS
+    return C.RC_INVALID_FRAGMENT if messages else C.RC_SUCCESS
 
 
 def command_lint_changelog_yaml(args: Any) -> int:
@@ -854,7 +854,7 @@ def command_lint_changelog_yaml(args: Any) -> int:
     for message in messages:
         print(message)
 
-    return C.INVALID_FRAGMENT if messages else C.SUCCESS
+    return C.RC_INVALID_FRAGMENT if messages else C.RC_SUCCESS
 
 
 def main() -> int:
@@ -871,6 +871,6 @@ def main() -> int:
 
     if sys.version_info < (3, 6):
         print("Needs Python 3.6 or later")
-        return C.OLD_PYTHON
+        return C.RC_OLD_PYTHON
 
     return run(sys.argv)
