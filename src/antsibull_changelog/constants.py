@@ -12,5 +12,4 @@ RC_SUCCESS = 0  # Success
 RC_UNHANDLED_ERROR = 1  # Unhandled error.  See the Traceback for more information.
 RC_BAD_CLI_ARG = 2  # There was a problem with the command line arguments.
 RC_INVALID_FRAGMENT = 3  # Found invalid changelog fragments.
-RC_OLD_PYTHON = 4  # Needs to be run on a newer version of Python.
 RC_COMMAND_FAILED = 5  # Problem occurred which prevented the execution of the command.

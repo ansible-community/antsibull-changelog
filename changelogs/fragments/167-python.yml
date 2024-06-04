@@ -1,2 +1,6 @@
 bugfixes:
-  - "Adjust the Python version check in ``main()`` to test for Python 3.9 instead of 3.6, which is the minimum required Python version since version 0.18.0 (https://github.com/ansible-community/antsibull-changelog/pull/167)."
+  - "Remove Python version check that was checking for Python >= 3.6 (instead of >= 3.9).
+     This check is not really necessary since ``pyproject.toml`` declares ``requires-python``,
+     and old enough Python versions where pip does not know about ``requires-python``
+     will not load antsibull-changelog due to syntax errors anyway
+     (https://github.com/ansible-community/antsibull-changelog/pull/167)."
