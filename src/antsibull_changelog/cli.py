@@ -869,8 +869,4 @@ def main() -> int:
     See constants.py for the return codes.
     """
 
-    if sys.version_info < (3, 6):
-        print("Needs Python 3.6 or later")
-        return C.RC_OLD_PYTHON
-
     return run(sys.argv)
