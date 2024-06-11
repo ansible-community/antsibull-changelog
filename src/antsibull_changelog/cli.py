@@ -18,7 +18,6 @@ import shutil
 import subprocess
 import sys
 import traceback
-import warnings
 from collections.abc import Callable
 from typing import Any, cast
 
@@ -617,15 +616,6 @@ def _get_version_and_codename(
     return version, codename
 
 
-def _check_deprecation(config: ChangelogConfig):
-    if config.changes_format == "classic":
-        warnings.warn(
-            "Support for 'classic' changelogs (Ansible 2.9 and before) is deprecated"
-            " and will soon be removed from antsibull-changelog.",
-            DeprecationWarning,
-        )
-
-
 def command_release(args: Any) -> int:
     """
     Add a new release to a changelog.
@@ -639,8 +629,6 @@ def command_release(args: Any) -> int:
 
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
-
-    _check_deprecation(config)
 
     load_collection_details(collection_details, args)
 
@@ -727,8 +715,6 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
     collection_details = CollectionDetails(paths)
     config = ChangelogConfig.load(paths, collection_details)
 
-    _check_deprecation(config)
-
     load_collection_details(collection_details, args)
 
     flatmap = _determine_flatmap(collection_details, config)
@@ -797,8 +783,6 @@ def command_lint(args: Any) -> int:
     config = ChangelogConfig.load(
         paths, collection_details, ignore_is_other_project=True
     )
-
-    _check_deprecation(config)
 
     exceptions: list[tuple[str, Exception]] = []
     fragments = load_fragments(paths, config, fragment_paths, exceptions)

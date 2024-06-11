@@ -7,10 +7,7 @@
 
 """
 Classes handling ``changelog.yaml`` (new Ansible and collections)
-and ``.changes.yaml`` (old Ansible) files.
 """
-
-# pylint: disable=too-many-lines
 
 from __future__ import annotations
 
@@ -26,15 +23,13 @@ from .changes_resolvers import (
     ChangesDataObjectResolver,
     ChangesDataPluginResolver,
     FragmentResolver,
-    LegacyFragmentResolver,
-    LegacyObjectResolver,
     LegacyPluginResolver,
     PluginResolver,
 )
 from .config import ChangelogConfig
-from .fragment import ChangelogFragment, load_fragments
+from .fragment import ChangelogFragment
 from .logger import LOGGER
-from .plugins import PluginDescription, load_plugins
+from .plugins import PluginDescription
 from .sanitize import sanitize_changes
 from .utils import get_version_constructor, is_release_version
 from .yaml import load_yaml, store_yaml
@@ -293,193 +288,6 @@ class ChangesBase(metaclass=abc.ABCMeta):
 
         If the fragments are not provided and needed by this object, they might be loaded.
         """
-
-
-class ChangesMetadata(ChangesBase):
-    """
-    Read, write and manage classic Ansible (2.9 and earlier) change metadata.
-    """
-
-    def __init__(self, config: ChangelogConfig, path: str):
-        """
-        Create legacy change metadata.
-        """
-        super().__init__(config, path)
-        self.load()
-
-    def load(self, data_override: dict | None = None) -> None:
-        """
-        Load the change metadata from disk.
-        """
-        super().load(data_override=data_override)
-
-        for _, config in self.releases.items():
-            for plugin_type, plugin_names in config.get("plugins", {}).items():
-                self.known_plugins |= set(
-                    "%s/%s" % (plugin_type, plugin_name) for plugin_name in plugin_names
-                )
-
-            module_names = config.get("modules", [])
-
-            self.known_plugins |= set(
-                "module/%s" % module_name for module_name in module_names
-            )
-
-            self.known_fragments |= set(config.get("fragments", []))
-
-    def update_plugins(
-        self, plugins: list[PluginDescription], allow_removals: bool | None
-    ) -> None:
-        """
-        Update plugin descriptions, and remove plugins which are not in the provided list
-        of plugins.
-        """
-        if not allow_removals:
-            # We only remove here, we don't update, since we only keep references
-            # to the plugins.
-            return
-
-        valid_plugins = collections.defaultdict(set)
-
-        for plugin in plugins:
-            if plugin.category == "plugin":
-                valid_plugins[plugin.type].add(plugin.name)
-
-        for _, config in self.releases.items():
-            if "modules" in config:
-                invalid_modules = set(
-                    module
-                    for module in config["modules"]
-                    if module not in valid_plugins["module"]
-                )
-                config["modules"] = [
-                    module
-                    for module in config["modules"]
-                    if module not in invalid_modules
-                ]
-                self.known_plugins -= set(
-                    "module/%s" % module for module in invalid_modules
-                )
-
-            if "plugins" in config:
-                for plugin_type in config["plugins"]:
-                    invalid_plugins = set(
-                        plugin
-                        for plugin in config["plugins"][plugin_type]
-                        if plugin not in valid_plugins[plugin_type]
-                    )
-                    config["plugins"][plugin_type] = [
-                        plugin
-                        for plugin in config["plugins"][plugin_type]
-                        if plugin not in invalid_plugins
-                    ]
-                    self.known_plugins -= set(
-                        "%s/%s" % (plugin_type, plugin) for plugin in invalid_plugins
-                    )
-
-    def update_objects(
-        self, objects: list[PluginDescription], allow_removals: bool | None
-    ) -> None:
-        """
-        Update object descriptions, and remove objects which are not in the provided list
-        of objects.
-        """
-        return
-
-    def update_fragments(
-        self,
-        fragments: list[ChangelogFragment],
-        load_extra_fragments: Callable[[str], list[ChangelogFragment]] | None = None,
-    ) -> None:
-        """
-        Update fragment contents, and remove fragment contents which are not in the provided
-        list of fragments.
-        """
-        valid_fragments = set(fragment.name for fragment in fragments)
-
-        for _, config in self.releases.items():
-            if "fragments" not in config:
-                continue
-
-            invalid_fragments = set(
-                fragment
-                for fragment in config["fragments"]
-                if fragment not in valid_fragments
-            )
-            config["fragments"] = [
-                fragment
-                for fragment in config["fragments"]
-                if fragment not in invalid_fragments
-            ]
-            self.known_fragments -= invalid_fragments
-
-    def sort(self) -> None:
-        """
-        Sort change metadata in place.
-        """
-        for _, config in self.data["releases"].items():
-            if "modules" in config:
-                config["modules"] = sorted(config["modules"])
-
-            if "plugins" in config:
-                for plugin_type in config["plugins"]:
-                    config["plugins"][plugin_type] = sorted(
-                        config["plugins"][plugin_type]
-                    )
-
-            if "fragments" in config:
-                config["fragments"] = sorted(config["fragments"])
-
-    def add_fragment(self, fragment: ChangelogFragment, version: str) -> bool:
-        """
-        Add a changelog fragment to the change metadata.
-        """
-        if fragment.name in self.known_fragments:
-            return False
-
-        self.known_fragments.add(fragment.name)
-
-        if "fragments" not in self.releases[version]:
-            self.releases[version]["fragments"] = []
-
-        fragments = self.releases[version]["fragments"]
-        fragments.append(fragment.name)
-        return True
-
-    def get_plugin_resolver(
-        self, plugins: list[PluginDescription] | None = None
-    ) -> PluginResolver:
-        """
-        Create a plugin resolver.
-
-        If the plugins are not provided and needed by this object, they **will** be loaded.
-        """
-        if plugins is None:
-            plugins = load_plugins(
-                paths=self.config.paths,
-                collection_details=self.config.collection_details,
-                version=self.latest_version,
-                force_reload=False,
-            )
-        return LegacyPluginResolver(plugins)
-
-    def get_object_resolver(self) -> PluginResolver:
-        """
-        Create a dummy object resolver.
-        """
-        return LegacyObjectResolver()
-
-    def get_fragment_resolver(
-        self, fragments: list[ChangelogFragment] | None = None
-    ) -> FragmentResolver:
-        """
-        Create a fragment resolver.
-
-        If the fragments are not provided and needed by this object, they **will** be loaded.
-        """
-        if fragments is None:
-            fragments = load_fragments(paths=self.config.paths, config=self.config)
-        return LegacyFragmentResolver(fragments)
 
 
 class ChangesData(ChangesBase):
@@ -935,8 +743,6 @@ def load_changes(config: ChangelogConfig) -> ChangesBase:
     Load changes metadata.
     """
     path = os.path.join(config.paths.changelog_dir, config.changes_file)
-    if config.changes_format == "classic":
-        return ChangesMetadata(config, path)
     return ChangesData(config, path)
 
 
