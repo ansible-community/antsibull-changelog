@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - "Removes support for the deprecated classic changelog format.
+     ``changes_format`` must now be present and set to ``combined``. 
+     (https://github.com/ansible-community/antsibull-changelog/issues/137)."
