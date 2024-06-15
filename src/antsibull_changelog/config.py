@@ -475,7 +475,6 @@ class ChangelogConfig:
 
         self.changelog_sort = self.config.get("changelog_sort", "alphanumerical")
 
-
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -506,10 +505,16 @@ class ChangelogConfig:
                 "combined with prevent_known_fragments == False"
             )
 
-        valid_sort_options = ["unsorted", "version", "version_reverse", "alphanumerical"]
+        valid_sort_options = [
+            "unsorted",
+            "version",
+            "version_reverse",
+            "alphanumerical",
+        ]
         if self.changelog_sort not in valid_sort_options:
-            raise ChangelogError(f"Invalid changelog_sort option: {self.changelog_sort}")
-
+            raise ChangelogError(
+                f"Invalid changelog_sort option: {self.changelog_sort}"
+            )
 
     def store(self) -> None:  # noqa: C901
         """
