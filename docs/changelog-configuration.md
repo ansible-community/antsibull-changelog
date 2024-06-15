@@ -103,12 +103,16 @@ YAML encoding that is compatible with ansible-lint's default rules.
     The exact format used might be adjusted in the future if new releases of ansible-lint
     adjust their yamllint configuration.
 
-### `changelog_semantic_versioning_sort` (boolean)
+### `changelog_sort` (string)
 
-The default is `false`.
+The default is `alphanumerical`.
 
-When set to `true` the changelog entries in `changelogs/changelog.yaml` entries will
-be sorted by semantic version.
+This option controls the sorting of changelog entries in `changelogs/changelog.yaml`. It accepts the following values:
+
+- `unsorted`: No sorting is performed on the changelog entries. The entries are stored in the order they were added.
+- `version`: Sorts the changelog entries by semantic version in ascending order.
+- `version_reverse`: Sorts the changelog entries by semantic version in descending order.
+- `alphanumerical`: Sorts the changelog entries in alphanumerical order.
 
 ### `flatmap` (optional boolean)
 

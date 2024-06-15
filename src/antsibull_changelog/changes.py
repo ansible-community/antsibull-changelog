@@ -156,11 +156,12 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         self.sort()
         self.data["ancestor"] = self.ancestor
+        sort_keys = self.config.changelog_sort == "alphanumerical"
         store_yaml(
             self.path,
             self.data,
             self.config.changelog_nice_yaml,
-            self.config.changelog_semantic_versioning_sort,
+            sort_keys,
         )
 
     def add_release(
@@ -421,17 +422,7 @@ class ChangesMetadata(ChangesBase):
     def sort(self) -> None:
         """
         Sort change metadata in place.
-        Optionally sorts by semantic version.
         """
-        if self.config.changelog_semantic_versioning_sort:
-            self.data["releases"] = dict(
-                sorted(
-                    self.data["releases"].items(),
-                    key=lambda t: [int(v) for v in t[0].split(".")],
-                    reverse=True,
-                ),
-            )
-
         for _, config in self.data["releases"].items():
             if "modules" in config:
                 config["modules"] = sorted(config["modules"])
@@ -714,6 +705,16 @@ class ChangesData(ChangesBase):
         """
         Sort change metadata in place.
         """
+        if self.config.changelog_sort in ["version", "version_reverse"]:
+            reverse_order = self.config.changelog_sort == "version_reverse"
+            self.data["releases"] = dict(
+                sorted(
+                    self.data["releases"].items(),
+                    key=lambda t: self.version_constructor(t[0]),
+                    reverse=reverse_order,
+                )
+            )
+
         for _, config in self.data["releases"].items():
             if "modules" in config:
                 config["modules"] = sorted(

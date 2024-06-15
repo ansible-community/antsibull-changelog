@@ -380,7 +380,7 @@ class ChangelogConfig:
     output_formats: set[TextFormat]
     add_plugin_period: bool
     changelog_nice_yaml: bool
-    changelog_semantic_versioning_sort: bool
+    changelog_sort: str
 
     def __init__(
         self,
@@ -427,6 +427,7 @@ class ChangelogConfig:
             "trivial" if has_trivial_section_by_default else None,
         )
         self.sanitize_changelog = self.config.get("sanitize_changelog", False)
+
         always_refresh = self.config.get(
             "always_refresh", self.changes_format == "classic"
         )
@@ -472,9 +473,8 @@ class ChangelogConfig:
 
         self.changelog_nice_yaml = self.config.get("changelog_nice_yaml", False)
 
-        self.changelog_semantic_versioning_sort = self.config.get(
-            "changelog_semantic_versioning_sort", False
-        )
+        self.changelog_sort = self.config.get("changelog_sort", "alphanumerical")
+
 
         self._validate_config(ignore_is_other_project)
 
@@ -506,6 +506,11 @@ class ChangelogConfig:
                 "combined with prevent_known_fragments == False"
             )
 
+        valid_sort_options = ["unsorted", "version", "version_reverse", "alphanumerical"]
+        if self.changelog_sort not in valid_sort_options:
+            raise ChangelogError(f"Invalid changelog_sort option: {self.changelog_sort}")
+
+
     def store(self) -> None:  # noqa: C901
         """
         Store changelog configuration file to disk.
@@ -527,7 +532,7 @@ class ChangelogConfig:
             "sanitize_changelog": self.sanitize_changelog,
             "add_plugin_period": self.add_plugin_period,
             "changelog_nice_yaml": self.changelog_nice_yaml,
-            "changelog_semantic_versioning_sort": self.changelog_semantic_versioning_sort,
+            "changelog_sort": self.changelog_sort,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -608,7 +613,7 @@ class ChangelogConfig:
             "sanitize_changelog": True,
             "add_plugin_period": True,
             "changelog_nice_yaml": False,
-            "changelog_semantic_versioning_sort": False,
+            "changelog_sort": "alphanumerical",
         }
         if title is not None:
             config["title"] = title
