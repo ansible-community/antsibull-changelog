@@ -83,7 +83,7 @@ Community Distribution changelog generator.
 Must be set to `combined`.
 
 All fragments and plugin data is stored inside the file (used
-by Ansible 2.10 and in collections).
+by ansible-base, ansible-core, and in collections).
 
 Note that support for `classic` has been **REMOVED** and the field is now required.
 
