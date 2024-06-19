@@ -1,6 +1,0 @@
----
-removed_features:
-  - "Removes support for the deprecated classic changelog format.
-     ``changes_format`` must now be present and set to ``combined``
-     for ansible-core usage, and the value ``classic`` is no longer allowed
-     (https://github.com/ansible-community/antsibull-changelog/issues/137)."

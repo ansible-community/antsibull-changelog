@@ -1,2 +1,0 @@
-minor_changes:
-  - "Add a ``reformat`` command that reformats ``changelogs/changelog.yaml`` to the current settings of ``changelogs/config.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/169)."

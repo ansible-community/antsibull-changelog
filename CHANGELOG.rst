@@ -4,6 +4,31 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.29.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Add a ``reformat`` command that reformats ``changelogs/changelog.yaml`` to the current settings of ``changelogs/config.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/169).
+- Adds a new configuration option ``changelog_sort``. This option allows sorting of changelog entries in ``changelogs/changelog.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/165).
+- Replaces numbers with constants for return codes (https://github.com/ansible-community/antsibull-changelog/issues/77).
+
+Removed Features (previously deprecated)
+----------------------------------------
+
+- Removes support for the deprecated classic changelog format. ``changes_format`` must now be present and set to ``combined`` for ansible-core usage, and the value ``classic`` is no longer allowed (https://github.com/ansible-community/antsibull-changelog/issues/137).
+
+Bugfixes
+--------
+
+- Remove Python version check that was checking for Python >= 3.6 (instead of >= 3.9). This check is not really necessary since ``pyproject.toml`` declares ``requires-python``, and old enough Python versions where pip does not know about ``requires-python`` will not load antsibull-changelog due to syntax errors anyway (https://github.com/ansible-community/antsibull-changelog/pull/167).
+
 v0.28.0
 =======
 

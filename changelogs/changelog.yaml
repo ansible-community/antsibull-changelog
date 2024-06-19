@@ -402,3 +402,32 @@ releases:
     - 0.28.0.yml
     - 160-changelog-nice-yaml.yml
     release_date: '2024-05-26'
+  0.29.0:
+    changes:
+      bugfixes:
+      - Remove Python version check that was checking for Python >= 3.6 (instead of
+        >= 3.9). This check is not really necessary since ``pyproject.toml`` declares
+        ``requires-python``, and old enough Python versions where pip does not know
+        about ``requires-python`` will not load antsibull-changelog due to syntax
+        errors anyway (https://github.com/ansible-community/antsibull-changelog/pull/167).
+      minor_changes:
+      - Add a ``reformat`` command that reformats ``changelogs/changelog.yaml`` to
+        the current settings of ``changelogs/config.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/169).
+      - 'Adds a new configuration option ``changelog_sort``. This option allows sorting
+        of changelog entries in ``changelogs/changelog.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/165).
+
+        '
+      - Replaces numbers with constants for return codes (https://github.com/ansible-community/antsibull-changelog/issues/77).
+      release_summary: Feature release.
+      removed_features:
+      - Removes support for the deprecated classic changelog format. ``changes_format``
+        must now be present and set to ``combined`` for ansible-core usage, and the
+        value ``classic`` is no longer allowed (https://github.com/ansible-community/antsibull-changelog/issues/137).
+    fragments:
+    - 0.29.0.yml
+    - 165-changelog-sort-option.yml
+    - 166-use-constants.yml
+    - 167-python.yml
+    - 168_classic.yml
+    - 169-reformat.yml
+    release_date: '2024-06-19'
