@@ -16,7 +16,7 @@ import collections
 import datetime
 import os
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, Mapping, Sequence, cast
 
 from .changes_resolvers import (
     ChangesDataFragmentResolver,
@@ -296,6 +296,18 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
 
 
+def _sort_dict_by_key(dictionary: Mapping[str, Any]) -> dict[str, Any]:
+    return dict(sorted(dictionary.items()))
+
+
+def _sort_modules_plugins_objects(
+    object_list: Sequence[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
+    return sorted(
+        (_sort_dict_by_key(obj) for obj in object_list), key=lambda obj: obj["name"]
+    )
+
+
 class ChangesData(ChangesBase):
     """
     Read, write and manage modern change metadata.
@@ -523,25 +535,23 @@ class ChangesData(ChangesBase):
                 )
             )
 
-        for _, config in self.data["releases"].items():
+        for version, config in self.data["releases"].items():
             if "modules" in config:
-                config["modules"] = sorted(
-                    config["modules"], key=lambda module: module["name"]
-                )
+                config["modules"] = _sort_modules_plugins_objects(config["modules"])
 
             if "plugins" in config:
                 for plugin_type in config["plugins"]:
-                    config["plugins"][plugin_type] = sorted(
-                        config["plugins"][plugin_type],
-                        key=lambda plugin: plugin["name"],
+                    config["plugins"][plugin_type] = _sort_modules_plugins_objects(
+                        config["plugins"][plugin_type]
                     )
+                config["plugins"] = _sort_dict_by_key(config["plugins"])
 
             if "objects" in config:
                 for object_type in config["objects"]:
-                    config["objects"][object_type] = sorted(
-                        config["objects"][object_type],
-                        key=lambda ansible_object: ansible_object["name"],
+                    config["objects"][object_type] = _sort_modules_plugins_objects(
+                        config["objects"][object_type]
                     )
+                config["objects"] = _sort_dict_by_key(config["objects"])
 
             if "fragments" in config:
                 config["fragments"] = sorted(config["fragments"])
@@ -555,6 +565,8 @@ class ChangesData(ChangesBase):
                     )
                     for section, entries in sorted(config["changes"].items())
                 }
+
+            self.data["releases"][version] = _sort_dict_by_key(config)
 
     def _add_fragment_obj(self, obj_class, obj_type, entry, version: str):
         """

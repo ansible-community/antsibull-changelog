@@ -292,6 +292,10 @@ class ChangelogEnvironment:
                 rc = self.run_tool(command, arguments, cwd=cwd)
         return rc, stdout.getvalue(), stderr.getvalue()
 
+    def read_file(self, filename: str) -> bytes:
+        with open(os.path.join(self.paths.base_dir, filename), "rb") as f:
+            return f.read()
+
     def _get_current_state(self) -> tuple[set[str], dict[str, bytes]]:
         created_dirs: set[str] = set()
         created_files: dict[str, bytes] = dict()
