@@ -288,6 +288,13 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         " formats.",
     )
 
+    reformat_parser = subparsers.add_parser(
+        "reformat",
+        parents=[common, is_collection],
+        help="reformat changelogs/changelog.yaml file",
+    )
+    reformat_parser.set_defaults(func=command_reformat)
+
     if HAS_ARGCOMPLETE:
         argcomplete.autocomplete(parser)
 
@@ -839,6 +846,22 @@ def command_lint_changelog_yaml(args: Any) -> int:
         print(message)
 
     return C.RC_INVALID_FRAGMENT if messages else C.RC_SUCCESS
+
+
+def command_reformat(args: Any) -> int:
+    """
+    Reformat changelogs/changelog.yaml file.
+
+    :arg args: Parsed arguments
+    """
+    paths = set_paths(is_collection=args.is_collection)
+    collection_details = CollectionDetails(paths)
+    config = ChangelogConfig.load(paths, collection_details)
+
+    changes = load_changes(config)
+    changes.save()
+
+    return C.RC_SUCCESS
 
 
 def main() -> int:
