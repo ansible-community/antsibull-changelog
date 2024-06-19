@@ -38,4 +38,4 @@ output_formats:
   - md
 add_plugin_period: false
 changelog_nice_yaml: false
-changelog_sort: alphanumerical
+changelog_sort: version

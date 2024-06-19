@@ -10,6 +10,127 @@ releases:
         until it was moved to its current location `ansible-community/antsibull-changelog
         <https://github.com/ansible-community/antsibull-changelog/>`_.
     release_date: '2020-05-30'
+  0.2.0:
+    changes:
+      minor_changes:
+      - Added more testing.
+      - Fix internal API for ACD changelog generation (pruning and concatenation of
+        changelogs).
+      - Improve error handling.
+      - Improve reStructuredText creation when new modules with and without namespace
+        exist at the same time.
+      - Title generation improved (remove superfluous space).
+      - Use PyYAML C loader/dumper if available.
+      - '``lint`` subcommand no longer requires specification whether it is run inside
+        a collection or not (if usual indicators are absent).'
+    release_date: '2020-05-31'
+  0.2.1:
+    changes:
+      bugfixes:
+      - Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
+    release_date: '2020-06-10'
+  0.3.0:
+    changes:
+      minor_changes:
+      - Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
+      - Changelog generator can be ran via ``python -m antsibull_changelog``.
+      - Use ``ansible-doc`` instead of ``/path/to/checkout/bin/ansible-doc`` when
+        being run in ansible-base checkouts.
+    release_date: '2020-06-10'
+  0.3.1:
+    changes:
+      bugfixes:
+      - Do not fail when ``changelogs/fragments`` does not exist. Simply assume there
+        are no fragments in that case.
+      - Improve behavior when ``changelogs/config.yaml`` is not a dictionary, or does
+        not contain ``sections``.
+      - Improve error message when ``--is-collection`` is specified and ``changelogs/config.yaml``
+        cannot be found, or when the ``lint`` subcommand is used.
+    release_date: '2020-06-11'
+  0.4.0:
+    changes:
+      bugfixes:
+      - Fix bad module namespace detection when collection was symlinked into Ansible's
+        collection search path. This also allows to add releases to collections which
+        are not installed in a way that Ansible finds them.
+      minor_changes:
+      - Allow to enable or disable flatmapping via ``config.yaml``.
+    release_date: '2020-06-22'
+  0.5.0:
+    changes:
+      minor_changes:
+      - The internal changelog generator code got more flexible to help antsibull
+        generate Ansible porting guides.
+    release_date: '2020-06-28'
+  0.6.0:
+    changes:
+      minor_changes:
+      - New changelog configurations place the ``CHANGELOG.rst`` file by default in
+        the top-level directory, and not in ``changelogs/``.
+      - The config option ``archive_path_template`` allows to move fragments into
+        an archive directory when ``keep_fragments`` is set to ``false``.
+      - The option ``use_fqcn`` (set to ``true`` in new configurations) allows to
+        use FQCN for new plugins and modules.
+    release_date: '2020-07-12'
+  0.7.0:
+    changes:
+      minor_changes:
+      - A new config option, ``ignore_other_fragment_extensions`` allows for configuring
+        whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test
+        sanity --test changelog`` test). The default value for existing configurations
+        is ``false``, and for new configurations ``true``.
+      - Allow to use semantic versioning also for Ansible-base with the ``use_semantic_versioning``
+        configuration setting.
+      - Refactoring changelog generation code to provide all preludes (release summaries)
+        in changelog entries, and provide generic functionality to extract a grouped
+        list of versions. These changes are mainly for the antsibull project.
+    release_date: '2020-07-26'
+  0.8.0:
+    changes:
+      minor_changes:
+      - Allow to not save a changelog on release when using API.
+      - Allow to sanitize changelog data on load/save. This means that unknown information
+        will be removed, and bad information will be stripped. This will be enabled
+        in newly created changelog configs, but is disabled for backwards compatibility.
+    release_date: '2020-08-18'
+  0.8.1:
+    changes:
+      bugfixes:
+      - Fixed error on generating changelogs when using the trivial section.
+    release_date: '2020-08-27'
+  0.9.0:
+    changes:
+      breaking_changes:
+      - The new option ``prevent_known_fragments`` with default value being the value
+        of ``keep_fragments`` allows to control whether fragments with names that
+        already appeared in the past are ignored or not. The new behavior happens
+        if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46).
+        Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core
+        changelog, are not affected.
+      major_changes:
+      - Add support for reporting new playbooks and roles in collections.
+      - "Add support for special changelog fragment sections which add new plugins
+        and/or objects to the changelog for this version. This is mainly useful for
+        ``test`` and ``filter`` plugins, and for ``playbook`` and ``role`` objects,
+        which are not yet automatically detected and mentioned in ``changelogs/changelog.yaml``
+        or the generated RST changelog.\n\nThe format of these sections and their
+        content is as follows::\n\n    ---\n    add plugin.filter:\n      - name:
+        to_time_unit\n        description: Converts a time expression to a given unit\n
+        \     - name: to_seconds\n        description: Converts a time expression
+        to seconds\n    add object.role:\n      - name: nginx\n        description:
+        The most awesome nginx installation role ever\n    add object.playbook:\n
+        \     - name: wipe_server\n        description: Totally wipes a server\n\nFor
+        every entry, a list of plugins (section ``add plugin.xxx``) or objects (section
+        ``add object.xxx``) of the given type (``filter``, ``test`` for plugins, ``playbook``,
+        ``role`` for objects) will be added. Every plugin or object has a short name
+        as well as a short description. These fields correspond to the module/plugin
+        name and the ``short_description`` field of the ``DOCUMENTATION`` block of
+        modules and documentable plugins.\n"
+      minor_changes:
+      - Add ``--update-existing`` option for ``antsibull-changelog release``, which
+        allows to update the current release's release date and (if relevant) codename
+        instead of simply reporting that the release already exists.
+    release_date: '2021-01-30'
   0.10.0:
     changes:
       bugfixes:
@@ -146,25 +267,6 @@ releases:
     - 101-tomllib.yml
     - 103-exceptions.yml
     release_date: '2023-03-10'
-  0.2.0:
-    changes:
-      minor_changes:
-      - Added more testing.
-      - Fix internal API for ACD changelog generation (pruning and concatenation of
-        changelogs).
-      - Improve error handling.
-      - Improve reStructuredText creation when new modules with and without namespace
-        exist at the same time.
-      - Title generation improved (remove superfluous space).
-      - Use PyYAML C loader/dumper if available.
-      - '``lint`` subcommand no longer requires specification whether it is run inside
-        a collection or not (if usual indicators are absent).'
-    release_date: '2020-05-31'
-  0.2.1:
-    changes:
-      bugfixes:
-      - Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
-    release_date: '2020-06-10'
   0.20.0:
     changes:
       bugfixes:
@@ -300,105 +402,3 @@ releases:
     - 0.28.0.yml
     - 160-changelog-nice-yaml.yml
     release_date: '2024-05-26'
-  0.3.0:
-    changes:
-      minor_changes:
-      - Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
-      - Changelog generator can be ran via ``python -m antsibull_changelog``.
-      - Use ``ansible-doc`` instead of ``/path/to/checkout/bin/ansible-doc`` when
-        being run in ansible-base checkouts.
-    release_date: '2020-06-10'
-  0.3.1:
-    changes:
-      bugfixes:
-      - Do not fail when ``changelogs/fragments`` does not exist. Simply assume there
-        are no fragments in that case.
-      - Improve behavior when ``changelogs/config.yaml`` is not a dictionary, or does
-        not contain ``sections``.
-      - Improve error message when ``--is-collection`` is specified and ``changelogs/config.yaml``
-        cannot be found, or when the ``lint`` subcommand is used.
-    release_date: '2020-06-11'
-  0.4.0:
-    changes:
-      bugfixes:
-      - Fix bad module namespace detection when collection was symlinked into Ansible's
-        collection search path. This also allows to add releases to collections which
-        are not installed in a way that Ansible finds them.
-      minor_changes:
-      - Allow to enable or disable flatmapping via ``config.yaml``.
-    release_date: '2020-06-22'
-  0.5.0:
-    changes:
-      minor_changes:
-      - The internal changelog generator code got more flexible to help antsibull
-        generate Ansible porting guides.
-    release_date: '2020-06-28'
-  0.6.0:
-    changes:
-      minor_changes:
-      - New changelog configurations place the ``CHANGELOG.rst`` file by default in
-        the top-level directory, and not in ``changelogs/``.
-      - The config option ``archive_path_template`` allows to move fragments into
-        an archive directory when ``keep_fragments`` is set to ``false``.
-      - The option ``use_fqcn`` (set to ``true`` in new configurations) allows to
-        use FQCN for new plugins and modules.
-    release_date: '2020-07-12'
-  0.7.0:
-    changes:
-      minor_changes:
-      - A new config option, ``ignore_other_fragment_extensions`` allows for configuring
-        whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test
-        sanity --test changelog`` test). The default value for existing configurations
-        is ``false``, and for new configurations ``true``.
-      - Allow to use semantic versioning also for Ansible-base with the ``use_semantic_versioning``
-        configuration setting.
-      - Refactoring changelog generation code to provide all preludes (release summaries)
-        in changelog entries, and provide generic functionality to extract a grouped
-        list of versions. These changes are mainly for the antsibull project.
-    release_date: '2020-07-26'
-  0.8.0:
-    changes:
-      minor_changes:
-      - Allow to not save a changelog on release when using API.
-      - Allow to sanitize changelog data on load/save. This means that unknown information
-        will be removed, and bad information will be stripped. This will be enabled
-        in newly created changelog configs, but is disabled for backwards compatibility.
-    release_date: '2020-08-18'
-  0.8.1:
-    changes:
-      bugfixes:
-      - Fixed error on generating changelogs when using the trivial section.
-    release_date: '2020-08-27'
-  0.9.0:
-    changes:
-      breaking_changes:
-      - The new option ``prevent_known_fragments`` with default value being the value
-        of ``keep_fragments`` allows to control whether fragments with names that
-        already appeared in the past are ignored or not. The new behavior happens
-        if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46).
-        Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core
-        changelog, are not affected.
-      major_changes:
-      - Add support for reporting new playbooks and roles in collections.
-      - "Add support for special changelog fragment sections which add new plugins
-        and/or objects to the changelog for this version. This is mainly useful for
-        ``test`` and ``filter`` plugins, and for ``playbook`` and ``role`` objects,
-        which are not yet automatically detected and mentioned in ``changelogs/changelog.yaml``
-        or the generated RST changelog.\n\nThe format of these sections and their
-        content is as follows::\n\n    ---\n    add plugin.filter:\n      - name:
-        to_time_unit\n        description: Converts a time expression to a given unit\n
-        \     - name: to_seconds\n        description: Converts a time expression
-        to seconds\n    add object.role:\n      - name: nginx\n        description:
-        The most awesome nginx installation role ever\n    add object.playbook:\n
-        \     - name: wipe_server\n        description: Totally wipes a server\n\nFor
-        every entry, a list of plugins (section ``add plugin.xxx``) or objects (section
-        ``add object.xxx``) of the given type (``filter``, ``test`` for plugins, ``playbook``,
-        ``role`` for objects) will be added. Every plugin or object has a short name
-        as well as a short description. These fields correspond to the module/plugin
-        name and the ``short_description`` field of the ``DOCUMENTATION`` block of
-        modules and documentable plugins.\n"
-      minor_changes:
-      - Add ``--update-existing`` option for ``antsibull-changelog release``, which
-        allows to update the current release's release date and (if relevant) codename
-        instead of simply reporting that the release already exists.
-    release_date: '2021-01-30'
