@@ -1,9 +1,6 @@
 ---
 minor_changes:
-  - |
-    Adds a new configuration option `changelog_sort`.
-    This option allows sorting of changelog entries in `changelogs/changelog.yaml` with four modes:
-    - `unsorted`: No sorting is performed.
-    - `version`: Sorts entries by version in ascending order.
-    - `version_reverse`: Sorts entries by version in descending order.
-    - `alphanumerical`: Sorts entries in alphanumerical order.
+  - >
+    Adds a new configuration option ``changelog_sort``.
+    This option allows sorting of changelog entries in ``changelogs/changelog.yaml``
+    (https://github.com/ansible-community/antsibull-changelog/pull/165).

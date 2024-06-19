@@ -43,7 +43,7 @@ def load_yaml(path: str) -> Any:
 
 
 def store_yaml(
-    path: str, content: Any, nice: bool = False, sort_keys: bool = False
+    path: str, content: Any, /, nice: bool = False, sort_keys: bool = True
 ) -> None:
     """
     Store ``content`` as YAML file under ``path``.

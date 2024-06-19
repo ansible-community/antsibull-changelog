@@ -160,8 +160,8 @@ class ChangesBase(metaclass=abc.ABCMeta):
         store_yaml(
             self.path,
             self.data,
-            self.config.changelog_nice_yaml,
-            sort_keys,
+            nice=self.config.changelog_nice_yaml,
+            sort_keys=sort_keys,
         )
 
     def add_release(
