@@ -19,6 +19,7 @@ from contextlib import redirect_stdout
 
 import pytest
 
+from antsibull_changelog import constants as C
 from antsibull_changelog.cli import command_lint_changelog_yaml
 from antsibull_changelog.lint import lint_changelog_yaml
 
@@ -64,7 +65,7 @@ def test_good_changelog_yaml_files(yaml_filename):
         rc = command_lint_changelog_yaml(args)
     stdout_lines = stdout.getvalue().splitlines()
     assert stdout_lines == []
-    assert rc == 0
+    assert rc == C.RC_SUCCESS
 
 
 @pytest.mark.parametrize("yaml_filename, json_filename", BAD_TESTS)
@@ -107,4 +108,4 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     for line, expected in zip(stdout_lines, expected_lines):
         line = line.replace(yaml_filename, "input.yaml")
         assert re.match(expected, line, flags=re.DOTALL) is not None
-    assert rc == 3
+    assert rc == C.RC_INVALID_FRAGMENT

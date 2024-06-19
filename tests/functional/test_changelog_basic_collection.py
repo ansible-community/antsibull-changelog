@@ -146,7 +146,7 @@ This is the first proper release\.
         collection_changelog.run_tool(
             "generate", ["-v", "--refresh", "--output", "CHANGELOG.md"]
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
     assert collection_changelog.diff().unchanged
 
@@ -1304,7 +1304,7 @@ New Modules
                 "foobar",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
 
     # Generate changelog for 1.10.0 - should fail
@@ -1316,7 +1316,7 @@ New Modules
                 "1.10.0",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
 
     # Generate changelog for 1.1.0
@@ -1519,7 +1519,10 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
     )
 
     # If we don't specify all options, the call will fail
-    assert collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == 5
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_COMMAND_FAILED
+    )
     assert (
         collection_changelog.run_tool(
             "release",
@@ -1537,7 +1540,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "yes",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
     assert (
         collection_changelog.run_tool(
@@ -1556,7 +1559,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "yes",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
     assert (
         collection_changelog.run_tool(
@@ -1575,7 +1578,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "yes",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
     assert (
         collection_changelog.run_tool(
@@ -1594,7 +1597,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "yes",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
     assert (
         collection_changelog.run_tool(
@@ -1613,7 +1616,7 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "sky",
             ],
         )
-        == 5
+        == C.RC_COMMAND_FAILED
     )
 
     # Add plugin cache content

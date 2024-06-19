@@ -62,7 +62,8 @@ other stuff: foobar
     )
 
     assert (
-        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"])
+        == C.RC_SUCCESS
     )
 
     assert (
@@ -99,7 +100,8 @@ releases:
     collection_changelog.set_config(collection_changelog.config)
 
     assert (
-        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"])
+        == C.RC_SUCCESS
     )
 
     assert (
@@ -136,7 +138,8 @@ releases:
     collection_changelog.set_config(collection_changelog.config)
 
     assert (
-        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"])
+        == C.RC_SUCCESS
     )
 
     assert (
@@ -174,7 +177,8 @@ releases:
     collection_changelog.set_config(collection_changelog.config)
 
     assert (
-        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"])
+        == C.RC_SUCCESS
     )
 
     assert (
@@ -212,7 +216,8 @@ releases:
     collection_changelog.set_config(collection_changelog.config)
 
     assert (
-        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"])
+        == C.RC_SUCCESS
     )
 
     assert (

@@ -811,7 +811,7 @@ New Modules
 
     # Lint fragments
     rc, stdout, stderr = ansible_changelog.run_tool_w_output("lint", ["-vv"])
-    assert rc == 3
+    assert rc == C.RC_INVALID_FRAGMENT
     assert (
         stdout
         == r"""
