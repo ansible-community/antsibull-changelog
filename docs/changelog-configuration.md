@@ -98,6 +98,17 @@ YAML encoding that is compatible with ansible-lint's default rules.
     The exact format used might be adjusted in the future if new releases of ansible-lint
     adjust their yamllint configuration.
 
+### `changelog_sort` (string)
+
+The default is `alphanumerical`.
+
+This option controls the sorting of changelog entries in `changelogs/changelog.yaml`. It accepts the following values:
+
+- `unsorted`: No sorting is performed on the changelog entries. The entries are stored in the order they were added.
+- `version`: Sorts the changelog entries by version in ascending order.
+- `version_reversed`: Sorts the changelog entries by version in descending order.
+- `alphanumerical`: Sorts the changelog entries in alphanumerical order.
+
 ### `flatmap` (optional boolean)
 
 The default value is `null`.

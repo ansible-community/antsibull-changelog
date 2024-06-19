@@ -380,6 +380,7 @@ class ChangelogConfig:
     output_formats: set[TextFormat]
     add_plugin_period: bool
     changelog_nice_yaml: bool
+    changelog_sort: str
 
     def __init__(
         self,
@@ -467,6 +468,8 @@ class ChangelogConfig:
 
         self.changelog_nice_yaml = self.config.get("changelog_nice_yaml", False)
 
+        self.changelog_sort = self.config.get("changelog_sort", "alphanumerical")
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -484,6 +487,17 @@ class ChangelogConfig:
             raise ChangelogError("is_other_project must not be True for collections")
         if self.changes_format != "combined":
             raise ChangelogError('changes_format must be "combined"')
+
+        valid_sort_options = [
+            "unsorted",
+            "version",
+            "version_reversed",
+            "alphanumerical",
+        ]
+        if self.changelog_sort not in valid_sort_options:
+            raise ChangelogError(
+                f"Invalid changelog_sort option: {self.changelog_sort}"
+            )
 
     def store(self) -> None:  # noqa: C901
         """
@@ -506,6 +520,7 @@ class ChangelogConfig:
             "sanitize_changelog": self.sanitize_changelog,
             "add_plugin_period": self.add_plugin_period,
             "changelog_nice_yaml": self.changelog_nice_yaml,
+            "changelog_sort": self.changelog_sort,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -585,6 +600,7 @@ class ChangelogConfig:
             "sanitize_changelog": True,
             "add_plugin_period": True,
             "changelog_nice_yaml": False,
+            "changelog_sort": "alphanumerical",
         }
         if title is not None:
             config["title"] = title

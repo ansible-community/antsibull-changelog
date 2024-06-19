@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - >
+    Adds a new configuration option ``changelog_sort``.
+    This option allows sorting of changelog entries in ``changelogs/changelog.yaml``
+    (https://github.com/ansible-community/antsibull-changelog/pull/165).

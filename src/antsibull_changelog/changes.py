@@ -151,7 +151,13 @@ class ChangesBase(metaclass=abc.ABCMeta):
         """
         self.sort()
         self.data["ancestor"] = self.ancestor
-        store_yaml(self.path, self.data, self.config.changelog_nice_yaml)
+        sort_keys = self.config.changelog_sort == "alphanumerical"
+        store_yaml(
+            self.path,
+            self.data,
+            nice=self.config.changelog_nice_yaml,
+            sort_keys=sort_keys,
+        )
 
     def add_release(
         self,
@@ -507,6 +513,16 @@ class ChangesData(ChangesBase):
         """
         Sort change metadata in place.
         """
+        if self.config.changelog_sort in ["version", "version_reversed"]:
+            reverse_order = self.config.changelog_sort == "version_reversed"
+            self.data["releases"] = dict(
+                sorted(
+                    self.data["releases"].items(),
+                    key=lambda t: self.version_constructor(t[0]),
+                    reverse=reverse_order,
+                )
+            )
+
         for _, config in self.data["releases"].items():
             if "modules" in config:
                 config["modules"] = sorted(
