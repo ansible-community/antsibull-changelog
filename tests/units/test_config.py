@@ -134,14 +134,6 @@ def test_config_loading_bad_changes_format(collection_config_path):
         ChangelogConfig.load(paths, collection_details)
 
 
-def test_config_loading_bad_keep_fragments(ansible_config_path):
-    ansible_config_path.write_text("changes_format: classic\nkeep_fragments: false")
-    paths = PathsConfig.detect()
-    collection_details = CollectionDetails(paths)
-    with pytest.raises(ChangelogError):
-        ChangelogConfig.load(paths, collection_details)
-
-
 def test_config_store_ansible(ansible_config_path):
     ansible_config_path.write_text("")
     paths = PathsConfig.detect()

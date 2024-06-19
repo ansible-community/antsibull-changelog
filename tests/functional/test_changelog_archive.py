@@ -15,6 +15,7 @@ from unittest import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
+from antsibull_changelog import constants as C
 from antsibull_changelog.config import PathsConfig
 
 
@@ -43,7 +44,10 @@ def test_changelog_release_keep_fragments(  # pylint: disable=redefined-outer-na
     collection_changelog.set_plugin_cache("1.0.0", {})
 
     # Release
-    assert collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == 0
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
+    )
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
@@ -83,7 +87,10 @@ Minor Changes
     )
 
     # Refresh
-    assert collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"]) == 0
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
+        == C.RC_SUCCESS
+    )
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
@@ -142,7 +149,10 @@ def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-
     collection_changelog.set_plugin_cache("1.0.0", {})
 
     # Release
-    assert collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == 0
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
+    )
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
@@ -179,7 +189,10 @@ Minor Changes
     )
 
     # Refresh should be ignored
-    assert collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"]) == 0
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
+        == C.RC_SUCCESS
+    )
     assert collection_changelog.diff().unchanged
 
     # Add fragment with same filename, but different content
@@ -193,7 +206,7 @@ Minor Changes
         collection_changelog.run_tool(
             "release", ["-v", "--version", "1.1.0", "--date", "2020-01-02"]
         )
-        == 0
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -251,7 +264,7 @@ Minor Changes
         collection_changelog.run_tool(
             "release", ["-v", "--version", "1.2.0", "--date", "2020-01-02"]
         )
-        == 0
+        == C.RC_SUCCESS
     )
 
     diff = collection_changelog.diff()
@@ -322,7 +335,10 @@ def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer
     collection_changelog.set_plugin_cache("1.0.0", {})
 
     # Release
-    assert collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"]) == 0
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
+    )
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == [".archive", ".archive/v1.0.0"]
@@ -373,7 +389,10 @@ Minor Changes
     )
 
     # Refresh
-    assert collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"]) == 0
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--refresh-fragments"])
+        == C.RC_SUCCESS
+    )
 
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
@@ -418,6 +437,6 @@ Minor Changes
         collection_changelog.run_tool(
             "generate", ["-v", "--refresh-fragments", "without-archives"]
         )
-        == 0
+        == C.RC_SUCCESS
     )
     assert collection_changelog.diff().unchanged

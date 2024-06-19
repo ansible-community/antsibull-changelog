@@ -14,7 +14,7 @@ import os
 
 import pytest
 
-from antsibull_changelog.changes import ChangesBase, ChangesData, ChangesMetadata
+from antsibull_changelog.changes import ChangesBase, ChangesData
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
 
 

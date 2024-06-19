@@ -80,17 +80,12 @@ Community Distribution changelog generator.
 
 ### `changes_format` (string)
 
-The default value is `classic` for existing configurations, and
-`combined` for new configurations.
+Must be set to `combined`.
 
-Determines whether `changes_file` contains only references to changelog
-fragments or plugins (was used internally by Ansible until version 2.9),
-or whether all fragments and plugin data is stored inside the file (used
-by Ansible 2.10 and in collections). Should never be set to `classic`,
-except when using the changelog generator for Ansible 2.9 or earlier.
+All fragments and plugin data is stored inside the file (used
+by ansible-base, ansible-core, and in collections).
 
-Note that support for `classic` is **DEPRECATED** and will be removed in
-a future release. The field will from then on be required.
+Note that support for `classic` has been **REMOVED** and the field is now required.
 
 ### `changelog_nice_yaml` (boolean)
 
@@ -150,7 +145,7 @@ are considered.
 
 ### `keep_fragments` (boolean)
 
-The default value is `false` (except if `changes_format` is `classic`).
+The default value is `false`.
 
 If set to `false`, the fragment files will be removed after a release is
 done. If set to `true`, fragment files for old releases are kept.

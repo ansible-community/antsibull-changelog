@@ -78,33 +78,28 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
 
     def _sanitize_modules(self, data: list, are_modules: bool = True) -> list:
         result: list = []
-        if self.config.changes_format == "classic":
-            for entry in data:
-                if isinstance(entry, str):
-                    result.append(entry)
-        else:
-            for entry in data:
-                if not isinstance(entry, collections.abc.Mapping):
+        for entry in data:
+            if not isinstance(entry, collections.abc.Mapping):
+                continue
+            name = entry.get("name")
+            if not isinstance(name, str):
+                continue
+            description = entry.get("description")
+            if not isinstance(description, str):
+                continue
+            if are_modules:
+                namespace = entry.get("namespace")
+                if not isinstance(namespace, str):
                     continue
-                name = entry.get("name")
-                if not isinstance(name, str):
-                    continue
-                description = entry.get("description")
-                if not isinstance(description, str):
-                    continue
-                if are_modules:
-                    namespace = entry.get("namespace")
-                    if not isinstance(namespace, str):
-                        continue
-                else:
-                    namespace = None
-                result.append(
-                    {
-                        "name": name,
-                        "description": description,
-                        "namespace": namespace,
-                    }
-                )
+            else:
+                namespace = None
+            result.append(
+                {
+                    "name": name,
+                    "description": description,
+                    "namespace": namespace,
+                }
+            )
         return result
 
     def _sanitize_plugins(self, data: Mapping) -> dict[str, list]:
