@@ -16,7 +16,7 @@ import collections
 import datetime
 import os
 from collections.abc import Callable
-from typing import Sequence, Mapping, Any, cast
+from typing import Any, Mapping, Sequence, cast
 
 from .changes_resolvers import (
     ChangesDataFragmentResolver,
@@ -300,10 +300,11 @@ def _sort_dict_by_key(dictionary: Mapping[str, Any]) -> dict[str, Any]:
     return dict(sorted(dictionary.items()))
 
 
-def _sort_modules_plugins_objects(object_list: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def _sort_modules_plugins_objects(
+    object_list: Sequence[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
     return sorted(
-        (_sort_dict_by_key(obj) for obj in object_list),
-        key=lambda obj: obj["name"]
+        (_sort_dict_by_key(obj) for obj in object_list), key=lambda obj: obj["name"]
     )
 
 
@@ -540,12 +541,16 @@ class ChangesData(ChangesBase):
 
             if "plugins" in config:
                 for plugin_type in config["plugins"]:
-                    config["plugins"][plugin_type] = _sort_modules_plugins_objects(config["plugins"][plugin_type])
+                    config["plugins"][plugin_type] = _sort_modules_plugins_objects(
+                        config["plugins"][plugin_type]
+                    )
                 config["plugins"] = _sort_dict_by_key(config["plugins"])
 
             if "objects" in config:
                 for object_type in config["objects"]:
-                    config["objects"][object_type] = _sort_modules_plugins_objects(config["objects"][object_type])
+                    config["objects"][object_type] = _sort_modules_plugins_objects(
+                        config["objects"][object_type]
+                    )
                 config["objects"] = _sort_dict_by_key(config["objects"])
 
             if "fragments" in config:

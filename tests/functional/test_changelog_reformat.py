@@ -25,9 +25,11 @@ def test_reformat(  # pylint: disable=redefined-outer-name
 ):  # noqa: F811
     collection_changelog.config.title = "Test Collection"
     collection_changelog.config.use_fqcn = False
-    collection_changelog.config.changelog_sort = 'unsorted'
+    collection_changelog.config.changelog_sort = "unsorted"
     collection_changelog.set_config(collection_changelog.config)
-    collection_changelog.add_file('changelogs/changelog.yaml', '''
+    collection_changelog.add_file(
+        "changelogs/changelog.yaml",
+        """
 releases:
   10.0.0:
     changes:
@@ -54,11 +56,18 @@ releases:
       release_summary: "Baz"
     release_date: "2024-06-18"
 other stuff: foobar
-'''.encode('utf-8'))
+""".encode(
+            "utf-8"
+        ),
+    )
 
-    assert collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    assert (
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    )
 
-    assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''ancestor: null
+    assert (
+        collection_changelog.read_file("changelogs/changelog.yaml").decode("utf-8")
+        == """ancestor: null
 releases:
   10.0.0:
     changes:
@@ -83,14 +92,19 @@ releases:
     changes:
       release_summary: Baz
     release_date: '2024-06-18'
-'''
+"""
+    )
 
-    collection_changelog.config.changelog_sort = 'alphanumerical'
+    collection_changelog.config.changelog_sort = "alphanumerical"
     collection_changelog.set_config(collection_changelog.config)
 
-    assert collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    assert (
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    )
 
-    assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''ancestor: null
+    assert (
+        collection_changelog.read_file("changelogs/changelog.yaml").decode("utf-8")
+        == """ancestor: null
 releases:
   1.0.0:
     changes:
@@ -115,14 +129,19 @@ releases:
     changes:
       release_summary: Baz
     release_date: '2024-06-18'
-'''
+"""
+    )
 
     collection_changelog.config.changelog_nice_yaml = True
     collection_changelog.set_config(collection_changelog.config)
 
-    assert collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    assert (
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    )
 
-    assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''---
+    assert (
+        collection_changelog.read_file("changelogs/changelog.yaml").decode("utf-8")
+        == """---
 ancestor: null
 releases:
   1.0.0:
@@ -148,14 +167,19 @@ releases:
     changes:
       release_summary: Baz
     release_date: '2024-06-18'
-'''
+"""
+    )
 
-    collection_changelog.config.changelog_sort = 'version_reversed'
+    collection_changelog.config.changelog_sort = "version_reversed"
     collection_changelog.set_config(collection_changelog.config)
 
-    assert collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    assert (
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    )
 
-    assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''---
+    assert (
+        collection_changelog.read_file("changelogs/changelog.yaml").decode("utf-8")
+        == """---
 ancestor: null
 releases:
   10.0.0:
@@ -181,14 +205,19 @@ releases:
     changes:
       release_summary: Foo
     release_date: '2024-06-17'
-'''
+"""
+    )
 
-    collection_changelog.config.changelog_sort = 'version'
+    collection_changelog.config.changelog_sort = "version"
     collection_changelog.set_config(collection_changelog.config)
 
-    assert collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    assert (
+        collection_changelog.run_tool("reformat", ["-v", "--is-collection=true"]) == 0
+    )
 
-    assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''---
+    assert (
+        collection_changelog.read_file("changelogs/changelog.yaml").decode("utf-8")
+        == """---
 ancestor: null
 releases:
   1.0.0:
@@ -214,4 +243,5 @@ releases:
           name: foo
           namespace: null
     release_date: '2024-06-19'
-'''
+"""
+    )
