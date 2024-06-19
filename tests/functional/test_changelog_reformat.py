@@ -35,10 +35,19 @@ releases:
       breaking_changes:
         - "This is a change"
     release_date: "2024-06-19"
+    objects:
+      role:
+        - name: foo
+          namespace: null
+          description: Bar
+      playbook:
+        - name: foo
+          namespace: null
+          description: Bar
   1.0.0:
+    release_date: "2024-06-17"
     changes:
       release_summary: "Foo"
-    release_date: "2024-06-17"
     bar: baz
   2.0.0:
     changes:
@@ -56,6 +65,15 @@ releases:
       breaking_changes:
       - This is a change
       release_summary: Bar
+    objects:
+      playbook:
+      - description: Bar
+        name: foo
+        namespace: null
+      role:
+      - description: Bar
+        name: foo
+        namespace: null
     release_date: '2024-06-19'
   1.0.0:
     changes:
@@ -83,6 +101,15 @@ releases:
       breaking_changes:
       - This is a change
       release_summary: Bar
+    objects:
+      playbook:
+      - description: Bar
+        name: foo
+        namespace: null
+      role:
+      - description: Bar
+        name: foo
+        namespace: null
     release_date: '2024-06-19'
   2.0.0:
     changes:
@@ -107,6 +134,15 @@ releases:
       breaking_changes:
         - This is a change
       release_summary: Bar
+    objects:
+      playbook:
+        - description: Bar
+          name: foo
+          namespace: null
+      role:
+        - description: Bar
+          name: foo
+          namespace: null
     release_date: '2024-06-19'
   2.0.0:
     changes:
@@ -127,6 +163,15 @@ releases:
       breaking_changes:
         - This is a change
       release_summary: Bar
+    objects:
+      playbook:
+        - description: Bar
+          name: foo
+          namespace: null
+      role:
+        - description: Bar
+          name: foo
+          namespace: null
     release_date: '2024-06-19'
   2.0.0:
     changes:
@@ -159,5 +204,14 @@ releases:
       breaking_changes:
         - This is a change
       release_summary: Bar
+    objects:
+      playbook:
+        - description: Bar
+          name: foo
+          namespace: null
+      role:
+        - description: Bar
+          name: foo
+          namespace: null
     release_date: '2024-06-19'
 '''
