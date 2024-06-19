@@ -508,7 +508,7 @@ class ChangelogConfig:
         valid_sort_options = [
             "unsorted",
             "version",
-            "version_reverse",
+            "version_reversed",
             "alphanumerical",
         ]
         if self.changelog_sort not in valid_sort_options:

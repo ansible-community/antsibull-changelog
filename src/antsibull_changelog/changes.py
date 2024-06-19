@@ -705,8 +705,8 @@ class ChangesData(ChangesBase):
         """
         Sort change metadata in place.
         """
-        if self.config.changelog_sort in ["version", "version_reverse"]:
-            reverse_order = self.config.changelog_sort == "version_reverse"
+        if self.config.changelog_sort in ["version", "version_reversed"]:
+            reverse_order = self.config.changelog_sort == "version_reversed"
             self.data["releases"] = dict(
                 sorted(
                     self.data["releases"].items(),
