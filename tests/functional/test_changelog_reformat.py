@@ -52,19 +52,19 @@ other stuff: foobar
     assert collection_changelog.read_file("changelogs/changelog.yaml").decode('utf-8') == '''ancestor: null
 releases:
   10.0.0:
-    release_date: '2024-06-19'
     changes:
       breaking_changes:
       - This is a change
       release_summary: Bar
+    release_date: '2024-06-19'
   1.0.0:
-    release_date: '2024-06-17'
     changes:
       release_summary: Foo
+    release_date: '2024-06-17'
   2.0.0:
-    release_date: '2024-06-18'
     changes:
       release_summary: Baz
+    release_date: '2024-06-18'
 '''
 
     collection_changelog.config.changelog_sort = 'alphanumerical'
@@ -123,19 +123,19 @@ releases:
 ancestor: null
 releases:
   10.0.0:
-    release_date: '2024-06-19'
     changes:
       breaking_changes:
         - This is a change
       release_summary: Bar
+    release_date: '2024-06-19'
   2.0.0:
-    release_date: '2024-06-18'
     changes:
       release_summary: Baz
+    release_date: '2024-06-18'
   1.0.0:
-    release_date: '2024-06-17'
     changes:
       release_summary: Foo
+    release_date: '2024-06-17'
 '''
 
     collection_changelog.config.changelog_sort = 'version'
@@ -147,17 +147,17 @@ releases:
 ancestor: null
 releases:
   1.0.0:
-    release_date: '2024-06-17'
     changes:
       release_summary: Foo
+    release_date: '2024-06-17'
   2.0.0:
-    release_date: '2024-06-18'
     changes:
       release_summary: Baz
+    release_date: '2024-06-18'
   10.0.0:
-    release_date: '2024-06-19'
     changes:
       breaking_changes:
         - This is a change
       release_summary: Bar
+    release_date: '2024-06-19'
 '''

@@ -523,7 +523,7 @@ class ChangesData(ChangesBase):
                 )
             )
 
-        for _, config in self.data["releases"].items():
+        for version, config in self.data["releases"].items():
             if "modules" in config:
                 config["modules"] = sorted(
                     config["modules"], key=lambda module: module["name"]
@@ -555,6 +555,8 @@ class ChangesData(ChangesBase):
                     )
                     for section, entries in sorted(config["changes"].items())
                 }
+
+            self.data["releases"][version] = dict(sorted(config.items()))
 
     def _add_fragment_obj(self, obj_class, obj_type, entry, version: str):
         """
