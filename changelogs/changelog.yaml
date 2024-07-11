@@ -1,3 +1,4 @@
+---
 ancestor: null
 releases:
   0.1.0:
@@ -13,421 +14,422 @@ releases:
   0.2.0:
     changes:
       minor_changes:
-      - Added more testing.
-      - Fix internal API for ACD changelog generation (pruning and concatenation of
-        changelogs).
-      - Improve error handling.
-      - Improve reStructuredText creation when new modules with and without namespace
-        exist at the same time.
-      - Title generation improved (remove superfluous space).
-      - Use PyYAML C loader/dumper if available.
-      - '``lint`` subcommand no longer requires specification whether it is run inside
-        a collection or not (if usual indicators are absent).'
+        - Added more testing.
+        - Fix internal API for ACD changelog generation (pruning and concatenation
+          of changelogs).
+        - Improve error handling.
+        - Improve reStructuredText creation when new modules with and without namespace
+          exist at the same time.
+        - Title generation improved (remove superfluous space).
+        - Use PyYAML C loader/dumper if available.
+        - '``lint`` subcommand no longer requires specification whether it is run
+          inside a collection or not (if usual indicators are absent).'
     release_date: '2020-05-31'
   0.2.1:
     changes:
       bugfixes:
-      - Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
+        - Allow to enumerate plugins/modules with ansible-doc by specifying ``--use-ansible-doc``.
     release_date: '2020-06-10'
   0.3.0:
     changes:
       minor_changes:
-      - Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
-      - Changelog generator can be ran via ``python -m antsibull_changelog``.
-      - Use ``ansible-doc`` instead of ``/path/to/checkout/bin/ansible-doc`` when
-        being run in ansible-base checkouts.
+        - Allow to pass path to ansible-doc binary via ``--ansible-doc-bin``.
+        - Changelog generator can be ran via ``python -m antsibull_changelog``.
+        - Use ``ansible-doc`` instead of ``/path/to/checkout/bin/ansible-doc`` when
+          being run in ansible-base checkouts.
     release_date: '2020-06-10'
   0.3.1:
     changes:
       bugfixes:
-      - Do not fail when ``changelogs/fragments`` does not exist. Simply assume there
-        are no fragments in that case.
-      - Improve behavior when ``changelogs/config.yaml`` is not a dictionary, or does
-        not contain ``sections``.
-      - Improve error message when ``--is-collection`` is specified and ``changelogs/config.yaml``
-        cannot be found, or when the ``lint`` subcommand is used.
+        - Do not fail when ``changelogs/fragments`` does not exist. Simply assume
+          there are no fragments in that case.
+        - Improve behavior when ``changelogs/config.yaml`` is not a dictionary, or
+          does not contain ``sections``.
+        - Improve error message when ``--is-collection`` is specified and ``changelogs/config.yaml``
+          cannot be found, or when the ``lint`` subcommand is used.
     release_date: '2020-06-11'
   0.4.0:
     changes:
       bugfixes:
-      - Fix bad module namespace detection when collection was symlinked into Ansible's
-        collection search path. This also allows to add releases to collections which
-        are not installed in a way that Ansible finds them.
+        - Fix bad module namespace detection when collection was symlinked into Ansible's
+          collection search path. This also allows to add releases to collections
+          which are not installed in a way that Ansible finds them.
       minor_changes:
-      - Allow to enable or disable flatmapping via ``config.yaml``.
+        - Allow to enable or disable flatmapping via ``config.yaml``.
     release_date: '2020-06-22'
   0.5.0:
     changes:
       minor_changes:
-      - The internal changelog generator code got more flexible to help antsibull
-        generate Ansible porting guides.
+        - The internal changelog generator code got more flexible to help antsibull
+          generate Ansible porting guides.
     release_date: '2020-06-28'
   0.6.0:
     changes:
       minor_changes:
-      - New changelog configurations place the ``CHANGELOG.rst`` file by default in
-        the top-level directory, and not in ``changelogs/``.
-      - The config option ``archive_path_template`` allows to move fragments into
-        an archive directory when ``keep_fragments`` is set to ``false``.
-      - The option ``use_fqcn`` (set to ``true`` in new configurations) allows to
-        use FQCN for new plugins and modules.
+        - New changelog configurations place the ``CHANGELOG.rst`` file by default
+          in the top-level directory, and not in ``changelogs/``.
+        - The config option ``archive_path_template`` allows to move fragments into
+          an archive directory when ``keep_fragments`` is set to ``false``.
+        - The option ``use_fqcn`` (set to ``true`` in new configurations) allows to
+          use FQCN for new plugins and modules.
     release_date: '2020-07-12'
   0.7.0:
     changes:
       minor_changes:
-      - A new config option, ``ignore_other_fragment_extensions`` allows for configuring
-        whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test
-        sanity --test changelog`` test). The default value for existing configurations
-        is ``false``, and for new configurations ``true``.
-      - Allow to use semantic versioning also for Ansible-base with the ``use_semantic_versioning``
-        configuration setting.
-      - Refactoring changelog generation code to provide all preludes (release summaries)
-        in changelog entries, and provide generic functionality to extract a grouped
-        list of versions. These changes are mainly for the antsibull project.
+        - A new config option, ``ignore_other_fragment_extensions`` allows for configuring
+          whether only ``.yaml`` and ``.yml`` files are used (as mandated by the ``ansible-test
+          sanity --test changelog`` test). The default value for existing configurations
+          is ``false``, and for new configurations ``true``.
+        - Allow to use semantic versioning also for Ansible-base with the ``use_semantic_versioning``
+          configuration setting.
+        - Refactoring changelog generation code to provide all preludes (release summaries)
+          in changelog entries, and provide generic functionality to extract a grouped
+          list of versions. These changes are mainly for the antsibull project.
     release_date: '2020-07-26'
   0.8.0:
     changes:
       minor_changes:
-      - Allow to not save a changelog on release when using API.
-      - Allow to sanitize changelog data on load/save. This means that unknown information
-        will be removed, and bad information will be stripped. This will be enabled
-        in newly created changelog configs, but is disabled for backwards compatibility.
+        - Allow to not save a changelog on release when using API.
+        - Allow to sanitize changelog data on load/save. This means that unknown information
+          will be removed, and bad information will be stripped. This will be enabled
+          in newly created changelog configs, but is disabled for backwards compatibility.
     release_date: '2020-08-18'
   0.8.1:
     changes:
       bugfixes:
-      - Fixed error on generating changelogs when using the trivial section.
+        - Fixed error on generating changelogs when using the trivial section.
     release_date: '2020-08-27'
   0.9.0:
     changes:
       breaking_changes:
-      - The new option ``prevent_known_fragments`` with default value being the value
-        of ``keep_fragments`` allows to control whether fragments with names that
-        already appeared in the past are ignored or not. The new behavior happens
-        if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46).
-        Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core
-        changelog, are not affected.
+        - The new option ``prevent_known_fragments`` with default value being the
+          value of ``keep_fragments`` allows to control whether fragments with names
+          that already appeared in the past are ignored or not. The new behavior happens
+          if ``keep_fragments=false``, and is less surprising to users (see https://github.com/ansible-community/antsibull-changelog/issues/46).
+          Changelogs with ``keep_fragments=true``, like the ansible-base/ansible-core
+          changelog, are not affected.
       major_changes:
-      - Add support for reporting new playbooks and roles in collections.
-      - "Add support for special changelog fragment sections which add new plugins
-        and/or objects to the changelog for this version. This is mainly useful for
-        ``test`` and ``filter`` plugins, and for ``playbook`` and ``role`` objects,
-        which are not yet automatically detected and mentioned in ``changelogs/changelog.yaml``
-        or the generated RST changelog.\n\nThe format of these sections and their
-        content is as follows::\n\n    ---\n    add plugin.filter:\n      - name:
-        to_time_unit\n        description: Converts a time expression to a given unit\n
-        \     - name: to_seconds\n        description: Converts a time expression
-        to seconds\n    add object.role:\n      - name: nginx\n        description:
-        The most awesome nginx installation role ever\n    add object.playbook:\n
-        \     - name: wipe_server\n        description: Totally wipes a server\n\nFor
-        every entry, a list of plugins (section ``add plugin.xxx``) or objects (section
-        ``add object.xxx``) of the given type (``filter``, ``test`` for plugins, ``playbook``,
-        ``role`` for objects) will be added. Every plugin or object has a short name
-        as well as a short description. These fields correspond to the module/plugin
-        name and the ``short_description`` field of the ``DOCUMENTATION`` block of
-        modules and documentable plugins.\n"
+        - Add support for reporting new playbooks and roles in collections.
+        - "Add support for special changelog fragment sections which add new plugins\
+          \ and/or objects to the changelog for this version. This is mainly useful\
+          \ for ``test`` and ``filter`` plugins, and for ``playbook`` and ``role``\
+          \ objects, which are not yet automatically detected and mentioned in ``changelogs/changelog.yaml``\
+          \ or the generated RST changelog.\n\nThe format of these sections and their\
+          \ content is as follows::\n\n    ---\n    add plugin.filter:\n      - name:\
+          \ to_time_unit\n        description: Converts a time expression to a given\
+          \ unit\n      - name: to_seconds\n        description: Converts a time expression\
+          \ to seconds\n    add object.role:\n      - name: nginx\n        description:\
+          \ The most awesome nginx installation role ever\n    add object.playbook:\n\
+          \      - name: wipe_server\n        description: Totally wipes a server\n\
+          \nFor every entry, a list of plugins (section ``add plugin.xxx``) or objects\
+          \ (section ``add object.xxx``) of the given type (``filter``, ``test`` for\
+          \ plugins, ``playbook``, ``role`` for objects) will be added. Every plugin\
+          \ or object has a short name as well as a short description. These fields\
+          \ correspond to the module/plugin name and the ``short_description`` field\
+          \ of the ``DOCUMENTATION`` block of modules and documentable plugins.\n"
       minor_changes:
-      - Add ``--update-existing`` option for ``antsibull-changelog release``, which
-        allows to update the current release's release date and (if relevant) codename
-        instead of simply reporting that the release already exists.
+        - Add ``--update-existing`` option for ``antsibull-changelog release``, which
+          allows to update the current release's release date and (if relevant) codename
+          instead of simply reporting that the release already exists.
     release_date: '2021-01-30'
   0.10.0:
     changes:
       bugfixes:
-      - Make sure that the plugin caching inside ansible-base/-core works without
-        ``--use-ansible-doc``.
+        - Make sure that the plugin caching inside ansible-base/-core works without
+          ``--use-ansible-doc``.
       minor_changes:
-      - The new ``--cummulative-release`` option for ``antsibull-changelog release``
-        allows to add all plugins and objects to a release since whose ``version_added``
-        is later than the previous release version (or ancestor if there was no previous
-        release), and at latest the current release version. This is needed for major
-        releases of ``community.general`` and similarly organized collections.
-      - 'Will now print a warning when a release is made where the no ``prelude_section_name``
-        section (default: ``release_summary``) appears.'
+        - The new ``--cummulative-release`` option for ``antsibull-changelog release``
+          allows to add all plugins and objects to a release since whose ``version_added``
+          is later than the previous release version (or ancestor if there was no
+          previous release), and at latest the current release version. This is needed
+          for major releases of ``community.general`` and similarly organized collections.
+        - 'Will now print a warning when a release is made where the no ``prelude_section_name``
+          section (default: ``release_summary``) appears.'
     release_date: '2021-04-26'
   0.11.0:
     changes:
       bugfixes:
-      - When subdirectories of ``modules`` are used in ansible-base/ansible-core,
-        the wrong module name was passed to ``ansible-doc`` when ``--use-ansible-doc``
-        was not used.
+        - When subdirectories of ``modules`` are used in ansible-base/ansible-core,
+          the wrong module name was passed to ``ansible-doc`` when ``--use-ansible-doc``
+          was not used.
       minor_changes:
-      - When using ansible-core 2.11 or newer, will now detect new roles with argument
-        spec. We only consider the ``main`` entrypoint of roles.
+        - When using ansible-core 2.11 or newer, will now detect new roles with argument
+          spec. We only consider the ``main`` entrypoint of roles.
     release_date: '2021-06-13'
   0.12.0:
     changes:
       bugfixes:
-      - Fix prerelease collapsing when ``use_semantic_versioning`` is set to ``true``
-        for ansible-core.
+        - Fix prerelease collapsing when ``use_semantic_versioning`` is set to ``true``
+          for ansible-core.
       minor_changes:
-      - Support changelogs for other projects than ansible-core/-base and Ansible
-        collections (https://github.com/ansible-community/antsibull-changelog/pull/60).
+        - Support changelogs for other projects than ansible-core/-base and Ansible
+          collections (https://github.com/ansible-community/antsibull-changelog/pull/60).
       release_summary: New feature release which supports other projects than ansible-core
         and Ansible collections.
     fragments:
-    - 0.12.0.yml
-    - other-projects.yml
-    - use_semantic_versioning.yml
+      - 0.12.0.yml
+      - other-projects.yml
+      - use_semantic_versioning.yml
     release_date: '2021-07-11'
   0.13.0:
     changes:
       bugfixes:
-      - Fix issues with module namespaces when symlinks appear in the path to the
-        temp directory (https://github.com/ansible-community/antsibull-changelog/issues/68,
-        https://github.com/ansible-community/antsibull-changelog/pull/69).
-      - Stop mentioning ``galaxy.yaml`` instead of ``galaxy.yml`` in some error messages
-        (https://github.com/ansible-community/antsibull-changelog/pull/66).
+        - Fix issues with module namespaces when symlinks appear in the path to the
+          temp directory (https://github.com/ansible-community/antsibull-changelog/issues/68,
+          https://github.com/ansible-community/antsibull-changelog/pull/69).
+        - Stop mentioning ``galaxy.yaml`` instead of ``galaxy.yml`` in some error
+          messages (https://github.com/ansible-community/antsibull-changelog/pull/66).
       minor_changes:
-      - Always lint fragments before releasing (https://github.com/ansible-community/antsibull-changelog/issues/65,
-        https://github.com/ansible-community/antsibull-changelog/pull/67).
+        - Always lint fragments before releasing (https://github.com/ansible-community/antsibull-changelog/issues/65,
+          https://github.com/ansible-community/antsibull-changelog/pull/67).
       release_summary: This release makes changelog building more reliable.
     fragments:
-    - 0.13.0.yml
-    - 66-galaxy.yaml
-    - 67-lint-before-release.yml
-    - 69-symlinks.yml
+      - 0.13.0.yml
+      - 66-galaxy.yaml
+      - 67-lint-before-release.yml
+      - 69-symlinks.yml
     release_date: '2021-12-13'
   0.14.0:
     changes:
       minor_changes:
-      - The internal ``changelog.yaml`` linting API allows to use ``packaging.version.Version``
-        for version numbers instead of semantic versioning (https://github.com/ansible-community/antsibull-changelog/pull/73).
-      - Use the new ``--metadata-dump`` option for ansible-core 2.13+ to quickly dump
-        and extract all module/plugin ``version_added`` values for the collection
-        (https://github.com/ansible-community/antsibull-changelog/pull/72).
+        - The internal ``changelog.yaml`` linting API allows to use ``packaging.version.Version``
+          for version numbers instead of semantic versioning (https://github.com/ansible-community/antsibull-changelog/pull/73).
+        - Use the new ``--metadata-dump`` option for ansible-core 2.13+ to quickly
+          dump and extract all module/plugin ``version_added`` values for the collection
+          (https://github.com/ansible-community/antsibull-changelog/pull/72).
       release_summary: Feature release that will speed up the release process with
         ansible-core 2.13.
     fragments:
-    - 0.14.0.yml
-    - 72-ansible-core-2.13.yml
-    - changelog-linting.yml
+      - 0.14.0.yml
+      - 72-ansible-core-2.13.yml
+      - changelog-linting.yml
     release_date: '2022-03-23'
   0.15.0:
     changes:
       minor_changes:
-      - Add ``changelogs/changelog.yaml`` file format linting subcommand that was
-        previously part of antsibull-lint (https://github.com/ansible-community/antsibull-changelog/pull/76,
-        https://github.com/ansible-community/antsibull/issues/410).
+        - Add ``changelogs/changelog.yaml`` file format linting subcommand that was
+          previously part of antsibull-lint (https://github.com/ansible-community/antsibull-changelog/pull/76,
+          https://github.com/ansible-community/antsibull/issues/410).
       release_summary: Feature release.
     fragments:
-    - 0.15.0.yml
-    - 76-lint-changelog-yaml.yml
+      - 0.15.0.yml
+      - 76-lint-changelog-yaml.yml
     release_date: '2022-03-30'
   0.16.0:
     changes:
       bugfixes:
-      - Mark rstcheck 4.x and 5.x as compatible. Support rstcheck 6.x as well (https://github.com/ansible-community/antsibull-changelog/pull/81).
+        - Mark rstcheck 4.x and 5.x as compatible. Support rstcheck 6.x as well (https://github.com/ansible-community/antsibull-changelog/pull/81).
       minor_changes:
-      - Allow to extract other project versions for Python poetry projects from ``pyproject.toml``
-        (https://github.com/ansible-community/antsibull-changelog/pull/80).
-      - The files in the source repository now follow the `REUSE Specification <https://reuse.software/spec/>`_.
-        The only exceptions are changelog fragments in ``changelogs/fragments/`` (https://github.com/ansible-community/antsibull-changelog/pull/82).
+        - Allow to extract other project versions for Python poetry projects from
+          ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/80).
+        - The files in the source repository now follow the `REUSE Specification <https://reuse.software/spec/>`_.
+          The only exceptions are changelog fragments in ``changelogs/fragments/``
+          (https://github.com/ansible-community/antsibull-changelog/pull/82).
       release_summary: Feature and bugfix release.
     fragments:
-    - 0.16.0.yml
-    - 80-pyproject-poetry.yml
-    - 81-rstcheck.yml
-    - 82-licenses.yml
+      - 0.16.0.yml
+      - 80-pyproject-poetry.yml
+      - 81-rstcheck.yml
+      - 82-licenses.yml
     release_date: '2022-08-08'
   0.17.0:
     changes:
       minor_changes:
-      - Only allow a ``trival`` section in the ansible-core/ansible-base changelog
-        when explicitly configured (https://github.com/ansible-community/antsibull-changelog/pull/90).
+        - Only allow a ``trival`` section in the ansible-core/ansible-base changelog
+          when explicitly configured (https://github.com/ansible-community/antsibull-changelog/pull/90).
       release_summary: Feature release for ansible-core.
     fragments:
-    - 0.17.0.yml
-    - 90-ansible-trivial.yml
+      - 0.17.0.yml
+      - 90-ansible-trivial.yml
     release_date: '2022-11-02'
   0.18.0:
     changes:
       breaking_changes:
-      - Drop support for Python 3.6, 3.7, and 3.8 (https://github.com/ansible-community/antsibull-changelog/pull/93).
+        - Drop support for Python 3.6, 3.7, and 3.8 (https://github.com/ansible-community/antsibull-changelog/pull/93).
       release_summary: Maintenance release that drops support for older Python versions.
     fragments:
-    - 0.18.0.yml
-    - python.yml
+      - 0.18.0.yml
+      - python.yml
     release_date: '2022-12-17'
   0.19.0:
     changes:
       minor_changes:
-      - Allow to extract other project versions for JavaScript / TypeScript projects
-        from ``package.json`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
-      - Allow to extract other project versions for Python projects from PEP 621 conformant
-        ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
-      - Support Python 3.11's ``tomllib`` to load ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/issues/101,
-        https://github.com/ansible-community/antsibull-changelog/pull/102).
-      - Use more specific exceptions than ``Exception`` for some cases in internal
-        code (https://github.com/ansible-community/antsibull-changelog/pull/103).
+        - Allow to extract other project versions for JavaScript / TypeScript projects
+          from ``package.json`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
+        - Allow to extract other project versions for Python projects from PEP 621
+          conformant ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/100).
+        - Support Python 3.11's ``tomllib`` to load ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/issues/101,
+          https://github.com/ansible-community/antsibull-changelog/pull/102).
+        - Use more specific exceptions than ``Exception`` for some cases in internal
+          code (https://github.com/ansible-community/antsibull-changelog/pull/103).
       release_summary: Feature release.
     fragments:
-    - 0.19.0.yml
-    - 100-more-other-projects.yml
-    - 101-tomllib.yml
-    - 103-exceptions.yml
+      - 0.19.0.yml
+      - 100-more-other-projects.yml
+      - 101-tomllib.yml
+      - 103-exceptions.yml
     release_date: '2023-03-10'
   0.20.0:
     changes:
       bugfixes:
-      - When releasing ansible-core and only one of ``--version`` and ``--codename``
-        is supplied, error out instead of ignoring the supplied value (https://github.com/ansible-community/antsibull-changelog/issues/104,
-        https://github.com/ansible-community/antsibull-changelog/pull/105).
+        - When releasing ansible-core and only one of ``--version`` and ``--codename``
+          is supplied, error out instead of ignoring the supplied value (https://github.com/ansible-community/antsibull-changelog/issues/104,
+          https://github.com/ansible-community/antsibull-changelog/pull/105).
       major_changes:
-      - Change pyproject build backend from ``poetry-core`` to ``hatchling``. ``pip
-        install antsibull`` works exactly the same as before, but some users may be
-        affected depending on how they build/install the project (https://github.com/ansible-community/antsibull-changelog/pull/109).
+        - Change pyproject build backend from ``poetry-core`` to ``hatchling``. ``pip
+          install antsibull`` works exactly the same as before, but some users may
+          be affected depending on how they build/install the project (https://github.com/ansible-community/antsibull-changelog/pull/109).
       release_summary: Bugfix and maintenance release using a new build system.
     fragments:
-    - 0.20.0.yml
-    - 105-version-codename.yml
-    - 109-build-system.yml
+      - 0.20.0.yml
+      - 105-version-codename.yml
+      - 109-build-system.yml
     release_date: '2023-03-29'
   0.21.0:
     changes:
       deprecated_features:
-      - Support for ``classic`` changelogs is deprecated and will be removed soon.
-        If you need to build changelogs for Ansible 2.9 or before, please use an older
-        version (https://github.com/ansible-community/antsibull-changelog/pull/123).
+        - Support for ``classic`` changelogs is deprecated and will be removed soon.
+          If you need to build changelogs for Ansible 2.9 or before, please use an
+          older version (https://github.com/ansible-community/antsibull-changelog/pull/123).
       release_summary: Maintenance release with a deprecation.
     fragments:
-    - 0.21.0.yml
-    - 123-deprecate-classic.yml
+      - 0.21.0.yml
+      - 123-deprecate-classic.yml
     release_date: '2023-06-27'
   0.22.0:
     changes:
       minor_changes:
-      - Add ``antsibull-changelog-lint`` and ``antsibull-changelog-lint-changelog-yaml``
-        pre-commit.com hooks (https://github.com/ansible-community/antsibull-changelog/pull/125).
-      - Add ``toml`` extra to pull in a toml parser to use to guess the version based
-        on ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/126).
+        - Add ``antsibull-changelog-lint`` and ``antsibull-changelog-lint-changelog-yaml``
+          pre-commit.com hooks (https://github.com/ansible-community/antsibull-changelog/pull/125).
+        - Add ``toml`` extra to pull in a toml parser to use to guess the version
+          based on ``pyproject.toml`` (https://github.com/ansible-community/antsibull-changelog/pull/126).
       release_summary: New feature release
     fragments:
-    - 0.22.0.yml
-    - 125-pre-commit-hook.yaml
-    - 126-toml-extra.yaml
+      - 0.22.0.yml
+      - 125-pre-commit-hook.yaml
+      - 126-toml-extra.yaml
     release_date: '2023-07-25'
   0.23.0:
     changes:
       minor_changes:
-      - Allow to generate changelog for a specific version (https://github.com/ansible-community/antsibull-changelog/pull/130).
-      - Allow to generate only the last entry without preamble with the ``generate``
-        command (https://github.com/ansible-community/antsibull-changelog/pull/131).
-      - Allow to write ``generate`` output to a user-provided file (https://github.com/ansible-community/antsibull-changelog/pull/131).
+        - Allow to generate changelog for a specific version (https://github.com/ansible-community/antsibull-changelog/pull/130).
+        - Allow to generate only the last entry without preamble with the ``generate``
+          command (https://github.com/ansible-community/antsibull-changelog/pull/131).
+        - Allow to write ``generate`` output to a user-provided file (https://github.com/ansible-community/antsibull-changelog/pull/131).
       release_summary: Feature release.
     fragments:
-    - 0.23.0.yml
-    - 130-generate-version.yml
-    - 131-generate.yml
+      - 0.23.0.yml
+      - 130-generate-version.yml
+      - 131-generate.yml
     release_date: '2023-08-10'
   0.24.0:
     changes:
       deprecated_features:
-      - Some code in ``antsibull_changelog.changelog_entry`` has been deprecated,
-        and the ``antsibull_changelog.rst`` module has been deprecated completely.
-        If you use them in your own code, please take a look at the `PR deprecating
-        them <https://github.com/ansible-community/antsibull-changelog/pull/139>`__
-        for information on how to stop using them (https://github.com/ansible-community/antsibull-changelog/pull/139).
+        - Some code in ``antsibull_changelog.changelog_entry`` has been deprecated,
+          and the ``antsibull_changelog.rst`` module has been deprecated completely.
+          If you use them in your own code, please take a look at the `PR deprecating
+          them <https://github.com/ansible-community/antsibull-changelog/pull/139>`__
+          for information on how to stop using them (https://github.com/ansible-community/antsibull-changelog/pull/139).
       minor_changes:
-      - Allow automatically retrieving package version for hatch projects with the
-        ``hatch version`` command (https://github.com/ansible-community/antsibull-changelog/pull/141).
-      - Allow to render changelogs as MarkDown. The output formats written can be
-        controlled with the ``output_formats`` option in the config file (https://github.com/ansible-community/antsibull-changelog/pull/139).
-      - Officially support Python 3.12 (https://github.com/ansible-community/antsibull-changelog/pull/134).
+        - Allow automatically retrieving package version for hatch projects with the
+          ``hatch version`` command (https://github.com/ansible-community/antsibull-changelog/pull/141).
+        - Allow to render changelogs as MarkDown. The output formats written can be
+          controlled with the ``output_formats`` option in the config file (https://github.com/ansible-community/antsibull-changelog/pull/139).
+        - Officially support Python 3.12 (https://github.com/ansible-community/antsibull-changelog/pull/134).
       release_summary: Feature release which now allows to output MarkDown.
     fragments:
-    - 0.24.0.yml
-    - 103-312.yaml
-    - 139-output-formats.yml
-    - 141-hatch-version.yaml
+      - 0.24.0.yml
+      - 103-312.yaml
+      - 139-output-formats.yml
+      - 141-hatch-version.yaml
     release_date: '2024-02-09'
   0.25.0:
     changes:
       bugfixes:
-      - When multiple output formats are defined and ``antsibull-changelog generate``
-        is used with both ``--output`` and ``--output-format``, an error was displayed
-        that ``--output-format`` must be specified (https://github.com/ansible-community/antsibull-changelog/issues/149,
-        https://github.com/ansible-community/antsibull-changelog/pull/151).
+        - When multiple output formats are defined and ``antsibull-changelog generate``
+          is used with both ``--output`` and ``--output-format``, an error was displayed
+          that ``--output-format`` must be specified (https://github.com/ansible-community/antsibull-changelog/issues/149,
+          https://github.com/ansible-community/antsibull-changelog/pull/151).
       minor_changes:
-      - Add ``--version`` flag to print package version and exit (https://github.com/ansible-community/antsibull-changelog/pull/147).
+        - Add ``--version`` flag to print package version and exit (https://github.com/ansible-community/antsibull-changelog/pull/147).
       release_summary: Bugfix and feature release.
     fragments:
-    - 0.25.0.yml
-    - 147-version-option.yaml
-    - 151-generate-output-format.yml
+      - 0.25.0.yml
+      - 147-version-option.yaml
+      - 151-generate-output-format.yml
     release_date: '2024-02-15'
   0.26.0:
     changes:
       minor_changes:
-      - The Markdown output format is now compatible with `python-markdown <https://python-markdown.github.io/>`_
-        and `mkdocs <https://www.mkdocs.org/>`_, as long as the `pymdownx.escapeall
-        <https://facelessuser.github.io/pymdown-extensions/extensions/escapeall/>`_
-        extension is enabled (https://github.com/ansible-community/antsibull-changelog/pull/153).
+        - The Markdown output format is now compatible with `python-markdown <https://python-markdown.github.io/>`_
+          and `mkdocs <https://www.mkdocs.org/>`_, as long as the `pymdownx.escapeall
+          <https://facelessuser.github.io/pymdown-extensions/extensions/escapeall/>`_
+          extension is enabled (https://github.com/ansible-community/antsibull-changelog/pull/153).
       release_summary: Feature release.
     fragments:
-    - 0.26.0.yml
-    - 153-pymd-improvements.yaml
+      - 0.26.0.yml
+      - 153-pymd-improvements.yaml
     release_date: '2024-03-17'
   0.27.0:
     changes:
       minor_changes:
-      - Adds period where needed at end of new plugin short descriptions. Controlled
-        by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87,
-        https://github.com/ansible-community/antsibull-changelog/pull/162).
+        - Adds period where needed at end of new plugin short descriptions. Controlled
+          by the ``add_plugin_period`` option in the config file (https://github.com/ansible-community/antsibull-changelog/issues/87,
+          https://github.com/ansible-community/antsibull-changelog/pull/162).
       release_summary: Feature release.
     fragments:
-    - 0.27.0.yml
-    - 162-add-plugin-period.yaml
+      - 0.27.0.yml
+      - 162-add-plugin-period.yaml
     release_date: '2024-05-20'
   0.28.0:
     changes:
       minor_changes:
-      - 'There is now an option ``changelog_nice_yaml`` to prepend the YAML document
-        start
+        - 'There is now an option ``changelog_nice_yaml`` to prepend the YAML document
+          start
 
-        marker ``---`` to the header of the ``changelogs/changelog.yaml`` file, and
-        to increases
+          marker ``---`` to the header of the ``changelogs/changelog.yaml`` file,
+          and to increases
 
-        indentation level on list items. This makes the file pass ansible-lint
+          indentation level on list items. This makes the file pass ansible-lint
 
-        (https://github.com/ansible-community/antsibull-changelog/issues/91,
+          (https://github.com/ansible-community/antsibull-changelog/issues/91,
 
-        https://github.com/ansible-community/antsibull-changelog/issues/152,
+          https://github.com/ansible-community/antsibull-changelog/issues/152,
 
-        https://github.com/ansible-community/antsibull-changelog/pull/160).
+          https://github.com/ansible-community/antsibull-changelog/pull/160).
 
-        '
+          '
       release_summary: Feature release.
     fragments:
-    - 0.28.0.yml
-    - 160-changelog-nice-yaml.yml
+      - 0.28.0.yml
+      - 160-changelog-nice-yaml.yml
     release_date: '2024-05-26'
   0.29.0:
     changes:
       bugfixes:
-      - Remove Python version check that was checking for Python >= 3.6 (instead of
-        >= 3.9). This check is not really necessary since ``pyproject.toml`` declares
-        ``requires-python``, and old enough Python versions where pip does not know
-        about ``requires-python`` will not load antsibull-changelog due to syntax
-        errors anyway (https://github.com/ansible-community/antsibull-changelog/pull/167).
+        - Remove Python version check that was checking for Python >= 3.6 (instead
+          of >= 3.9). This check is not really necessary since ``pyproject.toml``
+          declares ``requires-python``, and old enough Python versions where pip does
+          not know about ``requires-python`` will not load antsibull-changelog due
+          to syntax errors anyway (https://github.com/ansible-community/antsibull-changelog/pull/167).
       minor_changes:
-      - Add a ``reformat`` command that reformats ``changelogs/changelog.yaml`` to
-        the current settings of ``changelogs/config.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/169).
-      - 'Adds a new configuration option ``changelog_sort``. This option allows sorting
-        of changelog entries in ``changelogs/changelog.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/165).
+        - Add a ``reformat`` command that reformats ``changelogs/changelog.yaml``
+          to the current settings of ``changelogs/config.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/169).
+        - 'Adds a new configuration option ``changelog_sort``. This option allows
+          sorting of changelog entries in ``changelogs/changelog.yaml`` (https://github.com/ansible-community/antsibull-changelog/pull/165).
 
-        '
-      - Replaces numbers with constants for return codes (https://github.com/ansible-community/antsibull-changelog/issues/77).
+          '
+        - Replaces numbers with constants for return codes (https://github.com/ansible-community/antsibull-changelog/issues/77).
       release_summary: Feature release.
       removed_features:
-      - Removes support for the deprecated classic changelog format. ``changes_format``
-        must now be present and set to ``combined`` for ansible-core usage, and the
-        value ``classic`` is no longer allowed (https://github.com/ansible-community/antsibull-changelog/issues/137).
+        - Removes support for the deprecated classic changelog format. ``changes_format``
+          must now be present and set to ``combined`` for ansible-core usage, and
+          the value ``classic`` is no longer allowed (https://github.com/ansible-community/antsibull-changelog/issues/137).
     fragments:
-    - 0.29.0.yml
-    - 165-changelog-sort-option.yml
-    - 166-use-constants.yml
-    - 167-python.yml
-    - 168_classic.yml
-    - 169-reformat.yml
+      - 0.29.0.yml
+      - 165-changelog-sort-option.yml
+      - 166-use-constants.yml
+      - 167-python.yml
+      - 168_classic.yml
+      - 169-reformat.yml
     release_date: '2024-06-19'
