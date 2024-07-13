@@ -40,6 +40,7 @@ from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
 from .rendering.changelog import generate_changelog
 from .toml import has_toml_loader_available, load_toml
+from .update_galaxy import update_galaxy
 
 
 def set_paths(
@@ -243,6 +244,12 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     release_parser.set_defaults(func=command_release)
     release_parser.add_argument("--version", help="override release version")
     release_parser.add_argument("--codename", help="override/set release codename")
+    release_parser.add_argument(
+        "--update-galaxy-file",
+        action="store_true",
+        help="re-write galaxy.yml with the supplied version. "
+        "Note that this will remove comments and formatting",
+    )
     release_parser.add_argument(
         "--date", default=str(datetime.date.today()), help="override release date"
     )
@@ -644,6 +651,13 @@ def command_release(args: Any) -> int:
     version, codename = _get_version_and_codename(
         paths, config, collection_details, args
     )
+
+    if args.update_galaxy_file:
+        if not paths.galaxy_path:
+            LOGGER.error("Cannot find galaxy.yml file in path.")
+            return 5
+        else:
+            update_galaxy(galaxy_path=paths.galaxy_path, version=version)
 
     changes = load_changes(config)
 
