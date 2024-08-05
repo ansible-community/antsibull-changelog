@@ -8,8 +8,6 @@
 Code for conversion to MarkDown.
 """
 
-# pyre-ignore-all-errors
-
 from __future__ import annotations
 
 import io

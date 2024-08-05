@@ -8,8 +8,6 @@
 Utility code for rendering.
 """
 
-# pyre-ignore-all-errors
-
 from __future__ import annotations
 
 import io
