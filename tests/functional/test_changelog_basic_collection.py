@@ -15,7 +15,7 @@ from unittest import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
-import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
+import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
 from antsibull_changelog.config import TextFormat
 
@@ -1951,16 +1951,13 @@ FAKE_PLUGINS = {
 }
 
 
-class FakeAnsibleRelease:
-    def __init__(self, version: str, codename: str):
-        self.__version__ = version
-        self.__codename__ = codename
-
-
-@mock.patch("antsibull_changelog.ansible.HAS_ANSIBLE_RELEASE", True)
 @mock.patch(
-    "antsibull_changelog.ansible.ansible_release",
-    FakeAnsibleRelease("2.11.0", "dummy codename"),
+    "antsibull_changelog.plugins.get_ansible_release",
+    lambda: ("2.11.0", "dummy codename"),
+)
+@mock.patch(
+    "antsibull_changelog.plugins.get_documentable_objects",
+    lambda: ("role",),
 )
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     collection_changelog,
