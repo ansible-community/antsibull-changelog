@@ -14,17 +14,6 @@ import os.path
 import pathlib
 import tempfile
 
-# rstcheck >= 6.0.0 depends on rstcheck-core
-try:
-    import rstcheck_core.checker
-    import rstcheck_core.config
-
-    HAS_RSTCHECK_CORE = True
-except ImportError:
-    HAS_RSTCHECK_CORE = False
-    import docutils.utils
-    import rstcheck
-
 
 def check_rst_content(
     content: str, filename: str | None = None
@@ -35,7 +24,12 @@ def check_rst_content(
     The entries in the return list are tuples with line number, column number, and
     error/warning message.
     """
-    if HAS_RSTCHECK_CORE:
+    # rstcheck >= 6.0.0 depends on rstcheck-core
+    try:
+        # We import from rstcheck_core locally since importing it is rather slow
+        import rstcheck_core.checker  # pylint: disable=import-outside-toplevel
+        import rstcheck_core.config  # pylint: disable=import-outside-toplevel
+
         filename = os.path.basename(filename or "file.rst") or "file.rst"
         with tempfile.TemporaryDirectory() as tempdir:
             rst_path = os.path.join(tempdir, filename)
@@ -50,11 +44,14 @@ def check_rst_content(
             return [
                 (result["line_number"], 0, result["message"]) for result in core_results
             ]
-    else:
-        results = rstcheck.check(  # pylint: disable=no-member,used-before-assignment
+    except ImportError:
+        # We import from rstcheck_core locally since importing it is rather slow
+        import docutils.utils  # pylint: disable=import-outside-toplevel
+        import rstcheck  # pylint: disable=import-outside-toplevel
+
+        results = rstcheck.check(  # pylint: disable=no-member
             content,
             filename=filename,
-            # pylint: disable-next=used-before-assignment
             report_level=docutils.utils.Reporter.WARNING_LEVEL,
         )
         return [(result[0], 0, result[1]) for result in results]
