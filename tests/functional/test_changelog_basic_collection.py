@@ -1953,11 +1953,11 @@ FAKE_PLUGINS = {
 
 @mock.patch(
     "antsibull_changelog.plugins.get_ansible_release",
-    lambda: ("2.11.0", "dummy codename"),
+    return_value=("2.11.0", "dummy codename"),
 )
 @mock.patch(
     "antsibull_changelog.plugins.get_documentable_objects",
-    lambda: ("role",),
+    return_value=("role",),
 )
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     collection_changelog,
