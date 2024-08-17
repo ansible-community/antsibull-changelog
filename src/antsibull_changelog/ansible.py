@@ -84,5 +84,4 @@ def get_ansible_release() -> tuple[str, str]:
 
         return ansible_release.__version__, ansible_release.__codename__
     except ImportError as exc:
-        # pylint: disable-next=raise-missing-from
         raise ValueError("Cannot import ansible.release") from exc
