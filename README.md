@@ -48,15 +48,15 @@ and install the requirements needed to run the tests there.
 
 ---
 
-antsibull-changelog depends on the sister antsibull-docutils project. By default, `nox`
-will install a development version of this project from Github.
+antsibull-changelog depends on the sister antsibull-docutils project.
+By default, `nox` will install a development version of this project from Github.
 If you're hacking on antsibull-docutils alongside antsibull-changelog, nox will automatically
 install this project from  `../antsibull-docutils` when running tests if this path exists.
 You can change this behavior through the `OTHER_ANTSIBULL_MODE` env var:
 
 - `OTHER_ANTSIBULL_MODE=auto` — the default behavior described above
-- `OTHER_ANTSIBULL_MODE=local` — install the project from `../antsibull-docutils`. Fail if
-  those paths don't exist.
+- `OTHER_ANTSIBULL_MODE=local` — install the project from `../antsibull-docutils`.
+  Fail if those paths don't exist.
 - `OTHER_ANTSIBULL_MODE=git` — install the project from the Github main branch
 - `OTHER_ANTSIBULL_MODE=pypi` — install the latest version from PyPI
 
