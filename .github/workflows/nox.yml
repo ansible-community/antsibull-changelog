@@ -48,6 +48,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: antsibull-changelog
+      - name: Check out dependent project antsibull-docutils
+        uses: actions/checkout@v4
+        with:
+          repository: ansible-community/antsibull-docutils
+          path: antsibull-docutils
       - name: Install extra packages
         if: "matrix.packages != ''"
         run: |

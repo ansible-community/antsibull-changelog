@@ -12,9 +12,10 @@ from __future__ import annotations
 
 import abc
 
+from antsibull_docutils.utils import ensure_newline_after_last_content
+
 from ..config import TextFormat
 from .document import AbstractRenderer, DocumentRenderer
-from .utils import ensure_newline_after_last_content
 
 
 class BaseContent(abc.ABC):

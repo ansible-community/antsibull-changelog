@@ -15,6 +15,11 @@ import unicodedata
 from dataclasses import dataclass
 from typing import cast
 
+from antsibull_docutils.html_utils import html_escape
+from antsibull_docutils.markdown import GlobalContext, render_as_markdown
+from antsibull_docutils.md_utils import md_escape
+from antsibull_docutils.utils import ensure_newline_after_last_content
+
 from ..config import TextFormat
 from ._document import (
     AbstractRendererEx,
@@ -24,8 +29,7 @@ from ._document import (
     render_section,
 )
 from .document import SectionRenderer
-from .markdown import GlobalContext, html_escape, md_escape, render_as_markdown
-from .utils import ensure_newline_after_last_content, get_parser_name
+from .utils import get_parser_name
 
 _SPACE_LIKE = re.compile("[ ._-]")
 _DISALLOWED_LETTER = re.compile("[^a-zA-Z0-9-]")
