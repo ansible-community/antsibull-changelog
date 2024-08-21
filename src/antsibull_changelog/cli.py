@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2020, Ansible Project
 
+# PYTHON_ARGCOMPLETE_OK
+
 """
 Entrypoint to the antsibull-changelog script.
 """

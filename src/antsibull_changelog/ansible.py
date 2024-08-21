@@ -10,27 +10,9 @@ Return Ansible-specific information, like current release or list of documentabl
 
 from __future__ import annotations
 
-from typing import Any
+from functools import cache
 
 import packaging.version
-
-try:
-    from ansible import constants as C
-
-    HAS_ANSIBLE_CONSTANTS = True
-except ImportError:
-    HAS_ANSIBLE_CONSTANTS = False
-
-
-ansible_release: Any
-try:
-    from ansible import release as ansible_release
-
-    HAS_ANSIBLE_RELEASE = True
-except ImportError:
-    ansible_release = None
-    HAS_ANSIBLE_RELEASE = False
-
 
 OBJECT_TYPES = ("role", "playbook")
 
@@ -41,48 +23,65 @@ OTHER_PLUGIN_TYPES = ("module", "test", "filter")
 PLUGIN_EXCEPTIONS = (("cache", "base.py"), ("module", "async_wrapper.py"))
 
 
+@cache
 def get_documentable_plugins() -> tuple[str, ...]:
     """
     Retrieve plugin types that can be documented.
     """
-    if HAS_ANSIBLE_CONSTANTS:
+    try:
+        # We import from ansible locally since importing it is rather slow
+        from ansible import constants as C  # pylint: disable=import-outside-toplevel
+
         return C.DOCUMENTABLE_PLUGINS
-    return (
-        "become",
-        "cache",
-        "callback",
-        "cliconf",
-        "connection",
-        "httpapi",
-        "inventory",
-        "lookup",
-        "netconf",
-        "shell",
-        "vars",
-        "module",
-        "strategy",
-    )
+    except ImportError:
+        return (
+            "become",
+            "cache",
+            "callback",
+            "cliconf",
+            "connection",
+            "httpapi",
+            "inventory",
+            "lookup",
+            "netconf",
+            "shell",
+            "vars",
+            "module",
+            "strategy",
+        )
 
 
+@cache
 def get_documentable_objects() -> tuple[str, ...]:
     """
     Retrieve object types that can be documented.
     """
-    if not HAS_ANSIBLE_RELEASE:
+    try:
+        # We import from ansible locally since importing it is rather slow
+        # pylint: disable-next=import-outside-toplevel
+        from ansible import release as ansible_release
+
+        if packaging.version.Version(
+            ansible_release.__version__
+        ) < packaging.version.Version("2.11.0"):
+            return ()
+        return ("role",)
+    except ImportError:
         return ()
-    if packaging.version.Version(
-        ansible_release.__version__
-    ) < packaging.version.Version("2.11.0"):
-        return ()
-    return ("role",)
 
 
+@cache
 def get_ansible_release() -> tuple[str, str]:
     """
     Retrieve current version and codename of Ansible.
 
     :return: Tuple with version and codename
     """
-    if not HAS_ANSIBLE_RELEASE:
-        raise ValueError("Cannot import ansible.release")
-    return ansible_release.__version__, ansible_release.__codename__
+    try:
+        # We import from ansible locally since importing it is rather slow
+        # pylint: disable-next=import-outside-toplevel
+        from ansible import release as ansible_release
+
+        return ansible_release.__version__, ansible_release.__codename__
+    except ImportError as exc:
+        raise ValueError("Cannot import ansible.release") from exc

@@ -15,7 +15,7 @@ from unittest import mock
 from fixtures import collection_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
-import antsibull_changelog.ansible  # noqa: F401; pylint: disable=unused-variable
+import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
 from antsibull_changelog.config import TextFormat
 
@@ -1951,266 +1951,313 @@ FAKE_PLUGINS = {
 }
 
 
-class FakeAnsibleRelease:
-    def __init__(self, version: str, codename: str):
-        self.__version__ = version
-        self.__codename__ = codename
-
-
-@mock.patch("antsibull_changelog.ansible.HAS_ANSIBLE_RELEASE", True)
-@mock.patch(
-    "antsibull_changelog.ansible.ansible_release",
-    FakeAnsibleRelease("2.11.0", "dummy codename"),
-)
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     collection_changelog,
 ):  # noqa: F811
     with mock.patch(
-        "subprocess.check_output",
-        collection_changelog.create_fake_subprocess_ansible_doc(FAKE_PLUGINS),
+        "antsibull_changelog.plugins.get_ansible_release",
+        return_value=("2.11.0", "dummy codename"),
     ):
-        collection_changelog.set_galaxy(
-            {
-                "version": "1.0.0",
-            }
-        )
-        collection_changelog.config.title = "My Amazing Collection"
-        collection_changelog.set_config(collection_changelog.config)
-        collection_changelog.add_fragment_line(
-            "1.0.0.yml", "release_summary", "This is the first proper release."
-        )
-        collection_changelog.add_plugin(
-            "module",
-            "test_module.py",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "test_module",
-                    "short_description": "A test module",
-                    "version_added": "1.0.0",
-                    "description": ["This is a test module."],
-                    "author": ["Someone"],
-                    "options": {},
-                },
-                EXAMPLES="",
-                RETURN={},
-            ),
-        )
-        collection_changelog.add_plugin(
-            "module",
-            "__init__.py",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "bad_module",
-                    "short_description": "Bad module",
-                    "description": ["This should be ignored, not found as a module!."],
-                    "author": ["badguy"],
-                    "options": {},
-                },
-                EXAMPLES="# Some examples\n",
-                RETURN={},
-            ),
-            subdirs=["cloud"],
-        )
-        collection_changelog.add_plugin(
-            "module",
-            "old_module.py",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "old_module",
-                    "short_description": "An old module",
-                    "description": ["This is an old module."],
-                    "author": ["Elder"],
-                    "options": {},
-                },
-                EXAMPLES="# Some examples\n",
-                RETURN={},
-            ),
-            subdirs=["cloud", "sky"],
-        )
-        collection_changelog.add_plugin(
-            "module",
-            "bad_module2",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "bad_module2",
-                    "short_description": "An bad module",
-                    "description": ["Shold not be found either."],
-                    "author": ["Elder"],
-                    "options": {},
-                },
-                EXAMPLES="# Some examples\n",
-                RETURN={},
-            ),
-            subdirs=["cloud", "sky"],
-        )
-        collection_changelog.add_plugin(
-            "callback",
-            "test_callback.py",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "test_callback",
-                    "short_description": "A not so old callback",
-                    "version_added": "0.5.0",
-                    "description": ["This is a relatively new callback added before."],
-                    "author": ["Someone else"],
-                    "options": {},
-                },
-                EXAMPLES="# Some examples\n",
-                RETURN={},
-            ),
-        )
-        collection_changelog.add_plugin(
-            "callback",
-            "test_callback2.py",
-            create_plugin(
-                DOCUMENTATION={
-                    "name": "test_callback2",
-                    "short_description": "This one should not be found.",
-                    "version_added": "2.9",
-                    "description": ["This is a relatively new callback added before."],
-                    "author": ["Someone else"],
-                    "options": {},
-                },
-                EXAMPLES="# Some examples\n",
-                RETURN={},
-            ),
-            subdirs=["dont", "find", "me"],
-        )
-        collection_changelog.add_role(
-            "test_role",
-            {
-                "main": {
-                    "short_description": "Test role",
-                    "version_added": "1.0.0",
-                    "options": {},
-                },
-                "foo": {
-                    "short_description": "Test role foo entrypoint",
-                    "version_added": "0.9.0",
-                    "options": {},
-                },
-            },
-        )
-        collection_changelog.add_role(
-            "old_role",
-            {
-                "main": {
-                    "short_description": "Old role",
-                    "options": {},
-                },
-            },
-        )
-        collection_changelog.add_role(
-            "funky_role",
-            {
-                "funky": {
-                    "short_description": "A funky role",
-                    "version_added": "1.0.0",
-                    "options": {},
-                },
-            },
-        )
+        with mock.patch(
+            "antsibull_changelog.plugins.get_documentable_objects",
+            return_value=("role",),
+        ):
+            with mock.patch(
+                "subprocess.check_output",
+                collection_changelog.create_fake_subprocess_ansible_doc(FAKE_PLUGINS),
+            ):
+                collection_changelog.set_galaxy(
+                    {
+                        "version": "1.0.0",
+                    }
+                )
+                collection_changelog.config.title = "My Amazing Collection"
+                collection_changelog.set_config(collection_changelog.config)
+                collection_changelog.add_fragment_line(
+                    "1.0.0.yml", "release_summary", "This is the first proper release."
+                )
+                collection_changelog.add_plugin(
+                    "module",
+                    "test_module.py",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "test_module",
+                            "short_description": "A test module",
+                            "version_added": "1.0.0",
+                            "description": ["This is a test module."],
+                            "author": ["Someone"],
+                            "options": {},
+                        },
+                        EXAMPLES="",
+                        RETURN={},
+                    ),
+                )
+                collection_changelog.add_plugin(
+                    "module",
+                    "__init__.py",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "bad_module",
+                            "short_description": "Bad module",
+                            "description": [
+                                "This should be ignored, not found as a module!."
+                            ],
+                            "author": ["badguy"],
+                            "options": {},
+                        },
+                        EXAMPLES="# Some examples\n",
+                        RETURN={},
+                    ),
+                    subdirs=["cloud"],
+                )
+                collection_changelog.add_plugin(
+                    "module",
+                    "old_module.py",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "old_module",
+                            "short_description": "An old module",
+                            "description": ["This is an old module."],
+                            "author": ["Elder"],
+                            "options": {},
+                        },
+                        EXAMPLES="# Some examples\n",
+                        RETURN={},
+                    ),
+                    subdirs=["cloud", "sky"],
+                )
+                collection_changelog.add_plugin(
+                    "module",
+                    "bad_module2",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "bad_module2",
+                            "short_description": "An bad module",
+                            "description": ["Shold not be found either."],
+                            "author": ["Elder"],
+                            "options": {},
+                        },
+                        EXAMPLES="# Some examples\n",
+                        RETURN={},
+                    ),
+                    subdirs=["cloud", "sky"],
+                )
+                collection_changelog.add_plugin(
+                    "callback",
+                    "test_callback.py",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "test_callback",
+                            "short_description": "A not so old callback",
+                            "version_added": "0.5.0",
+                            "description": [
+                                "This is a relatively new callback added before."
+                            ],
+                            "author": ["Someone else"],
+                            "options": {},
+                        },
+                        EXAMPLES="# Some examples\n",
+                        RETURN={},
+                    ),
+                )
+                collection_changelog.add_plugin(
+                    "callback",
+                    "test_callback2.py",
+                    create_plugin(
+                        DOCUMENTATION={
+                            "name": "test_callback2",
+                            "short_description": "This one should not be found.",
+                            "version_added": "2.9",
+                            "description": [
+                                "This is a relatively new callback added before."
+                            ],
+                            "author": ["Someone else"],
+                            "options": {},
+                        },
+                        EXAMPLES="# Some examples\n",
+                        RETURN={},
+                    ),
+                    subdirs=["dont", "find", "me"],
+                )
+                collection_changelog.add_role(
+                    "test_role",
+                    {
+                        "main": {
+                            "short_description": "Test role",
+                            "version_added": "1.0.0",
+                            "options": {},
+                        },
+                        "foo": {
+                            "short_description": "Test role foo entrypoint",
+                            "version_added": "0.9.0",
+                            "options": {},
+                        },
+                    },
+                )
+                collection_changelog.add_role(
+                    "old_role",
+                    {
+                        "main": {
+                            "short_description": "Old role",
+                            "options": {},
+                        },
+                    },
+                )
+                collection_changelog.add_role(
+                    "funky_role",
+                    {
+                        "funky": {
+                            "short_description": "A funky role",
+                            "version_added": "1.0.0",
+                            "options": {},
+                        },
+                    },
+                )
 
-        assert (
-            collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
-            == C.RC_SUCCESS
-        )
+                assert (
+                    collection_changelog.run_tool(
+                        "release", ["-v", "--date", "2020-01-02"]
+                    )
+                    == C.RC_SUCCESS
+                )
 
-        diff = collection_changelog.diff()
-        assert diff.added_dirs == []
-        assert diff.added_files == [
-            "CHANGELOG.rst",
-            "changelogs/.plugin-cache.yaml",
-            "changelogs/changelog.yaml",
-        ]
-        assert diff.removed_dirs == []
-        assert diff.removed_files == ["changelogs/fragments/1.0.0.yml"]
-        assert diff.changed_files == []
+                diff = collection_changelog.diff()
+                assert diff.added_dirs == []
+                assert diff.added_files == [
+                    "CHANGELOG.rst",
+                    "changelogs/.plugin-cache.yaml",
+                    "changelogs/changelog.yaml",
+                ]
+                assert diff.removed_dirs == []
+                assert diff.removed_files == ["changelogs/fragments/1.0.0.yml"]
+                assert diff.changed_files == []
 
-        plugin_cache = diff.parse_yaml("changelogs/.plugin-cache.yaml")
-        assert plugin_cache["version"] == "1.0.0"
+                plugin_cache = diff.parse_yaml("changelogs/.plugin-cache.yaml")
+                assert plugin_cache["version"] == "1.0.0"
 
-        # Plugin cache: modules
-        assert sorted(plugin_cache["plugins"]["module"]) == [
-            "old_module",
-            "test_module",
-        ]
-        assert plugin_cache["plugins"]["module"]["old_module"]["name"] == "old_module"
-        assert (
-            plugin_cache["plugins"]["module"]["old_module"]["namespace"] == "cloud.sky"
-        )
-        assert (
-            plugin_cache["plugins"]["module"]["old_module"]["description"]
-            == "An old module"
-        )
-        assert plugin_cache["plugins"]["module"]["old_module"]["version_added"] is None
-        assert plugin_cache["plugins"]["module"]["test_module"]["name"] == "test_module"
-        assert plugin_cache["plugins"]["module"]["test_module"]["namespace"] == ""
-        assert (
-            plugin_cache["plugins"]["module"]["test_module"]["description"]
-            == "A test module"
-        )
-        assert (
-            plugin_cache["plugins"]["module"]["test_module"]["version_added"] == "1.0.0"
-        )
+                # Plugin cache: modules
+                assert sorted(plugin_cache["plugins"]["module"]) == [
+                    "old_module",
+                    "test_module",
+                ]
+                assert (
+                    plugin_cache["plugins"]["module"]["old_module"]["name"]
+                    == "old_module"
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["old_module"]["namespace"]
+                    == "cloud.sky"
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["old_module"]["description"]
+                    == "An old module"
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["old_module"]["version_added"]
+                    is None
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["test_module"]["name"]
+                    == "test_module"
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["test_module"]["namespace"] == ""
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["test_module"]["description"]
+                    == "A test module"
+                )
+                assert (
+                    plugin_cache["plugins"]["module"]["test_module"]["version_added"]
+                    == "1.0.0"
+                )
 
-        # Plugin cache: callbacks
-        assert sorted(plugin_cache["plugins"]["callback"]) == ["test_callback"]
-        assert (
-            plugin_cache["plugins"]["callback"]["test_callback"]["name"]
-            == "test_callback"
-        )
-        assert (
-            plugin_cache["plugins"]["callback"]["test_callback"]["description"]
-            == "A not so old callback"
-        )
-        assert (
-            plugin_cache["plugins"]["callback"]["test_callback"]["version_added"]
-            == "0.5.0"
-        )
-        assert "namespace" not in plugin_cache["plugins"]["callback"]["test_callback"]
+                # Plugin cache: callbacks
+                assert sorted(plugin_cache["plugins"]["callback"]) == ["test_callback"]
+                assert (
+                    plugin_cache["plugins"]["callback"]["test_callback"]["name"]
+                    == "test_callback"
+                )
+                assert (
+                    plugin_cache["plugins"]["callback"]["test_callback"]["description"]
+                    == "A not so old callback"
+                )
+                assert (
+                    plugin_cache["plugins"]["callback"]["test_callback"][
+                        "version_added"
+                    ]
+                    == "0.5.0"
+                )
+                assert (
+                    "namespace"
+                    not in plugin_cache["plugins"]["callback"]["test_callback"]
+                )
 
-        # Plugin cache: roles
-        assert sorted(plugin_cache["objects"]["role"]) == [
-            "funky_role",
-            "old_role",
-            "test_role",
-        ]
-        assert plugin_cache["objects"]["role"]["funky_role"]["name"] == "funky_role"
-        assert plugin_cache["objects"]["role"]["funky_role"]["description"] is None
-        assert plugin_cache["objects"]["role"]["funky_role"]["version_added"] is None
-        assert "namespace" not in plugin_cache["objects"]["role"]["funky_role"]
-        assert plugin_cache["objects"]["role"]["old_role"]["name"] == "old_role"
-        assert plugin_cache["objects"]["role"]["old_role"]["description"] == "Old role"
-        assert plugin_cache["objects"]["role"]["old_role"]["version_added"] is None
-        assert "namespace" not in plugin_cache["objects"]["role"]["old_role"]
-        assert plugin_cache["objects"]["role"]["test_role"]["name"] == "test_role"
-        assert (
-            plugin_cache["objects"]["role"]["test_role"]["description"] == "Test role"
-        )
-        assert plugin_cache["objects"]["role"]["test_role"]["version_added"] == "1.0.0"
-        assert "namespace" not in plugin_cache["objects"]["role"]["test_role"]
+                # Plugin cache: roles
+                assert sorted(plugin_cache["objects"]["role"]) == [
+                    "funky_role",
+                    "old_role",
+                    "test_role",
+                ]
+                assert (
+                    plugin_cache["objects"]["role"]["funky_role"]["name"]
+                    == "funky_role"
+                )
+                assert (
+                    plugin_cache["objects"]["role"]["funky_role"]["description"] is None
+                )
+                assert (
+                    plugin_cache["objects"]["role"]["funky_role"]["version_added"]
+                    is None
+                )
+                assert "namespace" not in plugin_cache["objects"]["role"]["funky_role"]
+                assert plugin_cache["objects"]["role"]["old_role"]["name"] == "old_role"
+                assert (
+                    plugin_cache["objects"]["role"]["old_role"]["description"]
+                    == "Old role"
+                )
+                assert (
+                    plugin_cache["objects"]["role"]["old_role"]["version_added"] is None
+                )
+                assert "namespace" not in plugin_cache["objects"]["role"]["old_role"]
+                assert (
+                    plugin_cache["objects"]["role"]["test_role"]["name"] == "test_role"
+                )
+                assert (
+                    plugin_cache["objects"]["role"]["test_role"]["description"]
+                    == "Test role"
+                )
+                assert (
+                    plugin_cache["objects"]["role"]["test_role"]["version_added"]
+                    == "1.0.0"
+                )
+                assert "namespace" not in plugin_cache["objects"]["role"]["test_role"]
 
-        # Changelog
-        changelog = diff.parse_yaml("changelogs/changelog.yaml")
-        assert changelog["ancestor"] is None
-        assert sorted(changelog["releases"]) == ["1.0.0"]
-        assert changelog["releases"]["1.0.0"]["release_date"] == "2020-01-02"
-        assert changelog["releases"]["1.0.0"]["changes"] == {
-            "release_summary": "This is the first proper release."
-        }
-        assert changelog["releases"]["1.0.0"]["fragments"] == ["1.0.0.yml"]
-        assert len(changelog["releases"]["1.0.0"]["modules"]) == 1
-        assert changelog["releases"]["1.0.0"]["modules"][0]["name"] == "test_module"
-        assert changelog["releases"]["1.0.0"]["modules"][0]["namespace"] == ""
-        assert (
-            changelog["releases"]["1.0.0"]["modules"][0]["description"]
-            == "A test module."
-        )
-        assert "version_added" not in changelog["releases"]["1.0.0"]["modules"][0]
+                # Changelog
+                changelog = diff.parse_yaml("changelogs/changelog.yaml")
+                assert changelog["ancestor"] is None
+                assert sorted(changelog["releases"]) == ["1.0.0"]
+                assert changelog["releases"]["1.0.0"]["release_date"] == "2020-01-02"
+                assert changelog["releases"]["1.0.0"]["changes"] == {
+                    "release_summary": "This is the first proper release."
+                }
+                assert changelog["releases"]["1.0.0"]["fragments"] == ["1.0.0.yml"]
+                assert len(changelog["releases"]["1.0.0"]["modules"]) == 1
+                assert (
+                    changelog["releases"]["1.0.0"]["modules"][0]["name"]
+                    == "test_module"
+                )
+                assert changelog["releases"]["1.0.0"]["modules"][0]["namespace"] == ""
+                assert (
+                    changelog["releases"]["1.0.0"]["modules"][0]["description"]
+                    == "A test module."
+                )
+                assert (
+                    "version_added" not in changelog["releases"]["1.0.0"]["modules"][0]
+                )
 
-        assert diff.file_contents["CHANGELOG.rst"].decode("utf-8") == (
-            r"""===================================
+                assert diff.file_contents["CHANGELOG.rst"].decode("utf-8") == (
+                    r"""===================================
 My Amazing Collection Release Notes
 ===================================
 
@@ -2234,16 +2281,16 @@ New Roles
 
 - acme.test.test_role - Test role.
 """
-        )
+                )
 
-        # Force reloading plugins. This time use ansible-doc for listing plugins.
-        assert (
-            collection_changelog.run_tool(
-                "generate", ["-v", "--reload-plugins", "--use-ansible-doc"]
-            )
-            == C.RC_SUCCESS
-        )
+                # Force reloading plugins. This time use ansible-doc for listing plugins.
+                assert (
+                    collection_changelog.run_tool(
+                        "generate", ["-v", "--reload-plugins", "--use-ansible-doc"]
+                    )
+                    == C.RC_SUCCESS
+                )
 
-        diff = collection_changelog.diff()
-        diff.dump()
-        assert diff.unchanged
+                diff = collection_changelog.diff()
+                diff.dump()
+                assert diff.unchanged
