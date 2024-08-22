@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2023 Maxwell G <maxwell@gtmx.me>
 
+from __future__ import annotations
+
 import contextlib
 import os
 import tempfile
@@ -11,6 +13,7 @@ from pathlib import Path
 
 import nox
 
+DEFAULT_MODE = os.environ.get("OTHER_ANTSIBULL_MODE", "auto")
 IN_CI = "GITHUB_ACTIONS" in os.environ
 ALLOW_EDITABLE = os.environ.get("ALLOW_EDITABLE", str(not IN_CI)).lower() in (
     "1",
@@ -34,9 +37,42 @@ def install(session: nox.Session, *args, editable=False, **kwargs):
     session.install(*args, "-U", **kwargs)
 
 
+def other_antsibull(
+    mode: str | None = None,
+) -> list[str | Path]:
+    if mode is None:
+        mode = DEFAULT_MODE
+    to_install: list[str | Path] = []
+    args = ("antsibull-docutils",)
+    for project in args:
+        path = Path("../", project)
+        path_exists = path.is_dir()
+        if mode == "auto":
+            if path_exists:
+                mode = "local"
+            else:
+                mode = "git"
+        if mode == "local":
+            if not path_exists:
+                raise ValueError(f"Cannot install {project}! {path} does not exist!")
+            if ALLOW_EDITABLE:
+                to_install.append("-e")
+            to_install.append(path)
+        elif mode == "git":
+            to_install.append(
+                f"{project} @ "
+                f"https://github.com/ansible-community/{project}/archive/main.tar.gz"
+            )
+        elif mode == "pypi":
+            to_install.append(project)
+        else:
+            raise ValueError(f"install_other_antsibull: invalid argument mode={mode!r}")
+    return to_install
+
+
 @nox.session(python=["3.9", "3.10", "3.11", "3.12"])
 def test(session: nox.Session):
-    install(session, ".[test, coverage]", editable=True)
+    install(session, ".[test, coverage]", *other_antsibull(), editable=True)
     covfile = Path(session.create_tmp(), ".coverage")
     more_args = []
     if session.python == "3.12":
@@ -60,7 +96,7 @@ def integration(session: nox.Session):
     `antsibull-changelog lint-changelog-yaml` against antsibull-changelog
     changelog and community.general's changelogs
     """
-    install(session, ".[coverage]", editable=True)
+    install(session, ".[coverage]", *other_antsibull(), editable=True)
     tmp = Path(session.create_tmp())
     covfile = tmp / ".coverage"
     env = {"COVERAGE_FILE": f"{covfile}", **session.env}
@@ -113,7 +149,7 @@ def integration(session: nox.Session):
 
 @nox.session
 def coverage(session: nox.Session):
-    install(session, ".[coverage]", editable=True)
+    install(session, ".[coverage]", *other_antsibull(), editable=True)
     combined = map(str, Path().glob(".nox/*/tmp/.coverage"))
     # Combine the results into a single .coverage file in the root
     session.run("coverage", "combine", "--keep", *combined)
@@ -132,7 +168,7 @@ def lint(session: nox.Session):
 
 @nox.session
 def formatters(session: nox.Session):
-    install(session, ".[formatters]")
+    install(session, ".[formatters]", *other_antsibull())
     posargs = list(session.posargs)
     if IN_CI:
         posargs.append("--check")
@@ -142,7 +178,7 @@ def formatters(session: nox.Session):
 
 @nox.session
 def codeqa(session: nox.Session):
-    install(session, ".[codeqa]", editable=True)
+    install(session, ".[codeqa]", *other_antsibull(), editable=True)
     session.run("flake8", "src/antsibull_changelog", *session.posargs)
     session.run(
         "pylint",
@@ -158,7 +194,7 @@ def codeqa(session: nox.Session):
 
 @nox.session
 def typing(session: nox.Session):
-    install(session, ".[typing]")
+    install(session, ".[typing]", *other_antsibull())
     session.run("mypy", "src/antsibull_changelog")
 
 

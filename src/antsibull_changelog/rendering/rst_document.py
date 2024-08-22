@@ -10,6 +10,9 @@ Functionality for rendering a ReStructuredText document.
 
 from __future__ import annotations
 
+from antsibull_docutils.rst_utils import column_width, rst_escape
+from antsibull_docutils.utils import ensure_newline_after_last_content
+
 from ..config import TextFormat
 from ._document import (
     AbstractRendererEx,
@@ -19,8 +22,6 @@ from ._document import (
     render_section,
 )
 from .document import SectionRenderer
-from .rst import column_width, rst_escape
-from .utils import ensure_newline_after_last_content
 
 _SECTION_UNDERLINES = """=-~^.*+:`'"_#"""
 
