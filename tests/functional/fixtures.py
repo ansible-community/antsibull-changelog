@@ -501,6 +501,8 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
                         plugin_data, plugin_type, args, base_dir
                     )
                 return json.dumps(result).encode("utf-8")
+            if command[0] == "git":
+                raise FileNotFoundError("git is not available")
             raise Exception("Unexpected command: {0}".format(command))
 
         return fake_subprocess_ansible_doc
