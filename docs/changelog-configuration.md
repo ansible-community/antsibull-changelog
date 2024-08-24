@@ -272,6 +272,22 @@ When set to `true`, uses FQCN (Fully Qualified Collection Names) when
 mentioning new plugins and modules. This means that `namespace.name.`
 is prepended to the plugin respectively module names.
 
+### `vcs` (optional string)
+
+Allowed values are `none` (default), `git`, or `auto`.
+
+Configures which Version Control System is used by the project, if any.
+Right now this is used when (re-)loading the plugin list for an Ansible
+collection. For that the project files are copied into a temporary
+directory tree so that `ansible-doc` can be used to extract the plugin
+documentation.
+
+When set to `none`, all files inside the project's directory will be
+considered. When set to `git`, will use `git ls-files` to determine
+which files to consider (directories and files ignored by `git` will be
+ignored). When set to `auto`, will automatically detect whether the
+project is part of a Git repository or not.
+
 ## Deprecated options
 
 ### `new_plugins_after_name` (string)
