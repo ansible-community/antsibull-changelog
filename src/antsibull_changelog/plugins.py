@@ -27,8 +27,9 @@ from .ansible import (
     get_documentable_objects,
     get_documentable_plugins,
 )
-from .config import CollectionDetails, PathsConfig
+from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .logger import LOGGER
+from .utils import detect_vcs
 from .yaml import load_yaml, store_yaml
 
 
@@ -372,16 +373,87 @@ def load_plugin_metadata(  # pylint: disable=too-many-arguments
     return result
 
 
+class Copier:  # pylint: disable=too-few-public-methods
+    """
+    Allows to copy directories.
+    """
+
+    def copy(self, from_path: str, to_path: str) -> None:
+        """
+        Copy a directory ``from_path`` to a destination ``to_path``.
+
+        ``to_path`` must not exist, but its parent directory must exist.
+        """
+        LOGGER.debug("Copying complete directory from {!r} to {!r}", from_path, to_path)
+        shutil.copytree(from_path, to_path, symlinks=True)
+
+
+class GitCopier(Copier):  # pylint: disable=too-few-public-methods
+    """
+    Allows to copy directories that are part of a Git repository.
+    """
+
+    def copy(self, from_path: str, to_path: str) -> None:
+        LOGGER.debug("Identifying files not ignored by Git in {!r}", from_path)
+        os.mkdir(to_path, mode=0o700)
+        files = (
+            subprocess.check_output(
+                [
+                    "git",
+                    "ls-files",
+                    "-z",
+                    "--cached",
+                    "--others",
+                    "--exclude-standard",
+                    "--deduplicate",
+                ],
+                cwd=from_path,
+            )
+            .strip(b"\x00")
+            .split(b"\x00")
+        )
+
+        LOGGER.debug(
+            "Copying {} file(s) from {!r} to {!r}", len(files), from_path, to_path
+        )
+        created_directories = set()
+        for file in files:
+            # Decode filename and check whether the file still exists
+            # (deleted files are part of the output)
+            file_decoded = file.decode("utf-8")
+            src_path = os.path.join(from_path, file_decoded)
+            if not os.path.exists(src_path):
+                continue
+
+            # Check whether the directory for this file exists
+            directory, _ = os.path.split(file_decoded)
+            if directory not in created_directories:
+                os.makedirs(os.path.join(to_path, directory), mode=0o700, exist_ok=True)
+                created_directories.add(directory)
+
+            # Copy the file
+            dst_path = os.path.join(to_path, file_decoded)
+            shutil.copyfile(src_path, dst_path)
+
+
 class CollectionCopier:
     """
     Creates a copy of a collection to a place where ``--playbook-dir`` can be used
     to prefer this copy of the collection over any installed ones.
     """
 
-    def __init__(self, paths: PathsConfig, namespace: str, name: str):
+    def __init__(
+        self, paths: PathsConfig, config: ChangelogConfig, namespace: str, name: str
+    ):
         self.paths = paths
         self.namespace = namespace
         self.name = name
+        self.copier = Copier()
+        vcs = config.vcs
+        if vcs == "auto":
+            vcs = detect_vcs(self.paths.base_dir)
+        if vcs == "git":
+            self.copier = GitCopier()
 
         self.dir = os.path.realpath(tempfile.mkdtemp(prefix="antsibull-changelog"))
 
@@ -393,8 +465,11 @@ class CollectionCopier:
             os.makedirs(collection_container_dir)
 
             collection_dir = os.path.join(collection_container_dir, self.name)
-            shutil.copytree(self.paths.base_dir, collection_dir, symlinks=True)
+            LOGGER.debug("Temporary collection directory: {!r}", collection_dir)
 
+            self.copier.copy(self.paths.base_dir, collection_dir)
+
+            LOGGER.debug("Temporary collection directory has been populated")
             new_paths = PathsConfig.force_collection(
                 collection_dir, ansible_doc_bin=self.paths.ansible_doc_path
             )
@@ -413,8 +488,10 @@ def _load_plugins_2_13(
     collection_name: str,
     playbook_dir: str | None = None,
 ) -> None:
+    LOGGER.debug("Run ansible-doc for {!r}", playbook_dir)
     data = run_ansible_doc_metadata_dump(paths, playbook_dir, collection_name)["all"]
 
+    LOGGER.debug("Processing result")
     for category, category_types in (
         ("plugins", get_documentable_plugins()),
         ("objects", get_documentable_objects()),
@@ -442,13 +519,14 @@ def _load_collection_plugins_2_13(
     plugins_data: dict[str, Any],
     paths: PathsConfig,
     collection_details: CollectionDetails,
+    config: ChangelogConfig,
 ) -> None:
     collection_name = "{}.{}".format(
         collection_details.get_namespace(), collection_details.get_name()
     )
 
     with CollectionCopier(
-        paths, collection_details.get_namespace(), collection_details.get_name()
+        paths, config, collection_details.get_namespace(), collection_details.get_name()
     ) as (playbook_dir, new_paths):
         _load_plugins_2_13(
             plugins_data, new_paths, collection_name, playbook_dir=playbook_dir
@@ -459,6 +537,7 @@ def _load_collection_plugins(
     plugins_data: dict[str, Any],
     paths: PathsConfig,
     collection_details: CollectionDetails,
+    config: ChangelogConfig,
     use_ansible_doc: bool,
 ) -> None:
     collection_name = "{}.{}".format(
@@ -466,7 +545,7 @@ def _load_collection_plugins(
     )
 
     with CollectionCopier(
-        paths, collection_details.get_namespace(), collection_details.get_name()
+        paths, config, collection_details.get_namespace(), collection_details.get_name()
     ) as (playbook_dir, new_paths):
         for plugin_type in get_documentable_plugins():
             plugins_data["plugins"][plugin_type] = load_plugin_metadata(
@@ -518,6 +597,7 @@ def _get_ansible_core_version(paths: PathsConfig) -> packaging.version.Version:
 def _refresh_plugin_cache(
     paths: PathsConfig,
     collection_details: CollectionDetails,
+    config: ChangelogConfig,
     version: str,
     use_ansible_doc: bool = False,
 ):
@@ -532,12 +612,14 @@ def _refresh_plugin_cache(
     core_version = _get_ansible_core_version(paths)
     if core_version >= packaging.version.Version("2.13.0.dev0"):
         if paths.is_collection:
-            _load_collection_plugins_2_13(plugins_data, paths, collection_details)
+            _load_collection_plugins_2_13(
+                plugins_data, paths, collection_details, config
+            )
         else:
             _load_plugins_2_13(plugins_data, paths, "ansible.builtin")
     elif paths.is_collection:
         _load_collection_plugins(
-            plugins_data, paths, collection_details, use_ansible_doc
+            plugins_data, paths, collection_details, config, use_ansible_doc
         )
     else:
         _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
@@ -555,6 +637,7 @@ def _refresh_plugin_cache(
 def load_plugins(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     collection_details: CollectionDetails,
+    config: ChangelogConfig,
     version: str,
     force_reload: bool = False,
     use_ansible_doc: bool = False,
@@ -588,7 +671,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
 
     if not plugins_data:
         plugins_data = _refresh_plugin_cache(
-            paths, collection_details, version, use_ansible_doc
+            paths, collection_details, config, version, use_ansible_doc
         )
         store_yaml(plugin_cache_path, plugins_data)
 
