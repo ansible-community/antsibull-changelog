@@ -610,6 +610,7 @@ class ChangelogConfig:
             "add_plugin_period": True,
             "changelog_nice_yaml": False,
             "changelog_sort": "alphanumerical",
+            "vcs": "auto",
         }
         if title is not None:
             config["title"] = title
