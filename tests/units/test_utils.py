@@ -9,11 +9,14 @@ Test utils module.
 
 from __future__ import annotations
 
+import subprocess
+from unittest import mock
+
 import pytest
 
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
 from antsibull_changelog.errors import ChangelogError
-from antsibull_changelog.utils import is_release_version
+from antsibull_changelog.utils import detect_vcs, is_release_version
 
 
 @pytest.mark.parametrize(
@@ -84,3 +87,36 @@ def test_is_release_version_collection_fail(version):
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
     with pytest.raises(ChangelogError):
         is_release_version(config, version)
+
+
+def test_detect_vcs():
+    path = "/path/to/dir"
+    git_command = ["git", "-C", path, "rev-parse", "--is-inside-work-tree"]
+
+    with mock.patch(
+        "subprocess.check_output",
+        return_value="true\n".encode("utf-8"),
+    ) as m:
+        assert detect_vcs(path) == "git"
+        m.assert_called_with(git_command)
+
+    with mock.patch(
+        "subprocess.check_output",
+        return_value="foobar\n".encode("utf-8"),
+    ) as m:
+        assert detect_vcs(path) == "none"
+        m.assert_called_with(git_command)
+
+    with mock.patch(
+        "subprocess.check_output",
+        side_effect=subprocess.CalledProcessError(128, path),
+    ) as m:
+        assert detect_vcs(path) == "none"
+        m.assert_called_with(git_command)
+
+    with mock.patch(
+        "subprocess.check_output",
+        side_effect=FileNotFoundError(),
+    ) as m:
+        assert detect_vcs(path) == "none"
+        m.assert_called_with(git_command)
