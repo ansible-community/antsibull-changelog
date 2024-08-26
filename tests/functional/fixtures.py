@@ -400,9 +400,12 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
         return ["lib", "ansible", "plugins", plugin_type]
 
     def create_fake_subprocess_ansible_doc(
-        self, plugin_data: dict[str, dict[str, Any]]
+        self,
+        plugin_data: dict[str, dict[str, Any]],
     ) -> Callable[[list[str]], str]:
-        def fake_subprocess_ansible_doc(command: list[str]) -> str:
+        def fake_subprocess_ansible_doc(
+            command: list[str], *, text: bool | None = None, encoding: str | None = None
+        ) -> str:
             if command[0].endswith("ansible-doc") and command[1] == "--version":
                 return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
                     ansible_core_version=self.ansible_core_version,
@@ -464,7 +467,9 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
     def create_fake_subprocess_ansible_doc(
         self, plugin_data: dict[str, dict[str, Any]]
     ) -> Callable[[list[str]], str]:
-        def fake_subprocess_ansible_doc(command: list[str]) -> str:
+        def fake_subprocess_ansible_doc(
+            command: list[str], *, text: bool | None = None, encoding: str | None = None
+        ) -> str:
             base_dir = self.paths.base_dir
             if command[0].endswith("ansible-doc") and command[1] == "--version":
                 return _ANSIBLE_DOC_VERSION_TEMPLATE.format(

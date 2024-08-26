@@ -95,28 +95,28 @@ def test_detect_vcs():
 
     with mock.patch(
         "subprocess.check_output",
-        return_value="true\n".encode("utf-8"),
+        return_value="true\n",
     ) as m:
         assert detect_vcs(path) == "git"
-        m.assert_called_with(git_command)
+        m.assert_called_with(git_command, text=True, encoding="utf-8")
 
     with mock.patch(
         "subprocess.check_output",
         return_value="foobar\n".encode("utf-8"),
     ) as m:
         assert detect_vcs(path) == "none"
-        m.assert_called_with(git_command)
+        m.assert_called_with(git_command, text=True, encoding="utf-8")
 
     with mock.patch(
         "subprocess.check_output",
         side_effect=subprocess.CalledProcessError(128, path),
     ) as m:
         assert detect_vcs(path) == "none"
-        m.assert_called_with(git_command)
+        m.assert_called_with(git_command, text=True, encoding="utf-8")
 
     with mock.patch(
         "subprocess.check_output",
         side_effect=FileNotFoundError(),
     ) as m:
         assert detect_vcs(path) == "none"
-        m.assert_called_with(git_command)
+        m.assert_called_with(git_command, text=True, encoding="utf-8")
