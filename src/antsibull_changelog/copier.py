@@ -101,12 +101,13 @@ class CollectionCopier:
         self.paths = paths
         self.namespace = namespace
         self.name = name
-        self.copier = Copier()
         vcs = config.vcs
         if vcs == "auto":
             vcs = detect_vcs(self.paths.base_dir)
-        if vcs == "git":
-            self.copier = GitCopier()
+        self.copier = {
+            "none": Copier,
+            "git": GitCopier,
+        }[vcs]()
 
         self.dir = os.path.realpath(tempfile.mkdtemp(prefix="antsibull-changelog"))
 
