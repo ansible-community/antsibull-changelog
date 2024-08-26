@@ -275,7 +275,7 @@ is prepended to the plugin respectively module names.
 ### `vcs` (optional string)
 
 Allowed values are `none`, `git`, or `auto`. The default value is
-`none` for existing configurations, and `auto` for new configurations.
+`none` for existing configurations and `auto` for new configurations.
 
 
 Configures which Version Control System is used by the project, if any.
