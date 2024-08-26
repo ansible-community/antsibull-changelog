@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 
 from .config import ChangelogConfig, PathsConfig
+from .errors import ChangelogError
 from .logger import LOGGER
 from .utils import detect_vcs
 
@@ -43,22 +44,27 @@ class GitCopier(Copier):  # pylint: disable=too-few-public-methods
     def copy(self, from_path: str, to_path: str) -> None:
         LOGGER.debug("Identifying files not ignored by Git in {!r}", from_path)
         os.mkdir(to_path, mode=0o700)
-        files = (
-            subprocess.check_output(
-                [
-                    "git",
-                    "ls-files",
-                    "-z",
-                    "--cached",
-                    "--others",
-                    "--exclude-standard",
-                    "--deduplicate",
-                ],
-                cwd=from_path,
+        try:
+            files = (
+                subprocess.check_output(
+                    [
+                        "git",
+                        "ls-files",
+                        "-z",
+                        "--cached",
+                        "--others",
+                        "--exclude-standard",
+                        "--deduplicate",
+                    ],
+                    cwd=from_path,
+                )
+                .strip(b"\x00")
+                .split(b"\x00")
             )
-            .strip(b"\x00")
-            .split(b"\x00")
-        )
+        except subprocess.CalledProcessError as exc:
+            raise ChangelogError("Error while running git") from exc
+        except FileNotFoundError as exc:
+            raise ChangelogError("Cannot find git executable") from exc
 
         LOGGER.debug(
             "Copying {} file(s) from {!r} to {!r}", len(files), from_path, to_path
