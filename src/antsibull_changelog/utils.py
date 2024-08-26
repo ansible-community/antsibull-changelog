@@ -115,13 +115,11 @@ def detect_vcs(path: str) -> Literal["none", "git"]:
     """
     LOGGER.debug("Trying to determine whether {!r} is a Git repository", path)
     try:
-        result = (
-            subprocess.check_output(
-                ["git", "-C", path, "rev-parse", "--is-inside-work-tree"]
-            )
-            .strip()
-            .decode("utf-8")
-        )
+        result = subprocess.check_output(
+            ["git", "-C", path, "rev-parse", "--is-inside-work-tree"],
+            text=True,
+            encoding="utf-8",
+        ).strip()
         LOGGER.debug("Git output: {}", result)
         if result == "true":
             LOGGER.info("Identified {!r} as a Git repository", path)
