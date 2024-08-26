@@ -26,21 +26,15 @@ def test_git_copier(tmp_path_factory):
     (src_dir / "empty").touch()
     (src_dir / "link").symlink_to("empty")
     (src_dir / "dir").mkdir()
-    with (src_dir / "file").open("w", encoding="utf-8") as f:
-        f.write("content")
-    with (src_dir / "dir" / "binary_file").open("wb") as f:
-        f.write(b"\x00\x01\x02")
+    (src_dir / "file").write_text("content", encoding="utf-8")
+    (src_dir / "dir" / "binary_file").write_bytes(b"\x00\x01\x02")
 
     copier = GitCopier()
 
     def assert_same(a: pathlib.Path, b: pathlib.Path):
         if a.is_file():
             assert b.is_file()
-            with a.open("rb") as f:
-                ac = f.read()
-            with b.open("rb") as f:
-                bc = f.read()
-            assert ac == bc
+            assert a.read_bytes() == b.read_bytes()
             return
         if a.is_dir():
             assert b.is_dir()
