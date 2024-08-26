@@ -110,7 +110,7 @@ class CollectionCopier:
 
         self.dir = os.path.realpath(tempfile.mkdtemp(prefix="antsibull-changelog"))
 
-    def __enter__(self):
+    def __enter__(self) -> tuple[str, PathsConfig]:
         try:
             collection_container_dir = os.path.join(
                 self.dir, "collections", "ansible_collections", self.namespace
