@@ -15,6 +15,7 @@ import collections
 import enum
 import os
 from collections.abc import Mapping
+from typing import Literal
 
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -380,8 +381,13 @@ class ChangelogConfig:
     output_formats: set[TextFormat]
     add_plugin_period: bool
     changelog_nice_yaml: bool
-    changelog_sort: str
-    vcs: str
+    changelog_sort: Literal[
+        "unsorted",
+        "version",
+        "version_reversed",
+        "alphanumerical",
+    ]
+    vcs: Literal["none", "auto", "git"]
 
     def __init__(
         self,
