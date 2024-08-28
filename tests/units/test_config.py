@@ -347,8 +347,22 @@ def test_collection_details(tmp_path):
 
 
 def test_config_loading_bad_output_format(ansible_config_path):
-    ansible_config_path.write_text("output_formats: [foobar]")
+    ansible_config_path.write_text("changes_format: combined\noutput_formats: [foobar]")
     paths = PathsConfig.detect()
     collection_details = CollectionDetails(paths)
-    with pytest.raises(ChangelogError):
+    with pytest.raises(
+        ChangelogError,
+        match="Found unknown extension in output_formats: Unknown extension 'foobar'",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_config_loading_bad_vcs(ansible_config_path):
+    ansible_config_path.write_text("changes_format: combined\nvcs: foobar")
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(
+        ChangelogError,
+        match="Invalid VCS value 'foobar'. Must be one of none, git, and auto.",
+    ):
         ChangelogConfig.load(paths, collection_details)

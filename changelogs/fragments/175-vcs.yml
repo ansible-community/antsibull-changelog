@@ -1,0 +1,6 @@
+minor_changes:
+  - "Allow to configure the used VCS in ``changelogs/config.yml``. Valid choices are ``none`` (default), ``git``, or ``auto``.
+     If set to ``git``, or ``auto`` detects that the project is part of a Git repository, only non-ignored files will be
+     copied to a temporary directory when trying to load information on Ansible modules, plugins and roles
+     (https://github.com/ansible-community/antsibull-changelog/issues/172,
+      https://github.com/ansible-community/antsibull-changelog/pull/175)."

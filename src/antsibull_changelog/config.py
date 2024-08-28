@@ -15,6 +15,7 @@ import collections
 import enum
 import os
 from collections.abc import Mapping
+from typing import Literal
 
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -380,7 +381,13 @@ class ChangelogConfig:
     output_formats: set[TextFormat]
     add_plugin_period: bool
     changelog_nice_yaml: bool
-    changelog_sort: str
+    changelog_sort: Literal[
+        "unsorted",
+        "version",
+        "version_reversed",
+        "alphanumerical",
+    ]
+    vcs: Literal["none", "auto", "git"]
 
     def __init__(
         self,
@@ -470,6 +477,8 @@ class ChangelogConfig:
 
         self.changelog_sort = self.config.get("changelog_sort", "alphanumerical")
 
+        self.vcs = self.config.get("vcs", "none")
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -499,6 +508,11 @@ class ChangelogConfig:
                 f"Invalid changelog_sort option: {self.changelog_sort}"
             )
 
+        if self.vcs not in ("none", "git", "auto"):
+            raise ChangelogError(
+                f"Invalid VCS value {self.vcs!r}. Must be one of none, git, and auto."
+            )
+
     def store(self) -> None:  # noqa: C901
         """
         Store changelog configuration file to disk.
@@ -521,6 +535,7 @@ class ChangelogConfig:
             "add_plugin_period": self.add_plugin_period,
             "changelog_nice_yaml": self.changelog_nice_yaml,
             "changelog_sort": self.changelog_sort,
+            "vcs": self.vcs,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -601,6 +616,7 @@ class ChangelogConfig:
             "add_plugin_period": True,
             "changelog_nice_yaml": False,
             "changelog_sort": "alphanumerical",
+            "vcs": "auto",
         }
         if title is not None:
             config["title"] = title
