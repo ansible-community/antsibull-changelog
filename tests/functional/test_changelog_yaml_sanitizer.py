@@ -15,10 +15,10 @@ import os.path
 import re
 
 import pytest
+from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
 from antsibull_changelog.sanitize import sanitize_changes
-from antsibull_changelog.yaml import load_yaml, store_yaml
 
 # Set to True to generate sanitize files instead of using them
 STORE_RESULT = False
@@ -51,7 +51,7 @@ load_tests()
 def test_good_changelog_yaml_files(yaml_filename):
     paths = PathsConfig.force_collection(base_dir="/")
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
-    data = load_yaml(yaml_filename)
+    data = load_yaml_file(yaml_filename)
     result = sanitize_changes(data, config)
     if "ancestor" not in data and result["ancestor"] is None:
         result.pop("ancestor")
@@ -63,14 +63,14 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     paths = PathsConfig.force_collection(base_dir="/")
     config = ChangelogConfig.default(paths, CollectionDetails(paths))
     try:
-        data = load_yaml(yaml_filename)
+        data = load_yaml_file(yaml_filename)
         if not STORE_RESULT:
-            sanitized_data = load_yaml(yaml_filename + "-sanitized")
+            sanitized_data = load_yaml_file(yaml_filename + "-sanitized")
     except Exception:
         # We are only interested in parsable YAML
         return
     result = sanitize_changes(data, config)
     if STORE_RESULT:
-        store_yaml(yaml_filename + "-sanitized", result)
+        store_yaml_file(yaml_filename + "-sanitized", result)
     else:
         assert result == sanitized_data

@@ -18,6 +18,8 @@ import os
 from collections.abc import Callable
 from typing import Any, Mapping, Sequence, cast
 
+from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
+
 from .changes_resolvers import (
     ChangesDataFragmentResolver,
     ChangesDataObjectResolver,
@@ -32,7 +34,6 @@ from .logger import LOGGER
 from .plugins import PluginDescription
 from .sanitize import sanitize_changes
 from .utils import get_version_constructor, is_release_version
-from .yaml import load_yaml, store_yaml
 
 
 class ChangesBase(metaclass=abc.ABCMeta):
@@ -105,7 +106,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         if data_override is not None:
             self.data = sanitize_changes(data_override, config=self.config)
         elif os.path.exists(self.path):
-            self.data = sanitize_changes(load_yaml(self.path), config=self.config)
+            self.data = sanitize_changes(load_yaml_file(self.path), config=self.config)
         else:
             self.data = self.empty()
         self.ancestor = self.data.get("ancestor")
@@ -152,7 +153,7 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.sort()
         self.data["ancestor"] = self.ancestor
         sort_keys = self.config.changelog_sort == "alphanumerical"
-        store_yaml(
+        store_yaml_file(
             self.path,
             self.data,
             nice=self.config.changelog_nice_yaml,

@@ -18,6 +18,7 @@ import subprocess
 from typing import Any
 
 import packaging.version
+from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from .ansible import (
     PLUGIN_EXCEPTIONS,
@@ -28,7 +29,6 @@ from .ansible import (
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .copier import CollectionCopier
 from .logger import LOGGER
-from .yaml import load_yaml, store_yaml
 
 
 class PluginDescription:
@@ -549,7 +549,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
     plugins_data: dict[str, Any] = {}
 
     if not force_reload and os.path.exists(plugin_cache_path):
-        plugins_data = load_yaml(plugin_cache_path)
+        plugins_data = load_yaml_file(plugin_cache_path)
         if version != plugins_data["version"]:
             LOGGER.info(
                 "version {} does not match plugin cache version {}",
@@ -562,7 +562,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
         plugins_data = _refresh_plugin_cache(
             paths, collection_details, config, version, use_ansible_doc
         )
-        store_yaml(plugin_cache_path, plugins_data)
+        store_yaml_file(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(
         plugins_data["plugins"],
