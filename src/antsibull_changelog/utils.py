@@ -12,16 +12,14 @@ Utility functions.
 from __future__ import annotations
 
 import re
-import subprocess
 from collections.abc import Callable, Collection
-from typing import Any, Literal
+from typing import Any
 
 import packaging.version
 import semantic_version
 
 from .config import ChangelogConfig
 from .errors import ChangelogError
-from .logger import LOGGER
 
 
 def get_version_constructor(config: ChangelogConfig) -> Callable[[str], Any]:
@@ -107,30 +105,3 @@ def collect_versions(
         version_list.append(version)
 
     return result
-
-
-def detect_vcs(path: str) -> Literal["none", "git"]:
-    """
-    Try to detect whether the given ``path`` is part of a VCS repository.
-    """
-    LOGGER.debug("Trying to determine whether {!r} is a Git repository", path)
-    try:
-        result = subprocess.check_output(
-            ["git", "-C", path, "rev-parse", "--is-inside-work-tree"],
-            text=True,
-            encoding="utf-8",
-        ).strip()
-        LOGGER.debug("Git output: {}", result)
-        if result == "true":
-            LOGGER.info("Identified {!r} as a Git repository", path)
-            return "git"
-    except subprocess.CalledProcessError as exc:
-        # This is likely not inside a work tree
-        LOGGER.debug("Git failed: {}", exc)
-    except FileNotFoundError as exc:
-        # Cannot find git executable
-        LOGGER.debug("Cannot find git: {}", exc)
-
-    # Fallback: no VCS detected
-    LOGGER.debug("Cannot identify VCS")
-    return "none"
