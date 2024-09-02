@@ -22,6 +22,10 @@ A changelog generator used by ansible-core and Ansible collections.
 
 antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
 
+## Community
+
+Need help or want to discuss the project? See our [Community guide](https://ansible.readthedocs.io/projects/antsibull-changelog/community/) to learn how to join the conversation!
+
 ## Installation
 
 It can be installed with pip:
