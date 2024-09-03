@@ -34,4 +34,5 @@ nav:
   - other-projects.md
   - changelog-configuration.md
   - changelog.yaml-format.md
+  - community.md
   - antsibull-changelog Release Notes: changelog.md
