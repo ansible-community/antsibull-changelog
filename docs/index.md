@@ -10,8 +10,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 [![Nox badge](https://github.com/ansible-community/antsibull-changelog/workflows/nox/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22nox%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
 
-> Need help or want to discuss the project? See our [Community guide](community.md) to learn how to join the conversation!
-
 A changelog generator used by ansible-core and Ansible collections.
 
 - Using the [`antsibull-changelog` CLI tool for collections](changelogs.md).
@@ -23,6 +21,8 @@ antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ans
 
 To see how antsibull-changelog changes, please look at the
 [antsibull-changelog changelog](https://github.com/ansible-community/antsibull-changelog/blob/main/CHANGELOG.md).
+
+> Need help or want to discuss the project? See our [Community guide](community.md) to learn how to join the conversation!
 
 ## Installation
 
