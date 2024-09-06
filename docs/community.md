@@ -20,4 +20,4 @@ For more information on the forum navigation, see the [Navigating the Ansible fo
 
 ## Matrix
 
-For real-time interactions, join the [#antsibull:ansible.com](https://matrix.to/#/#antsibull:ansible.com) Matrix channel. See the [Ansible communication guide](https://docs.ansible.com/ansible/devel/community/communication.html#real-time-chat) for more information.
+For real-time interactions, join the [#antsibull:ansible.com Matrix room](https://matrix.to/#/#antsibull:ansible.com). See the [Ansible communication guide](https://docs.ansible.com/ansible/devel/community/communication.html#real-time-chat) for more information on Matrix.
