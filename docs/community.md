@@ -10,7 +10,7 @@ We welcome your feedback, questions and ideas. Here's how to reach the community
 
 ## Forum
 
-Join the [Ansible Forum](https://forum.ansible.com) as a single starting point and our default communication platform for questions and help, development discussions, events, and much more. [Register](https://forum.ansible.com/signup?) to join the community. Search by categories and tags to find interesting topics or start a new one; subscribe only to topics you need!
+Join the [Ansible Forum](https://forum.ansible.com) as a single starting point and our default communication platform for questions and help, development discussions, events, and much more. [Register on the Forum](https://forum.ansible.com/signup?) to join the community. Search by categories and tags to find interesting topics or start a new one; subscribe only to topics you need!
 
 * [Posts tagged with 'antsibull'](https://forum.ansible.com/tag/antsibull): subscribe to participate in project-related conversations.
 * [Social Spaces](https://forum.ansible.com/c/chat/4): gather and interact with fellow enthusiasts.
