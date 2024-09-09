@@ -1,3 +1,0 @@
-minor_changes:
-  - Antsibull-changelog now depends on the new project antsibull-fileutils
-    (https://github.com/ansible-community/antsibull-changelog/pull/176).

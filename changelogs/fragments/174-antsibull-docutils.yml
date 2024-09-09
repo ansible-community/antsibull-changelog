@@ -1,3 +1,0 @@
-minor_changes:
-  - "Antsibull-changelog now depends on the new package antsibull-docutils. This should not have any visible impact,
-     expect potentially improved MarkDown output (https://github.com/ansible-community/antsibull-changelog/pull/174)."

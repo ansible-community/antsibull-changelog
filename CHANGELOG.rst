@@ -4,6 +4,22 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.30.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Allow to configure the used VCS in ``changelogs/config.yml``. Valid choices are ``none`` (default), ``git``, or ``auto``. If set to ``git``, or ``auto`` detects that the project is part of a Git repository, only non-ignored files will be copied to a temporary directory when trying to load information on Ansible modules, plugins and roles (https://github.com/ansible-community/antsibull-changelog/issues/172, https://github.com/ansible-community/antsibull-changelog/pull/175).
+- Antsibull-changelog now depends on the new package antsibull-docutils. This should not have any visible impact, expect potentially improved MarkDown output (https://github.com/ansible-community/antsibull-changelog/pull/174).
+- Antsibull-changelog now depends on the new project antsibull-fileutils (https://github.com/ansible-community/antsibull-changelog/pull/176).
+- If you are using `argcomplete <https://pypi.org/project/argcomplete/>`__ global completion, you can now tab-complete ``antsibull-changelog`` command lines. See `Activating global completion <https://pypi.org/project/argcomplete/#activating-global-completion>`__ in the argcomplete README for how to enable tab completion globally. This will also tab-complete Ansible commands such as ``ansible-playbook`` and ``ansible-test`` (https://github.com/ansible-community/antsibull-changelog/pull/173).
+
 v0.29.0
 =======
 
