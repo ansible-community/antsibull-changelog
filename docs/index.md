@@ -22,6 +22,9 @@ antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ans
 To see how antsibull-changelog changes, please look at the
 [antsibull-changelog changelog](https://github.com/ansible-community/antsibull-changelog/blob/main/CHANGELOG.md).
 
+!!! note
+    Need help or want to discuss the project? See our [Community guide](community.md) to learn how to join the conversation!
+
 ## Installation
 
 It can be installed with pip:
