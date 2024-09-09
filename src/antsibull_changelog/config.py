@@ -17,9 +17,10 @@ import os
 from collections.abc import Mapping
 from typing import Literal
 
+from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
+
 from .errors import ChangelogError
 from .logger import LOGGER
-from .yaml import load_yaml, store_yaml
 
 
 class TextFormat(enum.Enum):
@@ -54,7 +55,7 @@ class TextFormat(enum.Enum):
 
 def _is_other_project_config(config_path: str) -> bool:
     try:
-        config = load_yaml(config_path)
+        config = load_yaml_file(config_path)
         return config.get("is_other_project", False)
     except:  # pylint: disable=bare-except;  # noqa: E722
         return False
@@ -218,7 +219,7 @@ def load_galaxy_metadata(paths: PathsConfig) -> dict:
     path = paths.galaxy_path
     if path is None:
         raise ChangelogError("Cannot find galaxy.yml")
-    return load_yaml(path)
+    return load_yaml_file(path)
 
 
 class CollectionDetails:
@@ -571,7 +572,7 @@ class ChangelogConfig:
             text_format.to_extension() for text_format in self.output_formats
         )
 
-        store_yaml(self.paths.config_path, config)
+        store_yaml_file(self.paths.config_path, config)
 
     @staticmethod
     def load(
@@ -582,7 +583,7 @@ class ChangelogConfig:
         """
         Load changelog configuration file from disk.
         """
-        config = load_yaml(paths.config_path)
+        config = load_yaml_file(paths.config_path)
         if not isinstance(config, dict):
             raise ChangelogError("{0} must be a dictionary".format(paths.config_path))
         return ChangelogConfig(

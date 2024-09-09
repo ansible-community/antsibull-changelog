@@ -14,12 +14,13 @@ from __future__ import annotations
 import os
 from typing import Any
 
+from antsibull_fileutils.yaml import load_yaml_file
+
 from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, PathsConfig, TextFormat
 from .errors import ChangelogError
 from .logger import LOGGER
 from .rstcheck import check_rst_content
-from .yaml import load_yaml
 
 
 class ChangelogFragment:
@@ -81,7 +82,7 @@ class ChangelogFragment:
         """
         Load a ``ChangelogFragment`` from a file.
         """
-        content = load_yaml(path)
+        content = load_yaml_file(path)
         return ChangelogFragment(content, path, fragment_format=fragment_format)
 
     @staticmethod

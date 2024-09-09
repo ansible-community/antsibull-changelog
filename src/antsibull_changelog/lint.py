@@ -16,11 +16,11 @@ from typing import Any, cast
 
 import packaging.version
 import semantic_version
+from antsibull_fileutils.yaml import load_yaml_file
 
 from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .fragment import ChangelogFragment, ChangelogFragmentLinter
-from .yaml import load_yaml
 
 ISO_DATE_REGEX = re.compile("^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$")
 
@@ -365,7 +365,7 @@ class ChangelogYamlLinter:
         Load and lint the changelog.yaml file.
         """
         try:
-            changelog_yaml = load_yaml(self.path)
+            changelog_yaml = load_yaml_file(self.path)
         except Exception as exc:  # pylint: disable=broad-except
             self.errors.append(
                 (

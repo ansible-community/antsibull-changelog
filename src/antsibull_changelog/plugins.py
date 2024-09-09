@@ -15,9 +15,13 @@ import json
 import os
 import re
 import subprocess
-from typing import Any
+from contextlib import contextmanager
+from typing import Any, Generator
 
 import packaging.version
+from antsibull_fileutils.copier import CollectionCopier, Copier, GitCopier
+from antsibull_fileutils.vcs import detect_vcs
+from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from .ansible import (
     PLUGIN_EXCEPTIONS,
@@ -26,9 +30,7 @@ from .ansible import (
     get_documentable_plugins,
 )
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
-from .copier import CollectionCopier
 from .logger import LOGGER
-from .yaml import load_yaml, store_yaml
 
 
 class PluginDescription:
@@ -404,6 +406,37 @@ def _load_plugins_2_13(
                     ] = processed_data
 
 
+@contextmanager
+def collection_copier(
+    paths: PathsConfig, config: ChangelogConfig, namespace: str, name: str
+) -> Generator[tuple[str, PathsConfig], None, None]:
+    """
+    Creates a copy of a collection to a place where ``--playbook-dir`` can be used
+    to prefer this copy of the collection over any installed ones.
+    """
+    vcs = config.vcs
+    if vcs == "auto":
+        vcs = detect_vcs(paths.base_dir, log_debug=LOGGER.debug)
+    copier = {
+        "none": Copier,
+        "git": GitCopier,
+    }[
+        vcs
+    ](log_debug=LOGGER.debug)
+
+    with CollectionCopier(
+        source_directory=paths.base_dir,
+        namespace=namespace,
+        name=name,
+        copier=copier,
+        log_debug=LOGGER.debug,
+    ) as (root_dir, collection_dir):
+        new_paths = PathsConfig.force_collection(
+            collection_dir, ansible_doc_bin=paths.ansible_doc_path
+        )
+        yield root_dir, new_paths
+
+
 def _load_collection_plugins_2_13(
     plugins_data: dict[str, Any],
     paths: PathsConfig,
@@ -414,7 +447,7 @@ def _load_collection_plugins_2_13(
         collection_details.get_namespace(), collection_details.get_name()
     )
 
-    with CollectionCopier(
+    with collection_copier(
         paths, config, collection_details.get_namespace(), collection_details.get_name()
     ) as (playbook_dir, new_paths):
         _load_plugins_2_13(
@@ -433,7 +466,7 @@ def _load_collection_plugins(
         collection_details.get_namespace(), collection_details.get_name()
     )
 
-    with CollectionCopier(
+    with collection_copier(
         paths, config, collection_details.get_namespace(), collection_details.get_name()
     ) as (playbook_dir, new_paths):
         for plugin_type in get_documentable_plugins():
@@ -549,7 +582,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
     plugins_data: dict[str, Any] = {}
 
     if not force_reload and os.path.exists(plugin_cache_path):
-        plugins_data = load_yaml(plugin_cache_path)
+        plugins_data = load_yaml_file(plugin_cache_path)
         if version != plugins_data["version"]:
             LOGGER.info(
                 "version {} does not match plugin cache version {}",
@@ -562,7 +595,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
         plugins_data = _refresh_plugin_cache(
             paths, collection_details, config, version, use_ansible_doc
         )
-        store_yaml(plugin_cache_path, plugins_data)
+        store_yaml_file(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(
         plugins_data["plugins"],
