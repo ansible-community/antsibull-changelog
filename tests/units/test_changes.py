@@ -14,7 +14,7 @@ import os
 
 import pytest
 
-from antsibull_changelog.changes import ChangesBase, ChangesData
+from antsibull_changelog.changes import ChangesData
 from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
 
 
@@ -76,7 +76,7 @@ def test_changes_data():
     changes2 = ChangesData(
         config,
         os.path.join(config.paths.changelog_dir, config.changes_file),
-        data_override=ChangesBase.empty(),
+        data_override=ChangesData.empty(),
     )
     changes2.ancestor = "1.3.1-alpha"
     changes2.add_release("1.3.2", None, datetime.date(2020, 3, 10))
@@ -89,7 +89,7 @@ def test_changes_data():
     changes3 = ChangesData(
         config,
         os.path.join(config.paths.changelog_dir, config.changes_file),
-        data_override=ChangesBase.empty(),
+        data_override=ChangesData.empty(),
     )
     changes3.add_release("0.1.0", None, datetime.date(2019, 7, 30))
     changes3.add_release("0.2.0", None, datetime.date(2019, 12, 31))

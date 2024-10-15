@@ -20,7 +20,7 @@ from ..changelog_generator import (
     ChangelogGeneratorBase,
     get_plugin_name,
 )
-from ..changes import ChangesBase
+from ..changes import ChangesData
 from ..config import ChangelogConfig, PathsConfig, TextFormat
 from ..fragment import ChangelogFragment
 from ..logger import LOGGER
@@ -60,17 +60,18 @@ class ChangelogGenerator(ChangelogGeneratorBase):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         config: ChangelogConfig,
-        changes: ChangesBase,
-        plugins: list[PluginDescription] | None = None,
-        fragments: list[ChangelogFragment] | None = None,
+        changes: ChangesData,
+        *,
+        # pylint: disable-next=unused-argument
+        plugins: list[PluginDescription] | None = None,  # DEPRECATED
+        # pylint: disable-next=unused-argument
+        fragments: list[ChangelogFragment] | None = None,  # DEPRECATED
         flatmap: bool = True,
     ):
         """
         Create a changelog generator.
         """
-        super().__init__(
-            config, changes, plugins=plugins, fragments=fragments, flatmap=flatmap
-        )
+        super().__init__(config, changes, flatmap=flatmap)
 
     def append_changelog_entry(
         self,
@@ -373,7 +374,7 @@ def create_document_renderer(
 def _create_changelog_path(
     paths: PathsConfig,
     config: ChangelogConfig,
-    changes: ChangesBase,
+    changes: ChangesData,
     document_format: TextFormat,
 ) -> str:
     major_minor_version = ".".join(
@@ -391,11 +392,9 @@ def _create_changelog_path(
 def generate_changelog(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     config: ChangelogConfig,
-    changes: ChangesBase,
+    changes: ChangesData,
     document_format: TextFormat,
-    /,
-    plugins: list[PluginDescription] | None = None,
-    fragments: list[ChangelogFragment] | None = None,
+    *,
     flatmap: bool = True,
     changelog_path: str | None = None,
     only_latest: bool = False,
@@ -403,8 +402,6 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     """
     Generate the changelog as reStructuredText.
 
-    :kwarg plugins: Will be loaded if necessary. Only provide when you already have them
-    :kwarg fragments: Will be loaded if necessary. Only provide when you already have them
     :kwarg flatmap: Whether the collection uses flatmapping or not
     :kwarg changelog_path: Write the output to this path instead of the default path.
     :kwarg only_latest: Only write the last changelog entry without any preamble
@@ -412,7 +409,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     if changelog_path is None:
         changelog_path = _create_changelog_path(paths, config, changes, document_format)
 
-    generator = ChangelogGenerator(config, changes, plugins, fragments, flatmap)
+    generator = ChangelogGenerator(config, changes, flatmap=flatmap)
     renderer = create_document_renderer(
         document_format, start_level=1 if only_latest else 0
     )

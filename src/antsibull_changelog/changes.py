@@ -11,7 +11,6 @@ Classes handling ``changelog.yaml`` (new Ansible and collections)
 
 from __future__ import annotations
 
-import abc
 import collections
 import datetime
 import os
@@ -25,7 +24,6 @@ from .changes_resolvers import (
     ChangesDataObjectResolver,
     ChangesDataPluginResolver,
     FragmentResolver,
-    LegacyPluginResolver,
     PluginResolver,
 )
 from .config import ChangelogConfig
@@ -36,9 +34,23 @@ from .sanitize import sanitize_changes
 from .utils import get_version_constructor, is_release_version
 
 
-class ChangesBase(metaclass=abc.ABCMeta):
+def _sort_dict_by_key(dictionary: Mapping[str, Any]) -> dict[str, Any]:
+    return dict(sorted(dictionary.items()))
+
+
+def _sort_modules_plugins_objects(
+    object_list: Sequence[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
+    return sorted(
+        (_sort_dict_by_key(obj) for obj in object_list), key=lambda obj: obj["name"]
+    )
+
+
+class ChangesData:  # pylint: disable=too-many-public-methods
     """
-    Read, write and manage change metadata.
+    Read, write and manage modern change metadata.
+
+    This is the format used for ansible-base 2.10, ansible-core 2.11+, and for Ansible collections.
     """
 
     config: ChangelogConfig
@@ -49,7 +61,14 @@ class ChangesBase(metaclass=abc.ABCMeta):
     known_fragments: set[str]
     ancestor: str | None
 
-    def __init__(self, config: ChangelogConfig, path: str):
+    def __init__(
+        self, config: ChangelogConfig, path: str, data_override: dict | None = None
+    ):
+        """
+        Create modern change metadata.
+
+        :arg data_override: Allows to load data from dictionary instead from disk
+        """
         self.config = config
         self.path = path
         self.data = self.empty()
@@ -57,12 +76,8 @@ class ChangesBase(metaclass=abc.ABCMeta):
         self.known_plugins = set()
         self.known_objects = set()
         self.ancestor = None
-
-    def version_constructor(self, version: str) -> Any:
-        """
-        Create a version object.
-        """
-        return get_version_constructor(self.config)(version)
+        self.config = config
+        self.load(data_override=data_override)
 
     @staticmethod
     def empty() -> dict:
@@ -73,6 +88,60 @@ class ChangesBase(metaclass=abc.ABCMeta):
             "ancestor": None,
             "releases": {},
         }
+
+    def load(self, data_override: dict | None = None) -> None:
+        """
+        Load the change metadata from disk.
+
+        :arg data_override: If provided, will use this as loaded data instead of reading self.path
+        """
+        if data_override is not None:
+            self.data = sanitize_changes(data_override, config=self.config)
+        elif os.path.exists(self.path):
+            self.data = sanitize_changes(load_yaml_file(self.path), config=self.config)
+        else:
+            self.data = self.empty()
+        self.ancestor = self.data.get("ancestor")
+
+        for _, config in self.releases.items():
+            for plugin_type, plugins in config.get("plugins", {}).items():
+                self.known_plugins |= set(
+                    "%s/%s" % (plugin_type, plugin["name"]) for plugin in plugins
+                )
+
+            for object_type, objects in config.get("objects", {}).items():
+                self.known_objects |= set(
+                    "%s/%s" % (object_type, ansible_object["name"])
+                    for ansible_object in objects
+                )
+
+            modules = config.get("modules", [])
+
+            self.known_plugins |= set(
+                "module/%s" % module["name"] for module in modules
+            )
+
+            self.known_fragments |= set(config.get("fragments", []))
+
+    def save(self) -> None:
+        """
+        Save the change metadata to disk.
+        """
+        self.sort()
+        self.data["ancestor"] = self.ancestor
+        sort_keys = self.config.changelog_sort == "alphanumerical"
+        store_yaml_file(
+            self.path,
+            self.data,
+            nice=self.config.changelog_nice_yaml,
+            sort_keys=sort_keys,
+        )
+
+    def version_constructor(self, version: str) -> Any:
+        """
+        Create a version object.
+        """
+        return get_version_constructor(self.config)(version)
 
     @property
     def latest_version(self) -> str:
@@ -96,265 +165,6 @@ class ChangesBase(metaclass=abc.ABCMeta):
         Dictionary of releases.
         """
         return cast(dict[str, dict[str, Any]], self.data["releases"])
-
-    def load(self, data_override: dict | None = None) -> None:
-        """
-        Load the change metadata from disk.
-
-        :arg data_override: If provided, will use this as loaded data instead of reading self.path
-        """
-        if data_override is not None:
-            self.data = sanitize_changes(data_override, config=self.config)
-        elif os.path.exists(self.path):
-            self.data = sanitize_changes(load_yaml_file(self.path), config=self.config)
-        else:
-            self.data = self.empty()
-        self.ancestor = self.data.get("ancestor")
-
-    @abc.abstractmethod
-    def update_plugins(
-        self, plugins: list[PluginDescription], allow_removals: bool | None
-    ) -> None:
-        """
-        Update plugin descriptions, and remove plugins which are not in the provided list
-        of plugins.
-        """
-
-    @abc.abstractmethod
-    def update_objects(
-        self, objects: list[PluginDescription], allow_removals: bool | None
-    ) -> None:
-        """
-        Update object descriptions, and remove objects which are not in the provided list
-        of objects.
-        """
-
-    @abc.abstractmethod
-    def update_fragments(
-        self,
-        fragments: list[ChangelogFragment],
-        load_extra_fragments: Callable[[str], list[ChangelogFragment]] | None = None,
-    ) -> None:
-        """
-        Update fragment contents, and remove fragment contents which are not in the provided
-        list of fragments.
-        """
-
-    @abc.abstractmethod
-    def sort(self) -> None:
-        """
-        Sort change metadata in place.
-        """
-
-    def save(self) -> None:
-        """
-        Save the change metadata to disk.
-        """
-        self.sort()
-        self.data["ancestor"] = self.ancestor
-        sort_keys = self.config.changelog_sort == "alphanumerical"
-        store_yaml_file(
-            self.path,
-            self.data,
-            nice=self.config.changelog_nice_yaml,
-            sort_keys=sort_keys,
-        )
-
-    def add_release(
-        self,
-        version: str,
-        codename: str | None,
-        release_date: datetime.date,
-        update_existing=False,
-    ):
-        """
-        Add a new releases to the changes metadata.
-        """
-        if version not in self.releases:
-            self.releases[version] = {}
-        elif not update_existing:
-            LOGGER.warning("release {} already exists", version)
-            return
-
-        self.releases[version]["release_date"] = release_date.isoformat()
-        if codename is not None:
-            self.releases[version]["codename"] = codename
-
-    @abc.abstractmethod
-    def add_fragment(self, fragment: ChangelogFragment, version: str):
-        """
-        Add a new changelog fragment to the change metadata for the given version.
-        """
-
-    def restrict_to(self, version: str) -> None:
-        """
-        Restrict to all versions up to the specified one.
-        """
-        version_obj = self.version_constructor(version)
-        if version not in self.releases:
-            raise ValueError(f"Unknown version {version}")
-        for a_version in list(self.releases):
-            if self.version_constructor(a_version) > version_obj:
-                del self.releases[a_version]
-
-    @staticmethod
-    def _create_plugin_entry(plugin: PluginDescription) -> Any:
-        return plugin.name
-
-    def add_plugin(self, plugin: PluginDescription, version: str):
-        """
-        Add a new plugin to the change metadata for the given version.
-
-        If the plugin happens to be already known (for another version),
-        it will not be added.
-
-        :return: ``True`` if the plugin was added for this version
-        """
-        if plugin.category != "plugin":
-            return False
-
-        composite_name = "%s/%s" % (plugin.type, plugin.name)
-
-        if composite_name in self.known_plugins:
-            return False
-
-        self.known_plugins.add(composite_name)
-
-        if plugin.type == "module":
-            if "modules" not in self.releases[version]:
-                self.releases[version]["modules"] = []
-
-            modules = self.releases[version]["modules"]
-            modules.append(self._create_plugin_entry(plugin))
-        else:
-            if "plugins" not in self.releases[version]:
-                self.releases[version]["plugins"] = {}
-
-            plugins = self.releases[version]["plugins"]
-
-            if plugin.type not in plugins:
-                plugins[plugin.type] = []
-
-            plugins[plugin.type].append(self._create_plugin_entry(plugin))
-
-        return True
-
-    def add_object(self, ansible_object: PluginDescription, version: str):
-        """
-        Add a new object to the change metadata for the given version.
-
-        If the object happens to be already known (for another version),
-        it will not be added.
-
-        :return: ``True`` if the object was added for this version
-        """
-        if ansible_object.category != "object":
-            return False
-
-        composite_name = "%s/%s" % (ansible_object.type, ansible_object.name)
-
-        if composite_name in self.known_objects:
-            return False
-
-        self.known_objects.add(composite_name)
-
-        if "objects" not in self.releases[version]:
-            self.releases[version]["objects"] = {}
-
-        objects = self.releases[version]["objects"]
-
-        if ansible_object.type not in objects:
-            objects[ansible_object.type] = []
-
-        objects[ansible_object.type].append(self._create_plugin_entry(ansible_object))
-
-        return True
-
-    @abc.abstractmethod
-    def get_plugin_resolver(
-        self, plugins: list[PluginDescription] | None = None
-    ) -> PluginResolver:
-        """
-        Create a plugin resolver.
-
-        If the plugins are not provided and needed by this object, they might be loaded.
-        """
-
-    @abc.abstractmethod
-    def get_object_resolver(self) -> PluginResolver:
-        """
-        Create a object resolver.
-        """
-
-    @abc.abstractmethod
-    def get_fragment_resolver(
-        self, fragments: list[ChangelogFragment] | None = None
-    ) -> FragmentResolver:
-        """
-        Create a fragment resolver.
-
-        If the fragments are not provided and needed by this object, they might be loaded.
-        """
-
-
-def _sort_dict_by_key(dictionary: Mapping[str, Any]) -> dict[str, Any]:
-    return dict(sorted(dictionary.items()))
-
-
-def _sort_modules_plugins_objects(
-    object_list: Sequence[Mapping[str, Any]]
-) -> list[dict[str, Any]]:
-    return sorted(
-        (_sort_dict_by_key(obj) for obj in object_list), key=lambda obj: obj["name"]
-    )
-
-
-class ChangesData(ChangesBase):
-    """
-    Read, write and manage modern change metadata.
-
-    This is the format used for ansible-base 2.10, ansible-core 2.11+, and for Ansible collections.
-    """
-
-    config: ChangelogConfig
-
-    def __init__(
-        self, config: ChangelogConfig, path: str, data_override: dict | None = None
-    ):
-        """
-        Create modern change metadata.
-
-        :arg data_override: Allows to load data from dictionary instead from disk
-        """
-        super().__init__(config, path)
-        self.config = config
-        self.load(data_override=data_override)
-
-    def load(self, data_override: dict | None = None) -> None:
-        """
-        Load the change metadata from disk.
-        """
-        super().load(data_override=data_override)
-
-        for _, config in self.releases.items():
-            for plugin_type, plugins in config.get("plugins", {}).items():
-                self.known_plugins |= set(
-                    "%s/%s" % (plugin_type, plugin["name"]) for plugin in plugins
-                )
-
-            for object_type, objects in config.get("objects", {}).items():
-                self.known_objects |= set(
-                    "%s/%s" % (object_type, ansible_object["name"])
-                    for ansible_object in objects
-                )
-
-            modules = config.get("modules", [])
-
-            self.known_plugins |= set(
-                "module/%s" % module["name"] for module in modules
-            )
-
-            self.known_fragments |= set(config.get("fragments", []))
 
     def update_plugins(
         self, plugins: list[PluginDescription], allow_removals: bool | None
@@ -679,15 +489,11 @@ class ChangesData(ChangesBase):
 
     @staticmethod
     def _create_plugin_entry(plugin: PluginDescription) -> dict:
-        return LegacyPluginResolver.resolve_plugin(plugin)
+        return PluginResolver.resolve_plugin(plugin)
 
-    def get_plugin_resolver(
-        self, plugins: list[PluginDescription] | None = None
-    ) -> PluginResolver:
+    def get_plugin_resolver(self) -> PluginResolver:
         """
         Create a plugin resolver.
-
-        The plugins list is not used.
         """
         return ChangesDataPluginResolver()
 
@@ -697,13 +503,9 @@ class ChangesData(ChangesBase):
         """
         return ChangesDataObjectResolver()
 
-    def get_fragment_resolver(
-        self, fragments: list[ChangelogFragment] | None = None
-    ) -> FragmentResolver:
+    def get_fragment_resolver(self) -> FragmentResolver:
         """
         Create a fragment resolver.
-
-        The fragments list is not used.
         """
         return ChangesDataFragmentResolver()
 
@@ -735,6 +537,106 @@ class ChangesData(ChangesBase):
                 del self.data["releases"][version]
                 continue
 
+    def add_release(
+        self,
+        version: str,
+        codename: str | None,
+        release_date: datetime.date,
+        update_existing=False,
+    ):
+        """
+        Add a new releases to the changes metadata.
+        """
+        if version not in self.releases:
+            self.releases[version] = {}
+        elif not update_existing:
+            LOGGER.warning("release {} already exists", version)
+            return
+
+        self.releases[version]["release_date"] = release_date.isoformat()
+        if codename is not None:
+            self.releases[version]["codename"] = codename
+
+    def restrict_to(self, version: str) -> None:
+        """
+        Restrict to all versions up to the specified one.
+        """
+        version_obj = self.version_constructor(version)
+        if version not in self.releases:
+            raise ValueError(f"Unknown version {version}")
+        for a_version in list(self.releases):
+            if self.version_constructor(a_version) > version_obj:
+                del self.releases[a_version]
+
+    def add_plugin(self, plugin: PluginDescription, version: str):
+        """
+        Add a new plugin to the change metadata for the given version.
+
+        If the plugin happens to be already known (for another version),
+        it will not be added.
+
+        :return: ``True`` if the plugin was added for this version
+        """
+        if plugin.category != "plugin":
+            return False
+
+        composite_name = "%s/%s" % (plugin.type, plugin.name)
+
+        if composite_name in self.known_plugins:
+            return False
+
+        self.known_plugins.add(composite_name)
+
+        if plugin.type == "module":
+            if "modules" not in self.releases[version]:
+                self.releases[version]["modules"] = []
+
+            modules = self.releases[version]["modules"]
+            modules.append(self._create_plugin_entry(plugin))
+        else:
+            if "plugins" not in self.releases[version]:
+                self.releases[version]["plugins"] = {}
+
+            plugins = self.releases[version]["plugins"]
+
+            if plugin.type not in plugins:
+                plugins[plugin.type] = []
+
+            plugins[plugin.type].append(self._create_plugin_entry(plugin))
+
+        return True
+
+    def add_object(self, ansible_object: PluginDescription, version: str):
+        """
+        Add a new object to the change metadata for the given version.
+
+        If the object happens to be already known (for another version),
+        it will not be added.
+
+        :return: ``True`` if the object was added for this version
+        """
+        if ansible_object.category != "object":
+            return False
+
+        composite_name = "%s/%s" % (ansible_object.type, ansible_object.name)
+
+        if composite_name in self.known_objects:
+            return False
+
+        self.known_objects.add(composite_name)
+
+        if "objects" not in self.releases[version]:
+            self.releases[version]["objects"] = {}
+
+        objects = self.releases[version]["objects"]
+
+        if ansible_object.type not in objects:
+            objects[ansible_object.type] = []
+
+        objects[ansible_object.type].append(self._create_plugin_entry(ansible_object))
+
+        return True
+
     @staticmethod
     def concatenate(changes_datas: list["ChangesData"]) -> "ChangesData":
         """
@@ -746,7 +648,7 @@ class ChangesData(ChangesBase):
         """
         assert len(changes_datas) > 0
         last = changes_datas[-1]
-        data = ChangesBase.empty()
+        data = ChangesData.empty()
         ancestor = None
         no_ancestor = False
         for changes in changes_datas:
@@ -767,7 +669,7 @@ class ChangesData(ChangesBase):
         return ChangesData(last.config, last.path, data)
 
 
-def load_changes(config: ChangelogConfig) -> ChangesBase:
+def load_changes(config: ChangelogConfig) -> ChangesData:
     """
     Load changes metadata.
     """
@@ -803,7 +705,7 @@ def _create_filter_version_range(
 
 
 def _add_plugins_filters(
-    changes: ChangesBase,
+    changes: ChangesData,
     plugins: list[PluginDescription],
     objects: list[PluginDescription],
     version: str,
@@ -844,7 +746,7 @@ def _add_plugins_filters(
 
 
 def _add_fragments(
-    changes: ChangesBase,
+    changes: ChangesData,
     fragments: list[ChangelogFragment],
     version: str,
     show_release_summary_warning: bool,
@@ -870,7 +772,7 @@ def _add_fragments(
 
 def add_release(  # pylint: disable=too-many-arguments,too-many-locals
     config: ChangelogConfig,
-    changes: ChangesBase,
+    changes: ChangesData,
     plugins: list[PluginDescription],
     fragments: list[ChangelogFragment],
     version: str,

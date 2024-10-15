@@ -6,7 +6,7 @@
 # SPDX-FileCopyrightText: 2020, Ansible Project
 
 """
-Generate reStructuredText changelog from ChangesBase instance.
+Generate reStructuredText changelog from ChangesData instance.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ import os
 from collections.abc import MutableMapping
 from typing import Any, cast
 
-from .changes import ChangesBase, FragmentResolver, PluginResolver
+from .changes import ChangesData, FragmentResolver, PluginResolver
 from .config import ChangelogConfig, PathsConfig, TextFormat
 from .fragment import ChangelogFragment
 from .logger import LOGGER
@@ -110,17 +110,15 @@ class ChangelogGeneratorBase(abc.ABC):
     """
 
     config: ChangelogConfig
-    changes: ChangesBase
+    changes: ChangesData
     plugin_resolver: PluginResolver
     fragment_resolver: FragmentResolver
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         config: ChangelogConfig,
-        changes: ChangesBase,
-        /,
-        plugins: list[PluginDescription] | None = None,
-        fragments: list[ChangelogFragment] | None = None,
+        changes: ChangesData,
+        *,
         flatmap: bool = True,
     ):
         """
@@ -130,9 +128,9 @@ class ChangelogGeneratorBase(abc.ABC):
         self.changes = changes
         self.flatmap = flatmap
 
-        self.plugin_resolver = changes.get_plugin_resolver(plugins)
+        self.plugin_resolver = changes.get_plugin_resolver()
         self.object_resolver = changes.get_object_resolver()
-        self.fragment_resolver = changes.get_fragment_resolver(fragments)
+        self.fragment_resolver = changes.get_fragment_resolver()
 
     def _update_modules_plugins_objects(
         self, entry_config: ChangelogEntry, release: dict
@@ -298,17 +296,18 @@ class ChangelogGenerator(ChangelogGeneratorBase):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         config: ChangelogConfig,
-        changes: ChangesBase,
-        plugins: list[PluginDescription] | None = None,
-        fragments: list[ChangelogFragment] | None = None,
+        changes: ChangesData,
+        *,
+        # pylint: disable-next=unused-argument
+        plugins: list[PluginDescription] | None = None,  # DEPRECATED
+        # pylint: disable-next=unused-argument
+        fragments: list[ChangelogFragment] | None = None,  # DEPRECATED
         flatmap: bool = True,
     ):
         """
         Create a changelog generator.
         """
-        super().__init__(
-            config, changes, plugins=plugins, fragments=fragments, flatmap=flatmap
-        )
+        super().__init__(config, changes, flatmap=flatmap)
 
     def append_changelog_entry(
         self,
@@ -573,9 +572,8 @@ class ChangelogGenerator(ChangelogGeneratorBase):
 def generate_changelog(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     config: ChangelogConfig,
-    changes: ChangesBase,
-    plugins: list[PluginDescription] | None = None,
-    fragments: list[ChangelogFragment] | None = None,
+    changes: ChangesData,
+    *,
     flatmap: bool = True,
     changelog_path: str | None = None,
     only_latest: bool = False,
@@ -585,8 +583,6 @@ def generate_changelog(  # pylint: disable=too-many-arguments
 
     This function is DEPRECATED! It will be removed in a future version.
 
-    :arg plugins: Will be loaded if necessary. Only provide when you already have them
-    :arg fragments: Will be loaded if necessary. Only provide when you already have them
     :arg flatmap: Whether the collection uses flatmapping or not
     :arg changelog_path: Write the output to this path instead of the default path.
     :arg only_latest: Only write the last changelog entry without any preamble
@@ -603,7 +599,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
             changelog_filename = config.changelog_filename_template
         changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
 
-    generator = ChangelogGenerator(config, changes, plugins, fragments, flatmap)
+    generator = ChangelogGenerator(config, changes, flatmap=flatmap)
     rst = generator.generate(only_latest=only_latest)
 
     with open(changelog_path, "wb") as changelog_fd:

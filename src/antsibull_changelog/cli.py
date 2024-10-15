@@ -33,7 +33,7 @@ except ImportError:
 from . import __version__ as _version
 from . import constants as C
 from .ansible import get_ansible_release
-from .changes import ChangesBase, add_release, load_changes
+from .changes import ChangesData, add_release, load_changes
 from .config import ChangelogConfig, CollectionDetails, PathsConfig, TextFormat
 from .errors import ChangelogError
 from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
@@ -466,7 +466,7 @@ def _do_refresh(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
-    changes: ChangesBase,
+    changes: ChangesData,
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
 ) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]:
@@ -702,15 +702,13 @@ def command_release(args: Any) -> int:
             config,
             changes,
             document_format,
-            plugins=plugins,
-            fragments=fragments,
             flatmap=flatmap,
         )
 
     return C.RC_SUCCESS
 
 
-def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
+def command_generate(args: Any) -> int:
     """
     (Re-)generate the reStructuredText version of the changelog.
 
@@ -740,9 +738,7 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
     if not changes.has_release:
         print("Cannot create changelog when not at least one release has been added.")
         return C.RC_COMMAND_FAILED
-    plugins, fragments = _do_refresh(
-        args, paths, collection_details, config, changes, None, None
-    )
+    plugins, _ = _do_refresh(args, paths, collection_details, config, changes)
     if args.reload_plugins and plugins is None:
         plugins = load_plugins(
             paths=paths,
@@ -769,8 +765,6 @@ def command_generate(args: Any) -> int:  # pylint: disable=too-many-locals
             config,
             changes,
             document_format,
-            plugins=plugins,
-            fragments=fragments,
             flatmap=flatmap,
             changelog_path=output,
             only_latest=only_latest,
