@@ -1,0 +1,2 @@
+minor_changes:
+  - "Add ``--strict`` parameter to the ``lint-changelog-yaml`` subcommand to also check for extra fields that should not be there (https://github.com/ansible-community/antsibull-changelog/pull/182)."

@@ -8,5 +8,20 @@
         [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'description' is expected to be <class 'str'>, but got 234"],
         [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'namespace' must be null"],
         [0, 0, "Unknown object type 'chair' in 'releases' -> '1.0.0' -> 'objects'"]
+    ],
+    "errors_strict": [
+        [0, 0, "release version '1.0.0' must come after ancestor version '1.0.0'"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' is expected to be <class 'str'>, but got 23"],
+        [0, 0, "Unknown plugin type 'foo' in 'releases' -> '1.0.0' -> 'plugins'"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 0 is expected to be <class 'dict'>, but got 42"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'name' is expected to be <class 'str'>, but got 123"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'description' is expected to be <class 'str'>, but got 234"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 1 -> 'namespace' must be null"],
+        [0, 0, "'releases' -> '1.0.0' -> 'plugins' -> 'callback' -> 2 -> 'extra_callback': extra key not allowed"],
+        [0, 0, "Unknown object type 'chair' in 'releases' -> '1.0.0' -> 'objects'"],
+        [0, 0, "'releases' -> '1.0.0' -> 'objects' -> 'chair' -> 0 -> 'extra_chair': extra key not allowed"],
+        [0, 0, "'releases' -> '1.0.0' -> 'objects' -> 'role' -> 0 -> 'extra_role': extra key not allowed"],
+        [0, 0, "'releases' -> '1.0.0' -> 'extra_release': extra key not allowed"],
+        [0, 0, "'extra_global': extra key not allowed"]
     ]
 }
