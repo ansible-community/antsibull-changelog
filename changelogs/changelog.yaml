@@ -461,3 +461,26 @@ releases:
       - 175-vcs.yml
       - 176-antsibull-fileutils.yml
     release_date: '2024-09-09'
+  0.31.0:
+    changes:
+      breaking_changes:
+        - More internal code related to the old changelog format has been removed.
+          This only potentially affects other projects which consume antsibull-changelog
+          as a library. The sister antsibull projects antsibull-build and antsibull-docs
+          might only be affected in older versions. **Users of the antsibull-changelog
+          CLI tool are not affected by this change** (https://github.com/ansible-community/antsibull-changelog/pull/179).
+      minor_changes:
+        - Add ``--strict`` parameter to the ``lint-changelog-yaml`` subcommand to
+          also check for extra fields that should not be there (https://github.com/ansible-community/antsibull-changelog/pull/182).
+        - Declare support for Python 3.13 (https://github.com/ansible-community/antsibull-changelog/pull/180).
+        - 'Python API: allow to extract extra data when loading changelog files, and
+          allow to insert extra data when saving (https://github.com/ansible-community/antsibull-changelog/pull/181).'
+        - 'Python API: allow to preprocess changelog.yaml before linting (https://github.com/ansible-community/antsibull-changelog/pull/181).'
+      release_summary: Feature release.
+    fragments:
+      - 0.31.0.yml
+      - 179-cleanup.yml
+      - 181-extra-data.yml
+      - 182-strict-linting.yml
+      - python-3.13.yml
+    release_date: '2024-10-19'

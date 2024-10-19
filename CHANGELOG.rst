@@ -4,6 +4,27 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.31.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Add ``--strict`` parameter to the ``lint-changelog-yaml`` subcommand to also check for extra fields that should not be there (https://github.com/ansible-community/antsibull-changelog/pull/182).
+- Declare support for Python 3.13 (https://github.com/ansible-community/antsibull-changelog/pull/180).
+- Python API: allow to extract extra data when loading changelog files, and allow to insert extra data when saving (https://github.com/ansible-community/antsibull-changelog/pull/181).
+- Python API: allow to preprocess changelog.yaml before linting (https://github.com/ansible-community/antsibull-changelog/pull/181).
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- More internal code related to the old changelog format has been removed. This only potentially affects other projects which consume antsibull-changelog as a library. The sister antsibull projects antsibull-build and antsibull-docs might only be affected in older versions. **Users of the antsibull-changelog CLI tool are not affected by this change** (https://github.com/ansible-community/antsibull-changelog/pull/179).
+
 v0.30.0
 =======
 

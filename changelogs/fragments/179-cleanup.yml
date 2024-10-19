@@ -1,7 +1,0 @@
-breaking_changes:
-  - "More internal code related to the old changelog format has been removed.
-     This only potentially affects other projects which consume antsibull-changelog
-     as a library. The sister antsibull projects antsibull-build and antsibull-docs
-     might only be affected in older versions. **Users of the antsibull-changelog CLI
-     tool are not affected by this change**
-     (https://github.com/ansible-community/antsibull-changelog/pull/179)."
