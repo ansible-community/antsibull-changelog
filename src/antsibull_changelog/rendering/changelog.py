@@ -22,9 +22,7 @@ from ..changelog_generator import (
 )
 from ..changes import ChangesData
 from ..config import ChangelogConfig, PathsConfig, TextFormat
-from ..fragment import ChangelogFragment
 from ..logger import LOGGER
-from ..plugins import PluginDescription
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
 from .rst_document import RSTDocumentRenderer
@@ -57,15 +55,11 @@ class ChangelogGenerator(ChangelogGeneratorBase):
     a combined ACD changelog.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=useless-parent-delegation
         self,
         config: ChangelogConfig,
         changes: ChangesData,
         *,
-        # pylint: disable-next=unused-argument
-        plugins: list[PluginDescription] | None = None,  # DEPRECATED
-        # pylint: disable-next=unused-argument
-        fragments: list[ChangelogFragment] | None = None,  # DEPRECATED
         flatmap: bool = True,
     ):
         """
