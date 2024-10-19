@@ -70,12 +70,12 @@ def other_antsibull(
     return to_install
 
 
-@nox.session(python=["3.9", "3.10", "3.11", "3.12"])
+@nox.session(python=["3.9", "3.10", "3.11", "3.12", "3.13"])
 def test(session: nox.Session):
     install(session, ".[test, coverage]", *other_antsibull(), editable=True)
     covfile = Path(session.create_tmp(), ".coverage")
     more_args = []
-    if session.python == "3.12":
+    if session.python in {"3.12", "3.13"}:
         more_args.append("--error-for-skips")
     session.run(
         "pytest",
