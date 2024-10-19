@@ -12,6 +12,7 @@ Linting for changelog.yaml.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from typing import Any, cast
 
 import packaging.version
@@ -33,12 +34,19 @@ class ChangelogYamlLinter:
     errors: list[tuple[str, int, int, str]]
     path: str
 
-    def __init__(self, path: str, no_semantic_versioning: bool = False):
+    def __init__(
+        self,
+        path: str,
+        *,
+        no_semantic_versioning: bool = False,
+        preprocess_data: Callable[[dict], None] | None = None,
+    ):
         self.errors = []
         self.path = path
         self.valid_plugin_types = set(get_documentable_plugins())
         self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
         self.no_semantic_versioning = no_semantic_versioning
+        self.preprocess_data = preprocess_data
 
     def check_version(self, version: Any, message: str) -> Any | None:
         """
@@ -360,23 +368,10 @@ class ChangelogYamlLinter:
                     fragment, (str,), ["releases", version_str, "fragments", idx]
                 )
 
-    def lint(self) -> list[tuple[str, int, int, str]]:
+    def lint_content(self, changelog_yaml: dict) -> None:
         """
-        Load and lint the changelog.yaml file.
+        Lint the contents of a changelog.yaml file, provided it is a global mapping.
         """
-        try:
-            changelog_yaml = load_yaml_file(self.path)
-        except Exception as exc:  # pylint: disable=broad-except
-            self.errors.append(
-                (
-                    self.path,
-                    0,
-                    0,
-                    "error while parsing YAML: {0}".format(exc).replace("\n", " "),
-                )
-            )
-            return self.errors
-
         ancestor_str = changelog_yaml.get("ancestor")
         if ancestor_str is not None:
             ancestor = self.check_version(ancestor_str, "Invalid ancestor version")
@@ -407,16 +402,57 @@ class ChangelogYamlLinter:
                 if self.verify_type(entry, (dict,), ["releases", version_str]):
                     self.lint_releases_entry(fragment_linter, version_str, entry)
 
+    def lint(self) -> list[tuple[str, int, int, str]]:
+        """
+        Load and lint the changelog.yaml file.
+        """
+        try:
+            changelog_yaml = load_yaml_file(self.path)
+        except Exception as exc:  # pylint: disable=broad-except
+            self.errors.append(
+                (
+                    self.path,
+                    0,
+                    0,
+                    "error while parsing YAML: {0}".format(exc).replace("\n", " "),
+                )
+            )
+            return self.errors
+
+        if not isinstance(changelog_yaml, dict):
+            self.errors.append(
+                (
+                    self.path,
+                    0,
+                    0,
+                    "YAML file is not a global mapping",
+                )
+            )
+            return self.errors
+
+        if self.preprocess_data:
+            self.preprocess_data(changelog_yaml)
+
+        self.lint_content(changelog_yaml)
         return self.errors
 
 
 def lint_changelog_yaml(
     path: str,
+    *,
     no_semantic_versioning: bool = False,
+    preprocess_data: Callable[[dict], None] | None = None,
 ) -> list[tuple[str, int, int, str]]:
     """
     Lint a changelogs/changelog.yaml file.
+
+    :kwarg no_semantic_versioning: Set to ``True`` if the file does not use
+        semantic versioning, but Python version numbers.
+    :kwarg preprocess_data: If provided, will be called on the data loaded before
+        it is checked. This can be used to remove extra data before validation.
     """
     return ChangelogYamlLinter(
-        path, no_semantic_versioning=no_semantic_versioning
+        path,
+        no_semantic_versioning=no_semantic_versioning,
+        preprocess_data=preprocess_data,
     ).lint()
