@@ -1,0 +1,2 @@
+minor_changes:
+  - "Allow to extract extra data when loading changelog files, and allow to insert extra data when saving (https://github.com/ansible-community/antsibull-changelog/pull/181)."

@@ -62,12 +62,22 @@ class ChangesData:  # pylint: disable=too-many-public-methods
     ancestor: str | None
 
     def __init__(
-        self, config: ChangelogConfig, path: str, data_override: dict | None = None
+        self,
+        config: ChangelogConfig,
+        path: str,
+        data_override: dict | None = None,
+        *,
+        extra_data_extractor: Callable[[dict], None] | None = None,
     ):
         """
         Create modern change metadata.
 
+        :arg path: The path of the changelog file. If exists and ``data_override`` is not
+            provided, the file's contents will be read. An empty string will always be
+            treated as a non-existing file.
         :arg data_override: Allows to load data from dictionary instead from disk
+        :kwarg extra_data_extractor: Callback that will obtain the raw data before sanitization.
+            Can be used to extract extra data and store it somewhere else for later use.
         """
         self.config = config
         self.path = path
@@ -77,7 +87,9 @@ class ChangesData:  # pylint: disable=too-many-public-methods
         self.known_objects = set()
         self.ancestor = None
         self.config = config
-        self.load(data_override=data_override)
+        self.load(
+            data_override=data_override, extra_data_extractor=extra_data_extractor
+        )
 
     @staticmethod
     def empty() -> dict:
@@ -89,18 +101,28 @@ class ChangesData:  # pylint: disable=too-many-public-methods
             "releases": {},
         }
 
-    def load(self, data_override: dict | None = None) -> None:
+    def load(
+        self,
+        *,
+        data_override: dict | None = None,
+        extra_data_extractor: Callable[[dict], None] | None = None,
+    ) -> None:
         """
         Load the change metadata from disk.
 
-        :arg data_override: If provided, will use this as loaded data instead of reading self.path
+        :kwarg data_override: If provided, will use this as loaded data instead of reading self.path
+        :kwarg extra_data_extractor: Callback that will obtain the raw data before sanitization.
+            Can be used to extract extra data and store it somewhere else for later use.
         """
         if data_override is not None:
-            self.data = sanitize_changes(data_override, config=self.config)
-        elif os.path.exists(self.path):
-            self.data = sanitize_changes(load_yaml_file(self.path), config=self.config)
+            data = data_override
+        elif self.path and os.path.exists(self.path):
+            data = load_yaml_file(self.path)
         else:
-            self.data = self.empty()
+            data = self.empty()
+        if extra_data_extractor:
+            extra_data_extractor(data)
+        self.data = sanitize_changes(data, config=self.config)
         self.ancestor = self.data.get("ancestor")
 
         for _, config in self.releases.items():
@@ -123,16 +145,25 @@ class ChangesData:  # pylint: disable=too-many-public-methods
 
             self.known_fragments |= set(config.get("fragments", []))
 
-    def save(self) -> None:
+    def save(self, *, extra_data: dict | None = None) -> None:
         """
         Save the change metadata to disk.
+
+        :kwarg extra_data: Additional data to store into the file.
         """
+        if not self.path:
+            raise ValueError(
+                "Cannot save since path was not provided on ChangesData object creation"
+            )
         self.sort()
         self.data["ancestor"] = self.ancestor
         sort_keys = self.config.changelog_sort == "alphanumerical"
+        data = self.data.copy()
+        if extra_data:
+            data.update(extra_data)
         store_yaml_file(
             self.path,
-            self.data,
+            data,
             nice=self.config.changelog_nice_yaml,
             sort_keys=sort_keys,
         )
