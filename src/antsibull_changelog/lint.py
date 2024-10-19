@@ -33,6 +33,7 @@ class ChangelogYamlLinter:
 
     errors: list[tuple[str, int, int, str]]
     path: str
+    strict: bool
 
     def __init__(
         self,
@@ -40,6 +41,7 @@ class ChangelogYamlLinter:
         *,
         no_semantic_versioning: bool = False,
         preprocess_data: Callable[[dict], None] | None = None,
+        strict: bool = False,
     ):
         self.errors = []
         self.path = path
@@ -47,6 +49,7 @@ class ChangelogYamlLinter:
         self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
         self.no_semantic_versioning = no_semantic_versioning
         self.preprocess_data = preprocess_data
+        self.strict = strict
 
     def check_version(self, version: Any, message: str) -> Any | None:
         """
@@ -74,6 +77,27 @@ class ChangelogYamlLinter:
                 )
             )
             return None
+
+    def check_extra_entries(
+        self, data: dict, allowed_keys: set[str], yaml_path: list[Any]
+    ) -> None:
+        """
+        Verify that no extra keys than the ones from ``allowed_keys`` appear in ``data``.
+        """
+        if not self.strict:
+            return
+        for key in data:
+            if key not in allowed_keys:
+                self.errors.append(
+                    (
+                        self.path,
+                        0,
+                        0,
+                        "{0}: extra key not allowed".format(
+                            self._format_yaml_path(yaml_path + [key]),
+                        ),
+                    )
+                )
 
     @staticmethod
     def _format_yaml_path(yaml_path: list[Any]) -> str:
@@ -181,6 +205,16 @@ class ChangelogYamlLinter:
                             ),
                         )
                     )
+            self.check_extra_entries(
+                plugin,
+                {
+                    "release_date",
+                    "name",
+                    "description",
+                    "namespace",
+                },
+                yaml_path,
+            )
 
     def lint_plugins(self, version_str: str, plugins_dict: dict):
         """
@@ -368,6 +402,20 @@ class ChangelogYamlLinter:
                     fragment, (str,), ["releases", version_str, "fragments", idx]
                 )
 
+        self.check_extra_entries(
+            entry,
+            {
+                "release_date",
+                "codename",
+                "changes",
+                "modules",
+                "plugins",
+                "objects",
+                "fragments",
+            },
+            ["releases", version_str],
+        )
+
     def lint_content(self, changelog_yaml: dict) -> None:
         """
         Lint the contents of a changelog.yaml file, provided it is a global mapping.
@@ -401,6 +449,8 @@ class ChangelogYamlLinter:
                 # Check release information
                 if self.verify_type(entry, (dict,), ["releases", version_str]):
                     self.lint_releases_entry(fragment_linter, version_str, entry)
+
+        self.check_extra_entries(changelog_yaml, {"releases", "ancestor"}, [])
 
     def lint(self) -> list[tuple[str, int, int, str]]:
         """
@@ -442,6 +492,7 @@ def lint_changelog_yaml(
     *,
     no_semantic_versioning: bool = False,
     preprocess_data: Callable[[dict], None] | None = None,
+    strict: bool = False,
 ) -> list[tuple[str, int, int, str]]:
     """
     Lint a changelogs/changelog.yaml file.
@@ -450,9 +501,12 @@ def lint_changelog_yaml(
         semantic versioning, but Python version numbers.
     :kwarg preprocess_data: If provided, will be called on the data loaded before
         it is checked. This can be used to remove extra data before validation.
+    :kwarg strict: Set to ``True`` to enable more strict validation
+        (complain about extra fields).
     """
     return ChangelogYamlLinter(
         path,
         no_semantic_versioning=no_semantic_versioning,
         preprocess_data=preprocess_data,
+        strict=strict,
     ).lint()

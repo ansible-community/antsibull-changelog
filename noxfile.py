@@ -125,6 +125,14 @@ def integration(session: nox.Session):
         "changelogs/changelog.yaml",
     )
 
+    # Lint own changelogs/changelog.yaml in strict mode
+    cov_run(
+        "lint-changelog-yaml",
+        "--no-semantic-versioning",
+        "--strict",
+        "changelogs/changelog.yaml",
+    )
+
     # Lint community.general's changelogs/changelog.yaml
     cg_destination = tmp / "community.general"
     if not cg_destination.exists():
@@ -133,13 +141,18 @@ def integration(session: nox.Session):
                 "git",
                 "clone",
                 "https://github.com/ansible-collections/community.general",
-                "--branch=stable-4",
+                "--branch=stable-9",
                 "--depth=1",
                 external=True,
             )
     cov_run(
         "lint-changelog-yaml",
         str(cg_destination / "changelogs" / "changelog.yaml"),
+    )
+    cov_run(
+        "lint-changelog-yaml",
+        str(cg_destination / "changelogs" / "changelog.yaml"),
+        "--strict",
     )
 
     combined = map(str, tmp.glob(".coverage.*"))

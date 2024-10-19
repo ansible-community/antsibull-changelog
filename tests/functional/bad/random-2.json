@@ -1,5 +1,8 @@
 {
     "errors": [
         [0, 0, "error while parsing YAML: .*in \"input.yaml\", line 7, column 1"]
+    ],
+    "errors_strict": [
+        [0, 0, "error while parsing YAML: .*in \"input.yaml\", line 7, column 1"]
     ]
 }

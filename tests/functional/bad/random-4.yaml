@@ -7,6 +7,7 @@ ancestor: 1.0.0
 releases:
   1.0.0:
     release_date: '2020-01-01'
+    extra_release: shouldn't be there
     plugins:
       23: []
       foo: []
@@ -17,12 +18,16 @@ releases:
           namespace: 345
         - name: foo
           description: bar
+          extra_callback: shouldn't be there
     objects:
       chair:
         - name: hello
           description: world
           namespace: null
+          extra_chair: shouldn't be there
       role:
         - name: my_role
           description: This is my role
           namespace: null
+          extra_role: shouldn't be there
+extra_global: shouldn't be there

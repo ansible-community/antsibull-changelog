@@ -46,9 +46,12 @@ load_tests()
 
 
 class Args:
-    def __init__(self, changelog_yaml_path=None, no_semantic_versioning=False):
+    def __init__(
+        self, changelog_yaml_path=None, no_semantic_versioning=False, strict=False
+    ):
         self.changelog_yaml_path = changelog_yaml_path
         self.no_semantic_versioning = no_semantic_versioning
+        self.strict = strict
 
 
 # Test good files
@@ -67,17 +70,31 @@ def test_good_changelog_yaml_files(yaml_filename):
     assert stdout_lines == []
     assert rc == C.RC_SUCCESS
 
+    # Run test against CLI (strict checking)
+    args = Args(changelog_yaml_path=yaml_filename, strict=True)
+    stdout = io.StringIO()
+    with redirect_stdout(stdout):
+        rc = command_lint_changelog_yaml(args)
+    stdout_lines = stdout.getvalue().splitlines()
+    assert stdout_lines == []
+    assert rc == C.RC_SUCCESS
+
 
 @pytest.mark.parametrize("yaml_filename, json_filename", BAD_TESTS)
 def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     # Run test directly against implementation
     errors = lint_changelog_yaml(yaml_filename)
-    assert len(errors) > 0
+    errors_strict = lint_changelog_yaml(yaml_filename, strict=True)
+    assert len(errors_strict) > 0
 
     # Cut off path
     errors = [
         [error[1], error[2], error[3].replace(yaml_filename, "input.yaml")]
         for error in errors
+    ]
+    errors_strict = [
+        [error[1], error[2], error[3].replace(yaml_filename, "input.yaml")]
+        for error in errors_strict
     ]
 
     # Load expected errors
@@ -87,8 +104,16 @@ def test_bad_changelog_yaml_files(yaml_filename, json_filename):
     if errors != data["errors"]:
         print(json.dumps(errors, indent=2))
 
+    if errors_strict != data["errors_strict"]:
+        print(json.dumps(errors_strict, indent=2))
+
     assert len(errors) == len(data["errors"])
     for error1, error2 in zip(errors, data["errors"]):
+        assert error1[0:2] == error2[0:2]
+        assert re.match(error2[2], error1[2], flags=re.DOTALL) is not None
+
+    assert len(errors_strict) == len(data["errors_strict"])
+    for error1, error2 in zip(errors_strict, data["errors_strict"]):
         assert error1[0:2] == error2[0:2]
         assert re.match(error2[2], error1[2], flags=re.DOTALL) is not None
 

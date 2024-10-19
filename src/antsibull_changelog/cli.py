@@ -180,13 +180,19 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     lint_changelog_yaml_parser = subparsers.add_parser(
         "lint-changelog-yaml",
         parents=[common],
-        help="check syntax of" " changelogs/changelog.yaml file",
+        help="check syntax of changelogs/changelog.yaml file",
     )
     lint_changelog_yaml_parser.set_defaults(func=command_lint_changelog_yaml)
     lint_changelog_yaml_parser.add_argument(
         "changelog_yaml_path",
         metavar="/path/to/changelog.yaml",
         help="path to changelogs/changelog.yaml",
+    )
+    lint_changelog_yaml_parser.add_argument(
+        "--strict",
+        type=parse_boolean_arg,
+        help="do more strict checking, for example complain about extra"
+        " entries that are not mentioned in the changelog.yaml specification",
     )
 
     lint_changelog_yaml_parser.add_argument(
@@ -834,7 +840,9 @@ def command_lint_changelog_yaml(args: Any) -> int:
     :arg args: Parsed arguments
     """
     errors = lint_changelog_yaml(
-        args.changelog_yaml_path, no_semantic_versioning=args.no_semantic_versioning
+        args.changelog_yaml_path,
+        no_semantic_versioning=args.no_semantic_versioning,
+        strict=args.strict,
     )
 
     messages = sorted(
