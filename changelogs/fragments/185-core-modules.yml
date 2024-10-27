@@ -1,0 +1,2 @@
+bugfixes:
+  - "Fix ``namespace`` extraction for ansible-core modules (https://github.com/ansible-community/antsibull-changelog/issues/184, https://github.com/ansible-community/antsibull-changelog/pull/185)."
