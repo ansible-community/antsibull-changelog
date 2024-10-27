@@ -484,3 +484,13 @@ releases:
       - 182-strict-linting.yml
       - python-3.13.yml
     release_date: '2024-10-19'
+  0.31.1:
+    changes:
+      bugfixes:
+        - Fix ``namespace`` extraction for ansible-core modules (https://github.com/ansible-community/antsibull-changelog/issues/184,
+          https://github.com/ansible-community/antsibull-changelog/pull/185).
+      release_summary: Bugfix release for ansible-core.
+    fragments:
+      - 0.31.1.yml
+      - 185-core-modules.yml
+    release_date: '2024-10-27'

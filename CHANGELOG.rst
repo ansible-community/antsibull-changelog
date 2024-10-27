@@ -4,6 +4,19 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.31.1
+=======
+
+Release Summary
+---------------
+
+Bugfix release for ansible-core.
+
+Bugfixes
+--------
+
+- Fix ``namespace`` extraction for ansible-core modules (https://github.com/ansible-community/antsibull-changelog/issues/184, https://github.com/ansible-community/antsibull-changelog/pull/185).
+
 v0.31.0
 =======
 
