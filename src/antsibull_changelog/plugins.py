@@ -112,7 +112,7 @@ def extract_namespace(
     # Follow links
     filename = os.path.realpath(filename)
     # Determine relative path
-    if collection_name and collection_name != "ansible.builtin":
+    if collection_name:
         rel_to = os.path.join(paths.base_dir, "plugins", "modules")
     else:
         rel_to = os.path.join(paths.base_dir, "lib", "ansible", "modules")
@@ -159,7 +159,7 @@ def jsondoc_to_metadata(  # pylint: disable=too-many-arguments
             docs = entrypoints["main"]
     if category == "plugin" and plugin_type == "module":
         if is_ansible_core_2_13:
-            last_dot = name.rindex(".")
+            last_dot = name.rfind(".")
             if last_dot >= 0:
                 namespace = name[:last_dot]
                 name = name[last_dot + 1 :]
@@ -400,6 +400,7 @@ def _load_plugins_2_13(
                         plugin_name,
                         plugin_data,
                         category=category[:-1],
+                        is_ansible_core_2_13=True,
                     )
                     plugins_data[category][plugin_type][
                         processed_data["name"]
