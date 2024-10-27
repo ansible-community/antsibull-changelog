@@ -112,7 +112,7 @@ def extract_namespace(
     # Follow links
     filename = os.path.realpath(filename)
     # Determine relative path
-    if collection_name:
+    if collection_name and collection_name != "ansible.builtin":
         rel_to = os.path.join(paths.base_dir, "plugins", "modules")
     else:
         rel_to = os.path.join(paths.base_dir, "lib", "ansible", "modules")
