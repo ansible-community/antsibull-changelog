@@ -374,12 +374,12 @@ class ChangelogFragmentLinter:
                 results = ChangelogFragmentLinter._check_content(
                     line, fragment.fragment_format, fragment.path
                 )
-                errors += [(fragment.path, 0, 0, result[2]) for result in results]
+                errors += [(fragment.path, 0, 0, result) for result in results]
         elif isinstance(lines, str):
             results = ChangelogFragmentLinter._check_content(
                 lines, fragment.fragment_format, fragment.path
             )
-            errors += [(fragment.path, 0, 0, result[2]) for result in results]
+            errors += [(fragment.path, 0, 0, result) for result in results]
 
     def lint(self, fragment: ChangelogFragment) -> list[tuple[str, int, int, str]]:
         """

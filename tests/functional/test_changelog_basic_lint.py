@@ -91,6 +91,7 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
             ],
         },
     )
+    collection_changelog.add_fragment_line("bad-rst.yml", "bugfixes", ["This is *foo"])
 
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
@@ -98,6 +99,7 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
     assert (
         stdout
         == r"""
+changelogs/fragments/bad-rst.yml:0:0: (WARNING/2) Inline emphasis start-string without end-string.
 changelogs/fragments/int-instead-of-list.yml:0:0: section "bugfixes" must be type list not int
 changelogs/fragments/int-instead-of-string.yml:0:0: section "release_summary" must be type str not int
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add moo.role"'s name must be of format "add (object|plugin).(type)"
