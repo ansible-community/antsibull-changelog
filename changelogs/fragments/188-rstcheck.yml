@@ -1,2 +1,0 @@
-bugfixes:
-  - "When linting found RST problems with rstcheck, the error messages were reduced to a single letter (https://github.com/ansible-community/antsibull-changelog/pull/188)."

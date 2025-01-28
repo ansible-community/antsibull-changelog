@@ -4,6 +4,19 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.31.2
+=======
+
+Release Summary
+---------------
+
+Bugfix release.
+
+Bugfixes
+--------
+
+- When linting found RST problems with rstcheck, the error messages were reduced to a single letter (https://github.com/ansible-community/antsibull-changelog/pull/188).
+
 v0.31.1
 =======
 
