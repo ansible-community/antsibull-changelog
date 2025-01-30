@@ -1,0 +1,4 @@
+minor_changes:
+  - Add a new configuration option ``add_toc`` to the changelog configuration file.
+    If set to ``false`` (default is ``true``), a table of contents is not added to the top of the changelog.
+    (https://github.com/ansible-community/antsibull-changelog/pull/191)
