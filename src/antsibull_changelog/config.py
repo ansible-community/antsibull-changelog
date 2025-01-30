@@ -389,6 +389,7 @@ class ChangelogConfig:
         "alphanumerical",
     ]
     vcs: Literal["none", "auto", "git"]
+    add_toc: bool
 
     def __init__(
         self,
@@ -480,6 +481,8 @@ class ChangelogConfig:
 
         self.vcs = self.config.get("vcs", "none")
 
+        self.add_toc = self.config.get("add_toc", True)
+
         self._validate_config(ignore_is_other_project)
 
     def _validate_config(self, ignore_is_other_project: bool) -> None:
@@ -537,6 +540,7 @@ class ChangelogConfig:
             "changelog_nice_yaml": self.changelog_nice_yaml,
             "changelog_sort": self.changelog_sort,
             "vcs": self.vcs,
+            "add_toc": self.add_toc,
         }
         if not self.is_collection:
             if self.use_semantic_versioning:
@@ -618,6 +622,7 @@ class ChangelogConfig:
             "changelog_nice_yaml": False,
             "changelog_sort": "alphanumerical",
             "vcs": "auto",
+            "add_toc": True,
         }
         if title is not None:
             config["title"] = title

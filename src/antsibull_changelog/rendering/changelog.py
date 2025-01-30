@@ -144,13 +144,19 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             if only_latest:
                 break
 
-    def generate(self, renderer: DocumentRenderer, only_latest: bool = False) -> None:
+    def generate(
+        self,
+        renderer: DocumentRenderer,
+        only_latest: bool = False,
+        add_toc: bool = True,
+    ) -> None:
         """
         Generate the changelog.
         """
         if not only_latest:
             renderer.set_title(self.get_title())
-            renderer.add_toc("Topics")
+            if add_toc:
+                renderer.add_toc("Topics")
 
             if self.changes.ancestor and self.config.mention_ancestor:
                 renderer.add_text(
@@ -413,7 +419,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     renderer = create_document_renderer(
         document_format, start_level=1 if only_latest else 0
     )
-    generator.generate(renderer, only_latest=only_latest)
+    generator.generate(renderer, only_latest=only_latest, add_toc=config.add_toc)
 
     text = renderer.render()
     for warning in renderer.get_warnings():

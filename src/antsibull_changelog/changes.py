@@ -39,7 +39,7 @@ def _sort_dict_by_key(dictionary: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _sort_modules_plugins_objects(
-    object_list: Sequence[Mapping[str, Any]]
+    object_list: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
     return sorted(
         (_sort_dict_by_key(obj) for obj in object_list), key=lambda obj: obj["name"]
