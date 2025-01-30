@@ -382,7 +382,7 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             if only_latest:
                 break
 
-    def generate(self, only_latest: bool = False) -> str:
+    def generate(self, only_latest: bool = False, add_toc: bool = True) -> str:
         """
         Generate the changelog as reStructuredText.
         """
@@ -390,7 +390,8 @@ class ChangelogGenerator(ChangelogGeneratorBase):
 
         if not only_latest:
             builder.set_title(self.get_title())
-            builder.add_raw_rst(".. contents:: Topics\n")
+            if add_toc:
+                builder.add_raw_rst(".. contents:: Topics\n")
 
             if self.changes.ancestor and self.config.mention_ancestor:
                 builder.add_raw_rst(
@@ -600,7 +601,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
         changelog_path = os.path.join(paths.changelog_dir, changelog_filename)
 
     generator = ChangelogGenerator(config, changes, flatmap=flatmap)
-    rst = generator.generate(only_latest=only_latest)
+    rst = generator.generate(only_latest=only_latest, add_toc=config.add_toc)
 
     with open(changelog_path, "wb") as changelog_fd:
         changelog_fd.write(rst.encode("utf-8"))
