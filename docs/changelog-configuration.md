@@ -18,6 +18,11 @@ new configurations.
 
 If set to `false`, the plugin short description is used. If set to `true`, a period is added to the end of the plugin short description if no other end punctuation is present. Setting to `true` complies with the [Ansible changelog format](https://docs.ansible.com/ansible/latest/community/development_process.html#changelogs-how-to-format).
 
+### `add_toc` (boolean)
+
+The default value is `true`.
+
+If set to `true`, a table of contents is added to the top of the changelog.
 
 ### `always_refresh` (string)
 
