@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import enum
 import os
+import typing as t
 from collections.abc import Mapping
 from collections.abc import Sequence as _Sequence
-from typing import Any, Literal, Self
 
 import pydantic as p
 from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
@@ -24,7 +24,7 @@ from .errors import ChangelogError
 from .logger import LOGGER
 
 
-def _is_sequence(value: Any) -> bool:
+def _is_sequence(value: t.Any) -> bool:
     if not isinstance(value, _Sequence):
         return False
     return not isinstance(value, (str, bytes))
@@ -382,7 +382,7 @@ class ChangelogConfig(p.BaseModel):
     )
     new_plugins_after_name: str = ""  # not used
     changes_file: str = ".changes.yaml"
-    changes_format: Literal["combined"]
+    changes_format: t.Literal["combined"]
     keep_fragments: bool = False
     prevent_known_fragments: bool  # default is set in parse()
     use_fqcn: bool = False
@@ -407,17 +407,17 @@ class ChangelogConfig(p.BaseModel):
     output_formats: set[TextFormat] = {TextFormat.RESTRUCTURED_TEXT}
     add_plugin_period: bool = False
     changelog_nice_yaml: bool = False
-    changelog_sort: Literal[
+    changelog_sort: t.Literal[
         "unsorted",
         "version",
         "version_reversed",
         "alphanumerical",
     ] = "alphanumerical"
-    vcs: Literal["none", "auto", "git"] = "none"
+    vcs: t.Literal["none", "auto", "git"] = "none"
 
     @p.field_validator("always_refresh", mode="before")
     @classmethod
-    def fix_always_refresh(cls, value: Any) -> str:
+    def fix_always_refresh(cls, value: t.Any) -> str:
         """
         Validate and adjust the value of always_refresh.
         """
@@ -447,7 +447,7 @@ class ChangelogConfig(p.BaseModel):
 
     @p.field_validator("sections", mode="before")
     @classmethod
-    def parse_sections(cls, value: Any) -> Mapping[str, str]:
+    def parse_sections(cls, value: t.Any) -> Mapping[str, str]:
         """
         Parse the value of sections.
         """
@@ -481,7 +481,7 @@ class ChangelogConfig(p.BaseModel):
 
     @p.field_validator("output_formats", mode="before")
     @classmethod
-    def parse_output_formats(cls, value: Any) -> set[TextFormat]:
+    def parse_output_formats(cls, value: t.Any) -> set[TextFormat]:
         """
         Parse the value of output_formats.
         """
@@ -509,7 +509,7 @@ class ChangelogConfig(p.BaseModel):
         return result
 
     @p.model_validator(mode="after")
-    def postprocess_sections(self) -> Self:
+    def postprocess_sections(self) -> t.Self:
         """
         Postprocess sections value by inserting the prelude section.
         """
@@ -524,7 +524,7 @@ class ChangelogConfig(p.BaseModel):
         return self
 
     @p.model_validator(mode="after")
-    def validate_use_semantic_versioning(self) -> Self:
+    def validate_use_semantic_versioning(self) -> t.Self:
         """
         Validate use_semantic_versioning for collections.
         """
