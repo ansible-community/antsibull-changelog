@@ -374,7 +374,7 @@ class ChangelogConfig(p.BaseModel):
     is_collection: bool
     config: dict
 
-    title: str | None = None
+    title: t.Optional[str] = None
     notes_dir: str = p.Field(default="fragments", alias="notesdir")
     prelude_name: str = p.Field(default="release_summary", alias="prelude_section_name")
     prelude_title: str = p.Field(
@@ -386,11 +386,11 @@ class ChangelogConfig(p.BaseModel):
     keep_fragments: bool = False
     prevent_known_fragments: bool  # default is set in parse()
     use_fqcn: bool = False
-    archive_path_template: str | None = None
+    archive_path_template: t.Optional[str] = None
     changelog_filename_template: str = "CHANGELOG-v%s.rst"
     changelog_filename_version_depth: int = 2
     mention_ancestor: bool = True
-    trivial_section_name: str | None  # default is set by parse()
+    trivial_section_name: t.Optional[str]  # default is set by parse()
     release_tag_re: str = r"((?:[\d.ab]|rc)+)"  # only relevant for ansible-core
     pre_release_tag_re: str = (
         r"(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$"  # only relevant for ansible-core
@@ -398,7 +398,7 @@ class ChangelogConfig(p.BaseModel):
     always_refresh: str = "none"
     ignore_other_fragment_extensions: bool = False
     sanitize_changelog: bool = False
-    flatmap: bool | None = None
+    flatmap: t.Optional[bool] = None
     use_semantic_versioning: bool = (
         True  # default is False for ansible-core and other projects
     )
