@@ -352,7 +352,7 @@ def test_config_loading_bad_output_format(ansible_config_path):
     collection_details = CollectionDetails(paths)
     with pytest.raises(
         ChangelogError,
-        match="Found unknown extension in output_formats: Unknown extension 'foobar'",
+        match="The 1st entry of config value output_formats is an unknown extension: Unknown extension 'foobar'",
     ):
         ChangelogConfig.load(paths, collection_details)
 
@@ -363,6 +363,6 @@ def test_config_loading_bad_vcs(ansible_config_path):
     collection_details = CollectionDetails(paths)
     with pytest.raises(
         ChangelogError,
-        match="Invalid VCS value 'foobar'. Must be one of none, git, and auto.",
+        match="Input should be 'none', 'auto' or 'git'",
     ):
         ChangelogConfig.load(paths, collection_details)

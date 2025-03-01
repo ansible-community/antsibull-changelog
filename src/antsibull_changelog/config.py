@@ -11,16 +11,32 @@ Configuration classes for paths and changelogs.
 
 from __future__ import annotations
 
-import collections
 import enum
 import os
 from collections.abc import Mapping
-from typing import Literal
+from collections.abc import Sequence as _Sequence
+from typing import Any, Literal, Self
 
+import pydantic as p
 from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from .errors import ChangelogError
 from .logger import LOGGER
+
+
+def _is_sequence(value: Any) -> bool:
+    if not isinstance(value, _Sequence):
+        return False
+    return not isinstance(value, (str, bytes))
+
+
+def _ordinal(index: int) -> str:
+    one = abs(index) % 10
+    if one == 1:
+        return f"{index}st"
+    if one == 2:
+        return f"{index}nd"
+    return f"{index}th"
 
 
 class TextFormat(enum.Enum):
@@ -344,175 +360,231 @@ DEFAULT_SECTIONS = [
 ]
 
 
-class ChangelogConfig:
-    # pylint: disable=too-many-instance-attributes
+class ChangelogConfig(p.BaseModel):
     """
     Configuration for changelogs.
     """
 
+    model_config = p.ConfigDict(
+        frozen=False, extra="allow", validate_default=True, arbitrary_types_allowed=True
+    )
+
     paths: PathsConfig
     collection_details: CollectionDetails
-
-    config: dict
     is_collection: bool
-    title: str | None
-    notes_dir: str
-    prelude_name: str
-    prelude_title: str
-    new_plugins_after_name: str
-    changes_file: str
-    changes_format: str | None
-    keep_fragments: bool
-    prevent_known_fragments: bool
-    use_fqcn: bool
-    archive_path_template: str | None
-    changelog_filename_template: str
-    changelog_filename_version_depth: int
-    mention_ancestor: bool
-    trivial_section_name: str | None
-    release_tag_re: str
-    pre_release_tag_re: str
-    always_refresh: str
-    ignore_other_fragment_extensions: bool
-    sanitize_changelog: bool
-    flatmap: bool | None
-    use_semantic_versioning: bool
-    is_other_project: bool
-    sections: Mapping[str, str]
-    output_formats: set[TextFormat]
-    add_plugin_period: bool
-    changelog_nice_yaml: bool
+    config: dict
+
+    title: str | None = None
+    notes_dir: str = p.Field(default="fragments", alias="notesdir")
+    prelude_name: str = p.Field(default="release_summary", alias="prelude_section_name")
+    prelude_title: str = p.Field(
+        default="Release Summary", alias="prelude_section_title"
+    )
+    new_plugins_after_name: str = ""  # not used
+    changes_file: str = ".changes.yaml"
+    changes_format: Literal["combined"]
+    keep_fragments: bool = False
+    prevent_known_fragments: bool  # default is set in parse()
+    use_fqcn: bool = False
+    archive_path_template: str | None = None
+    changelog_filename_template: str = "CHANGELOG-v%s.rst"
+    changelog_filename_version_depth: int = 2
+    mention_ancestor: bool = True
+    trivial_section_name: str | None  # default is set by parse()
+    release_tag_re: str = r"((?:[\d.ab]|rc)+)"  # only relevant for ansible-core
+    pre_release_tag_re: str = (
+        r"(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$"  # only relevant for ansible-core
+    )
+    always_refresh: str = "none"
+    ignore_other_fragment_extensions: bool = False
+    sanitize_changelog: bool = False
+    flatmap: bool | None = None
+    use_semantic_versioning: bool = (
+        True  # default is False for ansible-core and other projects
+    )
+    is_other_project: bool = False
+    sections: Mapping[str, str] = dict(DEFAULT_SECTIONS)
+    output_formats: set[TextFormat] = {TextFormat.RESTRUCTURED_TEXT}
+    add_plugin_period: bool = False
+    changelog_nice_yaml: bool = False
     changelog_sort: Literal[
         "unsorted",
         "version",
         "version_reversed",
         "alphanumerical",
-    ]
-    vcs: Literal["none", "auto", "git"]
+    ] = "alphanumerical"
+    vcs: Literal["none", "auto", "git"] = "none"
 
-    def __init__(
-        self,
-        paths: PathsConfig,
-        collection_details: CollectionDetails,
-        config: dict,
-        ignore_is_other_project: bool = False,
-    ):
+    @p.field_validator("always_refresh", mode="before")
+    @classmethod
+    def fix_always_refresh(cls, value: Any) -> str:
         """
-        Create changelog config from dictionary.
+        Validate and adjust the value of always_refresh.
         """
-        self.paths = paths
-        self.collection_details = collection_details
-        self.config = config
-
-        self.is_collection = paths.is_collection
-        self.title = self.config.get("title")
-        self.notes_dir = self.config.get("notesdir", "fragments")
-        self.prelude_name = self.config.get("prelude_section_name", "release_summary")
-        self.prelude_title = self.config.get("prelude_section_title", "Release Summary")
-        self.new_plugins_after_name = self.config.get(
-            "new_plugins_after_name", ""
-        )  # not used
-        self.changes_file = self.config.get("changes_file", ".changes.yaml")
-        self.changes_format = self.config.get("changes_format")
-        self.keep_fragments = self.config.get("keep_fragments", False)
-        self.prevent_known_fragments = self.config.get(
-            "prevent_known_fragments", self.keep_fragments
-        )
-        self.use_fqcn = self.config.get("use_fqcn", False)
-        self.archive_path_template = self.config.get("archive_path_template")
-        self.changelog_filename_template = self.config.get(
-            "changelog_filename_template", "CHANGELOG-v%s.rst"
-        )
-        self.changelog_filename_version_depth = self.config.get(
-            "changelog_filename_version_depth", 2
-        )
-        self.mention_ancestor = self.config.get("mention_ancestor", True)
-        has_trivial_section_by_default = paths.is_collection or paths.is_other_project
-        self.trivial_section_name = self.config.get(
-            "trivial_section_name",
-            "trivial" if has_trivial_section_by_default else None,
-        )
-        self.sanitize_changelog = self.config.get("sanitize_changelog", False)
-        always_refresh = self.config.get("always_refresh", False)
-        if always_refresh is True:
-            always_refresh = "full"
-        if always_refresh is False:
-            always_refresh = "none"
-        self.always_refresh = always_refresh
-        self.ignore_other_fragment_extensions = self.config.get(
-            "ignore_other_fragment_extensions", False
-        )
-        self.flatmap = self.config.get("flatmap")
-        self.use_semantic_versioning = True
-        self.is_other_project = self.config.get("is_other_project", False)
-
-        # The following are only relevant for ansible-core/-base and other projects:
-        self.release_tag_re = self.config.get("release_tag_re", r"((?:[\d.ab]|rc)+)")
-        self.pre_release_tag_re = self.config.get(
-            "pre_release_tag_re", r"(?P<pre_release>\.\d+(?:[ab]|rc)+\d*)$"
-        )
-        if not self.is_collection:
-            self.use_semantic_versioning = self.config.get(
-                "use_semantic_versioning", False
+        if value is True:
+            value = "full"
+        elif value is False:
+            value = "none"
+        if not isinstance(value, str):
+            raise ValueError(
+                "If specified, always_refresh must be a boolean or a string"
             )
+        if value not in {"full", "none"}:
+            for part in value.split(","):
+                part = part.strip()
+                if part not in {
+                    "plugins",
+                    "plugins-without-removal",
+                    "fragments",
+                    "fragments-without-archives",
+                }:
+                    raise ValueError(
+                        'The config value always_refresh contains an invalid value "{0}"'.format(
+                            part
+                        )
+                    )
+        return value
 
-        sections = collections.OrderedDict([(self.prelude_name, self.prelude_title)])
-        for section_name, section_title in self.config.get(
-            "sections", DEFAULT_SECTIONS
-        ):
-            sections[section_name] = section_title
-        self.sections = sections
+    @p.field_validator("sections", mode="before")
+    @classmethod
+    def parse_sections(cls, value: Any) -> Mapping[str, str]:
+        """
+        Parse the value of sections.
+        """
+        if isinstance(value, Mapping):
+            return value
+        if not _is_sequence(value):
+            raise ValueError("The config value sections must be a list")
+        sections = {}
+        for index, entry in enumerate(value):
+            if not _is_sequence(entry) or len(entry) != 2:
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value sections"
+                    " must be a list of length 2"
+                )
+            if not isinstance(entry[0], str):
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value sections"
+                    " does not have a string as the first element"
+                )
+            if not isinstance(entry[1], str):
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value sections"
+                    " does not have a string as the second element"
+                )
+            if entry[0] in sections:
+                raise ValueError(
+                    f"The section name {entry[0]!r} appears more than once"
+                )
+            sections[entry[0]] = entry[1]
+        return sections
 
-        self.output_formats = set()
-        for extension in self.config.get("output_formats", ["rst"]):
+    @p.field_validator("output_formats", mode="before")
+    @classmethod
+    def parse_output_formats(cls, value: Any) -> set[TextFormat]:
+        """
+        Parse the value of output_formats.
+        """
+        if isinstance(value, set):
+            return value
+        if not _is_sequence(value):
+            raise ValueError("The config value output_formats must be a list")
+        result: set[TextFormat] = set()
+        for index, entry in enumerate(value):
+            if not isinstance(entry, str):
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value output_formats"
+                    " is not a string"
+                )
             try:
-                self.output_formats.add(TextFormat.from_extension(extension))
+                text_format = TextFormat.from_extension(entry)
             except ValueError as exc:
-                raise ChangelogError(
-                    f"Found unknown extension in output_formats: {exc}"
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value output_formats"
+                    f" is an unknown extension: {exc}"
                 ) from exc
+            if text_format in result:
+                raise ValueError(f"The output format {entry!r} appears more than once")
+            result.add(text_format)
+        return result
 
-        self.add_plugin_period = self.config.get("add_plugin_period", False)
+    @p.model_validator(mode="after")
+    def postprocess_sections(self) -> Self:
+        """
+        Postprocess sections value by inserting the prelude section.
+        """
+        sections = {self.prelude_name: self.prelude_title}
+        for k, v in self.sections.items():
+            if k == self.prelude_name:
+                raise ValueError(
+                    f"No section name must equal prelude_name ({self.prelude_name!r})"
+                )
+            sections[k] = v
+        self.sections = sections
+        return self
 
-        self.changelog_nice_yaml = self.config.get("changelog_nice_yaml", False)
+    @p.model_validator(mode="after")
+    def validate_use_semantic_versioning(self) -> Self:
+        """
+        Validate use_semantic_versioning for collections.
+        """
+        if self.is_collection and not self.use_semantic_versioning:
+            raise ValueError(
+                "The config value use_semantic_versioning must be true for collections"
+            )
+        return self
 
-        self.changelog_sort = self.config.get("changelog_sort", "alphanumerical")
-
-        self.vcs = self.config.get("vcs", "none")
-
-        self._validate_config(ignore_is_other_project)
-
-    def _validate_config(self, ignore_is_other_project: bool) -> None:
+    def _validate_other_project(self) -> None:
         """
         Basic config validation.
         """
-        if (
-            self.is_other_project != self.paths.is_other_project
-            and not ignore_is_other_project
-        ):
+        if self.is_other_project != self.paths.is_other_project:
             raise ChangelogError(
                 "is_other_project must be {0}".format(self.is_other_project)
             )
-        if self.is_other_project and self.is_collection and not ignore_is_other_project:
-            raise ChangelogError("is_other_project must not be True for collections")
-        if self.changes_format != "combined":
-            raise ChangelogError('changes_format must be "combined"')
+        if self.is_other_project and self.is_collection:
+            raise ChangelogError("is_other_project must not be true for collections")
 
-        valid_sort_options = [
-            "unsorted",
-            "version",
-            "version_reversed",
-            "alphanumerical",
-        ]
-        if self.changelog_sort not in valid_sort_options:
-            raise ChangelogError(
-                f"Invalid changelog_sort option: {self.changelog_sort}"
+    @classmethod
+    def parse(
+        cls,
+        paths: PathsConfig,
+        collection_details: CollectionDetails,
+        config: dict,
+        *,
+        ignore_is_other_project: bool = False,
+    ) -> ChangelogConfig:
+        """
+        Parse a raw changelog configuration.
+        """
+        adjusted_config = config.copy()
+        adjusted_config["paths"] = paths
+        adjusted_config["collection_details"] = collection_details
+        adjusted_config["is_collection"] = paths.is_collection
+        adjusted_config["config"] = config
+
+        # Set some special defaults
+        if "trivial_section_name" not in adjusted_config:
+            adjusted_config["trivial_section_name"] = (
+                "trivial" if (paths.is_collection or paths.is_other_project) else None
+            )
+        if "use_semantic_versioning" not in adjusted_config and not paths.is_collection:
+            adjusted_config["use_semantic_versioning"] = False
+        if "prevent_known_fragments" not in adjusted_config:
+            adjusted_config["prevent_known_fragments"] = adjusted_config.get(
+                "keep_fragments", False
             )
 
-        if self.vcs not in ("none", "git", "auto"):
-            raise ChangelogError(
-                f"Invalid VCS value {self.vcs!r}. Must be one of none, git, and auto."
-            )
+        # Parse
+        try:
+            result = cls.model_validate(adjusted_config)
+        except Exception as exc:
+            raise ChangelogError(f"Error while parsing changlog config: {exc}") from exc
+
+        if not ignore_is_other_project:
+            result._validate_other_project()  # pylint: disable=protected-access
+
+        return result
 
     def store(self) -> None:  # noqa: C901
         """
@@ -586,7 +658,7 @@ class ChangelogConfig:
         config = load_yaml_file(paths.config_path)
         if not isinstance(config, dict):
             raise ChangelogError("{0} must be a dictionary".format(paths.config_path))
-        return ChangelogConfig(
+        return ChangelogConfig.parse(
             paths,
             collection_details,
             config,
@@ -624,4 +696,4 @@ class ChangelogConfig:
         if paths.is_other_project:
             config["is_other_project"] = True
             config["use_semantic_versioning"] = True
-        return ChangelogConfig(paths, collection_details, config)
+        return ChangelogConfig.parse(paths, collection_details, config)

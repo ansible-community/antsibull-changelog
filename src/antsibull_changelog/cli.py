@@ -341,7 +341,7 @@ def run(args: list[str]) -> int:
 
         return arguments.func(arguments)
     except ChangelogError as e:
-        LOGGER.error(str(e))
+        LOGGER.error("{}", str(e))
         if verbosity > 2:
             traceback.print_exc()
         return C.RC_COMMAND_FAILED
