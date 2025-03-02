@@ -47,7 +47,10 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     config = diff.parse_yaml("changelogs/config.yaml")
     assert config["notesdir"] == "fragments"
     assert config["changes_file"] == "changelog.yaml"
-    assert config["changelog_filename_template"] == "../CHANGELOG.rst"
+    assert config["output"][0] == {
+        "file": "CHANGELOG.rst",
+        "format": "rst",
+    }
     assert config["is_other_project"] is True
     assert config["use_semantic_versioning"] is True
     assert config["title"] == "Project"
@@ -236,7 +239,7 @@ This is the first proper release.
 def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     other_changelog,
 ):  # noqa: F811
-    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.output[0].title_version_depth = 2
     other_changelog.config.use_semantic_versioning = True
     other_changelog.set_config(other_changelog.config)
     other_changelog.add_fragment_line(
@@ -694,7 +697,7 @@ Minor Changes
 def test_changelog_release_package_json(  # pylint: disable=redefined-outer-name
     other_changelog,
 ):  # noqa: F811
-    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.output[0].title_version_depth = 2
     other_changelog.config.use_semantic_versioning = True
     other_changelog.set_config(other_changelog.config)
     other_changelog.add_fragment_line(
@@ -792,7 +795,7 @@ Minor Changes
 def test_changelog_release_pyproject_toml(  # pylint: disable=redefined-outer-name
     other_changelog,
 ):  # noqa: F811
-    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.output[0].title_version_depth = 2
     other_changelog.config.use_semantic_versioning = True
     other_changelog.set_config(other_changelog.config)
     other_changelog.add_fragment_line(
@@ -885,7 +888,7 @@ Minor Changes
 def test_changelog_release_pyproject_toml_poetry(  # pylint: disable=redefined-outer-name
     other_changelog,
 ):  # noqa: F811
-    other_changelog.config.changelog_filename_version_depth = 2
+    other_changelog.config.output[0].title_version_depth = 2
     other_changelog.config.use_semantic_versioning = True
     other_changelog.set_config(other_changelog.config)
     other_changelog.add_fragment_line(

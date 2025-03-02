@@ -17,7 +17,7 @@ from collections.abc import MutableMapping
 from typing import Any, cast
 
 from .changes import ChangesData, FragmentResolver, PluginResolver
-from .config import ChangelogConfig, TextFormat
+from .config import ChangelogConfig, ChangelogRenderConfig, TextFormat
 from .logger import LOGGER
 from .utils import collect_versions
 
@@ -92,6 +92,7 @@ class ChangelogGeneratorBase(abc.ABC):
     changes: ChangesData
     plugin_resolver: PluginResolver
     fragment_resolver: FragmentResolver
+    render_config: ChangelogRenderConfig
 
     def __init__(
         self,
@@ -99,6 +100,7 @@ class ChangelogGeneratorBase(abc.ABC):
         changes: ChangesData,
         *,
         flatmap: bool = True,
+        render_config: ChangelogRenderConfig | None = None,
     ):
         """
         Create a changelog generator.
@@ -106,6 +108,9 @@ class ChangelogGeneratorBase(abc.ABC):
         self.config = config
         self.changes = changes
         self.flatmap = flatmap
+        if render_config is None:
+            render_config = ChangelogRenderConfig()
+        self.render_config = render_config
 
         self.plugin_resolver = changes.get_plugin_resolver()
         self.object_resolver = changes.get_object_resolver()
@@ -225,7 +230,7 @@ class ChangelogGeneratorBase(abc.ABC):
         latest_version = self.changes.latest_version
         codename = self.changes.releases[latest_version].get("codename")
         major_minor_version = ".".join(
-            latest_version.split(".")[: self.config.changelog_filename_version_depth]
+            latest_version.split(".")[: self.render_config.title_version_depth]
         )
 
         title = self.config.title or "Ansible"

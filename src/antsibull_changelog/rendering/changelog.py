@@ -21,7 +21,13 @@ from ..changelog_generator import (
     get_plugin_name,
 )
 from ..changes import ChangesData
-from ..config import ChangelogConfig, PathsConfig, TextFormat
+from ..config import (
+    ChangelogConfig,
+    ChangelogOutput,
+    ChangelogRenderConfig,
+    PathsConfig,
+    TextFormat,
+)
 from ..logger import LOGGER
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
@@ -61,11 +67,17 @@ class ChangelogGenerator(ChangelogGeneratorBase):
         changes: ChangesData,
         *,
         flatmap: bool = True,
+        render_config: ChangelogRenderConfig | None = None,
     ):
         """
         Create a changelog generator.
         """
-        super().__init__(config, changes, flatmap=flatmap)
+        super().__init__(
+            config,
+            changes,
+            flatmap=flatmap,
+            render_config=render_config,
+        )
 
     def append_changelog_entry(
         self,
@@ -80,6 +92,9 @@ class ChangelogGenerator(ChangelogGeneratorBase):
         if add_version:
             section_renderer = renderer.add_section("v%s" % changelog_entry.version)
             renderer = section_renderer
+
+        if self.render_config.per_release_toc:
+            renderer.add_toc(max_depth=self.render_config.per_release_toc_depth)
 
         for section_name in self.config.sections:
             self._add_section(
@@ -144,7 +159,10 @@ class ChangelogGenerator(ChangelogGeneratorBase):
         """
         if not only_latest:
             renderer.set_title(self.get_title())
-            renderer.add_toc("Topics")
+            if self.render_config.global_toc:
+                renderer.add_toc(
+                    "Topics", max_depth=self.render_config.global_toc_depth
+                )
 
             if self.changes.ancestor and self.config.mention_ancestor:
                 renderer.add_text(
@@ -367,45 +385,43 @@ def create_document_renderer(
 
 def _create_changelog_path(
     paths: PathsConfig,
-    config: ChangelogConfig,
     changes: ChangesData,
-    document_format: TextFormat,
+    output: ChangelogOutput,
 ) -> str:
     major_minor_version = ".".join(
-        changes.latest_version.split(".")[: config.changelog_filename_version_depth]
+        changes.latest_version.split(".")[: output.filename_version_depth]
     )
-    if "%s" in config.changelog_filename_template:
-        changelog_filename = config.changelog_filename_template % (major_minor_version,)
-    else:
-        changelog_filename = config.changelog_filename_template
-    fn, ext = os.path.splitext(changelog_filename)
-    ext = f".{document_format.to_extension()}"
-    return os.path.join(paths.changelog_dir, f"{fn}{ext}")
+    changelog_filename = output.file
+    if "%s" in changelog_filename:
+        changelog_filename = changelog_filename % (major_minor_version,)
+    return os.path.join(paths.base_dir, changelog_filename)
 
 
 def generate_changelog(  # pylint: disable=too-many-arguments
     paths: PathsConfig,
     config: ChangelogConfig,
     changes: ChangesData,
-    document_format: TextFormat,
+    output: ChangelogOutput,
     *,
     flatmap: bool = True,
-    changelog_path: str | None = None,
     only_latest: bool = False,
 ):
     """
     Generate the changelog as reStructuredText.
 
     :kwarg flatmap: Whether the collection uses flatmapping or not
-    :kwarg changelog_path: Write the output to this path instead of the default path.
     :kwarg only_latest: Only write the last changelog entry without any preamble
     """
-    if changelog_path is None:
-        changelog_path = _create_changelog_path(paths, config, changes, document_format)
+    changelog_path = _create_changelog_path(paths, changes, output)
 
-    generator = ChangelogGenerator(config, changes, flatmap=flatmap)
+    generator = ChangelogGenerator(
+        config,
+        changes,
+        flatmap=flatmap,
+        render_config=output,
+    )
     renderer = create_document_renderer(
-        document_format, start_level=1 if only_latest else 0
+        output.format, start_level=1 if only_latest else 0
     )
     generator.generate(renderer, only_latest=only_latest)
 
