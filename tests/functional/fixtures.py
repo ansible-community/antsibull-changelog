@@ -23,7 +23,13 @@ import pytest
 import yaml
 
 from antsibull_changelog.cli import run as run_changelog_tool
-from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
+from antsibull_changelog.config import (
+    ChangelogConfig,
+    ChangelogOutput,
+    ChangelogRenderConfig,
+    CollectionDetails,
+    PathsConfig,
+)
 
 # When debugging failed tests and you want to see what exactly changed, you can set this
 # variable to True. Then for all changed files, a colorized diff will be printed.
@@ -39,6 +45,11 @@ _ANSIBLE_DOC_VERSION_TEMPLATE = """ansible-doc [core {ansible_core_version}]
   jinja version = 3.0.3
   libyaml = True
 """
+
+
+# In the tests we want to simply modify values so we can update and write the config back to disk.
+for _model in (ChangelogRenderConfig, ChangelogOutput):
+    _model.model_config["frozen"] = False
 
 
 def diff(old: str, new: str) -> str:

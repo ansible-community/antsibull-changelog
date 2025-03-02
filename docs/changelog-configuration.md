@@ -42,31 +42,6 @@ the placeholder `{version}` can be used to make the destination
 dependent on the version number of the new release. If the directory
 does not yet exist, it will be created.
 
-### `changelog_filename_template` (string)
-
-The default value is `CHANGELOG-v%s.rst` for existing configurations,
-and `../CHANGELOG.rst` for new configurations.
-
-This is the path relative to the `changelogs/` directory where the
-reStructuredText version of the changelog is written to. The placeholder
-`%s` will be replaced by the first `changelog_filename_version_depth`
-parts of the version of the release.
-
-!!! note
-    The file extension (default `.rst`) will always be replaced by the
-    extension matching the output format (see [`output_formats`](#output_formats-list-of-strings)).
-    Therefore the extension provided here will always be ignored.
-
-### `changelog_filename_version_depth` (integer)
-
-The default value is 2 for existing configurations, and 0 for new
-configurations.
-
-Determines the number of parts of the current release version to be used
-when replacing `%s` in `changelog_filename_template` (see above). For
-the value 2, version 1.2.3 will result in the string `1.2`. The value 0
-results in the empty string.
-
 ### `changes_file` (string)
 
 The default value is `.changes.yaml` for existing configurations, and
@@ -172,19 +147,75 @@ The default value is `fragments`.
 The name of the subdirectory of `changelogs/` that contains the
 changelog fragments.
 
-### `output_formats` (list of strings)
-
-The default is `["rst"]`.
-
-A list of output formats to write the changelog as. Supported formats
-are `rst` for ReStructuredText and `md` for MarkDown.
-
 ### `prelude_name` (string)
 
 The default value is `release_summary`.
 
 Name of the prelude section to be used in changelog fragments. This
 section is special, in that it does not accept a list, but a string.
+
+### `output` (list of dictionaries)
+
+Defines the changelog files written by `antsibull-changelog generate` and
+`antsibull-changelog release`. The default value for existing configurations,
+if not specified, is:
+```yaml
+- file: changelogs/CHANGELOG-v%s.rst
+  filename_version_depth: 2
+  title_version_depth: 2
+  format: rst
+```
+
+The default for new configurations is:
+```yaml
+- file: CHANGELOG.rst
+  filename_version_depth: 0
+  title_version_depth: 0
+  format: rst
+```
+
+The `output` option must not be used with the deprecated options `changelog_filename_template`,
+`changelog_filename_version_depth`, and `output_formats`. If any of these values is set, for
+every `output_format` in `output_formats` (default: `[rst]`) the following entry is added to
+`output`:
+```yaml
+- file: (value of changelog_filename_template, with adjusted extension)
+  filename_version_depth: (value of changelog_filename_version_depth)
+  title_version_depth: (value of changelog_filename_version_depth)
+  format: (value of output_format)
+```
+
+The format of `output` is as follows:
+
+- `file` (string, **required**): The filename to write the changelog to.
+  This must include the correct extension.
+
+  If it contains the placeholder `%s`, then parts of the latest release's
+  version are inserted for `%s`.
+- `filename_version_depth` (int, default `0`): if `%s` is part of `file`,
+  this determines the version parts of the latest release that `%s` is
+  replaced by. For the value `2`, the latest version 1.2.3 will result in
+  the string `1.2`. The value `0` results in an empty string being inserted.
+
+  Must be zero if `%s` is not part of `file`, and must be non-zero if `%s`
+  is part of `file`.
+- `title_version_depth` (int, default `0`): determines the version parts
+  of the latest release that are inserted into the changelog's title.
+  For the value `2`, the latest version 1.2.3 will result in the string `1.2`.
+  The value `0` results in no version info being inserted into the changelog's
+  title.
+- `format` (string, **required**): the output format to write the
+  changelog as. Supported formats are `rst` for ReStructuredText
+  and `md` for MarkDown.
+- `global_toc` (bool, default `true`): Whether the changelog should have a
+  global Table of Contents.
+- `global_toc_depth` (int or `null`, default `null`): if `global_toc=true`,
+  determines whether the Table of Contents has a maximum depth.
+- `per_release_toc` (bool, default `false`): Whether every release of the
+  changelog should have a local Table of Contents.
+- `per_release_toc_depth` (int or `null`, default `null`): if
+  `per_release_toc=true`, determines whether the Table of Contents for a
+  release has a maximum depth.
 
 ### `prelude_title` (string)
 
@@ -297,6 +328,39 @@ project is part of a Git repository or not.
 The default value is `''` (empty string).
 
 This setting is not used.
+
+### `changelog_filename_template` (string)
+
+The default value is `CHANGELOG-v%s.rst` for existing configurations.
+**This option is deprecated, use ``output`` instead.**
+
+This is the path relative to the `changelogs/` directory where the
+reStructuredText version of the changelog is written to. The placeholder
+`%s` will be replaced by the first `changelog_filename_version_depth`
+parts of the version of the release.
+
+!!! note
+    The file extension (default `.rst`) will always be replaced by the
+    extension matching the output format (see [`output_formats`](#output_formats-list-of-strings)).
+    Therefore the extension provided here will always be ignored.
+
+### `changelog_filename_version_depth` (integer)
+
+The default value is 2 for existing configurations.
+**This option is deprecated, use ``output`` instead.**
+
+Determines the number of parts of the current release version to be used
+when replacing `%s` in `changelog_filename_template` (see above). For
+the value 2, version 1.2.3 will result in the string `1.2`. The value 0
+results in the empty string.
+
+### `output_formats` (list of strings)
+
+The default is `["rst"]`.
+**This option is deprecated, use ``output`` instead.**
+
+A list of output formats to write the changelog as. Supported formats
+are `rst` for ReStructuredText and `md` for MarkDown.
 
 ## Ansible-core/-base specific options
 

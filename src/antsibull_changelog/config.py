@@ -362,6 +362,175 @@ DEFAULT_SECTIONS = [
 ]
 
 
+class ChangelogRenderConfig(p.BaseModel):
+    """
+    Configuration for a changelog output.
+    """
+
+    model_config = p.ConfigDict(frozen=True, extra="allow", validate_default=True)
+
+    title_version_depth: int = 0
+
+    global_toc: bool = True
+    global_toc_depth: t.Optional[int] = None
+
+    per_release_toc: bool = False
+    per_release_toc_depth: t.Optional[int] = None
+
+    @p.field_validator("title_version_depth", mode="after")
+    @classmethod
+    def check_not_negative_title(cls, value: int) -> int:
+        """
+        Ensure that a value is not negative.
+        """
+        if value < 0:
+            raise ValueError("must not be negative")
+        return value
+
+    @p.field_validator("global_toc_depth", "per_release_toc_depth", mode="after")
+    @classmethod
+    def check_positive(cls, value: t.Optional[int]) -> t.Optional[int]:
+        """
+        Ensure that a value is not negative.
+        """
+        if value is not None and value <= 0:
+            raise ValueError("must be positive")
+        return value
+
+
+class ChangelogOutput(ChangelogRenderConfig):
+    """
+    Configuration for a changelog output.
+    """
+
+    model_config = p.ConfigDict(frozen=True, extra="allow", validate_default=True)
+
+    file: str
+    filename_version_depth: int = 0
+    format: TextFormat
+
+    @p.field_validator("filename_version_depth", mode="after")
+    @classmethod
+    def check_not_negative_filename(cls, value: int) -> int:
+        """
+        Ensure that a value is not negative.
+        """
+        if value < 0:
+            raise ValueError("must not be negative")
+        return value
+
+    @p.field_validator("format", mode="before")
+    @classmethod
+    def parse_format(cls, value: t.Any) -> TextFormat:
+        """
+        Parse the value of format.
+        """
+        if isinstance(value, TextFormat):
+            return value
+        if not isinstance(value, str):
+            raise ValueError("format must be a string")
+        try:
+            return TextFormat.from_extension(value)
+        except ValueError as exc:
+            raise ValueError(f"format is an unknown extension: {exc}") from exc
+
+    @p.field_serializer("format")
+    def serialize_format(self, output_format: TextFormat) -> str:
+        """
+        Serialize the format field.
+        """
+        return output_format.to_extension()
+
+    @p.model_validator(mode="after")
+    def validate_filename_replacements(self) -> t.Self:
+        """
+        Ensure that filename replacements look good.
+        """
+        if "%s" in self.file:
+            if self.filename_version_depth == 0:
+                raise ValueError(
+                    'If filename_version_depth is zero, file must not contain "%s"'
+                )
+        else:
+            if self.filename_version_depth > 0:
+                raise ValueError(
+                    'If filename_version_depth is non-zero, file must contain "%s"'
+                )
+        return self
+
+
+class _LegacyOutputOptions(p.BaseModel):
+    model_config = p.ConfigDict(frozen=True, extra="allow", validate_default=True)
+
+    changelog_filename_template: str = "CHANGELOG-v%s.rst"
+    changelog_filename_version_depth: int = 2
+    output_formats: set[TextFormat] = {TextFormat.RESTRUCTURED_TEXT}
+
+    @classmethod
+    def has_any(cls, config: dict) -> bool:
+        """
+        Check whether the given config uses any of this model's fields.
+        """
+        return any(
+            elt in config for elt in cls.model_fields  # pylint: disable=not-an-iterable
+        )
+
+    @p.field_validator("output_formats", mode="before")
+    @classmethod
+    def parse_output_formats(cls, value: t.Any) -> set[TextFormat]:
+        """
+        Parse the value of output_formats.
+        """
+        if isinstance(value, set):
+            for entry in value:
+                if not isinstance(entry, TextFormat):
+                    raise ValueError("The config value output_formats must be a list")
+            return value
+        if not _is_sequence(value):
+            raise ValueError("The config value output_formats must be a list")
+        result: set[TextFormat] = set()
+        for index, entry in enumerate(value):
+            if not isinstance(entry, str):
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value output_formats"
+                    " is not a string"
+                )
+            try:
+                text_format = TextFormat.from_extension(entry)
+            except ValueError as exc:
+                raise ValueError(
+                    f"The {_ordinal(index + 1)} entry of config value output_formats"
+                    f" is an unknown extension: {exc}"
+                ) from exc
+            if text_format in result:
+                raise ValueError(f"The output format {entry!r} appears more than once")
+            result.add(text_format)
+        return result
+
+    def to_output(self, paths: PathsConfig) -> list[ChangelogOutput]:
+        """
+        Convert the config to a list of ChangelogOutput objects.
+        """
+        changelog_dir = os.path.relpath(paths.changelog_dir, paths.base_dir)
+        result = []
+        fn, _ = os.path.splitext(self.changelog_filename_template)
+        for output_format in self.output_formats:
+            file = os.path.normpath(
+                os.path.join(changelog_dir, f"{fn}.{output_format.to_extension()}")
+            )
+            result.append(
+                ChangelogOutput(
+                    file=file,
+                    filename_version_depth=(
+                        self.changelog_filename_version_depth if "%s" in file else 0
+                    ),
+                    title_version_depth=self.changelog_filename_version_depth,
+                    format=output_format,
+                )
+            )
+        return result
+
+
 class ChangelogConfig(p.BaseModel):
     """
     Configuration for changelogs.
@@ -389,8 +558,6 @@ class ChangelogConfig(p.BaseModel):
     prevent_known_fragments: bool  # default is set in parse()
     use_fqcn: bool = False
     archive_path_template: t.Optional[str] = None
-    changelog_filename_template: str = "CHANGELOG-v%s.rst"
-    changelog_filename_version_depth: int = 2
     mention_ancestor: bool = True
     trivial_section_name: t.Optional[str]  # default is set by parse()
     release_tag_re: str = r"((?:[\d.ab]|rc)+)"  # only relevant for ansible-core
@@ -406,7 +573,6 @@ class ChangelogConfig(p.BaseModel):
     )
     is_other_project: bool = False
     sections: Mapping[str, str] = dict(DEFAULT_SECTIONS)
-    output_formats: set[TextFormat] = {TextFormat.RESTRUCTURED_TEXT}
     add_plugin_period: bool = False
     changelog_nice_yaml: bool = False
     changelog_sort: t.Literal[
@@ -416,6 +582,7 @@ class ChangelogConfig(p.BaseModel):
         "alphanumerical",
     ] = "alphanumerical"
     vcs: t.Literal["none", "auto", "git"] = "none"
+    output: list[ChangelogOutput]
 
     @p.field_validator("always_refresh", mode="before")
     @classmethod
@@ -489,37 +656,15 @@ class ChangelogConfig(p.BaseModel):
             sections[entry[0]] = entry[1]
         return sections
 
-    @p.field_validator("output_formats", mode="before")
+    @p.field_validator("output", mode="after")
     @classmethod
-    def parse_output_formats(cls, value: t.Any) -> set[TextFormat]:
+    def validate_output(cls, value: list[ChangelogOutput]) -> list[ChangelogOutput]:
         """
-        Parse the value of output_formats.
+        Check whether output has at least one entry.
         """
-        if isinstance(value, set):
-            for entry in value:
-                if not isinstance(entry, TextFormat):
-                    raise ValueError("The config value output_formats must be a list")
-            return value
-        if not _is_sequence(value):
-            raise ValueError("The config value output_formats must be a list")
-        result: set[TextFormat] = set()
-        for index, entry in enumerate(value):
-            if not isinstance(entry, str):
-                raise ValueError(
-                    f"The {_ordinal(index + 1)} entry of config value output_formats"
-                    " is not a string"
-                )
-            try:
-                text_format = TextFormat.from_extension(entry)
-            except ValueError as exc:
-                raise ValueError(
-                    f"The {_ordinal(index + 1)} entry of config value output_formats"
-                    f" is an unknown extension: {exc}"
-                ) from exc
-            if text_format in result:
-                raise ValueError(f"The output format {entry!r} appears more than once")
-            result.add(text_format)
-        return result
+        if not value:
+            raise ValueError("output must have at least one entry")
+        return value
 
     @p.model_validator(mode="after")
     def postprocess_sections(self) -> t.Self:
@@ -556,6 +701,28 @@ class ChangelogConfig(p.BaseModel):
         if self.is_other_project != self.paths.is_other_project:
             raise ChangelogError(f"is_other_project must be {self.is_other_project}")
 
+    @staticmethod
+    def _set_defaults(paths: PathsConfig, adjusted_config: dict) -> None:
+        if "trivial_section_name" not in adjusted_config:
+            adjusted_config["trivial_section_name"] = (
+                "trivial" if (paths.is_collection or paths.is_other_project) else None
+            )
+        if "use_semantic_versioning" not in adjusted_config and not paths.is_collection:
+            adjusted_config["use_semantic_versioning"] = False
+        if "prevent_known_fragments" not in adjusted_config:
+            adjusted_config["prevent_known_fragments"] = adjusted_config.get(
+                "keep_fragments", False
+            )
+        if "output" not in adjusted_config:
+            adjusted_config["output"] = [
+                ChangelogOutput(
+                    file="changelogs/CHANGELOG-v%s.rst",
+                    filename_version_depth=2,
+                    title_version_depth=2,
+                    format=TextFormat.RESTRUCTURED_TEXT,
+                )
+            ]
+
     @classmethod
     def parse(
         cls,
@@ -574,17 +741,24 @@ class ChangelogConfig(p.BaseModel):
         adjusted_config["is_collection"] = paths.is_collection
         adjusted_config["config"] = config
 
+        # Convert old fields to output
+        if _LegacyOutputOptions.has_any(config):
+            try:
+                output_options = _LegacyOutputOptions.model_validate(adjusted_config)
+            except Exception as exc:
+                raise ChangelogError(
+                    f"Error while parsing changlog config: {exc}"
+                ) from exc
+            if "output" in config:
+                others = ", ".join(sorted(output_options.model_fields_set))
+                raise ChangelogError(
+                    "Error while parsing changelog config:"
+                    f" output can not be combined with {others}"
+                )
+            adjusted_config["output"] = output_options.to_output(paths)
+
         # Set some special defaults
-        if "trivial_section_name" not in adjusted_config:
-            adjusted_config["trivial_section_name"] = (
-                "trivial" if (paths.is_collection or paths.is_other_project) else None
-            )
-        if "use_semantic_versioning" not in adjusted_config and not paths.is_collection:
-            adjusted_config["use_semantic_versioning"] = False
-        if "prevent_known_fragments" not in adjusted_config:
-            adjusted_config["prevent_known_fragments"] = adjusted_config.get(
-                "keep_fragments", False
-            )
+        cls._set_defaults(paths, adjusted_config)
 
         # Parse
         try:
@@ -608,8 +782,6 @@ class ChangelogConfig(p.BaseModel):
             "mention_ancestor": self.mention_ancestor,
             "keep_fragments": self.keep_fragments,
             "use_fqcn": self.use_fqcn,
-            "changelog_filename_template": self.changelog_filename_template,
-            "changelog_filename_version_depth": self.changelog_filename_version_depth,
             "prelude_section_name": self.prelude_name,
             "prelude_section_title": self.prelude_title,
             "new_plugins_after_name": self.new_plugins_after_name,
@@ -651,9 +823,9 @@ class ChangelogConfig(p.BaseModel):
             sections.append([key, value])
         config["sections"] = sections
 
-        config["output_formats"] = sorted(
-            text_format.to_extension() for text_format in self.output_formats
-        )
+        config["output"] = [
+            output.model_dump(exclude_defaults=True) for output in self.output
+        ]
 
         store_yaml_file(self.paths.config_path, config)
 
@@ -690,8 +862,6 @@ class ChangelogConfig(p.BaseModel):
         config = {
             "changes_file": "changelog.yaml",
             "changes_format": "combined",
-            "changelog_filename_template": "../CHANGELOG.rst",
-            "changelog_filename_version_depth": 0,
             "new_plugins_after_name": "removed_features",
             "sections": DEFAULT_SECTIONS,
             "use_fqcn": True,
@@ -701,6 +871,12 @@ class ChangelogConfig(p.BaseModel):
             "changelog_nice_yaml": False,
             "changelog_sort": "alphanumerical",
             "vcs": "auto",
+            "output": [
+                {
+                    "file": "CHANGELOG.rst",
+                    "format": "rst",
+                },
+            ],
         }
         if title is not None:
             config["title"] = title

@@ -27,7 +27,7 @@ def test_changelog_release_keep_fragments(  # pylint: disable=redefined-outer-na
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.changelog_filename_version_depth = 2
+    collection_changelog.config.output[0].title_version_depth = 2
     collection_changelog.config.keep_fragments = True
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
@@ -131,7 +131,7 @@ def test_changelog_release_remove_fragments(  # pylint: disable=redefined-outer-
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.changelog_filename_version_depth = 2
+    collection_changelog.config.output[0].title_version_depth = 2
     collection_changelog.config.keep_fragments = False
     collection_changelog.config.archive_path_template = None
     collection_changelog.set_config(collection_changelog.config)
@@ -317,7 +317,7 @@ def test_changelog_release_archive_fragments(  # pylint: disable=redefined-outer
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.changelog_filename_version_depth = 2
+    collection_changelog.config.output[0].title_version_depth = 2
     collection_changelog.config.keep_fragments = False
     collection_changelog.config.archive_path_template = ".archive/v{version}"
     collection_changelog.set_config(collection_changelog.config)

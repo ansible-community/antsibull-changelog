@@ -34,7 +34,13 @@ from . import __version__ as _version
 from . import constants as C
 from .ansible import get_ansible_release
 from .changes import ChangesData, add_release, load_changes
-from .config import ChangelogConfig, CollectionDetails, PathsConfig, TextFormat
+from .config import (
+    ChangelogConfig,
+    ChangelogOutput,
+    CollectionDetails,
+    PathsConfig,
+    TextFormat,
+)
 from .errors import ChangelogError
 from .fragment import ChangelogFragment, ChangelogFragmentLinter, load_fragments
 from .lint import lint_changelog_yaml
@@ -700,18 +706,45 @@ def command_release(args: Any) -> int:
         prev_version=prev_version,
         objects=cast(list[PluginDescription], plugins),
     )
-    for document_format in sorted(
-        config.output_formats, key=lambda of: of.to_extension()
-    ):
+    for output in config.output:
         generate_changelog(
             paths,
             config,
             changes,
-            document_format,
+            output,
             flatmap=flatmap,
         )
 
     return C.RC_SUCCESS
+
+
+def _get_outputs(
+    config: ChangelogConfig, *, output: str | None, output_format: str | None
+):
+    if output is not None:
+        if output_format is None:
+            output_format_choices = {doc_output.format for doc_output in config.output}
+            if len(output_format_choices) != 1:
+                raise ChangelogError(
+                    "When an explicit output path is specified and more than one output format"
+                    " is configured, you need to explicitly specify an output format"
+                )
+            output_format = list(output_format_choices)[0].to_extension()
+        return [
+            ChangelogOutput(
+                file=output, format=TextFormat.from_extension(output_format)
+            )
+        ]
+
+    if output_format:
+        text_format = TextFormat.from_extension(output_format)
+        return [
+            doc_output
+            for doc_output in config.output
+            if doc_output.format == text_format
+        ]
+
+    return config.output
 
 
 def command_generate(args: Any) -> int:
@@ -754,25 +787,14 @@ def command_generate(args: Any) -> int:
             force_reload=args.reload_plugins,
             add_plugin_period=config.add_plugin_period,
         )
-    if output and len(config.output_formats) > 1 and not output_format:
-        print(
-            "When an explicit output path is specified and more than one output format"
-            " is configured, you need to explicitly specify an output format"
-        )
-        return C.RC_COMMAND_FAILED
-    output_formats = (
-        [TextFormat.from_extension(output_format)]
-        if output_format
-        else sorted(config.output_formats, key=lambda of: of.to_extension())
-    )
-    for document_format in output_formats:
+    doc_outputs = _get_outputs(config, output=output, output_format=output_format)
+    for doc_output in doc_outputs:
         generate_changelog(
             paths,
             config,
             changes,
-            document_format,
+            doc_output,
             flatmap=flatmap,
-            changelog_path=output,
             only_latest=only_latest,
         )
 

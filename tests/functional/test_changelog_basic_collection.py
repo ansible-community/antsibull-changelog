@@ -17,7 +17,7 @@ from fixtures import create_plugin
 
 import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
-from antsibull_changelog.config import TextFormat
+from antsibull_changelog.config import ChangelogOutput, TextFormat
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -43,7 +43,11 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     config = diff.parse_yaml("changelogs/config.yaml")
     assert config["notesdir"] == "fragments"
     assert config["changes_file"] == "changelog.yaml"
-    assert config["changelog_filename_template"] == "../CHANGELOG.rst"
+    assert len(config["output"]) == 1
+    assert config["output"][0] == {
+        "file": "CHANGELOG.rst",
+        "format": "rst",
+    }
     assert "release_tag_re" not in config
     assert "pre_release_tag_re" not in config
     assert config["title"] == collection_changelog.collection_name.title()
@@ -57,10 +61,16 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.output_formats = {
-        TextFormat.RESTRUCTURED_TEXT,
-        TextFormat.MARKDOWN,
-    }
+    collection_changelog.config.output = [
+        ChangelogOutput(
+            file="CHANGELOG.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG.md",
+            format=TextFormat.MARKDOWN,
+        ),
+    ]
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "1.0.0.yml", "release_summary", "This is the first proper release."
@@ -346,7 +356,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.changelog_filename_version_depth = 2
+    collection_changelog.config.output[0].title_version_depth = 2
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "test-new-option.yml", "minor_changes", ["test - has a new option ``foo``."]
