@@ -36,6 +36,8 @@ def _ordinal(index: int) -> str:
         return f"{index}st"
     if one == 2:
         return f"{index}nd"
+    if one == 3:
+        return f"{index}rd"
     return f"{index}th"
 
 
@@ -55,7 +57,7 @@ class TextFormat(enum.Enum):
             return "rst"
         if self == TextFormat.MARKDOWN:
             return "md"
-        raise ValueError(f"Unknown text format {self}")
+        raise ValueError(f"Unknown text format {self}")  # pragma: no cover
 
     @staticmethod
     def from_extension(extension: str) -> TextFormat:
@@ -283,13 +285,13 @@ class CollectionDetails:
             )
 
         if what_for is None:
-            what_for = 'load field "{0}"'.format(needed_var)
+            what_for = f'load field "{needed_var}"'
         try:
             galaxy_yaml = load_galaxy_metadata(self.paths)
         except Exception as exc:
-            msg = "Cannot find galaxy.yml to {0}: {1}".format(what_for, exc)
+            msg = f"Cannot find galaxy.yml to {what_for}: {exc}"
             if help_text is not None:
-                msg = "{0}. {1}".format(msg, help_text)
+                msg = f"{msg}. {help_text}"
             raise ChangelogError(msg) from exc
 
         self._parse_galaxy_yaml(galaxy_yaml)
@@ -438,10 +440,13 @@ class ChangelogConfig(p.BaseModel):
                     "fragments",
                     "fragments-without-archives",
                 }:
-                    raise ValueError(
-                        'The config value always_refresh contains an invalid value "{0}"'.format(
-                            part
+                    if part in {"full", "none"}:
+                        raise ValueError(
+                            f'The config value always_refresh must not contain "{part}"'
+                            " together with other values"
                         )
+                    raise ValueError(
+                        f'The config value always_refresh contains an invalid value "{part}"'
                     )
         return value
 
@@ -452,6 +457,11 @@ class ChangelogConfig(p.BaseModel):
         Parse the value of sections.
         """
         if isinstance(value, Mapping):
+            for k, v in value.items():
+                if not isinstance(k, str) or not isinstance(v, str):
+                    raise ValueError(
+                        "The config value sections must be a dictionary mapping strings to strings"
+                    )
             return value
         if not _is_sequence(value):
             raise ValueError("The config value sections must be a list")
@@ -486,6 +496,9 @@ class ChangelogConfig(p.BaseModel):
         Parse the value of output_formats.
         """
         if isinstance(value, set):
+            for entry in value:
+                if not isinstance(entry, TextFormat):
+                    raise ValueError("The config value output_formats must be a list")
             return value
         if not _is_sequence(value):
             raise ValueError("The config value output_formats must be a list")
@@ -538,12 +551,10 @@ class ChangelogConfig(p.BaseModel):
         """
         Basic config validation.
         """
-        if self.is_other_project != self.paths.is_other_project:
-            raise ChangelogError(
-                "is_other_project must be {0}".format(self.is_other_project)
-            )
         if self.is_other_project and self.is_collection:
             raise ChangelogError("is_other_project must not be true for collections")
+        if self.is_other_project != self.paths.is_other_project:
+            raise ChangelogError(f"is_other_project must be {self.is_other_project}")
 
     @classmethod
     def parse(
@@ -657,7 +668,7 @@ class ChangelogConfig(p.BaseModel):
         """
         config = load_yaml_file(paths.config_path)
         if not isinstance(config, dict):
-            raise ChangelogError("{0} must be a dictionary".format(paths.config_path))
+            raise ChangelogError(f"{paths.config_path} must be a dictionary")
         return ChangelogConfig.parse(
             paths,
             collection_details,
