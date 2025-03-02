@@ -10,6 +10,7 @@ Test config module.
 from __future__ import annotations
 
 import os
+import re
 
 import pytest
 
@@ -20,52 +21,62 @@ from antsibull_changelog.errors import ChangelogError
 @pytest.fixture
 def root():
     old_cwd = os.getcwd()
-    os.chdir("/")
-    yield
-    os.chdir(old_cwd)
+    try:
+        os.chdir("/")
+        yield
+    finally:
+        os.chdir(old_cwd)
 
 
 @pytest.fixture
 def cwd_tmp_path(tmp_path):
     old_cwd = os.getcwd()
-    os.chdir(tmp_path)
-    yield tmp_path
-    os.chdir(old_cwd)
+    try:
+        os.chdir(tmp_path)
+        yield tmp_path
+    finally:
+        os.chdir(old_cwd)
 
 
 @pytest.fixture
 def ansible_config_path(tmp_path):
     old_cwd = os.getcwd()
-    os.chdir(tmp_path)
-    d = tmp_path / "lib"
-    d.mkdir()
-    d = d / "ansible"
-    d.mkdir()
-    d = tmp_path / "changelogs"
-    d.mkdir()
-    yield d / "config.yaml"
-    os.chdir(old_cwd)
+    try:
+        os.chdir(tmp_path)
+        d = tmp_path / "lib"
+        d.mkdir()
+        d = d / "ansible"
+        d.mkdir()
+        d = tmp_path / "changelogs"
+        d.mkdir()
+        yield d / "config.yaml"
+    finally:
+        os.chdir(old_cwd)
 
 
 @pytest.fixture
 def collection_config_path(tmp_path):
     old_cwd = os.getcwd()
-    os.chdir(tmp_path)
-    (tmp_path / "galaxy.yml").write_text("")
-    d = tmp_path / "changelogs"
-    d.mkdir()
-    yield d / "config.yaml"
-    os.chdir(old_cwd)
+    try:
+        os.chdir(tmp_path)
+        (tmp_path / "galaxy.yml").write_text("")
+        d = tmp_path / "changelogs"
+        d.mkdir()
+        yield d / "config.yaml"
+    finally:
+        os.chdir(old_cwd)
 
 
 @pytest.fixture
 def other_config_path(tmp_path):
     old_cwd = os.getcwd()
-    os.chdir(tmp_path)
-    d = tmp_path / "changelogs"
-    d.mkdir()
-    yield d / "config.yaml"
-    os.chdir(old_cwd)
+    try:
+        os.chdir(tmp_path)
+        d = tmp_path / "changelogs"
+        d.mkdir()
+        yield d / "config.yaml"
+    finally:
+        os.chdir(old_cwd)
 
 
 def test_detect_complete_fail(root):
@@ -288,6 +299,14 @@ def test_collection_details(tmp_path):
     assert "Cannot find galaxy.yml" in str(exc.value)
 
     galaxy_path = tmp_path / "galaxy.yml"
+    galaxy_path.write_text("---\nfoo")
+    paths = PathsConfig.force_collection(str(tmp_path))
+    details = CollectionDetails(paths)
+    with pytest.raises(ChangelogError) as exc:
+        details.get_namespace()
+    assert "galaxy.yml must be a dictionary" in str(exc.value)
+
+    galaxy_path = tmp_path / "galaxy.yml"
     galaxy_path.write_text("---\na: b\n")
     paths = PathsConfig.force_collection(str(tmp_path))
     details = CollectionDetails(paths)
@@ -346,23 +365,195 @@ def test_collection_details(tmp_path):
     assert details.get_flatmap() is False
 
 
-def test_config_loading_bad_output_format(ansible_config_path):
-    ansible_config_path.write_text("changes_format: combined\noutput_formats: [foobar]")
+def test_config_loading_bad_output_format(collection_config_path):
+    collection_config_path.write_text("changes_format: combined\noutput_formats: 42")
     paths = PathsConfig.detect()
     collection_details = CollectionDetails(paths)
     with pytest.raises(
         ChangelogError,
-        match="Found unknown extension in output_formats: Unknown extension 'foobar'",
+        match="The config value output_formats must be a list",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text("changes_format: combined\noutput_formats:\n- 42")
+    with pytest.raises(
+        ChangelogError,
+        match="The 1st entry of config value output_formats is not a string",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\noutput_formats: [rst, rst]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The output format 'rst' appears more than once",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\noutput_formats: [foobar]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The 1st entry of config value output_formats is an unknown extension: Unknown extension 'foobar'",
     ):
         ChangelogConfig.load(paths, collection_details)
 
 
-def test_config_loading_bad_vcs(ansible_config_path):
-    ansible_config_path.write_text("changes_format: combined\nvcs: foobar")
+def test_config_loading_bad_vcs(collection_config_path):
+    collection_config_path.write_text("changes_format: combined\nvcs: foobar")
     paths = PathsConfig.detect()
     collection_details = CollectionDetails(paths)
     with pytest.raises(
         ChangelogError,
-        match="Invalid VCS value 'foobar'. Must be one of none, git, and auto.",
+        match="Input should be 'none', 'auto' or 'git'",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_config_loading_always_refresh(ansible_config_path):
+    ansible_config_path.write_text(
+        "changes_format: combined\nalways_refresh: plugins, fragments"
+    )
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    config = ChangelogConfig.load(paths, collection_details)
+    config.always_refresh == "plugins, fragments"
+
+    ansible_config_path.write_text("changes_format: combined\nalways_refresh: 42")
+    with pytest.raises(
+        ChangelogError,
+        match="If specified, always_refresh must be a boolean or a string",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    ansible_config_path.write_text(
+        "changes_format: combined\nalways_refresh: plugins, bar"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match='The config value always_refresh contains an invalid value "bar"',
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    ansible_config_path.write_text(
+        "changes_format: combined\nalways_refresh: plugins, full"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match='The config value always_refresh must not contain "full" together with other values',
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_config_loading_bad_sections(collection_config_path):
+    collection_config_path.write_text("changes_format: combined\nsections: 42")
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(
+        ChangelogError,
+        match="The config value sections must be a list",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text("changes_format: combined\nsections:\n  42: foo")
+    with pytest.raises(
+        ChangelogError,
+        match="The config value sections must be a dictionary mapping strings to strings",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text("changes_format: combined\nsections:\n  foo: 42")
+    with pytest.raises(
+        ChangelogError,
+        match="The config value sections must be a dictionary mapping strings to strings",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [foo, bar]\n- foo"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The 2nd entry of config value sections must be a list of length 2",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [foo, bar]\n- [baz, bam]\n- [foo]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The 3rd entry of config value sections must be a list of length 2",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [foo, bar]\n- [baz, bam]\n- [bam, foo]\n- [1, foo]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The 4th entry of config value sections does not have a string as the first element",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [foo, bar]\n- [baz, bam]\n- [bam, foo]\n- [foo, 1]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The 4th entry of config value sections does not have a string as the second element",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [foo, bar]\n- [foo, baz]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="The section name 'foo' appears more than once",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nsections:\n- [release_summary, foo]"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=re.escape("No section name must equal prelude_name ('release_summary')"),
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_config_loading_collection(collection_config_path):
+    collection_config_path.write_text(
+        "changes_format: combined\nuse_semantic_versioning: false"
+    )
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(
+        ChangelogError,
+        match="The config value use_semantic_versioning must be true for collections",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        "changes_format: combined\nis_other_project: true"
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="is_other_project must not be true for collections",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_config_loading_bad_yaml(collection_config_path):
+    collection_config_path.write_text("[]")
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(
+        ChangelogError,
+        match=" must be a dictionary",
     ):
         ChangelogConfig.load(paths, collection_details)
