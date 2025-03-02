@@ -208,6 +208,11 @@ class ChangelogEnvironment:
         self.mkdir(config_dir)
         self._write_yaml(os.path.join(config_dir, ".plugin-cache.yaml"), data)
 
+    def set_changelog_yaml(self, data: dict):
+        changelog_dir = self.paths.changelog_dir
+        self.mkdir(changelog_dir)
+        self._write_yaml(os.path.join(changelog_dir, self.config.changes_file), data)
+
     def set_config_raw(self, config: bytes):
         self.mkdir(self.paths.changelog_dir)
         self._write(self.paths.config_path, config)
