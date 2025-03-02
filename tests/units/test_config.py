@@ -14,7 +14,13 @@ import re
 
 import pytest
 
-from antsibull_changelog.config import ChangelogConfig, CollectionDetails, PathsConfig
+from antsibull_changelog.config import (
+    ChangelogConfig,
+    ChangelogOutput,
+    CollectionDetails,
+    PathsConfig,
+    _LegacyOutputOptions,
+)
 from antsibull_changelog.errors import ChangelogError
 
 
@@ -557,3 +563,189 @@ def test_config_loading_bad_yaml(collection_config_path):
         match=" must be a dictionary",
     ):
         ChangelogConfig.load(paths, collection_details)
+
+
+def test_render_config(collection_config_path):
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output: []
+"""
+    )
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    with pytest.raises(
+        ChangelogError,
+        match=" output must have at least one entry",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    format: rst
+    title_version_depth: -1
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=" must not be negative",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    format: rst
+    global_toc_depth: 0
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=" must be positive",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    format: rst
+    filename_version_depth: -1
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=" must not be negative",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    format: 42
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=" format must be a string",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    format: rest
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=" format is an unknown extension: Unknown extension 'rest'",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo%s
+    filename_version_depth: 0
+    format: rst
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=' if filename_version_depth is zero, file must not contain "%s"',
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output:
+  - file: foo
+    filename_version_depth: 1
+    format: rst
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match=' if filename_version_depth is non-zero, file must contain "%s"',
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+
+def test_LegacyOutputOptions(collection_config_path):
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output_formats:
+  - rst
+"""
+    )
+    paths = PathsConfig.detect()
+    collection_details = CollectionDetails(paths)
+    ChangelogConfig.load(paths, collection_details)
+
+    collection_config_path.write_text(
+        r"""
+changes_format: combined
+output_formats:
+  - rst
+output:
+  - file: foo
+    format: rst
+"""
+    )
+    with pytest.raises(
+        ChangelogError,
+        match="Error while parsing changelog config: output can not be combined with output_formats",
+    ):
+        ChangelogConfig.load(paths, collection_details)
+
+    loo = _LegacyOutputOptions.model_validate(
+        {
+            "changelog_filename_template": "CHANGELOG-v%s.rst",
+            "changelog_filename_version_depth": 2,
+            "output_formats": ["rst"],
+        }
+    )
+    assert loo.to_output(paths) == [
+        ChangelogOutput(
+            file="changelogs/CHANGELOG-v%s.rst",
+            filename_version_depth=2,
+            title_version_depth=2,
+            format="rst",
+        ),
+    ]
+
+    loo = _LegacyOutputOptions.model_validate(
+        {
+            "changelog_filename_template": "../CHANGELOG.rst",
+            "changelog_filename_version_depth": 2,
+            "output_formats": ["md"],
+        }
+    )
+    assert loo.to_output(paths) == [
+        ChangelogOutput(file="CHANGELOG.md", title_version_depth=2, format="md"),
+    ]
+
+    loo = _LegacyOutputOptions.model_validate(
+        {
+            "changelog_filename_template": "../CHANGELOG",
+            "output_formats": ["rst", "md"],
+        }
+    )
+    assert loo.to_output(paths) == [
+        ChangelogOutput(file="CHANGELOG.md", title_version_depth=2, format="md"),
+        ChangelogOutput(file="CHANGELOG.rst", title_version_depth=2, format="rst"),
+    ]

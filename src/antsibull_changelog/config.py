@@ -449,12 +449,12 @@ class ChangelogOutput(ChangelogRenderConfig):
         if "%s" in self.file:
             if self.filename_version_depth == 0:
                 raise ValueError(
-                    'If filename_version_depth is zero, file must not contain "%s"'
+                    'if filename_version_depth is zero, file must not contain "%s"'
                 )
         else:
             if self.filename_version_depth > 0:
                 raise ValueError(
-                    'If filename_version_depth is non-zero, file must contain "%s"'
+                    'if filename_version_depth is non-zero, file must contain "%s"'
                 )
         return self
 
@@ -514,7 +514,9 @@ class _LegacyOutputOptions(p.BaseModel):
         changelog_dir = os.path.relpath(paths.changelog_dir, paths.base_dir)
         result = []
         fn, _ = os.path.splitext(self.changelog_filename_template)
-        for output_format in self.output_formats:
+        for output_format in sorted(
+            self.output_formats, key=lambda f: f.to_extension()
+        ):
             file = os.path.normpath(
                 os.path.join(changelog_dir, f"{fn}.{output_format.to_extension()}")
             )
@@ -750,7 +752,14 @@ class ChangelogConfig(p.BaseModel):
                     f"Error while parsing changlog config: {exc}"
                 ) from exc
             if "output" in config:
-                others = ", ".join(sorted(output_options.model_fields_set))
+                others = ", ".join(
+                    sorted(
+                        field
+                        for field in output_options.model_fields_set
+                        # pylint: disable-next=unsupported-membership-test
+                        if field in _LegacyOutputOptions.model_fields
+                    )
+                )
                 raise ChangelogError(
                     "Error while parsing changelog config:"
                     f" output can not be combined with {others}"
