@@ -5,7 +5,9 @@ major_changes:
 
 deprecated_features:
   - "The configuration settings ``changelog_filename_template``, ``changelog_filename_version_depth``, and ``output_formats``
-     are deprecated and will eventually be removed. Use the new setting ``output`` instead
+     are deprecated and will eventually be removed. Use the new setting ``output`` instead.
+     Note that there are no runtime warnings right now. If the time to remove them comes nearer, there will be runtime warnings
+     for a longer time first before they are actually removed
      (https://github.com/ansible-community/antsibull-changelog/pull/194)."
 
 removed_features:
