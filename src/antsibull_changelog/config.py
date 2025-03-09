@@ -369,33 +369,13 @@ class ChangelogRenderConfig(p.BaseModel):
 
     model_config = p.ConfigDict(frozen=True, extra="allow", validate_default=True)
 
-    title_version_depth: int = 0
+    title_version_depth: p.NonNegativeInt = 0
 
     global_toc: bool = True
-    global_toc_depth: t.Optional[int] = None
+    global_toc_depth: t.Optional[p.PositiveInt] = None
 
     per_release_toc: bool = False
-    per_release_toc_depth: t.Optional[int] = None
-
-    @p.field_validator("title_version_depth", mode="after")
-    @classmethod
-    def check_not_negative_title(cls, value: int) -> int:
-        """
-        Ensure that a value is not negative.
-        """
-        if value < 0:
-            raise ValueError("must not be negative")
-        return value
-
-    @p.field_validator("global_toc_depth", "per_release_toc_depth", mode="after")
-    @classmethod
-    def check_positive(cls, value: t.Optional[int]) -> t.Optional[int]:
-        """
-        Ensure that a value is not negative.
-        """
-        if value is not None and value <= 0:
-            raise ValueError("must be positive")
-        return value
+    per_release_toc_depth: t.Optional[p.PositiveInt] = None
 
 
 class ChangelogOutput(ChangelogRenderConfig):
