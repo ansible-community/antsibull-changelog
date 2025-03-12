@@ -17,6 +17,7 @@ import typing as t
 from collections.abc import Mapping
 from collections.abc import Sequence as _Sequence
 
+import annotated_types as at
 import pydantic as p
 from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
@@ -386,18 +387,8 @@ class ChangelogOutput(ChangelogRenderConfig):
     model_config = p.ConfigDict(frozen=True, extra="allow", validate_default=True)
 
     file: str
-    filename_version_depth: int = 0
+    filename_version_depth: p.NonNegativeInt = 0
     format: TextFormat
-
-    @p.field_validator("filename_version_depth", mode="after")
-    @classmethod
-    def check_not_negative_filename(cls, value: int) -> int:
-        """
-        Ensure that a value is not negative.
-        """
-        if value < 0:
-            raise ValueError("must not be negative")
-        return value
 
     @p.field_validator("format", mode="before")
     @classmethod
@@ -564,7 +555,7 @@ class ChangelogConfig(p.BaseModel):
         "alphanumerical",
     ] = "alphanumerical"
     vcs: t.Literal["none", "auto", "git"] = "none"
-    output: list[ChangelogOutput]
+    output: t.Annotated[list[ChangelogOutput], at.Len(min_length=1)]
 
     @p.field_validator("always_refresh", mode="before")
     @classmethod
@@ -637,16 +628,6 @@ class ChangelogConfig(p.BaseModel):
                 )
             sections[entry[0]] = entry[1]
         return sections
-
-    @p.field_validator("output", mode="after")
-    @classmethod
-    def validate_output(cls, value: list[ChangelogOutput]) -> list[ChangelogOutput]:
-        """
-        Check whether output has at least one entry.
-        """
-        if not value:
-            raise ValueError("output must have at least one entry")
-        return value
 
     @p.model_validator(mode="after")
     def postprocess_sections(self) -> t.Self:

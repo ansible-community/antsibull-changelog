@@ -576,7 +576,8 @@ output: []
     collection_details = CollectionDetails(paths)
     with pytest.raises(
         ChangelogError,
-        match=" output must have at least one entry",
+        # Note that the message is produced by pydantic, so it can change over time.
+        match="List should have at least 1 item after validation, not 0",
     ):
         ChangelogConfig.load(paths, collection_details)
 
@@ -623,7 +624,8 @@ output:
     )
     with pytest.raises(
         ChangelogError,
-        match=" must not be negative",
+        # Note that the message is produced by pydantic, so it can change over time.
+        match="Input should be greater than or equal to 0",
     ):
         ChangelogConfig.load(paths, collection_details)
 
