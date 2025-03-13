@@ -292,6 +292,7 @@ def bump(session: nox.Session):
         "CHANGELOG.rst",
         "changelogs/changelog.yaml",
         "changelogs/fragments/",
+        "docs/changelog.md",
         # __init__.py is not committed in the last step
         # when the release_summary fragment is created manually
         "src/antsibull_changelog/__init__.py",

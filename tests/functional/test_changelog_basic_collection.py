@@ -17,7 +17,7 @@ from fixtures import create_plugin
 
 import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
-from antsibull_changelog.config import TextFormat
+from antsibull_changelog.config import ChangelogOutput, TextFormat
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -43,7 +43,11 @@ def test_changelog_init(  # pylint: disable=redefined-outer-name
     config = diff.parse_yaml("changelogs/config.yaml")
     assert config["notesdir"] == "fragments"
     assert config["changes_file"] == "changelog.yaml"
-    assert config["changelog_filename_template"] == "../CHANGELOG.rst"
+    assert len(config["output"]) == 1
+    assert config["output"][0] == {
+        "file": "CHANGELOG.rst",
+        "format": "rst",
+    }
     assert "release_tag_re" not in config
     assert "pre_release_tag_re" not in config
     assert config["title"] == collection_changelog.collection_name.title()
@@ -57,10 +61,16 @@ def test_changelog_release_empty(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.output_formats = {
-        TextFormat.RESTRUCTURED_TEXT,
-        TextFormat.MARKDOWN,
-    }
+    collection_changelog.config.output = [
+        ChangelogOutput(
+            file="CHANGELOG.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG.md",
+            format=TextFormat.MARKDOWN,
+        ),
+    ]
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "1.0.0.yml", "release_summary", "This is the first proper release."
@@ -147,6 +157,12 @@ This is the first proper release\.
             "generate", ["-v", "--refresh", "--output", "CHANGELOG.md"]
         )
         == C.RC_COMMAND_FAILED
+    )
+    assert collection_changelog.diff().unchanged
+
+    assert (
+        collection_changelog.run_tool("generate", ["-v", "--output-format", "md"])
+        == C.RC_SUCCESS
     )
     assert collection_changelog.diff().unchanged
 
@@ -346,7 +362,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
             "version": "1.0.0",
         }
     )
-    collection_changelog.config.changelog_filename_version_depth = 2
+    collection_changelog.config.output[0].title_version_depth = 2
     collection_changelog.set_config(collection_changelog.config)
     collection_changelog.add_fragment_line(
         "test-new-option.yml", "minor_changes", ["test - has a new option ``foo``."]
@@ -2294,3 +2310,311 @@ New Roles
                 diff = collection_changelog.diff()
                 diff.dump()
                 assert diff.unchanged
+
+
+def test_changelog_output(  # pylint: disable=redefined-outer-name
+    collection_changelog,
+):  # noqa: F811
+    collection_changelog.set_galaxy(
+        {
+            "version": "1.0.0",
+        }
+    )
+    collection_changelog.config.output = [
+        ChangelogOutput(
+            file="CHANGELOG-notoc.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+            global_toc=False,
+            per_release_toc=False,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-toptoc.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+            global_toc=True,
+            per_release_toc=False,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-reltoc.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+            global_toc=False,
+            per_release_toc=True,
+            per_release_toc_depth=1,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-alltoc.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+            global_toc=True,
+            global_toc_depth=1,
+            per_release_toc=True,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-notoc.md",
+            format=TextFormat.MARKDOWN,
+            global_toc=False,
+            per_release_toc=False,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-toptoc.md",
+            format=TextFormat.MARKDOWN,
+            global_toc=True,
+            per_release_toc=False,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-reltoc.md",
+            format=TextFormat.MARKDOWN,
+            global_toc=False,
+            per_release_toc=True,
+            per_release_toc_depth=1,
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-alltoc.md",
+            format=TextFormat.MARKDOWN,
+            global_toc=True,
+            global_toc_depth=1,
+            per_release_toc=True,
+        ),
+    ]
+    collection_changelog.set_config(collection_changelog.config)
+    collection_changelog.add_fragment_line(
+        "1.0.0.yml", "release_summary", "This is the first proper release."
+    )
+    collection_changelog.set_plugin_cache("1.0.0", {})
+
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == [
+        "CHANGELOG-alltoc.md",
+        "CHANGELOG-alltoc.rst",
+        "CHANGELOG-notoc.md",
+        "CHANGELOG-notoc.rst",
+        "CHANGELOG-reltoc.md",
+        "CHANGELOG-reltoc.rst",
+        "CHANGELOG-toptoc.md",
+        "CHANGELOG-toptoc.rst",
+        "changelogs/changelog.yaml",
+    ]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        "changelogs/fragments/1.0.0.yml",
+    ]
+    assert diff.changed_files == []
+
+    assert diff.file_contents["CHANGELOG-notoc.rst"].decode("utf-8") == (
+        r"""=====================
+Ansible Release Notes
+=====================
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-toptoc.rst"].decode("utf-8") == (
+        r"""=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-reltoc.rst"].decode("utf-8") == (
+        r"""=====================
+Ansible Release Notes
+=====================
+
+v1.0.0
+======
+
+.. contents::
+  :local:
+  :depth: 1
+
+Release Summary
+---------------
+
+This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-alltoc.rst"].decode("utf-8") == (
+        r"""=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+  :depth: 1
+
+v1.0.0
+======
+
+.. contents::
+  :local:
+
+Release Summary
+---------------
+
+This is the first proper release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-notoc.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-toptoc.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+
+- <a href="#v1-0-0">v1\.0\.0</a>
+    - <a href="#release-summary">Release Summary</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-reltoc.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+- <a href="#release-summary">Release Summary</a>
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG-alltoc.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+
+- <a href="#v1-0-0">v1\.0\.0</a>
+
+<a id="v1-0-0"></a>
+## v1\.0\.0
+
+- <a href="#release-summary">Release Summary</a>
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+
+def test_changelog_ancestor(  # pylint: disable=redefined-outer-name
+    collection_changelog,
+):  # noqa: F811
+    collection_changelog.set_galaxy(
+        {
+            "version": "2.0.0",
+        }
+    )
+    collection_changelog.config.output = [
+        ChangelogOutput(
+            file="CHANGELOG.rst",
+            format=TextFormat.RESTRUCTURED_TEXT,
+        ),
+    ]
+    collection_changelog.config.mention_ancestor = True
+    collection_changelog.set_config(collection_changelog.config)
+    collection_changelog.add_fragment_line(
+        "2.0.0.yml", "release_summary", "This is the second major release."
+    )
+    collection_changelog.set_plugin_cache("2.0.0", {})
+    collection_changelog.set_changelog_yaml(
+        {
+            "ancestor": "1.0.0",
+            "releases": {},
+        }
+    )
+
+    assert (
+        collection_changelog.run_tool("release", ["-v", "--date", "2020-01-02"])
+        == C.RC_SUCCESS
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == [
+        "CHANGELOG.rst",
+    ]
+    assert diff.removed_dirs == []
+    assert diff.removed_files == [
+        "changelogs/fragments/2.0.0.yml",
+    ]
+    assert diff.changed_files == [
+        "changelogs/changelog.yaml",
+    ]
+
+    changelog = diff.parse_yaml("changelogs/changelog.yaml")
+    assert changelog["ancestor"] == "1.0.0"
+    assert list(changelog["releases"]) == ["2.0.0"]
+    assert changelog["releases"]["2.0.0"]["release_date"] == "2020-01-02"
+    assert changelog["releases"]["2.0.0"]["changes"] == {
+        "release_summary": "This is the second major release."
+    }
+    assert changelog["releases"]["2.0.0"]["fragments"] == ["2.0.0.yml"]
+    assert "modules" not in changelog["releases"]["2.0.0"]
+    assert "plugins" not in changelog["releases"]["2.0.0"]
+    assert "objects" not in changelog["releases"]["2.0.0"]
+    assert "codename" not in changelog["releases"]["2.0.0"]
+
+    assert diff.file_contents["CHANGELOG.rst"].decode("utf-8") == (
+        r"""=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+
+This changelog describes changes after version 1.0.0.
+
+v2.0.0
+======
+
+Release Summary
+---------------
+
+This is the second major release.
+"""
+    )
