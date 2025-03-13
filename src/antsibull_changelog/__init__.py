@@ -8,6 +8,6 @@
 Ansible Changelog Tool.
 """
 
-__version__ = "0.32.0"
+__version__ = "0.32.0.post0"
 
 __all__ = ("__version__",)
