@@ -1,9 +1,0 @@
-removed_features:
-  - "Python API: remove ``antsibull_changelog.rst`` module
-     (https://github.com/ansible-community/antsibull-changelog/pull/183)."
-  - "Python API: remove method ``ChangelogEntry.add_section_content``, class ``ChangelogGenerator``,
-     and function ``generate_changelog`` from ``antsibull_changelog.changelog_generator``
-     (https://github.com/ansible-community/antsibull-changelog/pull/183)."
-  - "Python API: remove constructor arguments ``plugins`` and ``fragments`` from
-     class ``ChangelogGenerator`` in ``antsibull_changelog.rendering.changelog``
-     (https://github.com/ansible-community/antsibull-changelog/pull/183)."
