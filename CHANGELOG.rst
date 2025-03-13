@@ -4,6 +4,45 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.32.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Major Changes
+-------------
+
+- The new configuration setting ``output`` allows to configure more precisely which changelog files are generated and how they are formatted (https://github.com/ansible-community/antsibull-changelog/issues/190, https://github.com/ansible-community/antsibull-changelog/pull/194).
+
+Minor Changes
+-------------
+
+- Antsibull-changelog now depends on Pydantic 2 (https://github.com/ansible-community/antsibull-changelog/pull/193).
+- Antsibull-changelog now uses Pydantic to parse and validate the config. This means that validation is more strict than before and might reject configs that were incorrect, but still got accepted somehow (https://github.com/ansible-community/antsibull-changelog/pull/193).
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- When using antsibull-changelog as a library, ``ChangelogConfig``'s constructor should no longer be called directly. Instead, use the class method ``ChangelogConfig.parse()``, which has the same signature than the previous constructor, except that ``ignore_is_other_project`` now must be a keyword parameter (https://github.com/ansible-community/antsibull-changelog/pull/193).
+- When using antsibull-changelog as a library, ``rendering.changelog.generate_changelog()`` now needs a ``ChangelogOutput`` object instead of the ``document_format: TextFormat`` parameter, and the ``config`` and ``changelog_path`` parameters have been removed (https://github.com/ansible-community/antsibull-changelog/pull/194).
+- When using the ``--output`` argument for ``antsibull-changelog generate``, the generated changelog's title will not contain any parts of the version number. If you need this, `please create an issue <https://github.com/ansible-community/antsibull-changelog/issues/new>`__ (https://github.com/ansible-community/antsibull-changelog/pull/194).
+
+Deprecated Features
+-------------------
+
+- The configuration settings ``changelog_filename_template``, ``changelog_filename_version_depth``, and ``output_formats`` are deprecated and will eventually be removed. Use the new setting ``output`` instead. Note that there are no runtime warnings right now. If the time to remove them comes nearer, there will be runtime warnings for a longer time first before they are actually removed (https://github.com/ansible-community/antsibull-changelog/pull/194).
+
+Removed Features (previously deprecated)
+----------------------------------------
+
+- Python API: remove ``antsibull_changelog.rst`` module (https://github.com/ansible-community/antsibull-changelog/pull/183).
+- Python API: remove constructor arguments ``plugins`` and ``fragments`` from class ``ChangelogGenerator`` in ``antsibull_changelog.rendering.changelog`` (https://github.com/ansible-community/antsibull-changelog/pull/183).
+- Python API: remove method ``ChangelogEntry.add_section_content``, class ``ChangelogGenerator``, and function ``generate_changelog`` from ``antsibull_changelog.changelog_generator`` (https://github.com/ansible-community/antsibull-changelog/pull/183).
+- When using antsibull-changelog as a library, the fields ``changelog_filename_template``, ``changelog_filename_version_depth``, and ``output_formats`` are no longer available in ``ChangelogConfig``. Use ``output`` instead (https://github.com/ansible-community/antsibull-changelog/pull/194).
+
 v0.31.2
 =======
 

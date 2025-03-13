@@ -2,119 +2,165 @@
 
 **Topics**
 
-- <a href="#v0-31-2">v0\.31\.2</a>
+- <a href="#v0-32-0">v0\.32\.0</a>
     - <a href="#release-summary">Release Summary</a>
-    - <a href="#bugfixes">Bugfixes</a>
-- <a href="#v0-31-1">v0\.31\.1</a>
-    - <a href="#release-summary-1">Release Summary</a>
-    - <a href="#bugfixes-1">Bugfixes</a>
-- <a href="#v0-31-0">v0\.31\.0</a>
-    - <a href="#release-summary-2">Release Summary</a>
+    - <a href="#major-changes">Major Changes</a>
     - <a href="#minor-changes">Minor Changes</a>
     - <a href="#breaking-changes--porting-guide">Breaking Changes / Porting Guide</a>
-- <a href="#v0-30-0">v0\.30\.0</a>
+    - <a href="#deprecated-features">Deprecated Features</a>
+    - <a href="#removed-features-previously-deprecated">Removed Features \(previously deprecated\)</a>
+- <a href="#v0-31-2">v0\.31\.2</a>
+    - <a href="#release-summary-1">Release Summary</a>
+    - <a href="#bugfixes">Bugfixes</a>
+- <a href="#v0-31-1">v0\.31\.1</a>
+    - <a href="#release-summary-2">Release Summary</a>
+    - <a href="#bugfixes-1">Bugfixes</a>
+- <a href="#v0-31-0">v0\.31\.0</a>
     - <a href="#release-summary-3">Release Summary</a>
     - <a href="#minor-changes-1">Minor Changes</a>
-- <a href="#v0-29-0">v0\.29\.0</a>
+    - <a href="#breaking-changes--porting-guide-1">Breaking Changes / Porting Guide</a>
+- <a href="#v0-30-0">v0\.30\.0</a>
     - <a href="#release-summary-4">Release Summary</a>
     - <a href="#minor-changes-2">Minor Changes</a>
-    - <a href="#removed-features-previously-deprecated">Removed Features \(previously deprecated\)</a>
-    - <a href="#bugfixes-2">Bugfixes</a>
-- <a href="#v0-28-0">v0\.28\.0</a>
+- <a href="#v0-29-0">v0\.29\.0</a>
     - <a href="#release-summary-5">Release Summary</a>
     - <a href="#minor-changes-3">Minor Changes</a>
-- <a href="#v0-27-0">v0\.27\.0</a>
+    - <a href="#removed-features-previously-deprecated-1">Removed Features \(previously deprecated\)</a>
+    - <a href="#bugfixes-2">Bugfixes</a>
+- <a href="#v0-28-0">v0\.28\.0</a>
     - <a href="#release-summary-6">Release Summary</a>
     - <a href="#minor-changes-4">Minor Changes</a>
-- <a href="#v0-26-0">v0\.26\.0</a>
+- <a href="#v0-27-0">v0\.27\.0</a>
     - <a href="#release-summary-7">Release Summary</a>
     - <a href="#minor-changes-5">Minor Changes</a>
-- <a href="#v0-25-0">v0\.25\.0</a>
+- <a href="#v0-26-0">v0\.26\.0</a>
     - <a href="#release-summary-8">Release Summary</a>
     - <a href="#minor-changes-6">Minor Changes</a>
-    - <a href="#bugfixes-3">Bugfixes</a>
-- <a href="#v0-24-0">v0\.24\.0</a>
+- <a href="#v0-25-0">v0\.25\.0</a>
     - <a href="#release-summary-9">Release Summary</a>
     - <a href="#minor-changes-7">Minor Changes</a>
-    - <a href="#deprecated-features">Deprecated Features</a>
-- <a href="#v0-23-0">v0\.23\.0</a>
+    - <a href="#bugfixes-3">Bugfixes</a>
+- <a href="#v0-24-0">v0\.24\.0</a>
     - <a href="#release-summary-10">Release Summary</a>
     - <a href="#minor-changes-8">Minor Changes</a>
-- <a href="#v0-22-0">v0\.22\.0</a>
+    - <a href="#deprecated-features-1">Deprecated Features</a>
+- <a href="#v0-23-0">v0\.23\.0</a>
     - <a href="#release-summary-11">Release Summary</a>
     - <a href="#minor-changes-9">Minor Changes</a>
-- <a href="#v0-21-0">v0\.21\.0</a>
+- <a href="#v0-22-0">v0\.22\.0</a>
     - <a href="#release-summary-12">Release Summary</a>
-    - <a href="#deprecated-features-1">Deprecated Features</a>
-- <a href="#v0-20-0">v0\.20\.0</a>
+    - <a href="#minor-changes-10">Minor Changes</a>
+- <a href="#v0-21-0">v0\.21\.0</a>
     - <a href="#release-summary-13">Release Summary</a>
-    - <a href="#major-changes">Major Changes</a>
+    - <a href="#deprecated-features-2">Deprecated Features</a>
+- <a href="#v0-20-0">v0\.20\.0</a>
+    - <a href="#release-summary-14">Release Summary</a>
+    - <a href="#major-changes-1">Major Changes</a>
     - <a href="#bugfixes-4">Bugfixes</a>
 - <a href="#v0-19-0">v0\.19\.0</a>
-    - <a href="#release-summary-14">Release Summary</a>
-    - <a href="#minor-changes-10">Minor Changes</a>
-- <a href="#v0-18-0">v0\.18\.0</a>
     - <a href="#release-summary-15">Release Summary</a>
-    - <a href="#breaking-changes--porting-guide-1">Breaking Changes / Porting Guide</a>
-- <a href="#v0-17-0">v0\.17\.0</a>
-    - <a href="#release-summary-16">Release Summary</a>
     - <a href="#minor-changes-11">Minor Changes</a>
-- <a href="#v0-16-0">v0\.16\.0</a>
+- <a href="#v0-18-0">v0\.18\.0</a>
+    - <a href="#release-summary-16">Release Summary</a>
+    - <a href="#breaking-changes--porting-guide-2">Breaking Changes / Porting Guide</a>
+- <a href="#v0-17-0">v0\.17\.0</a>
     - <a href="#release-summary-17">Release Summary</a>
     - <a href="#minor-changes-12">Minor Changes</a>
-    - <a href="#bugfixes-5">Bugfixes</a>
-- <a href="#v0-15-0">v0\.15\.0</a>
+- <a href="#v0-16-0">v0\.16\.0</a>
     - <a href="#release-summary-18">Release Summary</a>
     - <a href="#minor-changes-13">Minor Changes</a>
-- <a href="#v0-14-0">v0\.14\.0</a>
+    - <a href="#bugfixes-5">Bugfixes</a>
+- <a href="#v0-15-0">v0\.15\.0</a>
     - <a href="#release-summary-19">Release Summary</a>
     - <a href="#minor-changes-14">Minor Changes</a>
-- <a href="#v0-13-0">v0\.13\.0</a>
+- <a href="#v0-14-0">v0\.14\.0</a>
     - <a href="#release-summary-20">Release Summary</a>
     - <a href="#minor-changes-15">Minor Changes</a>
-    - <a href="#bugfixes-6">Bugfixes</a>
-- <a href="#v0-12-0">v0\.12\.0</a>
+- <a href="#v0-13-0">v0\.13\.0</a>
     - <a href="#release-summary-21">Release Summary</a>
     - <a href="#minor-changes-16">Minor Changes</a>
+    - <a href="#bugfixes-6">Bugfixes</a>
+- <a href="#v0-12-0">v0\.12\.0</a>
+    - <a href="#release-summary-22">Release Summary</a>
+    - <a href="#minor-changes-17">Minor Changes</a>
     - <a href="#bugfixes-7">Bugfixes</a>
 - <a href="#v0-11-0">v0\.11\.0</a>
-    - <a href="#minor-changes-17">Minor Changes</a>
+    - <a href="#minor-changes-18">Minor Changes</a>
     - <a href="#bugfixes-8">Bugfixes</a>
 - <a href="#v0-10-0">v0\.10\.0</a>
-    - <a href="#minor-changes-18">Minor Changes</a>
+    - <a href="#minor-changes-19">Minor Changes</a>
     - <a href="#bugfixes-9">Bugfixes</a>
 - <a href="#v0-9-0">v0\.9\.0</a>
-    - <a href="#major-changes-1">Major Changes</a>
-    - <a href="#minor-changes-19">Minor Changes</a>
-    - <a href="#breaking-changes--porting-guide-2">Breaking Changes / Porting Guide</a>
+    - <a href="#major-changes-2">Major Changes</a>
+    - <a href="#minor-changes-20">Minor Changes</a>
+    - <a href="#breaking-changes--porting-guide-3">Breaking Changes / Porting Guide</a>
 - <a href="#v0-8-1">v0\.8\.1</a>
     - <a href="#bugfixes-10">Bugfixes</a>
 - <a href="#v0-8-0">v0\.8\.0</a>
-    - <a href="#minor-changes-20">Minor Changes</a>
-- <a href="#v0-7-0">v0\.7\.0</a>
     - <a href="#minor-changes-21">Minor Changes</a>
-- <a href="#v0-6-0">v0\.6\.0</a>
+- <a href="#v0-7-0">v0\.7\.0</a>
     - <a href="#minor-changes-22">Minor Changes</a>
-- <a href="#v0-5-0">v0\.5\.0</a>
+- <a href="#v0-6-0">v0\.6\.0</a>
     - <a href="#minor-changes-23">Minor Changes</a>
-- <a href="#v0-4-0">v0\.4\.0</a>
+- <a href="#v0-5-0">v0\.5\.0</a>
     - <a href="#minor-changes-24">Minor Changes</a>
+- <a href="#v0-4-0">v0\.4\.0</a>
+    - <a href="#minor-changes-25">Minor Changes</a>
     - <a href="#bugfixes-11">Bugfixes</a>
 - <a href="#v0-3-1">v0\.3\.1</a>
     - <a href="#bugfixes-12">Bugfixes</a>
 - <a href="#v0-3-0">v0\.3\.0</a>
-    - <a href="#minor-changes-25">Minor Changes</a>
+    - <a href="#minor-changes-26">Minor Changes</a>
 - <a href="#v0-2-1">v0\.2\.1</a>
     - <a href="#bugfixes-13">Bugfixes</a>
 - <a href="#v0-2-0">v0\.2\.0</a>
-    - <a href="#minor-changes-26">Minor Changes</a>
+    - <a href="#minor-changes-27">Minor Changes</a>
 - <a href="#v0-1-0">v0\.1\.0</a>
-    - <a href="#release-summary-22">Release Summary</a>
+    - <a href="#release-summary-23">Release Summary</a>
+
+<a id="v0-32-0"></a>
+## v0\.32\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+Feature release\.
+
+<a id="major-changes"></a>
+### Major Changes
+
+* The new configuration setting <code>output</code> allows to configure more precisely which changelog files are generated and how they are formatted \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/190](https\://github\.com/ansible\-community/antsibull\-changelog/issues/190)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* Antsibull\-changelog now depends on Pydantic 2 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
+* Antsibull\-changelog now uses Pydantic to parse and validate the config\. This means that validation is more strict than before and might reject configs that were incorrect\, but still got accepted somehow \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
+
+<a id="breaking-changes--porting-guide"></a>
+### Breaking Changes / Porting Guide
+
+* When using antsibull\-changelog as a library\, <code>ChangelogConfig</code>\'s constructor should no longer be called directly\. Instead\, use the class method <code>ChangelogConfig\.parse\(\)</code>\, which has the same signature than the previous constructor\, except that <code>ignore\_is\_other\_project</code> now must be a keyword parameter \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
+* When using antsibull\-changelog as a library\, <code>rendering\.changelog\.generate\_changelog\(\)</code> now needs a <code>ChangelogOutput</code> object instead of the <code>document\_format\: TextFormat</code> parameter\, and the <code>config</code> and <code>changelog\_path</code> parameters have been removed \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
+* When using the <code>\-\-output</code> argument for <code>antsibull\-changelog generate</code>\, the generated changelog\'s title will not contain any parts of the version number\. If you need this\, [please create an issue](https\://github\.com/ansible\-community/antsibull\-changelog/issues/new) \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
+
+<a id="deprecated-features"></a>
+### Deprecated Features
+
+* The configuration settings <code>changelog\_filename\_template</code>\, <code>changelog\_filename\_version\_depth</code>\, and <code>output\_formats</code> are deprecated and will eventually be removed\. Use the new setting <code>output</code> instead\. Note that there are no runtime warnings right now\. If the time to remove them comes nearer\, there will be runtime warnings for a longer time first before they are actually removed \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
+
+<a id="removed-features-previously-deprecated"></a>
+### Removed Features \(previously deprecated\)
+
+* Python API\: remove <code>antsibull\_changelog\.rst</code> module \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/183](https\://github\.com/ansible\-community/antsibull\-changelog/pull/183)\)\.
+* Python API\: remove constructor arguments <code>plugins</code> and <code>fragments</code> from class <code>ChangelogGenerator</code> in <code>antsibull\_changelog\.rendering\.changelog</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/183](https\://github\.com/ansible\-community/antsibull\-changelog/pull/183)\)\.
+* Python API\: remove method <code>ChangelogEntry\.add\_section\_content</code>\, class <code>ChangelogGenerator</code>\, and function <code>generate\_changelog</code> from <code>antsibull\_changelog\.changelog\_generator</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/183](https\://github\.com/ansible\-community/antsibull\-changelog/pull/183)\)\.
+* When using antsibull\-changelog as a library\, the fields <code>changelog\_filename\_template</code>\, <code>changelog\_filename\_version\_depth</code>\, and <code>output\_formats</code> are no longer available in <code>ChangelogConfig</code>\. Use <code>output</code> instead \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
 
 <a id="v0-31-2"></a>
 ## v0\.31\.2
 
-<a id="release-summary"></a>
+<a id="release-summary-1"></a>
 ### Release Summary
 
 Bugfix release\.
@@ -127,7 +173,7 @@ Bugfix release\.
 <a id="v0-31-1"></a>
 ## v0\.31\.1
 
-<a id="release-summary-1"></a>
+<a id="release-summary-2"></a>
 ### Release Summary
 
 Bugfix release for ansible\-core\.
@@ -140,12 +186,12 @@ Bugfix release for ansible\-core\.
 <a id="v0-31-0"></a>
 ## v0\.31\.0
 
-<a id="release-summary-2"></a>
+<a id="release-summary-3"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * Add <code>\-\-strict</code> parameter to the <code>lint\-changelog\-yaml</code> subcommand to also check for extra fields that should not be there \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/182](https\://github\.com/ansible\-community/antsibull\-changelog/pull/182)\)\.
@@ -153,7 +199,7 @@ Feature release\.
 * Python API\: allow to extract extra data when loading changelog files\, and allow to insert extra data when saving \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/181](https\://github\.com/ansible\-community/antsibull\-changelog/pull/181)\)\.
 * Python API\: allow to preprocess changelog\.yaml before linting \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/181](https\://github\.com/ansible\-community/antsibull\-changelog/pull/181)\)\.
 
-<a id="breaking-changes--porting-guide"></a>
+<a id="breaking-changes--porting-guide-1"></a>
 ### Breaking Changes / Porting Guide
 
 * More internal code related to the old changelog format has been removed\. This only potentially affects other projects which consume antsibull\-changelog as a library\. The sister antsibull projects antsibull\-build and antsibull\-docs might only be affected in older versions\. <strong>Users of the antsibull\-changelog CLI tool are not affected by this change</strong> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/179](https\://github\.com/ansible\-community/antsibull\-changelog/pull/179)\)\.
@@ -161,12 +207,12 @@ Feature release\.
 <a id="v0-30-0"></a>
 ## v0\.30\.0
 
-<a id="release-summary-3"></a>
+<a id="release-summary-4"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * Allow to configure the used VCS in <code>changelogs/config\.yml</code>\. Valid choices are <code>none</code> \(default\)\, <code>git</code>\, or <code>auto</code>\. If set to <code>git</code>\, or <code>auto</code> detects that the project is part of a Git repository\, only non\-ignored files will be copied to a temporary directory when trying to load information on Ansible modules\, plugins and roles \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/172](https\://github\.com/ansible\-community/antsibull\-changelog/issues/172)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/175](https\://github\.com/ansible\-community/antsibull\-changelog/pull/175)\)\.
@@ -177,19 +223,19 @@ Feature release\.
 <a id="v0-29-0"></a>
 ## v0\.29\.0
 
-<a id="release-summary-4"></a>
+<a id="release-summary-5"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-2"></a>
+<a id="minor-changes-3"></a>
 ### Minor Changes
 
 * Add a <code>reformat</code> command that reformats <code>changelogs/changelog\.yaml</code> to the current settings of <code>changelogs/config\.yaml</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/169](https\://github\.com/ansible\-community/antsibull\-changelog/pull/169)\)\.
 * Adds a new configuration option <code>changelog\_sort</code>\. This option allows sorting of changelog entries in <code>changelogs/changelog\.yaml</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/165](https\://github\.com/ansible\-community/antsibull\-changelog/pull/165)\)\.
 * Replaces numbers with constants for return codes \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/77](https\://github\.com/ansible\-community/antsibull\-changelog/issues/77)\)\.
 
-<a id="removed-features-previously-deprecated"></a>
+<a id="removed-features-previously-deprecated-1"></a>
 ### Removed Features \(previously deprecated\)
 
 * Removes support for the deprecated classic changelog format\. <code>changes\_format</code> must now be present and set to <code>combined</code> for ansible\-core usage\, and the value <code>classic</code> is no longer allowed \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/137](https\://github\.com/ansible\-community/antsibull\-changelog/issues/137)\)\.
@@ -202,12 +248,12 @@ Feature release\.
 <a id="v0-28-0"></a>
 ## v0\.28\.0
 
-<a id="release-summary-5"></a>
+<a id="release-summary-6"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-3"></a>
+<a id="minor-changes-4"></a>
 ### Minor Changes
 
 * There is now an option <code>changelog\_nice\_yaml</code> to prepend the YAML document start
@@ -220,19 +266,6 @@ Feature release\.
 <a id="v0-27-0"></a>
 ## v0\.27\.0
 
-<a id="release-summary-6"></a>
-### Release Summary
-
-Feature release\.
-
-<a id="minor-changes-4"></a>
-### Minor Changes
-
-* Adds period where needed at end of new plugin short descriptions\. Controlled by the <code>add\_plugin\_period</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/87](https\://github\.com/ansible\-community/antsibull\-changelog/issues/87)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/162](https\://github\.com/ansible\-community/antsibull\-changelog/pull/162)\)\.
-
-<a id="v0-26-0"></a>
-## v0\.26\.0
-
 <a id="release-summary-7"></a>
 ### Release Summary
 
@@ -241,17 +274,30 @@ Feature release\.
 <a id="minor-changes-5"></a>
 ### Minor Changes
 
+* Adds period where needed at end of new plugin short descriptions\. Controlled by the <code>add\_plugin\_period</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/87](https\://github\.com/ansible\-community/antsibull\-changelog/issues/87)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/162](https\://github\.com/ansible\-community/antsibull\-changelog/pull/162)\)\.
+
+<a id="v0-26-0"></a>
+## v0\.26\.0
+
+<a id="release-summary-8"></a>
+### Release Summary
+
+Feature release\.
+
+<a id="minor-changes-6"></a>
+### Minor Changes
+
 * The Markdown output format is now compatible with [python\-markdown](https\://python\-markdown\.github\.io/) and [mkdocs](https\://www\.mkdocs\.org/)\, as long as the [pymdownx\.escapeall](https\://facelessuser\.github\.io/pymdown\-extensions/extensions/escapeall/) extension is enabled \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/153](https\://github\.com/ansible\-community/antsibull\-changelog/pull/153)\)\.
 
 <a id="v0-25-0"></a>
 ## v0\.25\.0
 
-<a id="release-summary-8"></a>
+<a id="release-summary-9"></a>
 ### Release Summary
 
 Bugfix and feature release\.
 
-<a id="minor-changes-6"></a>
+<a id="minor-changes-7"></a>
 ### Minor Changes
 
 * Add <code>\-\-version</code> flag to print package version and exit \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/147](https\://github\.com/ansible\-community/antsibull\-changelog/pull/147)\)\.
@@ -264,19 +310,19 @@ Bugfix and feature release\.
 <a id="v0-24-0"></a>
 ## v0\.24\.0
 
-<a id="release-summary-9"></a>
+<a id="release-summary-10"></a>
 ### Release Summary
 
 Feature release which now allows to output MarkDown\.
 
-<a id="minor-changes-7"></a>
+<a id="minor-changes-8"></a>
 ### Minor Changes
 
 * Allow automatically retrieving package version for hatch projects with the <code>hatch version</code> command \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/141](https\://github\.com/ansible\-community/antsibull\-changelog/pull/141)\)\.
 * Allow to render changelogs as MarkDown\. The output formats written can be controlled with the <code>output\_formats</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/139](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139)\)\.
 * Officially support Python 3\.12 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/134](https\://github\.com/ansible\-community/antsibull\-changelog/pull/134)\)\.
 
-<a id="deprecated-features"></a>
+<a id="deprecated-features-1"></a>
 ### Deprecated Features
 
 * Some code in <code>antsibull\_changelog\.changelog\_entry</code> has been deprecated\, and the <code>antsibull\_changelog\.rst</code> module has been deprecated completely\. If you use them in your own code\, please take a look at the [PR deprecating them](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139) for information on how to stop using them \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/139](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139)\)\.
@@ -284,12 +330,12 @@ Feature release which now allows to output MarkDown\.
 <a id="v0-23-0"></a>
 ## v0\.23\.0
 
-<a id="release-summary-10"></a>
+<a id="release-summary-11"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-8"></a>
+<a id="minor-changes-9"></a>
 ### Minor Changes
 
 * Allow to generate changelog for a specific version \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/130](https\://github\.com/ansible\-community/antsibull\-changelog/pull/130)\)\.
@@ -299,12 +345,12 @@ Feature release\.
 <a id="v0-22-0"></a>
 ## v0\.22\.0
 
-<a id="release-summary-11"></a>
+<a id="release-summary-12"></a>
 ### Release Summary
 
 New feature release
 
-<a id="minor-changes-9"></a>
+<a id="minor-changes-10"></a>
 ### Minor Changes
 
 * Add <code>antsibull\-changelog\-lint</code> and <code>antsibull\-changelog\-lint\-changelog\-yaml</code> pre\-commit\.com hooks \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/125](https\://github\.com/ansible\-community/antsibull\-changelog/pull/125)\)\.
@@ -313,12 +359,12 @@ New feature release
 <a id="v0-21-0"></a>
 ## v0\.21\.0
 
-<a id="release-summary-12"></a>
+<a id="release-summary-13"></a>
 ### Release Summary
 
 Maintenance release with a deprecation\.
 
-<a id="deprecated-features-1"></a>
+<a id="deprecated-features-2"></a>
 ### Deprecated Features
 
 * Support for <code>classic</code> changelogs is deprecated and will be removed soon\. If you need to build changelogs for Ansible 2\.9 or before\, please use an older version \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/123](https\://github\.com/ansible\-community/antsibull\-changelog/pull/123)\)\.
@@ -326,12 +372,12 @@ Maintenance release with a deprecation\.
 <a id="v0-20-0"></a>
 ## v0\.20\.0
 
-<a id="release-summary-13"></a>
+<a id="release-summary-14"></a>
 ### Release Summary
 
 Bugfix and maintenance release using a new build system\.
 
-<a id="major-changes"></a>
+<a id="major-changes-1"></a>
 ### Major Changes
 
 * Change pyproject build backend from <code>poetry\-core</code> to <code>hatchling</code>\. <code>pip install antsibull</code> works exactly the same as before\, but some users may be affected depending on how they build/install the project \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/109](https\://github\.com/ansible\-community/antsibull\-changelog/pull/109)\)\.
@@ -344,12 +390,12 @@ Bugfix and maintenance release using a new build system\.
 <a id="v0-19-0"></a>
 ## v0\.19\.0
 
-<a id="release-summary-14"></a>
+<a id="release-summary-15"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-10"></a>
+<a id="minor-changes-11"></a>
 ### Minor Changes
 
 * Allow to extract other project versions for JavaScript / TypeScript projects from <code>package\.json</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/100](https\://github\.com/ansible\-community/antsibull\-changelog/pull/100)\)\.
@@ -360,12 +406,12 @@ Feature release\.
 <a id="v0-18-0"></a>
 ## v0\.18\.0
 
-<a id="release-summary-15"></a>
+<a id="release-summary-16"></a>
 ### Release Summary
 
 Maintenance release that drops support for older Python versions\.
 
-<a id="breaking-changes--porting-guide-1"></a>
+<a id="breaking-changes--porting-guide-2"></a>
 ### Breaking Changes / Porting Guide
 
 * Drop support for Python 3\.6\, 3\.7\, and 3\.8 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/93](https\://github\.com/ansible\-community/antsibull\-changelog/pull/93)\)\.
@@ -373,12 +419,12 @@ Maintenance release that drops support for older Python versions\.
 <a id="v0-17-0"></a>
 ## v0\.17\.0
 
-<a id="release-summary-16"></a>
+<a id="release-summary-17"></a>
 ### Release Summary
 
 Feature release for ansible\-core\.
 
-<a id="minor-changes-11"></a>
+<a id="minor-changes-12"></a>
 ### Minor Changes
 
 * Only allow a <code>trival</code> section in the ansible\-core/ansible\-base changelog when explicitly configured \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/90](https\://github\.com/ansible\-community/antsibull\-changelog/pull/90)\)\.
@@ -386,12 +432,12 @@ Feature release for ansible\-core\.
 <a id="v0-16-0"></a>
 ## v0\.16\.0
 
-<a id="release-summary-17"></a>
+<a id="release-summary-18"></a>
 ### Release Summary
 
 Feature and bugfix release\.
 
-<a id="minor-changes-12"></a>
+<a id="minor-changes-13"></a>
 ### Minor Changes
 
 * Allow to extract other project versions for Python poetry projects from <code>pyproject\.toml</code> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/80](https\://github\.com/ansible\-community/antsibull\-changelog/pull/80)\)\.
@@ -405,12 +451,12 @@ Feature and bugfix release\.
 <a id="v0-15-0"></a>
 ## v0\.15\.0
 
-<a id="release-summary-18"></a>
+<a id="release-summary-19"></a>
 ### Release Summary
 
 Feature release\.
 
-<a id="minor-changes-13"></a>
+<a id="minor-changes-14"></a>
 ### Minor Changes
 
 * Add <code>changelogs/changelog\.yaml</code> file format linting subcommand that was previously part of antsibull\-lint \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/76](https\://github\.com/ansible\-community/antsibull\-changelog/pull/76)\, [https\://github\.com/ansible\-community/antsibull/issues/410](https\://github\.com/ansible\-community/antsibull/issues/410)\)\.
@@ -418,12 +464,12 @@ Feature release\.
 <a id="v0-14-0"></a>
 ## v0\.14\.0
 
-<a id="release-summary-19"></a>
+<a id="release-summary-20"></a>
 ### Release Summary
 
 Feature release that will speed up the release process with ansible\-core 2\.13\.
 
-<a id="minor-changes-14"></a>
+<a id="minor-changes-15"></a>
 ### Minor Changes
 
 * The internal <code>changelog\.yaml</code> linting API allows to use <code>packaging\.version\.Version</code> for version numbers instead of semantic versioning \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/73](https\://github\.com/ansible\-community/antsibull\-changelog/pull/73)\)\.
@@ -432,12 +478,12 @@ Feature release that will speed up the release process with ansible\-core 2\.13\
 <a id="v0-13-0"></a>
 ## v0\.13\.0
 
-<a id="release-summary-20"></a>
+<a id="release-summary-21"></a>
 ### Release Summary
 
 This release makes changelog building more reliable\.
 
-<a id="minor-changes-15"></a>
+<a id="minor-changes-16"></a>
 ### Minor Changes
 
 * Always lint fragments before releasing \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/65](https\://github\.com/ansible\-community/antsibull\-changelog/issues/65)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/67](https\://github\.com/ansible\-community/antsibull\-changelog/pull/67)\)\.
@@ -451,12 +497,12 @@ This release makes changelog building more reliable\.
 <a id="v0-12-0"></a>
 ## v0\.12\.0
 
-<a id="release-summary-21"></a>
+<a id="release-summary-22"></a>
 ### Release Summary
 
 New feature release which supports other projects than ansible\-core and Ansible collections\.
 
-<a id="minor-changes-16"></a>
+<a id="minor-changes-17"></a>
 ### Minor Changes
 
 * Support changelogs for other projects than ansible\-core/\-base and Ansible collections \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/60](https\://github\.com/ansible\-community/antsibull\-changelog/pull/60)\)\.
@@ -469,7 +515,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-11-0"></a>
 ## v0\.11\.0
 
-<a id="minor-changes-17"></a>
+<a id="minor-changes-18"></a>
 ### Minor Changes
 
 * When using ansible\-core 2\.11 or newer\, will now detect new roles with argument spec\. We only consider the <code>main</code> entrypoint of roles\.
@@ -482,7 +528,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-10-0"></a>
 ## v0\.10\.0
 
-<a id="minor-changes-18"></a>
+<a id="minor-changes-19"></a>
 ### Minor Changes
 
 * The new <code>\-\-cummulative\-release</code> option for <code>antsibull\-changelog release</code> allows to add all plugins and objects to a release since whose <code>version\_added</code> is later than the previous release version \(or ancestor if there was no previous release\)\, and at latest the current release version\. This is needed for major releases of <code>community\.general</code> and similarly organized collections\.
@@ -496,7 +542,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-9-0"></a>
 ## v0\.9\.0
 
-<a id="major-changes-1"></a>
+<a id="major-changes-2"></a>
 ### Major Changes
 
 * Add support for reporting new playbooks and roles in collections\.
@@ -521,12 +567,12 @@ New feature release which supports other projects than ansible\-core and Ansible
 
   For every entry\, a list of plugins \(section <code>add plugin\.xxx</code>\) or objects \(section <code>add object\.xxx</code>\) of the given type \(<code>filter</code>\, <code>test</code> for plugins\, <code>playbook</code>\, <code>role</code> for objects\) will be added\. Every plugin or object has a short name as well as a short description\. These fields correspond to the module/plugin name and the <code>short\_description</code> field of the <code>DOCUMENTATION</code> block of modules and documentable plugins\.
 
-<a id="minor-changes-19"></a>
+<a id="minor-changes-20"></a>
 ### Minor Changes
 
 * Add <code>\-\-update\-existing</code> option for <code>antsibull\-changelog release</code>\, which allows to update the current release\'s release date and \(if relevant\) codename instead of simply reporting that the release already exists\.
 
-<a id="breaking-changes--porting-guide-2"></a>
+<a id="breaking-changes--porting-guide-3"></a>
 ### Breaking Changes / Porting Guide
 
 * The new option <code>prevent\_known\_fragments</code> with default value being the value of <code>keep\_fragments</code> allows to control whether fragments with names that already appeared in the past are ignored or not\. The new behavior happens if <code>keep\_fragments\=false</code>\, and is less surprising to users \(see [https\://github\.com/ansible\-community/antsibull\-changelog/issues/46](https\://github\.com/ansible\-community/antsibull\-changelog/issues/46)\)\. Changelogs with <code>keep\_fragments\=true</code>\, like the ansible\-base/ansible\-core changelog\, are not affected\.
@@ -542,7 +588,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-8-0"></a>
 ## v0\.8\.0
 
-<a id="minor-changes-20"></a>
+<a id="minor-changes-21"></a>
 ### Minor Changes
 
 * Allow to not save a changelog on release when using API\.
@@ -551,7 +597,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-7-0"></a>
 ## v0\.7\.0
 
-<a id="minor-changes-21"></a>
+<a id="minor-changes-22"></a>
 ### Minor Changes
 
 * A new config option\, <code>ignore\_other\_fragment\_extensions</code> allows for configuring whether only <code>\.yaml</code> and <code>\.yml</code> files are used \(as mandated by the <code>ansible\-test sanity \-\-test changelog</code> test\)\. The default value for existing configurations is <code>false</code>\, and for new configurations <code>true</code>\.
@@ -561,7 +607,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-6-0"></a>
 ## v0\.6\.0
 
-<a id="minor-changes-22"></a>
+<a id="minor-changes-23"></a>
 ### Minor Changes
 
 * New changelog configurations place the <code>CHANGELOG\.rst</code> file by default in the top\-level directory\, and not in <code>changelogs/</code>\.
@@ -571,7 +617,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-5-0"></a>
 ## v0\.5\.0
 
-<a id="minor-changes-23"></a>
+<a id="minor-changes-24"></a>
 ### Minor Changes
 
 * The internal changelog generator code got more flexible to help antsibull generate Ansible porting guides\.
@@ -579,7 +625,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-4-0"></a>
 ## v0\.4\.0
 
-<a id="minor-changes-24"></a>
+<a id="minor-changes-25"></a>
 ### Minor Changes
 
 * Allow to enable or disable flatmapping via <code>config\.yaml</code>\.
@@ -602,7 +648,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-3-0"></a>
 ## v0\.3\.0
 
-<a id="minor-changes-25"></a>
+<a id="minor-changes-26"></a>
 ### Minor Changes
 
 * Allow to pass path to ansible\-doc binary via <code>\-\-ansible\-doc\-bin</code>\.
@@ -620,7 +666,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-2-0"></a>
 ## v0\.2\.0
 
-<a id="minor-changes-26"></a>
+<a id="minor-changes-27"></a>
 ### Minor Changes
 
 * Added more testing\.
@@ -634,7 +680,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-1-0"></a>
 ## v0\.1\.0
 
-<a id="release-summary-22"></a>
+<a id="release-summary-23"></a>
 ### Release Summary
 
 Initial release as antsibull\-changelog\. The Ansible Changelog Tool has originally been developed by \@mattclay in [the ansible/ansible](https\://github\.com/ansible/ansible/blob/stable\-2\.9/packaging/release/changelogs/changelog\.py) repository for Ansible itself\. It has been extended in [felixfontein/ansible\-changelog](https\://github\.com/felixfontein/ansible\-changelog/) and [ansible\-community/antsibull](https\://github\.com/ansible\-community/antsibull/) to work with collections\, until it was moved to its current location [ansible\-community/antsibull\-changelog](https\://github\.com/ansible\-community/antsibull\-changelog/)\.
