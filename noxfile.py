@@ -109,7 +109,7 @@ def integration(session: nox.Session):
         "--source",
         "antsibull_changelog",
         "-m",
-        "antsibull_changelog.cli",
+        "antsibull_changelog.__main__",
         env=env,
     )
 
