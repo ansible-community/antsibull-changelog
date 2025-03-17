@@ -190,16 +190,16 @@ The format of `output` is as follows:
 - `file` (string, **required**): The filename to write the changelog to.
   This must include the correct extension.
 
-   If it contains the placeholder `%s`, then parts of the latest release's
-   version are inserted for `%s`.
+    If it contains the placeholder `%s`, then parts of the latest release's
+    version are inserted for `%s`.
 
 - `filename_version_depth` (int, default `0`): if `%s` is part of `file`,
   this determines the version parts of the latest release that `%s` is
   replaced by. For the value `2`, the latest version 1.2.3 will result in
   the string `1.2`. The value `0` results in an empty string being inserted.
 
-   Must be zero if `%s` is not part of `file`, and must be non-zero if `%s`
-   is part of `file`.
+    Must be zero if `%s` is not part of `file`, and must be non-zero if `%s`
+    is part of `file`.
 
 - `title_version_depth` (int, default `0`): determines the version parts
   of the latest release that are inserted into the changelog's title.
