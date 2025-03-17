@@ -130,6 +130,7 @@ def integration(session: nox.Session):
         "lint-changelog-yaml",
         "--no-semantic-versioning",
         "--strict",
+        "true",
         "changelogs/changelog.yaml",
     )
 
@@ -153,6 +154,7 @@ def integration(session: nox.Session):
         "lint-changelog-yaml",
         str(cg_destination / "changelogs" / "changelog.yaml"),
         "--strict",
+        "true",
     )
 
     combined = map(str, tmp.glob(".coverage.*"))
