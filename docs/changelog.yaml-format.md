@@ -21,7 +21,7 @@ You can use the `antsibull-changelog lint-changelog-yaml` tool included in the [
 
 The tool does not output anything and exits with exit code 0 in case the file is OK, and outputs errors and exits with exit code 3 in case an error was found. Other exit codes indicate problems with the command line or during the execution of the linter.
 
-To avoid extra data in `changelog.yaml` that should not be in there, add the `--strict` option. This can be useful to avoid typos, for example if you wrote `change:` instead of `changes:`, or forgot `changes:` alltogether.
+To avoid extra data in `changelog.yaml` that should not be in there, add the `--strict true` option. This can be useful to avoid typos, for example if you wrote `change:` instead of `changes:`, or forgot `changes:` alltogether.
 
 
 ## changelog.yaml
