@@ -190,29 +190,36 @@ The format of `output` is as follows:
 - `file` (string, **required**): The filename to write the changelog to.
   This must include the correct extension.
 
-  If it contains the placeholder `%s`, then parts of the latest release's
-  version are inserted for `%s`.
+   If it contains the placeholder `%s`, then parts of the latest release's
+   version are inserted for `%s`.
+
 - `filename_version_depth` (int, default `0`): if `%s` is part of `file`,
   this determines the version parts of the latest release that `%s` is
   replaced by. For the value `2`, the latest version 1.2.3 will result in
   the string `1.2`. The value `0` results in an empty string being inserted.
 
-  Must be zero if `%s` is not part of `file`, and must be non-zero if `%s`
-  is part of `file`.
+   Must be zero if `%s` is not part of `file`, and must be non-zero if `%s`
+   is part of `file`.
+
 - `title_version_depth` (int, default `0`): determines the version parts
   of the latest release that are inserted into the changelog's title.
   For the value `2`, the latest version 1.2.3 will result in the string `1.2`.
   The value `0` results in no version info being inserted into the changelog's
   title.
+
 - `format` (string, **required**): the output format to write the
   changelog as. Supported formats are `rst` for ReStructuredText
   and `md` for MarkDown.
+
 - `global_toc` (bool, default `true`): Whether the changelog should have a
   global Table of Contents.
+
 - `global_toc_depth` (int or `null`, default `null`): if `global_toc=true`,
   determines whether the Table of Contents has a maximum depth.
+
 - `per_release_toc` (bool, default `false`): Whether every release of the
   changelog should have a local Table of Contents.
+
 - `per_release_toc_depth` (int or `null`, default `null`): if
   `per_release_toc=true`, determines whether the Table of Contents for a
   release has a maximum depth.
