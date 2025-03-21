@@ -1,0 +1,2 @@
+breaking_changes:
+  - "The ``--strict`` option of the ``lint-changelog-yaml`` subcommand no longer expects a parameter. It now matches what was documented (https://github.com/ansible-community/antsibull-changelog/issues/195, https://github.com/ansible-community/antsibull-changelog/pull/196)."
