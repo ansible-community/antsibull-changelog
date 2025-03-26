@@ -196,7 +196,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     )
     lint_changelog_yaml_parser.add_argument(
         "--strict",
-        type=parse_boolean_arg,
+        action="store_true",
         help="do more strict checking, for example complain about extra"
         " entries that are not mentioned in the changelog.yaml specification",
     )
