@@ -552,3 +552,23 @@ releases:
       - 193-config.yml
       - 194-output.yml
     release_date: '2025-03-13'
+  0.33.0:
+    changes:
+      breaking_changes:
+        - The ``--strict`` option of the ``lint-changelog-yaml`` subcommand no longer
+          expects a parameter. It now matches what was documented (https://github.com/ansible-community/antsibull-changelog/issues/195,
+          https://github.com/ansible-community/antsibull-changelog/pull/196).
+      deprecated_features:
+        - The boolean valued options ``--is-collection`` and ``--collection-flatmap``
+          will likely change to proper flags (``--flag`` and `--no-flag`` instead
+          of ``--flag true``/``--flag false``) in the near future. If you are using
+          these options and want them to not change, or have other suggestions, please
+          `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/new>`__
+          (https://github.com/ansible-community/antsibull-changelog/pull/199).
+      release_summary: Maintenance release for fixing / deprecating certain boolean
+        options.
+    fragments:
+      - 0.33.0.yml
+      - 196-lint-strict.yml
+      - 199-deprecate-boolean-valued-flags.yml
+    release_date: '2025-03-27'

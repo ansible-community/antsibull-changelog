@@ -1,9 +1,27 @@
 # Ansible Changelog Tool Release Notes
 
+<a id="v0-33-0"></a>
+## v0\.33\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+Maintenance release for fixing / deprecating certain boolean options\.
+
+<a id="breaking-changes--porting-guide"></a>
+### Breaking Changes / Porting Guide
+
+* The <code>\-\-strict</code> option of the <code>lint\-changelog\-yaml</code> subcommand no longer expects a parameter\. It now matches what was documented \([https\://github\.com/ansible\-community/antsibull\-changelog/issues/195](https\://github\.com/ansible\-community/antsibull\-changelog/issues/195)\, [https\://github\.com/ansible\-community/antsibull\-changelog/pull/196](https\://github\.com/ansible\-community/antsibull\-changelog/pull/196)\)\.
+
+<a id="deprecated-features"></a>
+### Deprecated Features
+
+* The boolean valued options <code>\-\-is\-collection</code> and <code>\-\-collection\-flatmap</code> will likely change to proper flags \(<code>\-\-flag</code> and <em class="title-reference">\-\-no\-flag\`</em> instead of <code>\-\-flag true</code>/<code>\-\-flag false</code>\) in the near future\. If you are using these options and want them to not change\, or have other suggestions\, please [create an issue in the antsibull\-changelog repository](https\://github\.com/ansible\-community/antsibull\-changelog/issues/new) \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/199](https\://github\.com/ansible\-community/antsibull\-changelog/pull/199)\)\.
+
 <a id="v0-32-0"></a>
 ## v0\.32\.0
 
-<a id="release-summary"></a>
+<a id="release-summary-1"></a>
 ### Release Summary
 
 Feature release\.
@@ -19,14 +37,14 @@ Feature release\.
 * Antsibull\-changelog now depends on Pydantic 2 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
 * Antsibull\-changelog now uses Pydantic to parse and validate the config\. This means that validation is more strict than before and might reject configs that were incorrect\, but still got accepted somehow \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
 
-<a id="breaking-changes--porting-guide"></a>
+<a id="breaking-changes--porting-guide-1"></a>
 ### Breaking Changes / Porting Guide
 
 * When using antsibull\-changelog as a library\, <code>ChangelogConfig</code>\'s constructor should no longer be called directly\. Instead\, use the class method <code>ChangelogConfig\.parse\(\)</code>\, which has the same signature than the previous constructor\, except that <code>ignore\_is\_other\_project</code> now must be a keyword parameter \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/193](https\://github\.com/ansible\-community/antsibull\-changelog/pull/193)\)\.
 * When using antsibull\-changelog as a library\, <code>rendering\.changelog\.generate\_changelog\(\)</code> now needs a <code>ChangelogOutput</code> object instead of the <code>document\_format\: TextFormat</code> parameter\, and the <code>config</code> and <code>changelog\_path</code> parameters have been removed \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
 * When using the <code>\-\-output</code> argument for <code>antsibull\-changelog generate</code>\, the generated changelog\'s title will not contain any parts of the version number\. If you need this\, [please create an issue](https\://github\.com/ansible\-community/antsibull\-changelog/issues/new) \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
 
-<a id="deprecated-features"></a>
+<a id="deprecated-features-1"></a>
 ### Deprecated Features
 
 * The configuration settings <code>changelog\_filename\_template</code>\, <code>changelog\_filename\_version\_depth</code>\, and <code>output\_formats</code> are deprecated and will eventually be removed\. Use the new setting <code>output</code> instead\. Note that there are no runtime warnings right now\. If the time to remove them comes nearer\, there will be runtime warnings for a longer time first before they are actually removed \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/194](https\://github\.com/ansible\-community/antsibull\-changelog/pull/194)\)\.
@@ -42,7 +60,7 @@ Feature release\.
 <a id="v0-31-2"></a>
 ## v0\.31\.2
 
-<a id="release-summary-1"></a>
+<a id="release-summary-2"></a>
 ### Release Summary
 
 Bugfix release\.
@@ -55,7 +73,7 @@ Bugfix release\.
 <a id="v0-31-1"></a>
 ## v0\.31\.1
 
-<a id="release-summary-2"></a>
+<a id="release-summary-3"></a>
 ### Release Summary
 
 Bugfix release for ansible\-core\.
@@ -68,7 +86,7 @@ Bugfix release for ansible\-core\.
 <a id="v0-31-0"></a>
 ## v0\.31\.0
 
-<a id="release-summary-3"></a>
+<a id="release-summary-4"></a>
 ### Release Summary
 
 Feature release\.
@@ -81,7 +99,7 @@ Feature release\.
 * Python API\: allow to extract extra data when loading changelog files\, and allow to insert extra data when saving \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/181](https\://github\.com/ansible\-community/antsibull\-changelog/pull/181)\)\.
 * Python API\: allow to preprocess changelog\.yaml before linting \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/181](https\://github\.com/ansible\-community/antsibull\-changelog/pull/181)\)\.
 
-<a id="breaking-changes--porting-guide-1"></a>
+<a id="breaking-changes--porting-guide-2"></a>
 ### Breaking Changes / Porting Guide
 
 * More internal code related to the old changelog format has been removed\. This only potentially affects other projects which consume antsibull\-changelog as a library\. The sister antsibull projects antsibull\-build and antsibull\-docs might only be affected in older versions\. <strong>Users of the antsibull\-changelog CLI tool are not affected by this change</strong> \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/179](https\://github\.com/ansible\-community/antsibull\-changelog/pull/179)\)\.
@@ -89,7 +107,7 @@ Feature release\.
 <a id="v0-30-0"></a>
 ## v0\.30\.0
 
-<a id="release-summary-4"></a>
+<a id="release-summary-5"></a>
 ### Release Summary
 
 Feature release\.
@@ -105,7 +123,7 @@ Feature release\.
 <a id="v0-29-0"></a>
 ## v0\.29\.0
 
-<a id="release-summary-5"></a>
+<a id="release-summary-6"></a>
 ### Release Summary
 
 Feature release\.
@@ -130,7 +148,7 @@ Feature release\.
 <a id="v0-28-0"></a>
 ## v0\.28\.0
 
-<a id="release-summary-6"></a>
+<a id="release-summary-7"></a>
 ### Release Summary
 
 Feature release\.
@@ -148,7 +166,7 @@ Feature release\.
 <a id="v0-27-0"></a>
 ## v0\.27\.0
 
-<a id="release-summary-7"></a>
+<a id="release-summary-8"></a>
 ### Release Summary
 
 Feature release\.
@@ -161,7 +179,7 @@ Feature release\.
 <a id="v0-26-0"></a>
 ## v0\.26\.0
 
-<a id="release-summary-8"></a>
+<a id="release-summary-9"></a>
 ### Release Summary
 
 Feature release\.
@@ -174,7 +192,7 @@ Feature release\.
 <a id="v0-25-0"></a>
 ## v0\.25\.0
 
-<a id="release-summary-9"></a>
+<a id="release-summary-10"></a>
 ### Release Summary
 
 Bugfix and feature release\.
@@ -192,7 +210,7 @@ Bugfix and feature release\.
 <a id="v0-24-0"></a>
 ## v0\.24\.0
 
-<a id="release-summary-10"></a>
+<a id="release-summary-11"></a>
 ### Release Summary
 
 Feature release which now allows to output MarkDown\.
@@ -204,7 +222,7 @@ Feature release which now allows to output MarkDown\.
 * Allow to render changelogs as MarkDown\. The output formats written can be controlled with the <code>output\_formats</code> option in the config file \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/139](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139)\)\.
 * Officially support Python 3\.12 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/134](https\://github\.com/ansible\-community/antsibull\-changelog/pull/134)\)\.
 
-<a id="deprecated-features-1"></a>
+<a id="deprecated-features-2"></a>
 ### Deprecated Features
 
 * Some code in <code>antsibull\_changelog\.changelog\_entry</code> has been deprecated\, and the <code>antsibull\_changelog\.rst</code> module has been deprecated completely\. If you use them in your own code\, please take a look at the [PR deprecating them](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139) for information on how to stop using them \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/139](https\://github\.com/ansible\-community/antsibull\-changelog/pull/139)\)\.
@@ -212,7 +230,7 @@ Feature release which now allows to output MarkDown\.
 <a id="v0-23-0"></a>
 ## v0\.23\.0
 
-<a id="release-summary-11"></a>
+<a id="release-summary-12"></a>
 ### Release Summary
 
 Feature release\.
@@ -227,7 +245,7 @@ Feature release\.
 <a id="v0-22-0"></a>
 ## v0\.22\.0
 
-<a id="release-summary-12"></a>
+<a id="release-summary-13"></a>
 ### Release Summary
 
 New feature release
@@ -241,12 +259,12 @@ New feature release
 <a id="v0-21-0"></a>
 ## v0\.21\.0
 
-<a id="release-summary-13"></a>
+<a id="release-summary-14"></a>
 ### Release Summary
 
 Maintenance release with a deprecation\.
 
-<a id="deprecated-features-2"></a>
+<a id="deprecated-features-3"></a>
 ### Deprecated Features
 
 * Support for <code>classic</code> changelogs is deprecated and will be removed soon\. If you need to build changelogs for Ansible 2\.9 or before\, please use an older version \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/123](https\://github\.com/ansible\-community/antsibull\-changelog/pull/123)\)\.
@@ -254,7 +272,7 @@ Maintenance release with a deprecation\.
 <a id="v0-20-0"></a>
 ## v0\.20\.0
 
-<a id="release-summary-14"></a>
+<a id="release-summary-15"></a>
 ### Release Summary
 
 Bugfix and maintenance release using a new build system\.
@@ -272,7 +290,7 @@ Bugfix and maintenance release using a new build system\.
 <a id="v0-19-0"></a>
 ## v0\.19\.0
 
-<a id="release-summary-15"></a>
+<a id="release-summary-16"></a>
 ### Release Summary
 
 Feature release\.
@@ -288,12 +306,12 @@ Feature release\.
 <a id="v0-18-0"></a>
 ## v0\.18\.0
 
-<a id="release-summary-16"></a>
+<a id="release-summary-17"></a>
 ### Release Summary
 
 Maintenance release that drops support for older Python versions\.
 
-<a id="breaking-changes--porting-guide-2"></a>
+<a id="breaking-changes--porting-guide-3"></a>
 ### Breaking Changes / Porting Guide
 
 * Drop support for Python 3\.6\, 3\.7\, and 3\.8 \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/93](https\://github\.com/ansible\-community/antsibull\-changelog/pull/93)\)\.
@@ -301,7 +319,7 @@ Maintenance release that drops support for older Python versions\.
 <a id="v0-17-0"></a>
 ## v0\.17\.0
 
-<a id="release-summary-17"></a>
+<a id="release-summary-18"></a>
 ### Release Summary
 
 Feature release for ansible\-core\.
@@ -314,7 +332,7 @@ Feature release for ansible\-core\.
 <a id="v0-16-0"></a>
 ## v0\.16\.0
 
-<a id="release-summary-18"></a>
+<a id="release-summary-19"></a>
 ### Release Summary
 
 Feature and bugfix release\.
@@ -333,7 +351,7 @@ Feature and bugfix release\.
 <a id="v0-15-0"></a>
 ## v0\.15\.0
 
-<a id="release-summary-19"></a>
+<a id="release-summary-20"></a>
 ### Release Summary
 
 Feature release\.
@@ -346,7 +364,7 @@ Feature release\.
 <a id="v0-14-0"></a>
 ## v0\.14\.0
 
-<a id="release-summary-20"></a>
+<a id="release-summary-21"></a>
 ### Release Summary
 
 Feature release that will speed up the release process with ansible\-core 2\.13\.
@@ -360,7 +378,7 @@ Feature release that will speed up the release process with ansible\-core 2\.13\
 <a id="v0-13-0"></a>
 ## v0\.13\.0
 
-<a id="release-summary-21"></a>
+<a id="release-summary-22"></a>
 ### Release Summary
 
 This release makes changelog building more reliable\.
@@ -379,7 +397,7 @@ This release makes changelog building more reliable\.
 <a id="v0-12-0"></a>
 ## v0\.12\.0
 
-<a id="release-summary-22"></a>
+<a id="release-summary-23"></a>
 ### Release Summary
 
 New feature release which supports other projects than ansible\-core and Ansible collections\.
@@ -454,7 +472,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 
 * Add <code>\-\-update\-existing</code> option for <code>antsibull\-changelog release</code>\, which allows to update the current release\'s release date and \(if relevant\) codename instead of simply reporting that the release already exists\.
 
-<a id="breaking-changes--porting-guide-3"></a>
+<a id="breaking-changes--porting-guide-4"></a>
 ### Breaking Changes / Porting Guide
 
 * The new option <code>prevent\_known\_fragments</code> with default value being the value of <code>keep\_fragments</code> allows to control whether fragments with names that already appeared in the past are ignored or not\. The new behavior happens if <code>keep\_fragments\=false</code>\, and is less surprising to users \(see [https\://github\.com/ansible\-community/antsibull\-changelog/issues/46](https\://github\.com/ansible\-community/antsibull\-changelog/issues/46)\)\. Changelogs with <code>keep\_fragments\=true</code>\, like the ansible\-base/ansible\-core changelog\, are not affected\.
@@ -562,7 +580,7 @@ New feature release which supports other projects than ansible\-core and Ansible
 <a id="v0-1-0"></a>
 ## v0\.1\.0
 
-<a id="release-summary-23"></a>
+<a id="release-summary-24"></a>
 ### Release Summary
 
 Initial release as antsibull\-changelog\. The Ansible Changelog Tool has originally been developed by \@mattclay in [the ansible/ansible](https\://github\.com/ansible/ansible/blob/stable\-2\.9/packaging/release/changelogs/changelog\.py) repository for Ansible itself\. It has been extended in [felixfontein/ansible\-changelog](https\://github\.com/felixfontein/ansible\-changelog/) and [ansible\-community/antsibull](https\://github\.com/ansible\-community/antsibull/) to work with collections\, until it was moved to its current location [ansible\-community/antsibull\-changelog](https\://github\.com/ansible\-community/antsibull\-changelog/)\.

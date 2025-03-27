@@ -4,6 +4,24 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.33.0
+=======
+
+Release Summary
+---------------
+
+Maintenance release for fixing / deprecating certain boolean options.
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- The ``--strict`` option of the ``lint-changelog-yaml`` subcommand no longer expects a parameter. It now matches what was documented (https://github.com/ansible-community/antsibull-changelog/issues/195, https://github.com/ansible-community/antsibull-changelog/pull/196).
+
+Deprecated Features
+-------------------
+
+- The boolean valued options ``--is-collection`` and ``--collection-flatmap`` will likely change to proper flags (``--flag`` and `--no-flag`` instead of ``--flag true``/``--flag false``) in the near future. If you are using these options and want them to not change, or have other suggestions, please `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/new>`__ (https://github.com/ansible-community/antsibull-changelog/pull/199).
+
 v0.32.0
 =======
 
