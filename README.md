@@ -5,6 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 # antsibull-changelog -- Ansible Changelog Tool
+[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://ansible.readthedocs.io/projects/antsibull-changelog/)
 [![Discuss on Matrix at #antsibull:ansible.com](https://img.shields.io/matrix/antsibull:ansible.com.svg?server_fqdn=ansible-accounts.ems.host&label=Discuss%20on%20Matrix%20at%20%23antsibull:ansible.com&logo=matrix)](https://matrix.to/#/#antsibull:ansible.com)
 [![Nox badge](https://github.com/ansible-community/antsibull-changelog/workflows/nox/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22nox%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
@@ -13,12 +14,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 A changelog generator used by ansible-core and Ansible collections.
 
 - Using the
-  [`antsibull-changelog` CLI tool for collections](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelogs.md).
+  [`antsibull-changelog` CLI tool for collections](https://ansible.readthedocs.io/projects/antsibull-changelog/changelogs/).
 - Using the
-  [`antsibull-changelog` CLI tool for other projects](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/other-projects.md).
-- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog-configuration.md).
+  [`antsibull-changelog` CLI tool for other projects](https://ansible.readthedocs.io/projects/antsibull-changelog/other-projects/).
+- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://ansible.readthedocs.io/projects/antsibull-changelog/changelog-configuration/).
 - Documentation on the
-  [`changelog.yaml` format](https://github.com/ansible-community/antsibull-changelog/tree/main/docs/changelog.yaml-format.md).
+  [`changelog.yaml` format](https://ansible.readthedocs.io/projects/antsibull-changelog/changelog.yaml-format/).
 
 antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
 
