@@ -59,7 +59,9 @@ class RSTAbstractRenderer(AbstractRendererEx):
     Abstract RST renderer.
     """
 
-    def __init__(self, root: DocumentRendererEx):
+    root: "RSTDocumentRenderer"
+
+    def __init__(self, root: "RSTDocumentRenderer"):
         super().__init__(root, "- ")
 
     def add_section(self, title: str) -> SectionRenderer:
@@ -84,7 +86,9 @@ class RSTSectionRenderer(RSTAbstractRenderer, SectionRenderer):
 
     title: str
 
-    def __init__(self, level: int, title: str, root: DocumentRendererEx):
+    root: "RSTDocumentRenderer"
+
+    def __init__(self, level: int, title: str, root: "RSTDocumentRenderer"):
         super().__init__(root=root)
         self._level = level
         self.title = title
