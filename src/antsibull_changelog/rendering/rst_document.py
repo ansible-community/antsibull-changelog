@@ -100,7 +100,7 @@ class RSTSectionRenderer(RSTAbstractRenderer, SectionRenderer):
         ensure_newline_after_last_content(lines)
         level = max(0, self._level - 1)
         lines.append(self.title)
-        lines.append(_SECTION_UNDERLINES[level] * column_width(self.title))
+        lines.append(self.root.section_underlines[level] * column_width(self.title))
         lines.append("")
         for content in self.content:
             content.append_lines(lines, start_level=start_level)
@@ -117,13 +117,15 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
     unsupported_class_names: set[str]
     raw_preamble: str | None
     document_label: str | None
+    section_underlines: str
 
-    def __init__(self, start_level: int = 0):
+    def __init__(self, start_level: int = 0, *, section_underlines: str | None = None):
         super().__init__(root=self)
         DocumentRendererEx.__init__(self, start_level=start_level)
         self.unsupported_class_names = set()
         self.raw_preamble = None
         self.document_label = None
+        self.section_underlines = section_underlines or _SECTION_UNDERLINES
 
     def _get_level(self) -> int:
         return self.start_level
