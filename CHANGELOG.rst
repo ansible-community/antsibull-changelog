@@ -4,6 +4,19 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.34.0
+=======
+
+Release Summary
+---------------
+
+Feature release for antsibull-build.
+
+Minor Changes
+-------------
+
+- The ``RSTDocumentRenderer`` API now allows to configure section underlines. This is needed to fix the Ansible 12 porting guide (https://github.com/ansible-community/antsibull-changelog/pull/203).
+
 v0.33.0
 =======
 

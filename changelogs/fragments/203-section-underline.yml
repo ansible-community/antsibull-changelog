@@ -1,4 +1,0 @@
-minor_changes:
-  - "The ``RSTDocumentRenderer`` API now allows to configure section underlines.
-     This is needed to fix the Ansible 12 porting guide
-     (https://github.com/ansible-community/antsibull-changelog/pull/203)."

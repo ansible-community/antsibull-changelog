@@ -572,3 +572,13 @@ releases:
       - 196-lint-strict.yml
       - 199-deprecate-boolean-valued-flags.yml
     release_date: '2025-03-27'
+  0.34.0:
+    changes:
+      minor_changes:
+        - The ``RSTDocumentRenderer`` API now allows to configure section underlines.
+          This is needed to fix the Ansible 12 porting guide (https://github.com/ansible-community/antsibull-changelog/pull/203).
+      release_summary: Feature release for antsibull-build.
+    fragments:
+      - 0.34.0.yml
+      - 203-section-underline.yml
+    release_date: '2025-05-07'
