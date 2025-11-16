@@ -17,7 +17,7 @@ A changelog generator used by ansible-core and Ansible collections.
 - Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](changelog-configuration.md).
 - Documentation on the [`changelog.yaml` format](changelog.yaml-format.md).
 
-antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html).
 
 To see how antsibull-changelog changes, please look at the
 [antsibull-changelog changelog](https://github.com/ansible-community/antsibull-changelog/blob/main/CHANGELOG.md).

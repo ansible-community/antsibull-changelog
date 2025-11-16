@@ -48,9 +48,9 @@ dependencies = [
 ]
 
 [project.urls]
-"Documentation" = "https://ansible.readthedocs.io/projects/antsibull-changelog/"
+"Documentation" = "https://docs.ansible.com/projects/antsibull-changelog/"
 "Source code" = "https://github.com/ansible-community/antsibull-changelog/"
-"Code of Conduct" = "https://docs.ansible.com/ansible/latest/community/code_of_conduct.html"
+"Code of Conduct" = "https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html"
 "Bug tracker" = "https://github.com/ansible-community/antsibull-changelog/issues"
 "Changelog" = "https://github.com/ansible-community/antsibull-changelog/tree/main/CHANGELOG.md"
 

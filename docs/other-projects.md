@@ -141,7 +141,7 @@ This section describes the section categories created in the default
 config. If you really want, you can change them.
 
 The categories are the same as the ones in the [Ansible-case changelog
-fragments](https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to).
+fragments](https://docs.ansible.com/projects/ansible/devel/community/development_process.html#changelogs-how-to).
 
 The full list of categories is:
 
@@ -215,7 +215,7 @@ changelog fragment.
 ### Examples
 
 A guide on how to write changelog fragments can be found in the [Ansible
-docs](https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to).
+docs](https://docs.ansible.com/projects/ansible/devel/community/development_process.html#changelogs-how-to).
 
 Example of a regular changelog fragment:
 

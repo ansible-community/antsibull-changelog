@@ -196,7 +196,7 @@ collections which will be included in the Ansible Community
 Distribution.
 
 The categories are the same as the ones in the [Ansible-case changelog
-fragments](https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to).
+fragments](https://docs.ansible.com/projects/ansible/devel/community/development_process.html#changelogs-how-to).
 
 !!! note
     The changelog generator automatically detects new modules and
@@ -280,7 +280,7 @@ please see the next section for details.
 ### Examples
 
 A guide on how to write changelog fragments can be found in the [Ansible
-docs](https://docs.ansible.com/ansible/devel/community/development_process.html#changelogs-how-to).
+docs](https://docs.ansible.com/projects/ansible/devel/community/development_process.html#changelogs-how-to).
 
 Example of a regular changelog fragment:
 

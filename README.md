@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
 # antsibull-changelog -- Ansible Changelog Tool
-[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://ansible.readthedocs.io/projects/antsibull-changelog/)
+[![Documentation](https://img.shields.io/badge/docs-brightgreen.svg)](https://docs.ansible.com/projects/antsibull-changelog/)
 [![Discuss on Matrix at #antsibull:ansible.com](https://img.shields.io/matrix/antsibull:ansible.com.svg?server_fqdn=ansible-accounts.ems.host&label=Discuss%20on%20Matrix%20at%20%23antsibull:ansible.com&logo=matrix)](https://matrix.to/#/#antsibull:ansible.com)
 [![Nox badge](https://github.com/ansible-community/antsibull-changelog/workflows/nox/badge.svg?event=push&branch=main)](https://github.com/ansible-community/antsibull-changelog/actions?query=workflow%3A%22nox%22+branch%3Amain)
 [![Codecov badge](https://img.shields.io/codecov/c/github/ansible-community/antsibull-changelog)](https://codecov.io/gh/ansible-community/antsibull-changelog)
@@ -14,18 +14,18 @@ SPDX-License-Identifier: GPL-3.0-or-later
 A changelog generator used by ansible-core and Ansible collections.
 
 - Using the
-  [`antsibull-changelog` CLI tool for collections](https://ansible.readthedocs.io/projects/antsibull-changelog/changelogs/).
+  [`antsibull-changelog` CLI tool for collections](https://docs.ansible.com/projects/antsibull-changelog/changelogs/).
 - Using the
-  [`antsibull-changelog` CLI tool for other projects](https://ansible.readthedocs.io/projects/antsibull-changelog/other-projects/).
-- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://ansible.readthedocs.io/projects/antsibull-changelog/changelog-configuration/).
+  [`antsibull-changelog` CLI tool for other projects](https://docs.ansible.com/projects/antsibull-changelog/other-projects/).
+- Documentation on the [`changelogs/config.yaml` configuration file for `antsibull-changelog`](https://docs.ansible.com/projects/antsibull-changelog/changelog-configuration/).
 - Documentation on the
-  [`changelog.yaml` format](https://ansible.readthedocs.io/projects/antsibull-changelog/changelog.yaml-format/).
+  [`changelog.yaml` format](https://docs.ansible.com/projects/antsibull-changelog/changelog.yaml-format/).
 
-antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html).
+antsibull-changelog is covered by the [Ansible Code of Conduct](https://docs.ansible.com/projects/ansible/latest/community/code_of_conduct.html).
 
 ## Community
 
-Need help or want to discuss the project? See our [Community guide](https://ansible.readthedocs.io/projects/antsibull-changelog/community/) to learn how to join the conversation!
+Need help or want to discuss the project? See our [Community guide](https://docs.ansible.com/projects/antsibull-changelog/community/) to learn how to join the conversation!
 
 ## Installation
 
@@ -43,7 +43,7 @@ to pull in the necessary toml parser for this feature.
 The `toml` extra is always available, but it is noop on Python >= 3.11,
 as `tomllib` is part of the standard library.
 
-For more information, see the [documentation](https://ansible.readthedocs.io/projects/antsibull-changelog/).
+For more information, see the [documentation](https://docs.ansible.com/projects/antsibull-changelog/).
 
 ## Development
 

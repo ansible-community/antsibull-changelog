@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 site_name: antsibull-changelog – Ansible Changelog Tool
-site_url: https://ansible.readthedocs.io/projects/antsibull-changelog
+site_url: https://docs.ansible.com/projects/antsibull-changelog
 repo_url: https://github.com/ansible-community/antsibull-changelog
 theme:
   name: ansible
