@@ -45,18 +45,18 @@ jobs:
     name: "Run nox ${{ matrix.session }} session"
     steps:
       - name: Check out antsibull-changelog
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: antsibull-changelog
           persist-credentials: false
       - name: Check out dependent project antsibull-docutils
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ansible-community/antsibull-docutils
           path: antsibull-docutils
           persist-credentials: false
       - name: Check out dependent project antsibull-fileutils
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ansible-community/antsibull-fileutils
           path: antsibull-fileutils
