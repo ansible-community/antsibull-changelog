@@ -46,7 +46,7 @@ class FormattingAdapter(logging.LoggerAdapter):
 
 LOGGER = FormattingAdapter(logging.getLogger("changelog"))
 
-_LOGGER_SET_UP = False  # pylint: disable=invalid-name
+_LOGGER_SET_UP = False
 
 
 def setup_logger(verbosity: int) -> None:
