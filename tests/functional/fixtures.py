@@ -484,10 +484,15 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         self, plugin_data: dict[str, dict[str, Any]]
     ) -> Callable[[list[str]], str]:
         def fake_subprocess_ansible_doc(
-            command: list[str], *, text: bool | None = None, encoding: str | None = None
+            command: list[str],
+            *,
+            text: bool | None = None,
+            encoding: str | None = None,
+            stderr: int | None = None,
         ) -> str:
             base_dir = self.paths.base_dir
             if command[0].endswith("ansible-doc") and command[1] == "--version":
+                assert stderr is None
                 return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
                     ansible_core_version=self.ansible_core_version,
                 ).encode("utf-8")
@@ -496,6 +501,7 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
                 and command[1] == "--json"
                 and command[2] == "-t"
             ):
+                assert stderr is None
                 plugin_type = command[3]
                 args = command[4:]
                 do_list = False
