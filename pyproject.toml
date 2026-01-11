@@ -37,14 +37,15 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
+    "annotated_types",
+    "antsibull-docs-parser >= 1.2.2, < 2.0.0",
+    "antsibull-docutils >= 1.0.0, < 2.0.0",
     "antsibull-fileutils >= 1.0.0, < 2.0.0",
     "docutils",
     "packaging",
+    "pydantic ~= 2.0",
     "rstcheck >= 3.0.0, < 7.0.0",
     "semantic_version",
-    "antsibull-docutils >= 1.0.0, < 2.0.0",
-    "pydantic ~= 2.0",
-    "annotated_types",
 ]
 
 [project.urls]

@@ -378,7 +378,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a test module",
+                    "description": "This is a C(test) R(module",
                     "namespace": "",
                     "version_added": "1.0.0",
                 },
@@ -459,7 +459,7 @@ def test_changelog_release_simple(  # pylint: disable=redefined-outer-name
     assert changelog["releases"]["1.0.0"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a test module.",
+            "description": "This is a C(test) R(module.",
             "namespace": "",
         },
     ]
@@ -506,7 +506,7 @@ Lookup
 New Modules
 -----------
 
-- acme.test.test - This is a test module.
+- acme.test.test - This is a C(test) R(module.
 """
     )
 
@@ -521,7 +521,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a C(TEST) M(foo.bar.module) with O(foo=bar) and RV(baz). Do not confuse with P(foo.bar.baz#lookup).",
                     "namespace": "",
                     "version_added": "1.0.0",
                 },
@@ -584,7 +584,7 @@ New Modules
     assert changelog["releases"]["1.0.0"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a TEST module.",
+            "description": "This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.",
             "namespace": "",
         },
     ]
@@ -592,7 +592,7 @@ New Modules
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo_bar lookup.",
+                "description": "A foo\\_bar lookup.",
                 "namespace": None,
             },
         ],
@@ -625,12 +625,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup.
+- acme.test.bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module.
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
 """
     )
 
@@ -641,7 +641,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a C(TEST) M(foo.bar.module) with O(foo=bar) and RV(baz). Do not confuse with P(foo.bar.baz#lookup).",
                     "namespace": "",
                     "version_added": "1.0.0",
                 },
@@ -774,12 +774,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup.
+- acme.test.bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module.
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
 """
     )
 
@@ -790,7 +790,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a C(TEST) M(foo.bar.module) with O(foo=bar) and RV(baz). Do not confuse with P(foo.bar.baz#lookup).",
                     "namespace": "",
                     "version_added": "1.0.0",
                 },
@@ -964,12 +964,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup.
+- acme.test.bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module.
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
 """
     )
 
@@ -997,7 +997,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a C(TEST) M(foo.bar.module) with O(foo=bar) and RV(baz). Do not confuse with P(foo.bar.baz#lookup).",
                     "namespace": "",
                     "version_added": "1.0.0",
                 },
@@ -1285,12 +1285,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup.
+- acme.test.bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module.
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
 """
     )
 
@@ -1407,12 +1407,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- acme.test.bar - A foo_bar lookup.
+- acme.test.bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- acme.test.test - This is a TEST module.
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
 """
     )
 
@@ -1511,7 +1511,7 @@ This is the first proper release\.
 <a id="new-modules"></a>
 ## New Modules
 
-* acme\.test\.test \- This is a TEST module\.
+* acme\.test\.test \- This is a <code>TEST</code> foo\.bar\.module with <code>foo\=bar</code> and <code>baz</code>\. Do not confuse with foo\.bar\.baz\.
 """
     )
 
