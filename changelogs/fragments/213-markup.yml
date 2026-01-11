@@ -1,0 +1,2 @@
+minor_changes:
+  - "Antsibull-changelog now also depends on antsibull-docs-parser (https://github.com/ansible-community/antsibull-changelog/pull/213)."

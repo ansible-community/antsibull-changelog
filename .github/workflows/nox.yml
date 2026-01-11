@@ -49,6 +49,12 @@ jobs:
         with:
           path: antsibull-changelog
           persist-credentials: false
+      - name: Check out dependent project antsibull-docs-parser
+        uses: actions/checkout@v6
+        with:
+          repository: ansible-community/antsibull-docs-parser
+          path: antsibull-docs-parser
+          persist-credentials: false
       - name: Check out dependent project antsibull-docutils
         uses: actions/checkout@v6
         with:
