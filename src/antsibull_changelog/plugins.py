@@ -19,6 +19,15 @@ from contextlib import contextmanager
 from typing import Any, Generator
 
 import packaging.version
+from antsibull_docs_parser import dom as _ansible_markup_dom
+from antsibull_docs_parser.parser import Context as _AnsibleMarkupContext
+from antsibull_docs_parser.parser import Whitespace as _AnsibleMarkupWhitespace
+from antsibull_docs_parser.parser import parse as _parse_ansible_markup
+from antsibull_docs_parser.rst import (
+    PlainRSTFormatter as _AnsibleMarkupRSTFormatterBase,
+)
+from antsibull_docs_parser.rst import rst_escape as _ansible_markup_rst_escape
+from antsibull_docs_parser.rst import to_rst_plain as _ansible_markup_to_rst
 from antsibull_fileutils.copier import CollectionCopier, Copier, GitCopier
 from antsibull_fileutils.vcs import detect_vcs
 from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
@@ -31,6 +40,41 @@ from .ansible import (
 )
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .logger import LOGGER
+
+
+class _AnsibleMarkupRSTFormatter(_AnsibleMarkupRSTFormatterBase):
+    @staticmethod
+    def _format_option_like(
+        part: _ansible_markup_dom.OptionNamePart | _ansible_markup_dom.ReturnValuePart,
+    ) -> str:
+        value_text = part.name
+        value = part.value
+        if value is not None:
+            value_text = f"{value_text}={value}"
+        escaped_text = _ansible_markup_rst_escape(
+            value_text, escape_ending_whitespace=True, must_not_be_empty=True
+        )
+        return f"\\ :literal:`{escaped_text}`\\ "
+
+    def format_module(
+        self, part: _ansible_markup_dom.ModulePart, url: str | None
+    ) -> str:
+        return _ansible_markup_rst_escape(part.fqcn)
+
+    def format_option_name(
+        self, part: _ansible_markup_dom.OptionNamePart, url: str | None
+    ) -> str:
+        return self._format_option_like(part)
+
+    def format_plugin(
+        self, part: _ansible_markup_dom.PluginPart, url: str | None
+    ) -> str:
+        return _ansible_markup_rst_escape(part.plugin.fqcn)
+
+    def format_return_value(
+        self, part: _ansible_markup_dom.ReturnValuePart, url: str | None
+    ) -> str:
+        return self._format_option_like(part)
 
 
 class PluginDescription:
@@ -89,6 +133,24 @@ class PluginDescription:
                     and not description.endswith((".", ",", "!", "?"))
                 ):
                     description += "."
+                # Process Ansible markup
+                try:
+                    markup = _parse_ansible_markup(
+                        description or "",
+                        _AnsibleMarkupContext(),
+                        errors="exception",
+                        whitespace=_AnsibleMarkupWhitespace.STRIP,
+                    )
+                    description = _ansible_markup_to_rst(
+                        markup, formatter=_AnsibleMarkupRSTFormatter()
+                    )
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    LOGGER.warning(
+                        "Error while parsing description of {0} {1}: {2}",
+                        plugin_type,
+                        plugin_name,
+                        str(exc),
+                    )
                 plugins.append(
                     PluginDescription(
                         plugin_type=plugin_type,

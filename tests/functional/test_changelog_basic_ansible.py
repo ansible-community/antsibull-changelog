@@ -331,7 +331,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a B(TEST) I(module)",
                     "namespace": "",
                     "version_added": "2.10",
                 },
@@ -402,7 +402,7 @@ New Modules
     assert changelog["releases"]["2.10"]["modules"] == [
         {
             "name": "test",
-            "description": "This is a TEST module.",
+            "description": "This is a :strong:`TEST` :emphasis:`module`.",
             "namespace": "",
         },
     ]
@@ -410,7 +410,7 @@ New Modules
         "lookup": [
             {
                 "name": "bar",
-                "description": "A foo_bar lookup.",
+                "description": "A foo\\_bar lookup.",
                 "namespace": None,
             },
         ],
@@ -444,12 +444,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup.
+- bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module.
+- test - This is a :strong:`TEST` :emphasis:`module`.
 """
     )
 
@@ -460,7 +460,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a B(TEST) I(module)",
                     "namespace": "",
                     "version_added": "2.10",
                 },
@@ -595,12 +595,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup.
+- bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module.
+- test - This is a :strong:`TEST` :emphasis:`module`.
 """
     )
 
@@ -611,7 +611,7 @@ New Modules
             "module": {
                 "test": {
                     "name": "test",
-                    "description": "This is a TEST module",
+                    "description": "This is a B(TEST) I(module)",
                     "namespace": "",
                     "version_added": "2.10",
                 },
@@ -775,12 +775,12 @@ New Plugins
 Lookup
 ~~~~~~
 
-- bar - A foo_bar lookup.
+- bar - A foo\_bar lookup.
 
 New Modules
 -----------
 
-- test - This is a TEST module.
+- test - This is a :strong:`TEST` :emphasis:`module`.
 """
     )
 
@@ -864,7 +864,7 @@ FAKE_PLUGINS = {
         "test_module": {
             "doc": {
                 "author": ["Someone"],
-                "description": ["This is a test module."],
+                "description": ["This is a :strong:`TEST` :emphasis:`module`."],
                 "filename": os.path.join("lib", "ansible", "modules", "test_module.py"),
                 "name": "test_module",
                 "options": {},
