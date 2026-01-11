@@ -1,2 +1,0 @@
-minor_changes:
-  - "Declare support for Python 3.14 (https://github.com/ansible-community/antsibull-changelog/pull/207)."

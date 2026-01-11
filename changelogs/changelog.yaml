@@ -582,3 +582,16 @@ releases:
       - 0.34.0.yml
       - 203-section-underline.yml
     release_date: '2025-05-07'
+  0.35.0:
+    changes:
+      minor_changes:
+        - Antsibull-changelog now also depends on antsibull-docs-parser (https://github.com/ansible-community/antsibull-changelog/pull/213).
+        - Declare support for Python 3.14 (https://github.com/ansible-community/antsibull-changelog/pull/207).
+        - Process Ansible markup in plugin/module/role ``short_description`` (https://github.com/ansible-community/antsibull-changelog/issues/207,
+          https://github.com/ansible-community/antsibull-changelog/pull/213).
+      release_summary: Feature release.
+    fragments:
+      - 0.35.0.yml
+      - 207-python.yml
+      - 213-markup.yml
+    release_date: '2026-01-11'

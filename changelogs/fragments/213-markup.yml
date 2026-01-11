@@ -1,3 +1,0 @@
-minor_changes:
-  - "Antsibull-changelog now also depends on antsibull-docs-parser (https://github.com/ansible-community/antsibull-changelog/pull/213)."
-  - "Process Ansible markup in plugin/module/role ``short_description`` (https://github.com/ansible-community/antsibull-changelog/issues/207, https://github.com/ansible-community/antsibull-changelog/pull/213)."

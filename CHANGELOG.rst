@@ -4,6 +4,21 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.35.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Antsibull-changelog now also depends on antsibull-docs-parser (https://github.com/ansible-community/antsibull-changelog/pull/213).
+- Declare support for Python 3.14 (https://github.com/ansible-community/antsibull-changelog/pull/207).
+- Process Ansible markup in plugin/module/role ``short_description`` (https://github.com/ansible-community/antsibull-changelog/issues/207, https://github.com/ansible-community/antsibull-changelog/pull/213).
+
 v0.34.0
 =======
 
