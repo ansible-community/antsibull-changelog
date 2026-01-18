@@ -96,9 +96,7 @@ def test_changelog_fragment_lint_broken(  # pylint: disable=redefined-outer-name
     # Lint fragments
     rc, stdout, stderr = collection_changelog.run_tool_w_output("lint", [])
     assert rc == C.RC_INVALID_FRAGMENT
-    assert (
-        stdout
-        == r"""
+    assert stdout == r"""
 changelogs/fragments/bad-rst.yml:0:0: (WARNING/2) Inline emphasis start-string without end-string.
 changelogs/fragments/int-instead-of-list.yml:0:0: section "bugfixes" must be type list not int
 changelogs/fragments/int-instead-of-string.yml:0:0: section "release_summary" must be type str not int
@@ -121,16 +119,12 @@ changelogs/fragments/not-a-dict.yaml:0:0: file must be a mapping not int
 changelogs/fragments/string-instead-of-list.yml:0:0: section "minor_changes" must be type list not str
 changelogs/fragments/wrong-category.yaml:0:0: invalid section: minor_change
 """.lstrip()
-    )
 
     # Lint non-existing fragment
     rc, stdout, stderr = collection_changelog.run_tool_w_output(
         "lint", ["changelogs/fragments/non-existing"]
     )
     assert rc == C.RC_INVALID_FRAGMENT
-    assert (
-        stdout
-        == r"""
+    assert stdout == r"""
 changelogs/fragments/non-existing:0:0: yaml parsing error
 """.lstrip()
-    )

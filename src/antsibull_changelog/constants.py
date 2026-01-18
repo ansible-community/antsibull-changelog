@@ -6,7 +6,6 @@
 Constants used by antsibull-changelog.
 """
 
-
 # Return codes used in cli.py and test files.
 RC_SUCCESS = 0  # Success
 RC_UNHANDLED_ERROR = 1  # Unhandled error.  See the Traceback for more information.

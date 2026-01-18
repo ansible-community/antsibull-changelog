@@ -566,12 +566,10 @@ def test_config_loading_bad_yaml(collection_config_path):
 
 
 def test_render_config(collection_config_path):
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output: []
-"""
-    )
+""")
     paths = PathsConfig.detect()
     collection_details = CollectionDetails(paths)
     with pytest.raises(
@@ -581,15 +579,13 @@ output: []
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     format: rst
     title_version_depth: -1
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         # Note that the message is produced by pydantic, so it can change over time.
@@ -597,15 +593,13 @@ output:
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     format: rst
     global_toc_depth: 0
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         # Note that the message is produced by pydantic, so it can change over time.
@@ -613,15 +607,13 @@ output:
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     format: rst
     filename_version_depth: -1
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         # Note that the message is produced by pydantic, so it can change over time.
@@ -629,58 +621,50 @@ output:
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     format: 42
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         match=" format must be a string",
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     format: rest
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         match=" format is an unknown extension: Unknown extension 'rest'",
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo%s
     filename_version_depth: 0
     format: rst
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         match=' if filename_version_depth is zero, file must not contain "%s"',
     ):
         ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output:
   - file: foo
     filename_version_depth: 1
     format: rst
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         match=' if filename_version_depth is non-zero, file must contain "%s"',
@@ -689,27 +673,23 @@ output:
 
 
 def test_LegacyOutputOptions(collection_config_path):
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output_formats:
   - rst
-"""
-    )
+""")
     paths = PathsConfig.detect()
     collection_details = CollectionDetails(paths)
     ChangelogConfig.load(paths, collection_details)
 
-    collection_config_path.write_text(
-        r"""
+    collection_config_path.write_text(r"""
 changes_format: combined
 output_formats:
   - rst
 output:
   - file: foo
     format: rst
-"""
-    )
+""")
     with pytest.raises(
         ChangelogError,
         match="Error while parsing changelog config: output can not be combined with output_formats",

@@ -812,12 +812,9 @@ New Modules
     # Lint fragments
     rc, stdout, stderr = ansible_changelog.run_tool_w_output("lint", ["-vv"])
     assert rc == C.RC_INVALID_FRAGMENT
-    assert (
-        stdout
-        == r"""
+    assert stdout == r"""
 changelogs/fragments/trivial.yml:0:0: invalid section: trivial
 """.lstrip()
-    )
 
 
 FAKE_PLUGINS = {

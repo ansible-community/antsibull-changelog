@@ -819,9 +819,7 @@ name = "random-project"
 version = "1.0.0"
 description = "A Random Project"
 license = "GPL-3.0-or-later"
-""".encode(
-            "utf-8"
-        ),
+""".encode("utf-8"),
     )
 
     # Release
@@ -916,9 +914,7 @@ name = "random-project"
 version = "1.0.0"
 description = "A Random Project"
 license = "GPL-3.0-or-later"
-""".encode(
-            "utf-8"
-        ),
+""".encode("utf-8"),
     )
 
     # Release

@@ -56,9 +56,7 @@ releases:
       release_summary: "Baz"
     release_date: "2024-06-18"
 other stuff: foobar
-""".encode(
-            "utf-8"
-        ),
+""".encode("utf-8"),
     )
 
     assert (
