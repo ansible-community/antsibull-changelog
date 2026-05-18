@@ -1,0 +1,2 @@
+bugfixes:
+  - "Ensure that there is a newline between the Table of Contents in rendered MarkDown documents and following text content (https://github.com/ansible-community/antsibull-changelog/pull/217)."

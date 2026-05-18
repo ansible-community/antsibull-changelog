@@ -2555,6 +2555,10 @@ def test_changelog_ancestor(  # pylint: disable=redefined-outer-name
             file="CHANGELOG.rst",
             format=TextFormat.RESTRUCTURED_TEXT,
         ),
+        ChangelogOutput(
+            file="CHANGELOG.md",
+            format=TextFormat.MARKDOWN,
+        ),
     ]
     collection_changelog.config.mention_ancestor = True
     collection_changelog.set_config(collection_changelog.config)
@@ -2577,6 +2581,7 @@ def test_changelog_ancestor(  # pylint: disable=redefined-outer-name
     diff = collection_changelog.diff()
     assert diff.added_dirs == []
     assert diff.added_files == [
+        "CHANGELOG.md",
         "CHANGELOG.rst",
     ]
     assert diff.removed_dirs == []
@@ -2616,5 +2621,25 @@ Release Summary
 ---------------
 
 This is the second major release.
+"""
+    )
+
+    assert diff.file_contents["CHANGELOG.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+
+- <a href="#v2-0-0">v2\.0\.0</a>
+    - <a href="#release-summary">Release Summary</a>
+
+This changelog describes changes after version 1\.0\.0\.
+
+<a id="v2-0-0"></a>
+## v2\.0\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+This is the second major release\.
 """
     )

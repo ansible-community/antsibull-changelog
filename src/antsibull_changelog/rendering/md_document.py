@@ -104,6 +104,7 @@ class MDTOCRenderer(BaseContent):
             lines.append(f"**{md_escape(self.title)}**\n")
         for entry in toc:
             self._append_toc_entry(lines, entry, "")
+        ensure_newline_after_last_content(lines)
 
 
 class MDAbstractRenderer(AbstractRendererEx):
