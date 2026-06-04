@@ -109,7 +109,7 @@ Bugfix release\.
 <a id="bugfixes-1"></a>
 ### Bugfixes
 
-* When linting found RST problems with rstcheck\, the error messages were reduced to a single letter \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/188](https\://github\.com/ansible\-community/antsibull\-changelog/pull/188)\)\.
+* When linting found RST problems with rstcheck\, the error messages were reduced to a single letter \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/189](https\://github\.com/ansible\-community/antsibull\-changelog/pull/189)\)\.
 
 <a id="v0-31-1"></a>
 ## v0\.31\.1
