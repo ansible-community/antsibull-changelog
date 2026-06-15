@@ -124,7 +124,7 @@ class ChangelogGenerator(ChangelogGeneratorBase):
         if section_renderer:
             section_renderer.close()
 
-    def generate_to(  # pylint: disable=too-many-arguments
+    def generate_to(
         self,
         renderer: AbstractRenderer,
         squash: bool = False,

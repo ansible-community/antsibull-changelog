@@ -89,7 +89,6 @@ class TextRenderer(BaseContent):
     indent_first: str
     indent_next: str
 
-    # pylint: disable-next=too-many-arguments
     def __init__(
         self,
         text: str,

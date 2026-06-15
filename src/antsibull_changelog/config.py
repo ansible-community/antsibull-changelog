@@ -109,7 +109,7 @@ class PathsConfig:
         galaxy_path: str | None,
         ansible_doc_path: str | None,
         is_other_project: bool = False,
-    ):  # pylint: disable=too-many-arguments
+    ):
         """
         Forces configuration with given base path.
 
