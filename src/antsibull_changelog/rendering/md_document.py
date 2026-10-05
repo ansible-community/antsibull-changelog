@@ -107,7 +107,7 @@ class MDTOCRenderer(BaseContent):
         ensure_newline_after_last_content(lines)
 
 
-class MDAbstractRenderer(AbstractRendererEx):
+class MDAbstractRenderer(AbstractRendererEx):  # pylint: disable=abstract-method
     """
     Abstract MarkDown renderer.
     """

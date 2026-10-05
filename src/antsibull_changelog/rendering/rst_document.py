@@ -54,7 +54,7 @@ class RSTTOCRenderer(BaseContent):
         lines.append("")
 
 
-class RSTAbstractRenderer(AbstractRendererEx):
+class RSTAbstractRenderer(AbstractRendererEx):  # pylint: disable=abstract-method
     """
     Abstract RST renderer.
     """
