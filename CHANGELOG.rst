@@ -4,6 +4,24 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.35.2
+=======
+
+Release Summary
+---------------
+
+Maintenance release.
+
+Minor Changes
+-------------
+
+- Internal change to allow rendering MarkDown documents without section IDs (https://github.com/ansible-community/antsibull-changelog/pull/226).
+
+Bugfixes
+--------
+
+- Declare support for Python 3.15 (https://github.com/ansible-community/antsibull-changelog/pull/227).
+
 v0.35.1
 =======
 

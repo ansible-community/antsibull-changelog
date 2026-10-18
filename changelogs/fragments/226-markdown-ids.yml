@@ -1,2 +1,0 @@
-minor_changes:
-  - "Internal change to allow rendering MarkDown documents without section IDs (https://github.com/ansible-community/antsibull-changelog/pull/226)."
