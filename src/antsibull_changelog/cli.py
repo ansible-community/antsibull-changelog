@@ -21,7 +21,7 @@ import subprocess
 import sys
 import traceback
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, cast, overload
 
 try:
     import argcomplete
@@ -315,7 +315,9 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     return parser
 
 
-def load_collection_details(collection_details: CollectionDetails, args: Any):
+def load_collection_details(
+    collection_details: CollectionDetails, args: argparse.Namespace
+):
     """
     Override collection details data with CLI args.
     """
@@ -363,7 +365,7 @@ def run(args: list[str]) -> int:
         return C.RC_UNHANDLED_ERROR
 
 
-def command_init(args: Any) -> int:
+def command_init(args: argparse.Namespace) -> int:
     """
     Initialize a changelog config.
 
@@ -431,7 +433,7 @@ def _determine_flatmap(
 
 
 def _get_refresh_config(
-    args: Any, config: ChangelogConfig
+    args: argparse.Namespace, config: ChangelogConfig
 ) -> tuple[str | None, str | None]:
     refresh_plugins: str | None = args.refresh_plugins
     refresh_fragments: str | None = args.refresh_fragments
@@ -473,8 +475,32 @@ def _get_archive_loader(
     return load_extra_fragments
 
 
+@overload
+def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
+    args: argparse.Namespace,
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+    config: ChangelogConfig,
+    changes: ChangesData,
+    plugins: list[PluginDescription],
+    fragments: list[ChangelogFragment],
+) -> tuple[list[PluginDescription], list[ChangelogFragment]]: ...
+
+
+@overload
+def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
+    args: argparse.Namespace,
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+    config: ChangelogConfig,
+    changes: ChangesData,
+    plugins: list[PluginDescription] | None = None,
+    fragments: list[ChangelogFragment] | None = None,
+) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]: ...
+
+
 def _do_refresh(  # pylint: disable=too-many-arguments
-    args: Any,
+    args: argparse.Namespace,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -595,7 +621,7 @@ def _get_version_and_codename(
     paths: PathsConfig,
     config: ChangelogConfig,
     collection_details: CollectionDetails,
-    args: Any,
+    args: argparse.Namespace,
 ) -> tuple[str, str | None]:
     """
     Extract version and codename for a release from arguments, autodetect them, or fail.
@@ -638,7 +664,7 @@ def _get_version_and_codename(
     return version, codename
 
 
-def command_release(args: Any) -> int:
+def command_release(args: argparse.Namespace) -> int:
     """
     Add a new release to a changelog.
 
@@ -668,9 +694,6 @@ def command_release(args: Any) -> int:
             changes.latest_version if changes.has_release else changes.ancestor
         )
 
-    plugins: list[PluginDescription] | None
-    fragments: list[ChangelogFragment] | None
-
     plugins = load_plugins(
         paths=paths,
         collection_details=collection_details,
@@ -695,16 +718,14 @@ def command_release(args: Any) -> int:
     add_release(
         config,
         changes,
-        # Need cast() here because there is currently no way to mark _do_refresh so that
-        # it does not convert a non-None value to None for plugins or fragments
-        cast(list[PluginDescription], plugins),
-        cast(list[ChangelogFragment], fragments),
+        plugins,
+        fragments,
         version,
         codename,
         date,
         update_existing=args.update_existing,
         prev_version=prev_version,
-        objects=cast(list[PluginDescription], plugins),
+        objects=plugins,
     )
     for output in config.output:
         generate_changelog(
@@ -747,7 +768,7 @@ def _get_outputs(
     return config.output
 
 
-def command_generate(args: Any) -> int:
+def command_generate(args: argparse.Namespace) -> int:
     """
     (Re-)generate the reStructuredText version of the changelog.
 
@@ -801,7 +822,7 @@ def command_generate(args: Any) -> int:
     return C.RC_SUCCESS
 
 
-def command_lint(args: Any) -> int:
+def command_lint(args: argparse.Namespace) -> int:
     """
     Lint changelog fragments.
 
@@ -855,7 +876,7 @@ def lint_fragments(
     return C.RC_INVALID_FRAGMENT if messages else C.RC_SUCCESS
 
 
-def command_lint_changelog_yaml(args: Any) -> int:
+def command_lint_changelog_yaml(args: argparse.Namespace) -> int:
     """
     Lint changelogs/changelog.yaml file.
 
@@ -877,7 +898,7 @@ def command_lint_changelog_yaml(args: Any) -> int:
     return C.RC_INVALID_FRAGMENT if messages else C.RC_SUCCESS
 
 
-def command_reformat(args: Any) -> int:
+def command_reformat(args: argparse.Namespace) -> int:
     """
     Reformat changelogs/changelog.yaml file.
 
