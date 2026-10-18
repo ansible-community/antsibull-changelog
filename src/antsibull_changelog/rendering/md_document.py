@@ -55,15 +55,22 @@ class MDTOCRenderer(BaseContent):
     title: str | None
     max_depth: int | None
     toc: list[TOCEntry] | None
+    add_section_ids: bool
 
     def __init__(
-        self, owner: "MDAbstractRenderer", title: str | None, max_depth: int | None
+        self,
+        owner: "MDAbstractRenderer",
+        title: str | None,
+        max_depth: int | None,
+        *,
+        add_section_ids: bool = True,
     ):
         super().__init__(already_closed=True)
         self.owner = owner
         self.title = title
         self.max_depth = max_depth
         self.toc = None
+        self.add_section_ids = add_section_ids
 
     @staticmethod
     def _collect_toc_entries(
@@ -87,10 +94,13 @@ class MDTOCRenderer(BaseContent):
         )
 
     def _append_toc_entry(self, lines: list[str], entry: TOCEntry, indent: str) -> None:
-        lines.append(
-            f'{indent}- <a href="#{html_escape(entry.section.ref_id)}">'
-            f"{md_escape(entry.section.title)}</a>"
-        )
+        if self.add_section_ids:
+            lines.append(
+                f'{indent}- <a href="#{html_escape(entry.section.ref_id)}">'
+                f"{md_escape(entry.section.title)}</a>"
+            )
+        else:
+            lines.append(f"{indent}- {md_escape(entry.section.title)}")
         next_indent = indent + " " * 4
         for child in entry.children:
             self._append_toc_entry(lines, child, next_indent)
@@ -112,20 +122,28 @@ class MDAbstractRenderer(AbstractRendererEx):  # pylint: disable=abstract-method
     Abstract MarkDown renderer.
     """
 
-    def __init__(self, root: DocumentRendererEx):
+    def __init__(self, root: DocumentRendererEx, *, add_section_ids: bool = True):
         super().__init__(root, "* ")
+        self.add_section_ids = add_section_ids
 
     def add_section(self, title: str) -> SectionRenderer:
         if self.closed:
             raise ValueError("{self} is already closed")
-        section = MDSectionRenderer(self._get_level() + 1, title, self.root)
+        section = MDSectionRenderer(
+            self._get_level() + 1,
+            title,
+            self.root,
+            add_section_ids=self.add_section_ids,
+        )
         self.content.append(section)
         return section
 
     def add_toc(self, title: str | None = None, max_depth: int | None = None) -> None:
         if self.closed:
             raise ValueError("{self} is already closed")
-        self.content.append(MDTOCRenderer(self, title, max_depth))
+        self.content.append(
+            MDTOCRenderer(self, title, max_depth, add_section_ids=self.add_section_ids)
+        )
 
 
 class MDSectionRenderer(MDAbstractRenderer, SectionRenderer):
@@ -138,8 +156,15 @@ class MDSectionRenderer(MDAbstractRenderer, SectionRenderer):
     title: str
     ref_id: str
 
-    def __init__(self, level: int, title: str, root: DocumentRendererEx):
-        super().__init__(root=root)
+    def __init__(
+        self,
+        level: int,
+        title: str,
+        root: DocumentRendererEx,
+        *,
+        add_section_ids: bool = True,
+    ):
+        super().__init__(root=root, add_section_ids=add_section_ids)
         self._level = level
         self.title = title
         self.ref_id = cast(MDDocumentRenderer, self.root).get_ref_id(self.title)
@@ -154,7 +179,8 @@ class MDSectionRenderer(MDAbstractRenderer, SectionRenderer):
     def append_lines(self, lines: list[str], start_level: int = 0) -> None:
         ensure_newline_after_last_content(lines)
         heading = "#" * (1 + self._level - start_level)
-        lines.append(f'<a id="{html_escape(self.ref_id)}"></a>')
+        if self.add_section_ids:
+            lines.append(f'<a id="{html_escape(self.ref_id)}"></a>')
         lines.append(f"{heading} {md_escape(self.title)}")
         lines.append("")
         for content in self.content:
@@ -180,8 +206,8 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
     unsupported_class_names: set[str]
     warnings: list[str]
 
-    def __init__(self, start_level: int = 0):
-        super().__init__(root=self)
+    def __init__(self, start_level: int = 0, *, add_section_ids: bool = True):
+        super().__init__(root=self, add_section_ids=add_section_ids)
         DocumentRendererEx.__init__(self, start_level=start_level)
         self.global_context = GlobalContext()
         self.unsupported_class_names = set()
