@@ -618,3 +618,27 @@ releases:
       - 226-markdown-ids.yml
       - python315.yml
     release_date: '2026-10-18'
+  0.36.0:
+    changes:
+      breaking_changes:
+        - The ``--is-collection`` and ``--collection-flatmap`` options no longer accept
+          boolean values (``true``/``yes``/``false``/``no``), but instead accept no
+          value and have a ``--no-is-collection`` respectively ``--no-collection-flatmap``
+          analogue (https://github.com/ansible-community/antsibull-changelog/pull/232).
+      minor_changes:
+        - Add internal API for generating changelogs as text instead of writing them
+          to files (https://github.com/ansible-community/antsibull-changelog/pull/231).
+        - In internal code, allow to pass extra keyword arguments to the document
+          renderer (https://github.com/ansible-community/antsibull-changelog/pull/233).
+        - Internal change that makes some private code public (https://github.com/ansible-community/antsibull-changelog/pull/230).
+        - Internal change to allow loading plugin information without invoking the
+          cache (https://github.com/ansible-community/antsibull-changelog/pull/229).
+      release_summary: Feature release with breaking changes.
+    fragments:
+      - 0.36.0.yml
+      - 229-cache.yml
+      - 230-refactor.yml
+      - 231-generate.yml
+      - 232-flag-breaking.yml
+      - 233-extra-args.yml
+    release_date: '2026-10-25'

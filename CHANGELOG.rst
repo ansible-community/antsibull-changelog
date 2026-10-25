@@ -4,6 +4,27 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.36.0
+=======
+
+Release Summary
+---------------
+
+Feature release with breaking changes.
+
+Minor Changes
+-------------
+
+- Add internal API for generating changelogs as text instead of writing them to files (https://github.com/ansible-community/antsibull-changelog/pull/231).
+- In internal code, allow to pass extra keyword arguments to the document renderer (https://github.com/ansible-community/antsibull-changelog/pull/233).
+- Internal change that makes some private code public (https://github.com/ansible-community/antsibull-changelog/pull/230).
+- Internal change to allow loading plugin information without invoking the cache (https://github.com/ansible-community/antsibull-changelog/pull/229).
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- The ``--is-collection`` and ``--collection-flatmap`` options no longer accept boolean values (``true``/``yes``/``false``/``no``), but instead accept no value and have a ``--no-is-collection`` respectively ``--no-collection-flatmap`` analogue (https://github.com/ansible-community/antsibull-changelog/pull/232).
+
 v0.35.2
 =======
 

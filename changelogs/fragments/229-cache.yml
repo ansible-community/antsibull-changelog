@@ -1,3 +1,0 @@
-minor_changes:
-  - Internal change to allow loading plugin information without invoking the cache
-    (https://github.com/ansible-community/antsibull-changelog/pull/229).

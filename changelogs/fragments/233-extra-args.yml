@@ -1,3 +1,0 @@
-minor_changes:
-  - In internal code, allow to pass extra keyword arguments to the document renderer
-    (https://github.com/ansible-community/antsibull-changelog/pull/233).
