@@ -627,6 +627,8 @@ def load_plugins(  # pylint: disable=too-many-arguments
     force_reload: bool = False,
     use_ansible_doc: bool = False,
     add_plugin_period: bool = False,
+    *,
+    ignore_cache: bool = False,
 ) -> list[PluginDescription]:
     """
     Load plugins from ansible-doc.
@@ -636,6 +638,8 @@ def load_plugins(  # pylint: disable=too-many-arguments
     :arg version: The current version. Used for caching data
     :arg force_reload: Set to ``True`` to ignore potentially cached data
     :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
+    :arg ignore_cache: Set to ``True`` to neither read nor write the cache.
+        Implies ``force_reload=True``.
     :return: A list of all plugins
     """
     if paths.is_other_project:
@@ -644,7 +648,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
     plugin_cache_path = os.path.join(paths.changelog_dir, ".plugin-cache.yaml")
     plugins_data: dict[str, Any] = {}
 
-    if not force_reload and os.path.exists(plugin_cache_path):
+    if not ignore_cache and not force_reload and os.path.exists(plugin_cache_path):
         plugins_data = load_yaml_file(plugin_cache_path)
         if version != plugins_data["version"]:
             LOGGER.info(
@@ -658,7 +662,8 @@ def load_plugins(  # pylint: disable=too-many-arguments
         plugins_data = _refresh_plugin_cache(
             paths, collection_details, config, version, use_ansible_doc
         )
-        store_yaml_file(plugin_cache_path, plugins_data)
+        if not ignore_cache:
+            store_yaml_file(plugin_cache_path, plugins_data)
 
     plugins = PluginDescription.from_dict(
         plugins_data["plugins"],
