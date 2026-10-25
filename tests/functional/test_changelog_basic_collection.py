@@ -1547,13 +1547,11 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--date",
                 "2020-01-02",
                 "--is-collection",
-                "true",
                 "--collection-namespace",
                 "cloud",
                 "--collection-name",
                 "sky",
                 "--collection-flatmap",
-                "yes",
             ],
         )
         == C.RC_COMMAND_FAILED
@@ -1572,7 +1570,6 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--collection-name",
                 "sky",
                 "--collection-flatmap",
-                "yes",
             ],
         )
         == C.RC_COMMAND_FAILED
@@ -1587,11 +1584,9 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--version",
                 "1.0.0",
                 "--is-collection",
-                "true",
                 "--collection-name",
                 "sky",
                 "--collection-flatmap",
-                "yes",
             ],
         )
         == C.RC_COMMAND_FAILED
@@ -1606,11 +1601,9 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--version",
                 "1.0.0",
                 "--is-collection",
-                "true",
                 "--collection-namespace",
                 "cloud",
                 "--collection-flatmap",
-                "yes",
             ],
         )
         == C.RC_COMMAND_FAILED
@@ -1625,7 +1618,6 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--version",
                 "1.0.0",
                 "--is-collection",
-                "true",
                 "--collection-namespace",
                 "cloud",
                 "--collection-name",
@@ -1711,13 +1703,11 @@ def test_changelog_release_simple_no_galaxy(  # pylint: disable=redefined-outer-
                 "--version",
                 "1.0.0",
                 "--is-collection",
-                "true",
                 # The following two options are not needed since the tool doesn't have to scan for plugins,
                 # and since FQCNs are not used:
                 # '--collection-namespace', 'cloud',
                 # '--collection-name', 'sky',
                 "--collection-flatmap",
-                "yes",
             ],
         )
         == C.RC_SUCCESS

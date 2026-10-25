@@ -21,7 +21,7 @@ import subprocess
 import sys
 import traceback
 from collections.abc import Callable
-from typing import Any, Literal, cast, overload
+from typing import Literal, cast, overload
 
 try:
     import argcomplete
@@ -97,23 +97,9 @@ def set_paths(
         raise ChangelogError(  # pylint: disable=raise-missing-from
             "Only the 'init' command can be used outside an Ansible checkout and outside a "
             "collection repository, or inside one without changelogs/config.yaml.\n"
-            "If you are in a collection without galaxy.yml, specify `--is-collection yes` "
+            "If you are in a collection without galaxy.yml, specify `--is-collection` "
             "on the command line."
         )
-
-
-def parse_boolean_arg(value: Any) -> bool:
-    """
-    Parse a string as a boolean
-    """
-    if isinstance(value, bool):
-        return value
-    value = str(value)
-    if value.lower() in ("yes", "true"):
-        return True
-    if value.lower() in ("no", "false"):
-        return False
-    raise argparse.ArgumentTypeError("Cannot interpret as boolean")
 
 
 def create_argparser(program_name: str) -> argparse.ArgumentParser:
@@ -137,7 +123,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     is_collection = argparse.ArgumentParser(add_help=False)
     is_collection.add_argument(
         "--is-collection",
-        type=parse_boolean_arg,
+        action=argparse.BooleanOptionalAction,
         help="override whether this is a collection or not "
         "(needed when galaxy.yml does not exist)",
     )
@@ -153,7 +139,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     )
     collection_details.add_argument(
         "--collection-flatmap",
-        type=parse_boolean_arg,
+        action=argparse.BooleanOptionalAction,
         help="override collection flatmapping flag "
         "(needed when galaxy.yml does not exist)",
     )
