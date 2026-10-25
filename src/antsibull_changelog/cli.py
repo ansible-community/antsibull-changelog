@@ -48,6 +48,7 @@ from .logger import LOGGER, setup_logger
 from .plugins import PluginDescription, load_plugins
 from .rendering.changelog import generate_changelog
 from .toml import has_toml_loader_available, load_toml
+from .utils import determine_flatmap
 
 
 def set_paths(
@@ -415,23 +416,6 @@ def command_init(args: argparse.Namespace) -> int:
     return C.RC_SUCCESS
 
 
-def _determine_flatmap(
-    collection_details: CollectionDetails, config: ChangelogConfig
-) -> bool:
-    """
-    Determine whether flatmapping is used or not for the collection.
-    """
-    flatmap = not config.is_collection
-    flatmap_ = config.flatmap
-    if flatmap_ is not None:
-        flatmap = flatmap_
-    if config.is_collection:
-        flatmap_ = collection_details.get_flatmap()
-        if flatmap_ is not None:
-            flatmap = flatmap_
-    return flatmap
-
-
 def _get_refresh_config(
     args: argparse.Namespace, config: ChangelogConfig
 ) -> tuple[str | None, str | None]:
@@ -680,7 +664,7 @@ def command_release(args: argparse.Namespace) -> int:
 
     load_collection_details(collection_details, args)
 
-    flatmap = _determine_flatmap(collection_details, config)
+    flatmap = determine_flatmap(collection_details, config)
 
     version, codename = _get_version_and_codename(
         paths, config, collection_details, args
@@ -786,7 +770,7 @@ def command_generate(args: argparse.Namespace) -> int:
 
     load_collection_details(collection_details, args)
 
-    flatmap = _determine_flatmap(collection_details, config)
+    flatmap = determine_flatmap(collection_details, config)
 
     changes = load_changes(config)
     if version is not None:
