@@ -21,7 +21,7 @@ import subprocess
 import sys
 import traceback
 from collections.abc import Callable
-from typing import Any, cast, overload
+from typing import Any, Literal, cast, overload
 
 try:
     import argcomplete
@@ -416,13 +416,22 @@ def command_init(args: argparse.Namespace) -> int:
     return C.RC_SUCCESS
 
 
+RefreshPlugins = Literal["allow-removal", "prevent-removal"]
+RefreshFragments = Literal["without-archives", "with-archives"]
+
+
 def _get_refresh_config(
-    args: argparse.Namespace, config: ChangelogConfig
-) -> tuple[str | None, str | None]:
-    refresh_plugins: str | None = args.refresh_plugins
-    refresh_fragments: str | None = args.refresh_fragments
+    *,
+    args_refresh_plugins: RefreshPlugins | None,
+    args_refresh_fragments: RefreshFragments | None,
+    args_refresh: bool,
+    config: ChangelogConfig,
+) -> tuple[RefreshPlugins | None, str | None]:
+    refresh_plugins = args_refresh_plugins
+    refresh_fragments = args_refresh_fragments
+
     always_refresh = config.always_refresh
-    if args.refresh or always_refresh == "full":
+    if args_refresh or always_refresh == "full":
         if refresh_plugins is None:
             refresh_plugins = "allow-removal"
         if refresh_fragments is None:
@@ -460,8 +469,13 @@ def _get_archive_loader(
 
 
 @overload
-def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
-    args: argparse.Namespace,
+def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
+    *,
+    args_refresh_plugins: RefreshPlugins | None,
+    args_refresh_fragments: RefreshFragments | None,
+    args_refresh: bool,
+    args_reload_plugins: bool,
+    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -472,8 +486,13 @@ def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
 
 
 @overload
-def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
-    args: argparse.Namespace,
+def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
+    *,
+    args_refresh_plugins: RefreshPlugins | None,
+    args_refresh_fragments: RefreshFragments | None,
+    args_refresh: bool,
+    args_reload_plugins: bool,
+    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -483,8 +502,13 @@ def _do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
 ) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]: ...
 
 
-def _do_refresh(  # pylint: disable=too-many-arguments
-    args: argparse.Namespace,
+def do_refresh(  # pylint: disable=too-many-arguments,too-many-locals
+    *,
+    args_refresh_plugins: RefreshPlugins | None,
+    args_refresh_fragments: RefreshFragments | None,
+    args_refresh: bool,
+    args_reload_plugins: bool,
+    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -492,7 +516,15 @@ def _do_refresh(  # pylint: disable=too-many-arguments
     plugins: list[PluginDescription] | None = None,
     fragments: list[ChangelogFragment] | None = None,
 ) -> tuple[list[PluginDescription] | None, list[ChangelogFragment] | None]:
-    refresh_plugins, refresh_fragments = _get_refresh_config(args, config)
+    """
+    Refresh plugins and fragments depending on the settings and changelog configuration.
+    """
+    refresh_plugins, refresh_fragments = _get_refresh_config(
+        args_refresh_plugins=args_refresh_plugins,
+        args_refresh_fragments=args_refresh_fragments,
+        args_refresh=args_refresh,
+        config=config,
+    )
 
     if refresh_plugins:
         if plugins is None:
@@ -501,8 +533,8 @@ def _do_refresh(  # pylint: disable=too-many-arguments
                 collection_details=collection_details,
                 config=config,
                 version=changes.latest_version,
-                force_reload=args.reload_plugins,
-                use_ansible_doc=args.use_ansible_doc,
+                force_reload=args_reload_plugins,
+                use_ansible_doc=args_use_ansible_doc,
                 add_plugin_period=config.add_plugin_period,
             )
         allow_removals = refresh_plugins == "allow-removal"
@@ -696,8 +728,18 @@ def command_release(args: argparse.Namespace) -> int:
         )
         return lint_rc
 
-    plugins, fragments = _do_refresh(
-        args, paths, collection_details, config, changes, plugins, fragments
+    plugins, fragments = do_refresh(
+        args_refresh_plugins=args.refresh_plugins,
+        args_refresh_fragments=args.refresh_fragments,
+        args_refresh=args.refresh,
+        args_reload_plugins=args.reload_plugins,
+        args_use_ansible_doc=args.use_ansible_doc,
+        paths=paths,
+        collection_details=collection_details,
+        config=config,
+        changes=changes,
+        plugins=plugins,
+        fragments=fragments,
     )
     add_release(
         config,
@@ -782,7 +824,17 @@ def command_generate(args: argparse.Namespace) -> int:
     if not changes.has_release:
         print("Cannot create changelog when not at least one release has been added.")
         return C.RC_COMMAND_FAILED
-    plugins, _ = _do_refresh(args, paths, collection_details, config, changes)
+    plugins, _ = do_refresh(
+        args_refresh_plugins=args.refresh_plugins,
+        args_refresh_fragments=args.refresh_fragments,
+        args_refresh=args.refresh,
+        args_reload_plugins=args.reload_plugins,
+        args_use_ansible_doc=args.use_ansible_doc,
+        paths=paths,
+        collection_details=collection_details,
+        config=config,
+        changes=changes,
+    )
     if args.reload_plugins and plugins is None:
         plugins = load_plugins(
             paths=paths,
