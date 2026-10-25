@@ -1,0 +1,4 @@
+breaking_changes:
+  - The ``--is-collection`` and ``--collection-flatmap`` options no longer accept boolean values (``true``/``yes``/``false``/``no``),
+    but instead accept no value and have a ``--no-is-collection`` respectively ``--no-collection-flatmap`` analogue
+    (https://github.com/ansible-community/antsibull-changelog/pull/232).
