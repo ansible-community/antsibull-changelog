@@ -18,7 +18,7 @@ from typing import Any
 import packaging.version
 import semantic_version
 
-from .config import ChangelogConfig
+from .config import ChangelogConfig, CollectionDetails
 from .errors import ChangelogError
 
 
@@ -105,3 +105,20 @@ def collect_versions(
         version_list.append(version)
 
     return result
+
+
+def determine_flatmap(
+    collection_details: CollectionDetails, config: ChangelogConfig
+) -> bool:
+    """
+    Determine whether flatmapping is used or not for the collection.
+    """
+    flatmap = not config.is_collection
+    flatmap_ = config.flatmap
+    if flatmap_ is not None:
+        flatmap = flatmap_
+    if config.is_collection:
+        flatmap_ = collection_details.get_flatmap()
+        if flatmap_ is not None:
+            flatmap = flatmap_
+    return flatmap

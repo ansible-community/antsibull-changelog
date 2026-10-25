@@ -1,0 +1,3 @@
+minor_changes:
+  - Internal change that makes some private code public
+    (https://github.com/ansible-community/antsibull-changelog/pull/230).
