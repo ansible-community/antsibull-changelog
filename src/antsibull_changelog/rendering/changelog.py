@@ -371,15 +371,15 @@ class ChangelogGenerator(ChangelogGeneratorBase):
 
 
 def create_document_renderer(
-    document_format: TextFormat, start_level: int = 0
+    document_format: TextFormat, start_level: int = 0, **kwargs
 ) -> DocumentRenderer:
     """
     Create a document renderer for a given format.
     """
     if document_format == TextFormat.RESTRUCTURED_TEXT:
-        return RSTDocumentRenderer(start_level=start_level)
+        return RSTDocumentRenderer(start_level=start_level, **kwargs)
     if document_format == TextFormat.MARKDOWN:
-        return MDDocumentRenderer(start_level=start_level)
+        return MDDocumentRenderer(start_level=start_level, **kwargs)
     raise ValueError(f"Unsupported format {document_format}")
 
 
@@ -397,13 +397,14 @@ def _create_changelog_path(
     return os.path.join(paths.base_dir, changelog_filename)
 
 
-def generate_changelog_content(
+def generate_changelog_content(  # pylint: disable=too-many-arguments
     config: ChangelogConfig,
     changes: ChangesData,
     output: ChangelogOutput,
     *,
     flatmap: bool = True,
     only_latest: bool = False,
+    renderer_kwargs: Mapping[str, Any] | None = None,
 ) -> tuple[str, list[str]]:
     """
     Generate the changelog as text.
@@ -419,7 +420,7 @@ def generate_changelog_content(
         render_config=output,
     )
     renderer = create_document_renderer(
-        output.format, start_level=1 if only_latest else 0
+        output.format, start_level=1 if only_latest else 0, **(renderer_kwargs or {})
     )
     generator.generate(renderer, only_latest=only_latest)
 
@@ -435,6 +436,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
     *,
     flatmap: bool = True,
     only_latest: bool = False,
+    renderer_kwargs: Mapping[str, Any] | None = None,
 ):
     """
     Generate the changelog file.
@@ -451,7 +453,7 @@ def generate_changelog(  # pylint: disable=too-many-arguments
         render_config=output,
     )
     renderer = create_document_renderer(
-        output.format, start_level=1 if only_latest else 0
+        output.format, start_level=1 if only_latest else 0, **(renderer_kwargs or {})
     )
     generator.generate(renderer, only_latest=only_latest)
 
