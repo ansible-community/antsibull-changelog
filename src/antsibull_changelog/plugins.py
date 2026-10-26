@@ -311,6 +311,10 @@ def list_plugins_walk(
     return sorted(result)
 
 
+def _check_output(command: list[str]) -> bytes:
+    return subprocess.run(command, check=True, stdout=subprocess.PIPE).stdout
+
+
 def list_plugins_ansibledoc(
     paths: PathsConfig,
     playbook_dir: str | None,
@@ -338,7 +342,7 @@ def list_plugins_ansibledoc(
         command.extend(["--playbook-dir", playbook_dir])
     if collection_name:
         command.append(collection_name)
-    output = subprocess.check_output(command)
+    output = _check_output(command)
     plugins_list = json.loads(output.decode("utf-8"))
 
     if not collection_name:
@@ -374,7 +378,7 @@ def run_ansible_doc(
     if playbook_dir:
         command.extend(["--playbook-dir", playbook_dir])
     command.extend(plugin_names)
-    output = subprocess.check_output(command)
+    output = _check_output(command)
     return json.loads(output.decode("utf-8"))
 
 
@@ -389,7 +393,7 @@ def run_ansible_doc_metadata_dump(
         command.append(collection_name)
     if playbook_dir:
         command.extend(["--playbook-dir", playbook_dir])
-    output = subprocess.check_output(command)
+    output = _check_output(command)
     return json.loads(output.decode("utf-8"))
 
 
@@ -569,7 +573,7 @@ def _get_ansible_core_version(paths: PathsConfig) -> packaging.version.Version:
         pass
 
     command = [paths.ansible_doc_path, "--version"]
-    output = subprocess.check_output(command).decode("utf-8")
+    output = _check_output(command).decode("utf-8")
     for regex in (r"^ansible-doc \[(?:core|base) ([^\]]+)\]", r"^ansible-doc ([^\s]+)"):
         match = re.match(regex, output)
         if match:
