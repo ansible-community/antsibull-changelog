@@ -1969,7 +1969,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
             return_value=("role",),
         ):
             with mock.patch(
-                "subprocess.check_output",
+                "subprocess.run",
                 collection_changelog.create_fake_subprocess_ansible_doc(FAKE_PLUGINS),
             ):
                 collection_changelog.set_galaxy(

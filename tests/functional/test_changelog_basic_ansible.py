@@ -883,7 +883,7 @@ def test_changelog_release_ansible_plugin_cache(  # pylint: disable=redefined-ou
     ansible_changelog,
 ):  # noqa: F811
     with mock.patch(
-        "subprocess.check_output",
+        "subprocess.run",
         ansible_changelog.create_fake_subprocess_ansible_doc(FAKE_PLUGINS),
     ):
         ansible_config_contents = r"""
