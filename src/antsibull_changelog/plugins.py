@@ -312,7 +312,9 @@ def list_plugins_walk(
 
 
 def _check_output(command: list[str]) -> bytes:
-    return subprocess.run(command, check=True, stdout=subprocess.PIPE).stdout
+    return subprocess.run(
+        command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).stdout
 
 
 def list_plugins_ansibledoc(
