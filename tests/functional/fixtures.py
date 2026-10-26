@@ -14,6 +14,7 @@ import io
 import json
 import os
 import pathlib
+import subprocess
 import textwrap
 from collections.abc import Callable, Mapping
 from contextlib import redirect_stderr, redirect_stdout
@@ -400,6 +401,21 @@ class ChangelogEnvironment:
         return result
 
 
+def _cp(
+    *,
+    args: list[str],
+    returncode: int = 0,
+    stdout: bytes | None = None,
+    stderr: bytes | None = None,
+) -> subprocess.CompletedProcess:
+    return subprocess.CompletedProcess(
+        args=args,
+        returncode=0,
+        stdout=stdout,
+        stderr=stderr,
+    )
+
+
 class AnsibleChangelogEnvironment(ChangelogEnvironment):
     """
     Ansible changelog environment.
@@ -420,12 +436,26 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
         plugin_data: dict[str, dict[str, Any]],
     ) -> Callable[[list[str]], str]:
         def fake_subprocess_ansible_doc(
-            command: list[str], *, text: bool | None = None, encoding: str | None = None
-        ) -> str:
+            command: list[str],
+            *,
+            check: bool | None = None,
+            stdout: int | None = None,
+            stderr: int | None = None,
+            timeout: float | None = None,
+            text: bool | None = None,
+            encoding: str | None = None,
+        ) -> subprocess.CompletedProcess:
+            assert check is True
+            assert stdout is subprocess.PIPE
+            assert stderr is subprocess.PIPE
             if command[0].endswith("ansible-doc") and command[1] == "--version":
-                return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
-                    ansible_core_version=self.ansible_core_version,
-                ).encode("utf-8")
+                return _cp(
+                    args=command,
+                    stdout=_ANSIBLE_DOC_VERSION_TEMPLATE.format(
+                        ansible_core_version=self.ansible_core_version,
+                    ).encode("utf-8"),
+                    stderr=b"",
+                )
             if (
                 command[0].endswith("ansible-doc")
                 and command[1] == "--json"
@@ -445,7 +475,9 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
                     result = self._create_ansible_doc_info(
                         plugin_data, plugin_type, args, self.paths.base_dir
                     )
-                return json.dumps(result).encode("utf-8")
+                return _cp(
+                    args=command, stdout=json.dumps(result).encode("utf-8"), stderr=b""
+                )
             raise Exception("Unexpected command: {0}".format(command))
 
         return fake_subprocess_ansible_doc
@@ -486,22 +518,30 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         def fake_subprocess_ansible_doc(
             command: list[str],
             *,
+            check: bool | None = None,
+            stdout: int | None = None,
+            stderr: int | None = None,
+            timeout: float | None = None,
             text: bool | None = None,
             encoding: str | None = None,
-            stderr: int | None = None,
-        ) -> str:
+        ) -> subprocess.CompletedProcess:
+            assert check is True
+            assert stdout is subprocess.PIPE
+            assert stderr is subprocess.PIPE
             base_dir = self.paths.base_dir
             if command[0].endswith("ansible-doc") and command[1] == "--version":
-                assert stderr is None
-                return _ANSIBLE_DOC_VERSION_TEMPLATE.format(
-                    ansible_core_version=self.ansible_core_version,
-                ).encode("utf-8")
+                return _cp(
+                    args=command,
+                    stdout=_ANSIBLE_DOC_VERSION_TEMPLATE.format(
+                        ansible_core_version=self.ansible_core_version,
+                    ).encode("utf-8"),
+                    stderr=b"",
+                )
             if (
                 command[0].endswith("ansible-doc")
                 and command[1] == "--json"
                 and command[2] == "-t"
             ):
-                assert stderr is None
                 plugin_type = command[3]
                 args = command[4:]
                 do_list = False
@@ -527,7 +567,11 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
                     result = self._create_ansible_doc_info(
                         plugin_data, plugin_type, args, base_dir
                     )
-                return json.dumps(result).encode("utf-8")
+                return _cp(
+                    args=command,
+                    stdout=json.dumps(result).encode("utf-8"),
+                    stderr=b"",
+                )
             if command[0] == "git":
                 raise FileNotFoundError("git is not available")
             raise Exception("Unexpected command: {0}".format(command))

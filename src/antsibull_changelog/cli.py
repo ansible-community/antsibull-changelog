@@ -344,6 +344,14 @@ def run(args: list[str]) -> int:
         # All cases that sys.exit is called directly or indirectly in the above
         # code (that we are aware of) always return an int.
         return cast(int, e.code)
+    except subprocess.CalledProcessError as e:
+        if verbosity > 0:
+            traceback.print_exc()
+        else:
+            print(f"ERROR: {e}")
+        print("\nStandard error output:")
+        print(e.stderr.decode("utf-8"))
+        return C.RC_UNHANDLED_ERROR
     except Exception:  # pylint: disable=broad-except
         if verbosity > 0:
             traceback.print_exc()
