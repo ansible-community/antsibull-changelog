@@ -86,7 +86,7 @@ class OutputTextFormat(enum.Enum):
 
     def to_extension(self) -> str:
         """
-        Convert a text format to the associated extension (without leading dot).
+        Convert an output text format to the associated extension (without leading dot).
         """
         if self == OutputTextFormat.RESTRUCTURED_TEXT:
             return "rst"
@@ -99,7 +99,7 @@ class OutputTextFormat(enum.Enum):
     @staticmethod
     def from_extension(extension: str) -> OutputTextFormat:
         """
-        Convert a file extension (without leading dot) to the corresponding text format.
+        Convert a file extension (without leading dot) to the corresponding output text format.
         """
         if extension == "rst":
             return OutputTextFormat.RESTRUCTURED_TEXT
@@ -108,6 +108,17 @@ class OutputTextFormat(enum.Enum):
         if extension == "txt":
             return OutputTextFormat.TEXT
         raise ValueError(f"Unknown extension {extension!r}")
+
+    @staticmethod
+    def from_format(text_format: TextFormat):
+        """
+        Convert a ``TextFormat`` to the corresponding ``OutputTextFormat``.
+        """
+        if text_format == TextFormat.RESTRUCTURED_TEXT:
+            return OutputTextFormat.RESTRUCTURED_TEXT
+        if text_format == TextFormat.MARKDOWN:
+            return OutputTextFormat.MARKDOWN
+        raise ValueError(f"Unknown text format {text_format!r}")
 
 
 def _is_other_project_config(config_path: str) -> bool:
@@ -445,8 +456,10 @@ class ChangelogOutput(ChangelogRenderConfig):
         """
         Parse the value of format.
         """
-        if isinstance(value, (TextFormat, OutputTextFormat)):
+        if isinstance(value, OutputTextFormat):
             return value
+        if isinstance(value, TextFormat):
+            return OutputTextFormat.from_format(value)
         if not isinstance(value, str):
             raise ValueError("format must be a string")
         try:
