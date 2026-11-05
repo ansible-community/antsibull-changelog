@@ -25,6 +25,7 @@ from ..config import (
     ChangelogConfig,
     ChangelogOutput,
     ChangelogRenderConfig,
+    OutputTextFormat,
     PathsConfig,
     TextFormat,
 )
@@ -32,6 +33,7 @@ from ..logger import LOGGER
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
 from .rst_document import RSTDocumentRenderer
+from .text_document import TextDocumentRenderer
 
 
 def add_section_content(
@@ -371,15 +373,20 @@ class ChangelogGenerator(ChangelogGeneratorBase):
 
 
 def create_document_renderer(
-    document_format: TextFormat, start_level: int = 0, **kwargs
+    document_format: TextFormat | OutputTextFormat, start_level: int = 0, **kwargs
 ) -> DocumentRenderer:
     """
     Create a document renderer for a given format.
     """
-    if document_format == TextFormat.RESTRUCTURED_TEXT:
+    if document_format in (
+        TextFormat.RESTRUCTURED_TEXT,
+        OutputTextFormat.RESTRUCTURED_TEXT,
+    ):
         return RSTDocumentRenderer(start_level=start_level, **kwargs)
-    if document_format == TextFormat.MARKDOWN:
+    if document_format in (TextFormat.MARKDOWN, OutputTextFormat.MARKDOWN):
         return MDDocumentRenderer(start_level=start_level, **kwargs)
+    if document_format == OutputTextFormat.TEXT:
+        return TextDocumentRenderer(start_level=start_level, **kwargs)
     raise ValueError(f"Unsupported format {document_format}")
 
 

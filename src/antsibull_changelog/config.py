@@ -75,6 +75,41 @@ class TextFormat(enum.Enum):
         raise ValueError(f"Unknown extension {extension!r}")
 
 
+class OutputTextFormat(enum.Enum):
+    """
+    Supported text formats.
+    """
+
+    RESTRUCTURED_TEXT = "restructuredtext"
+    MARKDOWN = "markdown"
+    TEXT = "text"
+
+    def to_extension(self) -> str:
+        """
+        Convert a text format to the associated extension (without leading dot).
+        """
+        if self == OutputTextFormat.RESTRUCTURED_TEXT:
+            return "rst"
+        if self == OutputTextFormat.MARKDOWN:
+            return "md"
+        if self == OutputTextFormat.TEXT:
+            return "txt"
+        raise ValueError(f"Unknown text format {self}")  # pragma: no cover
+
+    @staticmethod
+    def from_extension(extension: str) -> OutputTextFormat:
+        """
+        Convert a file extension (without leading dot) to the corresponding text format.
+        """
+        if extension == "rst":
+            return OutputTextFormat.RESTRUCTURED_TEXT
+        if extension == "md":
+            return OutputTextFormat.MARKDOWN
+        if extension == "txt":
+            return OutputTextFormat.TEXT
+        raise ValueError(f"Unknown extension {extension!r}")
+
+
 def _is_other_project_config(config_path: str) -> bool:
     try:
         config = load_yaml_file(config_path)
@@ -402,25 +437,25 @@ class ChangelogOutput(ChangelogRenderConfig):
 
     file: str
     filename_version_depth: p.NonNegativeInt = 0
-    format: TextFormat
+    format: TextFormat | OutputTextFormat
 
     @p.field_validator("format", mode="before")
     @classmethod
-    def parse_format(cls, value: t.Any) -> TextFormat:
+    def parse_format(cls, value: t.Any) -> TextFormat | OutputTextFormat:
         """
         Parse the value of format.
         """
-        if isinstance(value, TextFormat):
+        if isinstance(value, (TextFormat, OutputTextFormat)):
             return value
         if not isinstance(value, str):
             raise ValueError("format must be a string")
         try:
-            return TextFormat.from_extension(value)
+            return OutputTextFormat.from_extension(value)
         except ValueError as exc:
             raise ValueError(f"format is an unknown extension: {exc}") from exc
 
     @p.field_serializer("format")
-    def serialize_format(self, output_format: TextFormat) -> str:
+    def serialize_format(self, output_format: TextFormat | OutputTextFormat) -> str:
         """
         Serialize the format field.
         """
@@ -696,7 +731,7 @@ class ChangelogConfig(p.BaseModel):
                     file=f"{CHANGELOGS_DIR}/CHANGELOG-v%s.rst",
                     filename_version_depth=2,
                     title_version_depth=2,
-                    format=TextFormat.RESTRUCTURED_TEXT,
+                    format=OutputTextFormat.RESTRUCTURED_TEXT,
                 )
             ]
 
