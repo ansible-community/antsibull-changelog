@@ -437,7 +437,7 @@ class ChangelogOutput(ChangelogRenderConfig):
 
     file: str
     filename_version_depth: p.NonNegativeInt = 0
-    format: TextFormat | OutputTextFormat
+    format: t.Union[TextFormat, OutputTextFormat]
 
     @p.field_validator("format", mode="before")
     @classmethod
