@@ -19,10 +19,13 @@ from collections.abc import Sequence as _Sequence
 
 import annotated_types as at
 import pydantic as p
-from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
+from antsibull_fileutils.yaml import load_yaml_bytes, load_yaml_file, store_yaml_file
 
 from .errors import ChangelogError
 from .logger import LOGGER
+
+CHANGELOGS_DIR = "changelogs"
+CONFIG_FILENAME = "config.yaml"
 
 
 def _is_sequence(value: t.Any) -> bool:
@@ -96,11 +99,11 @@ class PathsConfig:
 
     @staticmethod
     def _changelog_dir(base_dir: str) -> str:
-        return os.path.join(base_dir, "changelogs")
+        return os.path.join(base_dir, CHANGELOGS_DIR)
 
     @staticmethod
     def _config_path(changelog_dir: str) -> str:
-        return os.path.join(changelog_dir, "config.yaml")
+        return os.path.join(changelog_dir, CONFIG_FILENAME)
 
     def __init__(
         self,
@@ -274,6 +277,17 @@ class CollectionDetails:
             self.version = galaxy_yaml.get("version")
         if self.flatmap is None and galaxy_yaml.get("type") is not None:
             self.flatmap = galaxy_yaml["type"] == "flatmap"
+
+    def set_galaxy_yaml_content(self, content: bytes) -> None:
+        """
+        Set the galaxy.yml content directly, instead of lazily loading the file from disk.
+        """
+        try:
+            galaxy_yaml = load_yaml_bytes(content)
+        except Exception as exc:
+            raise ChangelogError(f"Error while parsing galaxy.yml: {exc}") from exc
+
+        self._parse_galaxy_yaml(galaxy_yaml)
 
     def _load_galaxy_yaml(
         self, needed_var: str, what_for: str | None = None, help_text: str | None = None
@@ -679,7 +693,7 @@ class ChangelogConfig(p.BaseModel):
         if "output" not in adjusted_config:
             adjusted_config["output"] = [
                 ChangelogOutput(
-                    file="changelogs/CHANGELOG-v%s.rst",
+                    file=f"{CHANGELOGS_DIR}/CHANGELOG-v%s.rst",
                     filename_version_depth=2,
                     title_version_depth=2,
                     format=TextFormat.RESTRUCTURED_TEXT,
