@@ -8,6 +8,8 @@
 Ansible Changelog Tool.
 """
 
+from __future__ import annotations
+
 __version__ = "0.36.0.post0"
 
 __all__ = ("__version__",)
