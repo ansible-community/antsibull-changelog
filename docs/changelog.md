@@ -96,7 +96,7 @@ Maintenance release for fixing / deprecating certain boolean options\.
 <a id="deprecated-features"></a>
 ### Deprecated Features
 
-* The boolean valued options <code>\-\-is\-collection</code> and <code>\-\-collection\-flatmap</code> will likely change to proper flags \(<code>\-\-flag</code> and <em class="title-reference">\-\-no\-flag\`</em> instead of <code>\-\-flag true</code>/<code>\-\-flag false</code>\) in the near future\. If you are using these options and want them to not change\, or have other suggestions\, please [create an issue in the antsibull\-changelog repository](https\://github\.com/ansible\-community/antsibull\-changelog/issues/new) \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/199](https\://github\.com/ansible\-community/antsibull\-changelog/pull/199)\)\.
+* The boolean valued options <code>\-\-is\-collection</code> and <code>\-\-collection\-flatmap</code> will likely change to proper flags \(<code>\-\-flag</code> and <code>\-\-no\-flag</code> instead of <code>\-\-flag true</code>/<code>\-\-flag false</code>\) in the near future\. If you are using these options and want them to not change\, or have other suggestions\, please [create an issue in the antsibull\-changelog repository](https\://github\.com/ansible\-community/antsibull\-changelog/issues/new) \([https\://github\.com/ansible\-community/antsibull\-changelog/pull/199](https\://github\.com/ansible\-community/antsibull\-changelog/pull/199)\)\.
 
 <a id="v0-32-0"></a>
 ## v0\.32\.0

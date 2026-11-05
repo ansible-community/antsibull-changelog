@@ -100,7 +100,7 @@ Breaking Changes / Porting Guide
 Deprecated Features
 -------------------
 
-- The boolean valued options ``--is-collection`` and ``--collection-flatmap`` will likely change to proper flags (``--flag`` and `--no-flag`` instead of ``--flag true``/``--flag false``) in the near future. If you are using these options and want them to not change, or have other suggestions, please `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/new>`__ (https://github.com/ansible-community/antsibull-changelog/pull/199).
+- The boolean valued options ``--is-collection`` and ``--collection-flatmap`` will likely change to proper flags (``--flag`` and ``--no-flag`` instead of ``--flag true``/``--flag false``) in the near future. If you are using these options and want them to not change, or have other suggestions, please `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/new>`__ (https://github.com/ansible-community/antsibull-changelog/pull/199).
 
 v0.32.0
 =======
