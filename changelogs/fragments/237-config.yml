@@ -1,0 +1,2 @@
+minor_changes:
+  - "Simplify loading objects from memory instead of disk (https://github.com/ansible-community/antsibull-changelog/pull/237)."
