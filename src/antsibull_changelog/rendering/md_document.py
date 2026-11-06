@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from dataclasses import dataclass
 from typing import cast
 
 from antsibull_docutils.html_utils import html_escape
@@ -25,6 +24,8 @@ from ._document import (
     AbstractRendererEx,
     BaseContent,
     DocumentRendererEx,
+    TOCEntry,
+    collect_toc_entries,
     render_document,
     render_section,
 )
@@ -35,17 +36,6 @@ _SPACE_LIKE = re.compile("[ ._-]")
 _DISALLOWED_LETTER = re.compile("[^a-zA-Z0-9-]")
 
 
-@dataclass
-class TOCEntry:
-    """
-    A TOC entry.
-    """
-
-    section: "MDSectionRenderer"
-
-    children: "list[TOCEntry]"
-
-
 class MDTOCRenderer(BaseContent):
     """
     Render a Table of contents as MarkDown.
@@ -54,7 +44,7 @@ class MDTOCRenderer(BaseContent):
     owner: "MDAbstractRenderer"
     title: str | None
     max_depth: int | None
-    toc: list[TOCEntry] | None
+    toc: "list[TOCEntry[MDSectionRenderer]] | None"
     add_section_ids: bool
 
     def __init__(
@@ -72,25 +62,11 @@ class MDTOCRenderer(BaseContent):
         self.toc = None
         self.add_section_ids = add_section_ids
 
-    @staticmethod
-    def _collect_toc_entries(
-        content: list[BaseContent], max_depth: int | None
-    ) -> list[TOCEntry]:
-        result = []
-        for c in content:
-            if isinstance(c, MDSectionRenderer):
-                if max_depth in (0, 1):
-                    children = []
-                else:
-                    children = MDTOCRenderer._collect_toc_entries(
-                        c.content, None if max_depth is None else (max_depth - 1)
-                    )
-                result.append(TOCEntry(c, children))
-        return result
-
     def generate(self) -> None:
-        self.toc = self._collect_toc_entries(
-            self.owner.content, max_depth=self.max_depth
+        self.toc = collect_toc_entries(
+            content=self.owner.content,
+            max_depth=self.max_depth,
+            clazz=MDSectionRenderer,
         )
 
     def _append_toc_entry(self, lines: list[str], entry: TOCEntry, indent: str) -> None:
@@ -105,6 +81,7 @@ class MDTOCRenderer(BaseContent):
         for child in entry.children:
             self._append_toc_entry(lines, child, next_indent)
 
+    # pylint: disable=duplicate-code
     def append_lines(self, lines: list[str], start_level: int = 0) -> None:
         toc = self.toc
         if toc is None:
@@ -169,6 +146,7 @@ class MDSectionRenderer(MDAbstractRenderer, SectionRenderer):
         self.title = title
         self.ref_id = cast(MDDocumentRenderer, self.root).get_ref_id(self.title)
 
+    # pylint: disable=duplicate-code
     def _get_level(self) -> int:
         return self._level
 
@@ -203,20 +181,18 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
     """
 
     global_context: GlobalContext
-    unsupported_class_names: set[str]
-    warnings: list[str]
 
     def __init__(self, start_level: int = 0, *, add_section_ids: bool = True):
         super().__init__(root=self, add_section_ids=add_section_ids)
         DocumentRendererEx.__init__(self, start_level=start_level)
         self.global_context = GlobalContext()
-        self.unsupported_class_names = set()
-        self.warnings = []
 
     def _get_level(self) -> int:
         return self.start_level
 
-    def render_text(self, text: str, text_format: TextFormat) -> str:
+    def render_text(
+        self, text: str, text_format: TextFormat, *, indent: str | None = None
+    ) -> str:
         """
         Render a text as MarkDown.
         """
@@ -246,17 +222,6 @@ class MDDocumentRenderer(MDAbstractRenderer, DocumentRendererEx):
 
     def render(self) -> str:
         return render_document(self, self)
-
-    def get_warnings(self) -> list[str]:
-        result = []
-        if self.unsupported_class_names:
-            classnames = ", ".join(sorted(self.unsupported_class_names))
-            result.append(
-                "Found unsupported docutils class names that could not be converted"
-                f" to MarkDown: {classnames}"
-            )
-        result.extend(self.warnings)
-        return result
 
 
 __all__ = ("MDDocumentRenderer",)

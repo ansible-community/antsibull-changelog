@@ -11,6 +11,8 @@ Common code for rendering a document.
 from __future__ import annotations
 
 import abc
+import typing as t
+from dataclasses import dataclass
 
 from antsibull_docutils.utils import ensure_newline_after_last_content
 
@@ -47,13 +49,19 @@ class DocumentRendererEx(DocumentRenderer):
 
     start_level: int
     title: str | None
+    unsupported_class_names: set[str]
+    warnings: list[str]
 
     def __init__(self, start_level: int):
         self.start_level = start_level
         self.title = None
+        self.unsupported_class_names = set()
+        self.warnings = []
 
     @abc.abstractmethod
-    def render_text(self, text: str, text_format: TextFormat) -> str:
+    def render_text(
+        self, text: str, text_format: TextFormat, *, indent: str | None = None
+    ) -> str:
         """
         Render a text as ReStructured Text.
         """
@@ -62,6 +70,21 @@ class DocumentRendererEx(DocumentRenderer):
         if self.title is not None:
             raise ValueError("Document title already set")
         self.title = title
+
+    @abc.abstractmethod
+    def render(self) -> str:
+        pass
+
+    def get_warnings(self) -> list[str]:
+        result = []
+        if self.unsupported_class_names:
+            classnames = ", ".join(sorted(self.unsupported_class_names))
+            result.append(
+                "Found unsupported docutils class names that could not be converted"
+                f" to text: {classnames}"
+            )
+        result.extend(self.warnings)
+        return result
 
 
 class ParagraphBreak(BaseContent):
@@ -106,8 +129,8 @@ class TextRenderer(BaseContent):
         self.indent_next = indent_next
 
     def append_lines(self, lines: list[str], start_level: int = 0) -> None:
-        text = self.root.render_text(self.text, self.text_format)
         indent = self.indent_first
+        text = self.root.render_text(self.text, self.text_format, indent=indent)
         for line in text.splitlines():
             if not line and indent != self.indent_first:
                 lines.append("")
@@ -214,6 +237,41 @@ def render_document(
         abstract_renderer,
         start_level=document_renderer.start_level,
     )
+
+
+_Class = t.TypeVar("_Class", bound=AbstractRendererEx)
+
+
+@dataclass
+class TOCEntry(t.Generic[_Class]):
+    """
+    A TOC entry.
+    """
+
+    section: _Class
+
+    children: "list[TOCEntry[_Class]]"
+
+
+def collect_toc_entries(
+    *, content: list[BaseContent], max_depth: int | None, clazz: type[_Class]
+) -> list[TOCEntry[_Class]]:
+    """
+    Collect TOC entries.
+    """
+    result = []
+    for c in content:
+        if isinstance(c, clazz):
+            if max_depth in (0, 1):
+                children = []
+            else:
+                children = collect_toc_entries(
+                    content=c.content,
+                    max_depth=None if max_depth is None else (max_depth - 1),
+                    clazz=clazz,
+                )
+            result.append(TOCEntry(c, children))
+    return result
 
 
 __all__ = (
