@@ -17,7 +17,7 @@ from fixtures import create_plugin
 
 import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
-from antsibull_changelog.config import ChangelogOutput, TextFormat
+from antsibull_changelog.config import ChangelogOutput, OutputTextFormat, TextFormat
 
 
 def test_changelog_init(  # pylint: disable=redefined-outer-name
@@ -2631,5 +2631,705 @@ This changelog describes changes after version 1\.0\.0\.
 ### Release Summary
 
 This is the second major release\.
+"""
+    )
+
+
+def test_changelog_formats(  # pylint: disable=redefined-outer-name
+    collection_changelog,
+):  # noqa: F811
+    collection_changelog.set_galaxy(
+        {
+            "version": "1.0.0",
+        }
+    )
+    collection_changelog.config.output = [
+        ChangelogOutput(
+            file="CHANGELOG.rst", format=OutputTextFormat.RESTRUCTURED_TEXT
+        ),
+        ChangelogOutput(file="CHANGELOG.md", format=OutputTextFormat.MARKDOWN),
+        ChangelogOutput(
+            file="CHANGELOG-noansi.txt",
+            format=OutputTextFormat.TEXT,
+            text_max_columns=40,
+            text_use_ansi_formatting="never",
+        ),
+        ChangelogOutput(
+            file="CHANGELOG-ansi.txt",
+            format=OutputTextFormat.TEXT,
+            text_max_columns=80,
+            text_use_ansi_formatting="always",
+        ),
+    ]
+    collection_changelog.set_config(collection_changelog.config)
+    collection_changelog.set_changelog_yaml(
+        {
+            "ancestor": None,
+            "releases": {
+                "1.0.0": {
+                    "changes": {
+                        "minor_changes": [
+                            "baz lookup - no longer ignores the ``bar`` option.",
+                            "test - has a new option ``foo``.",
+                        ],
+                        "release_summary": "This is the first proper release.",
+                    },
+                    "fragments": [
+                        "1.0.0.yml",
+                        "baz-new-option.yaml",
+                        "test-new-option.yml",
+                    ],
+                    "modules": [
+                        {
+                            "description": "This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.",
+                            "name": "test",
+                            "namespace": "",
+                        }
+                    ],
+                    "plugins": {
+                        "lookup": [
+                            {
+                                "description": "A foo\\_bar lookup.",
+                                "name": "bar",
+                                "namespace": None,
+                            }
+                        ]
+                    },
+                    "release_date": "2020-01-02",
+                },
+                "1.1.0": {
+                    "changes": {
+                        "bugfixes": ["A bugfix."],
+                        "minor_changes": ["A minor change."],
+                        "release_summary": "Final release of 1.1.0.",
+                    },
+                    "fragments": ["1.1.0.yml", "bugfix.yml", "minorchange.yml"],
+                    "modules": [
+                        {
+                            "description": "This is ANOTHER test module!!!11.",
+                            "name": "test_new2",
+                            "namespace": "",
+                        },
+                        {
+                            "description": "This is yet another test module.",
+                            "name": "test_new3",
+                            "namespace": "",
+                        },
+                    ],
+                    "release_date": "2020-02-29",
+                },
+                "1.1.0-beta-1": {
+                    "changes": {
+                        "minor_changes": [
+                            "Another new fragment.",
+                            "The boolean valued options ``--is-collection`` and ``--collection-flatmap``"
+                            " will likely change to proper flags (``--flag`` and ``--no-flag`` instead of"
+                            " ``--flag true``/``--flag false``) in the near future. If you are using these"
+                            " options and want them to not change, or have other suggestions, please"
+                            " `create an issue in the antsibull-changelog repository"
+                            " <https://github.com/ansible-community/antsibull-changelog/issues/new>`__"
+                            " (https://github.com/ansible-community/antsibull-changelog/pull/199).",
+                        ],
+                        "release_summary": "Beta of 1.1.0.",
+                    },
+                    "fragments": ["1.1.0-beta-1.yml", "test-new-fragment.yml"],
+                    "modules": [
+                        {
+                            "description": "This is ANOTHER test module.",
+                            "name": "test_new",
+                            "namespace": "",
+                        }
+                    ],
+                    "release_date": "2020-02-14",
+                },
+                "1.2.0": {
+                    "changes": {"release_summary": "Release of 1.2.0."},
+                    "fragments": [
+                        "1.2.0.yml",
+                        "new-module.yml",
+                        "new-plugins.yml",
+                        "new-test-plugin.yml",
+                    ],
+                    "modules": [
+                        {
+                            "description": "A meh module",
+                            "name": "meh",
+                            "namespace": "foo",
+                        },
+                        {
+                            "description": "This is yet another test module!",
+                            "name": "test_new4",
+                            "namespace": "",
+                        },
+                    ],
+                    "objects": {
+                        "playbook": [
+                            {
+                                "description": "Totally wipes a server",
+                                "name": "wipe_server",
+                                "namespace": None,
+                            }
+                        ],
+                        "role": [
+                            {
+                                "description": "The most awesome nginx installation role ever",
+                                "name": "nginx",
+                                "namespace": None,
+                            }
+                        ],
+                    },
+                    "plugins": {
+                        "filter": [
+                            {
+                                "description": "Converts a time expression to seconds",
+                                "name": "to_seconds",
+                                "namespace": None,
+                            },
+                            {
+                                "description": "Converts a time expression to a given unit",
+                                "name": "to_time_unit",
+                                "namespace": None,
+                            },
+                        ],
+                        "test": [
+                            {
+                                "description": "Tests whether two objects are similar",
+                                "name": "similar",
+                                "namespace": None,
+                            }
+                        ],
+                    },
+                    "release_date": "2020-03-01",
+                },
+            },
+        }
+    )
+    assert collection_changelog.run_tool("generate", ["-v"]) == 0
+
+    diff = collection_changelog.diff()
+    assert diff.added_files == [
+        "CHANGELOG-ansi.txt",
+        "CHANGELOG-noansi.txt",
+        "CHANGELOG.md",
+        "CHANGELOG.rst",
+    ]
+
+    print(repr(diff.file_contents["CHANGELOG.rst"].decode("utf-8")))
+    assert (
+        diff.file_contents["CHANGELOG.rst"].decode("utf-8") == """=====================
+Ansible Release Notes
+=====================
+
+.. contents:: Topics
+
+v1.2.0
+======
+
+Release Summary
+---------------
+
+Release of 1.2.0.
+
+New Plugins
+-----------
+
+Filter
+~~~~~~
+
+- acme.test.to_seconds - Converts a time expression to seconds
+- acme.test.to_time_unit - Converts a time expression to a given unit
+
+Test
+~~~~
+
+- acme.test.similar - Tests whether two objects are similar
+
+New Modules
+-----------
+
+- acme.test.test_new4 - This is yet another test module!
+
+Foo
+~~~
+
+- acme.test.foo.meh - A meh module
+
+New Playbooks
+-------------
+
+- acme.test.wipe_server - Totally wipes a server
+
+New Roles
+---------
+
+- acme.test.nginx - The most awesome nginx installation role ever
+
+v1.1.0
+======
+
+Release Summary
+---------------
+
+Final release of 1.1.0.
+
+Minor Changes
+-------------
+
+- A minor change.
+- Another new fragment.
+- The boolean valued options ``--is-collection`` and ``--collection-flatmap`` will likely change to proper flags (``--flag`` and ``--no-flag`` instead of ``--flag true``/``--flag false``) in the near future. If you are using these options and want them to not change, or have other suggestions, please `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/new>`__ (https://github.com/ansible-community/antsibull-changelog/pull/199).
+
+Bugfixes
+--------
+
+- A bugfix.
+
+New Modules
+-----------
+
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
+- acme.test.test_new3 - This is yet another test module.
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first proper release.
+
+Minor Changes
+-------------
+
+- baz lookup - no longer ignores the ``bar`` option.
+- test - has a new option ``foo``.
+
+New Plugins
+-----------
+
+Lookup
+~~~~~~
+
+- acme.test.bar - A foo\\_bar lookup.
+
+New Modules
+-----------
+
+- acme.test.test - This is a :literal:`TEST` foo.bar.module with :literal:`foo=bar` and :literal:`baz`. Do not confuse with foo.bar.baz.
+"""
+    )
+
+    print(repr(diff.file_contents["CHANGELOG.md"].decode("utf-8")))
+    assert (
+        diff.file_contents["CHANGELOG.md"].decode("utf-8") == """# Ansible Release Notes
+
+**Topics**
+
+- <a href="#v1-2-0">v1\\.2\\.0</a>
+    - <a href="#release-summary">Release Summary</a>
+    - <a href="#new-plugins">New Plugins</a>
+        - <a href="#filter">Filter</a>
+        - <a href="#test">Test</a>
+    - <a href="#new-modules">New Modules</a>
+        - <a href="#foo">Foo</a>
+    - <a href="#new-playbooks">New Playbooks</a>
+    - <a href="#new-roles">New Roles</a>
+- <a href="#v1-1-0">v1\\.1\\.0</a>
+    - <a href="#release-summary-1">Release Summary</a>
+    - <a href="#minor-changes">Minor Changes</a>
+    - <a href="#bugfixes">Bugfixes</a>
+    - <a href="#new-modules-1">New Modules</a>
+- <a href="#v1-0-0">v1\\.0\\.0</a>
+    - <a href="#release-summary-2">Release Summary</a>
+    - <a href="#minor-changes-1">Minor Changes</a>
+    - <a href="#new-plugins-1">New Plugins</a>
+        - <a href="#lookup">Lookup</a>
+    - <a href="#new-modules-2">New Modules</a>
+
+<a id="v1-2-0"></a>
+## v1\\.2\\.0
+
+<a id="release-summary"></a>
+### Release Summary
+
+Release of 1\\.2\\.0\\.
+
+<a id="new-plugins"></a>
+### New Plugins
+
+<a id="filter"></a>
+#### Filter
+
+* acme\\.test\\.to\\_seconds \\- Converts a time expression to seconds
+* acme\\.test\\.to\\_time\\_unit \\- Converts a time expression to a given unit
+
+<a id="test"></a>
+#### Test
+
+* acme\\.test\\.similar \\- Tests whether two objects are similar
+
+<a id="new-modules"></a>
+### New Modules
+
+* acme\\.test\\.test\\_new4 \\- This is yet another test module\\!
+
+<a id="foo"></a>
+#### Foo
+
+* acme\\.test\\.foo\\.meh \\- A meh module
+
+<a id="new-playbooks"></a>
+### New Playbooks
+
+* acme\\.test\\.wipe\\_server \\- Totally wipes a server
+
+<a id="new-roles"></a>
+### New Roles
+
+* acme\\.test\\.nginx \\- The most awesome nginx installation role ever
+
+<a id="v1-1-0"></a>
+## v1\\.1\\.0
+
+<a id="release-summary-1"></a>
+### Release Summary
+
+Final release of 1\\.1\\.0\\.
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* A minor change\\.
+* Another new fragment\\.
+* The boolean valued options <code>\\-\\-is\\-collection</code> and <code>\\-\\-collection\\-flatmap</code> will likely change to proper flags \\(<code>\\-\\-flag</code> and <code>\\-\\-no\\-flag</code> instead of <code>\\-\\-flag true</code>/<code>\\-\\-flag false</code>\\) in the near future\\. If you are using these options and want them to not change\\, or have other suggestions\\, please [create an issue in the antsibull\\-changelog repository](https\\://github\\.com/ansible\\-community/antsibull\\-changelog/issues/new) \\([https\\://github\\.com/ansible\\-community/antsibull\\-changelog/pull/199](https\\://github\\.com/ansible\\-community/antsibull\\-changelog/pull/199)\\)\\.
+
+<a id="bugfixes"></a>
+### Bugfixes
+
+* A bugfix\\.
+
+<a id="new-modules-1"></a>
+### New Modules
+
+* acme\\.test\\.test\\_new \\- This is ANOTHER test module\\.
+* acme\\.test\\.test\\_new2 \\- This is ANOTHER test module\\!\\!\\!11\\.
+* acme\\.test\\.test\\_new3 \\- This is yet another test module\\.
+
+<a id="v1-0-0"></a>
+## v1\\.0\\.0
+
+<a id="release-summary-2"></a>
+### Release Summary
+
+This is the first proper release\\.
+
+<a id="minor-changes-1"></a>
+### Minor Changes
+
+* baz lookup \\- no longer ignores the <code>bar</code> option\\.
+* test \\- has a new option <code>foo</code>\\.
+
+<a id="new-plugins-1"></a>
+### New Plugins
+
+<a id="lookup"></a>
+#### Lookup
+
+* acme\\.test\\.bar \\- A foo\\_bar lookup\\.
+
+<a id="new-modules-2"></a>
+### New Modules
+
+* acme\\.test\\.test \\- This is a <code>TEST</code> foo\\.bar\\.module with <code>foo\\=bar</code> and <code>baz</code>\\. Do not confuse with foo\\.bar\\.baz\\.
+"""
+    )
+
+    print(repr(diff.file_contents["CHANGELOG-noansi.txt"].decode("utf-8")))
+    assert (
+        diff.file_contents["CHANGELOG-noansi.txt"].decode("utf-8")
+        == """Ansible Release Notes
+═════════════════════
+
+Topics
+
+- v1.2.0
+  - Release Summary
+  - New Plugins
+    - Filter
+    - Test
+  - New Modules
+    - Foo
+  - New Playbooks
+  - New Roles
+- v1.1.0
+  - Release Summary
+  - Minor Changes
+  - Bugfixes
+  - New Modules
+- v1.0.0
+  - Release Summary
+  - Minor Changes
+  - New Plugins
+    - Lookup
+  - New Modules
+
+v1.2.0
+━━━━━━
+
+Release Summary
+───────────────
+
+Release of 1.2.0.
+
+New Plugins
+───────────
+
+Filter
+┉┉┉┉┉┉
+
+- acme.test.to_seconds - Converts a time
+  expression to seconds
+- acme.test.to_time_unit - Converts a
+  time expression to a given unit
+
+Test
+┉┉┉┉
+
+- acme.test.similar - Tests whether two
+  objects are similar
+
+New Modules
+───────────
+
+- acme.test.test_new4 - This is yet
+  another test module!
+
+Foo
+┉┉┉
+
+- acme.test.foo.meh - A meh module
+
+New Playbooks
+─────────────
+
+- acme.test.wipe_server - Totally wipes
+  a server
+
+New Roles
+─────────
+
+- acme.test.nginx - The most awesome
+  nginx installation role ever
+
+v1.1.0
+━━━━━━
+
+Release Summary
+───────────────
+
+Final release of 1.1.0.
+
+Minor Changes
+─────────────
+
+- A minor change.
+- Another new fragment.
+- The boolean valued options `--is-
+  collection` and `--collection-flatmap`
+  will likely change to proper flags (`-
+  -flag` and `--no-flag` instead of `--
+  flag true`/`--flag false`) in the near
+  future. If you are using these options
+  and want them to not change, or have
+  other suggestions, please create an
+  issue in the antsibull-changelog
+  repository
+  (https://github.com/ansible-
+  community/antsibull-
+  changelog/issues/new)
+  (https://github.com/ansible-
+  community/antsibull-
+  changelog/pull/199).
+
+Bugfixes
+────────
+
+- A bugfix.
+
+New Modules
+───────────
+
+- acme.test.test_new - This is ANOTHER
+  test module.
+- acme.test.test_new2 - This is ANOTHER
+  test module!!!11.
+- acme.test.test_new3 - This is yet
+  another test module.
+
+v1.0.0
+━━━━━━
+
+Release Summary
+───────────────
+
+This is the first proper release.
+
+Minor Changes
+─────────────
+
+- baz lookup - no longer ignores the
+  `bar` option.
+- test - has a new option `foo`.
+
+New Plugins
+───────────
+
+Lookup
+┉┉┉┉┉┉
+
+- acme.test.bar - A foo_bar lookup.
+
+New Modules
+───────────
+
+- acme.test.test - This is a `TEST`
+  foo.bar.module with `foo=bar` and
+  `baz`. Do not confuse with
+  foo.bar.baz.
+"""
+    )
+
+    print(repr(diff.file_contents["CHANGELOG-ansi.txt"].decode("utf-8")))
+    assert (
+        diff.file_contents["CHANGELOG-ansi.txt"].decode("utf-8")
+        == """\x1b[0;1mAnsible Release Notes\x1b[0m
+\x1b[0;1m═════════════════════\x1b[0m
+
+\x1b[0;1mTopics\x1b[0m
+
+- v1.2.0
+  - Release Summary
+  - New Plugins
+    - Filter
+    - Test
+  - New Modules
+    - Foo
+  - New Playbooks
+  - New Roles
+- v1.1.0
+  - Release Summary
+  - Minor Changes
+  - Bugfixes
+  - New Modules
+- v1.0.0
+  - Release Summary
+  - Minor Changes
+  - New Plugins
+    - Lookup
+  - New Modules
+
+\x1b[0;1mv1.2.0\x1b[0m
+\x1b[0;1m━━━━━━\x1b[0m
+
+\x1b[0;1mRelease Summary\x1b[0m
+\x1b[0;1m───────────────\x1b[0m
+
+Release of 1.2.0.
+
+\x1b[0;1mNew Plugins\x1b[0m
+\x1b[0;1m───────────\x1b[0m
+
+\x1b[0;1mFilter\x1b[0m
+\x1b[0;1m┉┉┉┉┉┉\x1b[0m
+
+- acme.test.to_seconds - Converts a time expression to seconds
+- acme.test.to_time_unit - Converts a time expression to a given unit
+
+\x1b[0;1mTest\x1b[0m
+\x1b[0;1m┉┉┉┉\x1b[0m
+
+- acme.test.similar - Tests whether two objects are similar
+
+\x1b[0;1mNew Modules\x1b[0m
+\x1b[0;1m───────────\x1b[0m
+
+- acme.test.test_new4 - This is yet another test module!
+
+\x1b[0;1mFoo\x1b[0m
+\x1b[0;1m┉┉┉\x1b[0m
+
+- acme.test.foo.meh - A meh module
+
+\x1b[0;1mNew Playbooks\x1b[0m
+\x1b[0;1m─────────────\x1b[0m
+
+- acme.test.wipe_server - Totally wipes a server
+
+\x1b[0;1mNew Roles\x1b[0m
+\x1b[0;1m─────────\x1b[0m
+
+- acme.test.nginx - The most awesome nginx installation role ever
+
+\x1b[0;1mv1.1.0\x1b[0m
+\x1b[0;1m━━━━━━\x1b[0m
+
+\x1b[0;1mRelease Summary\x1b[0m
+\x1b[0;1m───────────────\x1b[0m
+
+Final release of 1.1.0.
+
+\x1b[0;1mMinor Changes\x1b[0m
+\x1b[0;1m─────────────\x1b[0m
+
+- A minor change.
+- Another new fragment.
+- The boolean valued options `--is-collection` and `--collection-flatmap` will
+  likely change to proper flags (`--flag` and `--no-flag` instead of `--flag
+  true`/`--flag false`) in the near future. If you are using these options and
+  want them to not change, or have other suggestions, please \x1b[0;4mcreate an issue in\x1b[0m
+  \x1b[0;4mthe antsibull-changelog repository\x1b[0m (\x1b[0;4mhttps://github.com/ansible-\x1b[0m
+  \x1b[0;4mcommunity/antsibull-changelog/issues/new\x1b[0m) (\x1b[0;4mhttps://github.com/ansible-\x1b[0m
+  \x1b[0;4mcommunity/antsibull-changelog/pull/199\x1b[0m).
+
+\x1b[0;1mBugfixes\x1b[0m
+\x1b[0;1m────────\x1b[0m
+
+- A bugfix.
+
+\x1b[0;1mNew Modules\x1b[0m
+\x1b[0;1m───────────\x1b[0m
+
+- acme.test.test_new - This is ANOTHER test module.
+- acme.test.test_new2 - This is ANOTHER test module!!!11.
+- acme.test.test_new3 - This is yet another test module.
+
+\x1b[0;1mv1.0.0\x1b[0m
+\x1b[0;1m━━━━━━\x1b[0m
+
+\x1b[0;1mRelease Summary\x1b[0m
+\x1b[0;1m───────────────\x1b[0m
+
+This is the first proper release.
+
+\x1b[0;1mMinor Changes\x1b[0m
+\x1b[0;1m─────────────\x1b[0m
+
+- baz lookup - no longer ignores the `bar` option.
+- test - has a new option `foo`.
+
+\x1b[0;1mNew Plugins\x1b[0m
+\x1b[0;1m───────────\x1b[0m
+
+\x1b[0;1mLookup\x1b[0m
+\x1b[0;1m┉┉┉┉┉┉\x1b[0m
+
+- acme.test.bar - A foo_bar lookup.
+
+\x1b[0;1mNew Modules\x1b[0m
+\x1b[0;1m───────────\x1b[0m
+
+- acme.test.test - This is a `TEST` foo.bar.module with `foo=bar` and `baz`. Do
+  not confuse with foo.bar.baz.
 """
     )
