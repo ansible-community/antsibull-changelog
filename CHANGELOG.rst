@@ -4,6 +4,22 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.37.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Minor Changes
+-------------
+
+- Simplify loading objects from memory instead of disk (https://github.com/ansible-community/antsibull-changelog/pull/237).
+- Support (plain) text output, with or without ANSI formatting sequences (https://github.com/ansible-community/antsibull-changelog/pull/236).
+- When invoking ansible-doc, catch standard error output and only show it in case of failures (https://github.com/ansible-community/antsibull-changelog/pull/235).
+- antsibull-changelog now depends on antsibull-docutils[unicode] 1.5.0+. This pulls in one more transitive dependency on Python < 3.15 (https://github.com/ansible-community/antsibull-changelog/pull/236).
+
 v0.36.0
 =======
 
