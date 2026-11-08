@@ -208,8 +208,8 @@ The format of `output` is as follows:
   title.
 
 - `format` (string, **required**): the output format to write the
-  changelog as. Supported formats are `rst` for ReStructuredText
-  and `md` for MarkDown.
+  changelog as. Supported formats are `rst` for ReStructuredText,
+  `md` for MarkDown, and `txt` for (plain) text files.
 
 - `global_toc` (bool, default `true`): Whether the changelog should have a
   global Table of Contents.
@@ -223,6 +223,13 @@ The format of `output` is as follows:
 - `per_release_toc_depth` (int or `null`, default `null`): if
   `per_release_toc=true`, determines whether the Table of Contents for a
   release has a maximum depth.
+
+- `text_use_ansi_formatting` (`"always"` or `"never"`, default `"never"`):
+  if `format` is `"txt"`, determines whether ANSI formatting sequences
+  are used or not.
+
+- `text_max_columns` (int, default `120`):
+  the maximum number of columns that every line in `txt` output should be wide.
 
 ### `prelude_title` (string)
 

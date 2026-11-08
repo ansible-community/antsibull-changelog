@@ -163,8 +163,8 @@ class TextDocumentRenderer(TextAbstractRenderer, DocumentRendererEx):
         start_level: int = 0,
         *,
         column_width: int = 80,
-        use_ansi_formatting: UseAnsiFormattingType = "always",
-        use_unicode_splitting: UseUnicodeSplittingType = "auto",
+        use_ansi_formatting: UseAnsiFormattingType = "never",
+        use_unicode_splitting: UseUnicodeSplittingType = "always",
     ):
         super().__init__(root=self)
         DocumentRendererEx.__init__(self, start_level=start_level)

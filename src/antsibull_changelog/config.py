@@ -450,6 +450,10 @@ class ChangelogOutput(ChangelogRenderConfig):
     filename_version_depth: p.NonNegativeInt = 0
     format: t.Union[TextFormat, OutputTextFormat]
 
+    # Format specific:
+    text_use_ansi_formatting: t.Literal["always", "never"] = "never"
+    text_max_columns: int = 120
+
     @p.field_validator("format", mode="before")
     @classmethod
     def parse_format(cls, value: t.Any) -> TextFormat | OutputTextFormat:
