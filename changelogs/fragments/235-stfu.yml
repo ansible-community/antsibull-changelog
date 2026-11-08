@@ -1,0 +1,2 @@
+minor_changes:
+  - "When invoking ansible-doc, catch standard error output and only show it in case of failures (https://github.com/ansible-community/antsibull-changelog/pull/235)."
