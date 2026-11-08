@@ -292,6 +292,7 @@ def bump(session: nox.Session):
         "add",
         "CHANGELOG.md",
         "CHANGELOG.rst",
+        "CHANGELOG.txt",
         "changelogs/changelog.yaml",
         "changelogs/fragments/",
         "docs/changelog.md",
