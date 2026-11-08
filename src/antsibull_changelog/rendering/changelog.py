@@ -25,6 +25,7 @@ from ..config import (
     ChangelogConfig,
     ChangelogOutput,
     ChangelogRenderConfig,
+    OutputTextFormat,
     PathsConfig,
     TextFormat,
 )
@@ -32,6 +33,7 @@ from ..logger import LOGGER
 from .document import AbstractRenderer, DocumentRenderer, SectionRenderer
 from .md_document import MDDocumentRenderer
 from .rst_document import RSTDocumentRenderer
+from .text_document import TextDocumentRenderer
 
 
 def add_section_content(
@@ -371,15 +373,29 @@ class ChangelogGenerator(ChangelogGeneratorBase):
 
 
 def create_document_renderer(
-    document_format: TextFormat, start_level: int = 0, **kwargs
+    document_format: TextFormat | OutputTextFormat,
+    start_level: int = 0,
+    *,
+    output: ChangelogOutput | None = None,
+    **kwargs,
 ) -> DocumentRenderer:
     """
     Create a document renderer for a given format.
     """
-    if document_format == TextFormat.RESTRUCTURED_TEXT:
+    if document_format in (
+        TextFormat.RESTRUCTURED_TEXT,
+        OutputTextFormat.RESTRUCTURED_TEXT,
+    ):
         return RSTDocumentRenderer(start_level=start_level, **kwargs)
-    if document_format == TextFormat.MARKDOWN:
+    if document_format in (TextFormat.MARKDOWN, OutputTextFormat.MARKDOWN):
         return MDDocumentRenderer(start_level=start_level, **kwargs)
+    if document_format == OutputTextFormat.TEXT:
+        params: dict[str, Any] = {}
+        if output is not None:
+            params["use_ansi_formatting"] = output.text_use_ansi_formatting
+            params["column_width"] = output.text_max_columns
+        params.update(kwargs)
+        return TextDocumentRenderer(start_level=start_level, **params)
     raise ValueError(f"Unsupported format {document_format}")
 
 
@@ -420,7 +436,10 @@ def generate_changelog_content(  # pylint: disable=too-many-arguments
         render_config=output,
     )
     renderer = create_document_renderer(
-        output.format, start_level=1 if only_latest else 0, **(renderer_kwargs or {})
+        output.format,
+        start_level=1 if only_latest else 0,
+        output=output,
+        **(renderer_kwargs or {}),
     )
     generator.generate(renderer, only_latest=only_latest)
 
@@ -453,7 +472,10 @@ def generate_changelog(  # pylint: disable=too-many-arguments
         render_config=output,
     )
     renderer = create_document_renderer(
-        output.format, start_level=1 if only_latest else 0, **(renderer_kwargs or {})
+        output.format,
+        start_level=1 if only_latest else 0,
+        output=output,
+        **(renderer_kwargs or {}),
     )
     generator.generate(renderer, only_latest=only_latest)
 

@@ -40,6 +40,12 @@ output:
     format: md
     global_toc: true
     per_release_toc: false
+  - file: CHANGELOG.txt
+    format: txt
+    global_toc: true
+    per_release_toc: false
+    text_use_ansi_formatting: never
+    text_max_columns: 120
   - file: docs/changelog.md
     format: md
     global_toc: false

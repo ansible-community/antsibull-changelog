@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from antsibull_docutils.utils import SupportedParser
 
-from ..config import TextFormat
+from ..config import OutputTextFormat, TextFormat
 
 
-def get_parser_name(text_format: TextFormat) -> SupportedParser:
+def get_parser_name(text_format: TextFormat | OutputTextFormat) -> SupportedParser:
     """
     Convert a TextFormat to a docutils parser name.
     """

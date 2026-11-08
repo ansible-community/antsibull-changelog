@@ -93,6 +93,7 @@ class RSTSectionRenderer(RSTAbstractRenderer, SectionRenderer):
         self._level = level
         self.title = title
 
+    # pylint: disable=duplicate-code
     def _get_level(self) -> int:
         return self._level
 
@@ -134,7 +135,9 @@ class RSTDocumentRenderer(RSTAbstractRenderer, DocumentRendererEx):
     def _get_level(self) -> int:
         return self.start_level
 
-    def render_text(self, text: str, text_format: TextFormat) -> str:
+    def render_text(
+        self, text: str, text_format: TextFormat, *, indent: str | None = None
+    ) -> str:
         """
         Render a text as ReStructured Text.
         """

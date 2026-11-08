@@ -40,7 +40,7 @@ classifiers = [
 dependencies = [
     "annotated_types",
     "antsibull-docs-parser >= 1.2.2, < 2.0.0",
-    "antsibull-docutils >= 1.0.0, < 2.0.0",
+    "antsibull-docutils[unicode] >= 1.5.0, < 2.0.0",
     "antsibull-fileutils >= 1.0.0, < 2.0.0",
     "docutils",
     "packaging",
