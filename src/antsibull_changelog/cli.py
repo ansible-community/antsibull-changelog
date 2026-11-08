@@ -203,7 +203,8 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     common_build.add_argument(
         "--ansible-doc-bin", help="path to ansible-doc (overrides autodetect)"
     )
-    common_build.add_argument(
+    # pylint: disable-next=fixme
+    common_build.add_argument(  # TODO: deprecate!
         "--use-ansible-doc",
         action="store_true",
         help="always use ansible-doc to find plugins",
@@ -469,7 +470,6 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh_fragments: RefreshFragments | None,
     args_refresh: bool,
     args_reload_plugins: bool,
-    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -486,7 +486,6 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh_fragments: RefreshFragments | None,
     args_refresh: bool,
     args_reload_plugins: bool,
-    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -502,7 +501,6 @@ def do_refresh(  # pylint: disable=too-many-arguments,too-many-locals
     args_refresh_fragments: RefreshFragments | None,
     args_refresh: bool,
     args_reload_plugins: bool,
-    args_use_ansible_doc: bool,
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -528,7 +526,6 @@ def do_refresh(  # pylint: disable=too-many-arguments,too-many-locals
                 config=config,
                 version=changes.latest_version,
                 force_reload=args_reload_plugins,
-                use_ansible_doc=args_use_ansible_doc,
                 add_plugin_period=config.add_plugin_period,
             )
         allow_removals = refresh_plugins == "allow-removal"
@@ -710,7 +707,6 @@ def command_release(args: argparse.Namespace) -> int:
         config=config,
         version=version,
         force_reload=args.reload_plugins,
-        use_ansible_doc=args.use_ansible_doc,
         add_plugin_period=config.add_plugin_period,
     )
     fragments = load_fragments(paths, config)
@@ -727,7 +723,6 @@ def command_release(args: argparse.Namespace) -> int:
         args_refresh_fragments=args.refresh_fragments,
         args_refresh=args.refresh,
         args_reload_plugins=args.reload_plugins,
-        args_use_ansible_doc=args.use_ansible_doc,
         paths=paths,
         collection_details=collection_details,
         config=config,
@@ -823,7 +818,6 @@ def command_generate(args: argparse.Namespace) -> int:
         args_refresh_fragments=args.refresh_fragments,
         args_refresh=args.refresh,
         args_reload_plugins=args.reload_plugins,
-        args_use_ansible_doc=args.use_ansible_doc,
         paths=paths,
         collection_details=collection_details,
         config=config,

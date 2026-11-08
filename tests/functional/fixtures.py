@@ -362,43 +362,26 @@ class ChangelogEnvironment:
         result.dump()
         return result
 
-    def _create_ansible_doc_list(
-        self, plugin_data: dict[str, dict[str, Any]], plugin_type: str
-    ) -> dict[str, Any]:
-        if plugin_type == "role":
-            # Role listing works differently
-            result = dict()
-            for role, role_data in plugin_data[plugin_type].items():
-                result[role] = {
-                    "collection": role_data["collection"],
-                    "entry_points": {
-                        ep: ep_data.get("short_description")
-                        for ep, ep_data in role_data["entry_points"].items()
-                    },
-                }
-            return result
-        return {
-            plugin_name: plugin_data.get("short_description")
-            for plugin_name, plugin_data in plugin_data[plugin_type].items()
-        }
-
-    def _create_ansible_doc_info(
+    def _create_ansible_doc_metadata(
         self,
         plugin_data: dict[str, dict[str, Any]],
-        plugin_type: str,
-        plugin_names: list[str],
         base_dir: str,
     ) -> dict[str, Any]:
-        result = dict()
-        for plugin_name in plugin_names:
-            doc = plugin_data[plugin_type][plugin_name].copy()
-            if "doc" in doc and "filename" in doc["doc"]:
-                doc["doc"] = doc["doc"].copy()
-                doc["doc"]["filename"] = os.path.join(base_dir, doc["doc"]["filename"])
-            if "path" in doc:
-                doc["path"] = os.path.join(base_dir, doc["path"])
-            result[plugin_name] = doc
-        return result
+        t_result = {}
+        for plugin_type, plugins_data in plugin_data.items():
+            p_result = {}
+            t_result[plugin_type] = p_result
+            for plugin_name, plugin_docs in plugins_data.items():
+                doc = plugin_docs.copy()
+                p_result[plugin_name] = doc
+                if "doc" in doc and "filename" in doc["doc"]:
+                    doc["doc"] = doc["doc"].copy()
+                    doc["doc"]["filename"] = os.path.join(
+                        base_dir, doc["doc"]["filename"]
+                    )
+                if "path" in doc:
+                    doc["path"] = os.path.join(base_dir, doc["path"])
+        return {"all": t_result}
 
 
 def _cp(
@@ -458,23 +441,13 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
                 )
             if (
                 command[0].endswith("ansible-doc")
-                and command[1] == "--json"
-                and command[2] == "-t"
+                and len(command) == 3
+                and command[1] == "--metadata-dump"
+                and command[2] == "ansible.builtin"
             ):
-                plugin_type = command[3]
-                args = command[4:]
-                do_list = False
-                if args[0] == "--list":
-                    do_list = True
-                    args = args[1:]
-                if do_list:
-                    if args:
-                        raise Exception("Unexpected list commands: {0}".format(args))
-                    result = self._create_ansible_doc_list(plugin_data, plugin_type)
-                else:
-                    result = self._create_ansible_doc_info(
-                        plugin_data, plugin_type, args, self.paths.base_dir
-                    )
+                result = self._create_ansible_doc_metadata(
+                    plugin_data, self.paths.base_dir
+                )
                 return _cp(
                     args=command, stdout=json.dumps(result).encode("utf-8"), stderr=b""
                 )
@@ -539,34 +512,19 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
                 )
             if (
                 command[0].endswith("ansible-doc")
-                and command[1] == "--json"
-                and command[2] == "-t"
+                and len(command) == 5
+                and command[1] == "--metadata-dump"
+                and command[2] == f"{self.namespace}.{self.collection}"
+                and command[3] == "--playbook-dir"
             ):
-                plugin_type = command[3]
-                args = command[4:]
-                do_list = False
-                if args[0] == "--list":
-                    do_list = True
-                    args = args[1:]
-                if args[0] == "--playbook-dir":
-                    base_dir = os.path.join(
-                        args[1],
-                        "collections",
-                        "ansible_collections",
-                        self.namespace,
-                        self.collection,
-                    )
-                    args = args[2:]
-                if do_list:
-                    if len(args) and args[0] == self.collection_name:
-                        args = args[1:]
-                    if args:
-                        raise Exception("Unexpected list commands: {0}".format(args))
-                    result = self._create_ansible_doc_list(plugin_data, plugin_type)
-                else:
-                    result = self._create_ansible_doc_info(
-                        plugin_data, plugin_type, args, base_dir
-                    )
+                base_dir = os.path.join(
+                    command[4],
+                    "collections",
+                    "ansible_collections",
+                    self.namespace,
+                    self.collection,
+                )
+                result = self._create_ansible_doc_metadata(plugin_data, base_dir)
                 return _cp(
                     args=command,
                     stdout=json.dumps(result).encode("utf-8"),
@@ -643,8 +601,7 @@ def create_plugin(**parts):
     result = [
         "#!/usr/bin/python",
         "",
-        "from __future__ import absolute_import, division, print_function",
-        "__metaclass__ = type",
+        "from __future__ import annotations",
     ]
 
     for part, data in parts.items():

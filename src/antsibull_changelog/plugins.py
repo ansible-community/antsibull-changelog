@@ -13,12 +13,10 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import subprocess
 from contextlib import contextmanager
 from typing import Any, Generator
 
-import packaging.version
 from antsibull_docs_parser import dom as _ansible_markup_dom
 from antsibull_docs_parser.parser import Context as _AnsibleMarkupContext
 from antsibull_docs_parser.parser import Whitespace as _AnsibleMarkupWhitespace
@@ -34,7 +32,6 @@ from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from .ansible import (
     PLUGIN_EXCEPTIONS,
-    get_ansible_release,
     get_documentable_objects,
     get_documentable_plugins,
 )
@@ -385,60 +382,16 @@ def run_ansible_doc(
 
 
 def run_ansible_doc_metadata_dump(
-    paths: PathsConfig, playbook_dir: str | None, collection_name: str | None
+    paths: PathsConfig, playbook_dir: str | None, collection_name: str
 ) -> dict:
     """
     Runs ansible-doc to retrieve documentation for all plugins in a collection.
     """
-    command = [paths.ansible_doc_path, "--metadata-dump"]
-    if collection_name:
-        command.append(collection_name)
+    command = [paths.ansible_doc_path, "--metadata-dump", collection_name]
     if playbook_dir:
         command.extend(["--playbook-dir", playbook_dir])
     output = _check_output(command)
     return json.loads(output.decode("utf-8"))
-
-
-def load_plugin_metadata(  # pylint: disable=too-many-arguments
-    paths: PathsConfig,
-    playbook_dir: str | None,
-    plugin_type: str,
-    collection_name: str | None,
-    use_ansible_doc: bool = False,
-    category: str = "plugin",
-) -> dict[str, dict[str, Any]]:
-    """
-    Collect plugin metadata for all plugins of a given type.
-
-    :arg paths: Paths configuration
-    :arg playbook_dir: Value for the ``--playbook-dir`` argument of ``ansible-doc``
-    :arg plugin_type: The plugin type or object type to consider
-    :arg collection_name: The name of the collection, if appropriate
-    :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
-    :arg category: Set to ``object`` for roles and playbooks
-    """
-    if use_ansible_doc or category == "object":
-        # WARNING: Do not make this the default to this before ansible-core/-base is a requirement!
-        plugins_list = list_plugins_ansibledoc(
-            paths, playbook_dir, plugin_type, collection_name, category
-        )
-    else:
-        plugins_list = list_plugins_walk(
-            paths, playbook_dir, plugin_type, collection_name
-        )
-
-    result: dict[str, dict[str, Any]] = {}
-    if not plugins_list:
-        return result
-
-    plugins_data = run_ansible_doc(paths, playbook_dir, plugin_type, plugins_list)
-
-    for name, data in plugins_data.items():
-        processed_data = jsondoc_to_metadata(
-            paths, collection_name, plugin_type, name, data, category=category
-        )
-        result[processed_data["name"]] = processed_data
-    return result
 
 
 def _load_plugins_2_13(
@@ -524,73 +477,11 @@ def _load_collection_plugins_2_13(
         )
 
 
-def _load_collection_plugins(
-    plugins_data: dict[str, Any],
-    paths: PathsConfig,
-    collection_details: CollectionDetails,
-    config: ChangelogConfig,
-    use_ansible_doc: bool,
-) -> None:
-    collection_name = "{}.{}".format(
-        collection_details.get_namespace(), collection_details.get_name()
-    )
-
-    with collection_copier(
-        paths, config, collection_details.get_namespace(), collection_details.get_name()
-    ) as (playbook_dir, new_paths):
-        for plugin_type in get_documentable_plugins():
-            plugins_data["plugins"][plugin_type] = load_plugin_metadata(
-                new_paths,
-                playbook_dir,
-                plugin_type,
-                collection_name,
-                use_ansible_doc=use_ansible_doc,
-            )
-
-        for object_type in get_documentable_objects():
-            plugins_data["objects"][object_type] = load_plugin_metadata(
-                new_paths,
-                playbook_dir,
-                object_type,
-                collection_name,
-                use_ansible_doc=use_ansible_doc,
-                category="object",
-            )
-
-
-def _load_ansible_plugins(
-    plugins_data: dict[str, Any], paths: PathsConfig, use_ansible_doc: bool
-) -> None:
-    for plugin_type in get_documentable_plugins():
-        plugins_data["plugins"][plugin_type] = load_plugin_metadata(
-            paths, None, plugin_type, None, use_ansible_doc=use_ansible_doc
-        )
-
-
-def _get_ansible_core_version(paths: PathsConfig) -> packaging.version.Version:
-    try:
-        version, _ = get_ansible_release()
-        return packaging.version.Version(version)
-    except ValueError:
-        pass
-
-    command = [paths.ansible_doc_path, "--version"]
-    output = _check_output(command).decode("utf-8")
-    for regex in (r"^ansible-doc \[(?:core|base) ([^\]]+)\]", r"^ansible-doc ([^\s]+)"):
-        match = re.match(regex, output)
-        if match:
-            return packaging.version.Version(match.group(1))
-    raise RuntimeError(
-        f"Cannot extract ansible-core version from ansible-doc --version output:\n{output}"
-    )
-
-
 def _refresh_plugin_cache(
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
     version: str,
-    use_ansible_doc: bool = False,
 ):
     LOGGER.info("refreshing plugin cache")
 
@@ -600,20 +491,10 @@ def _refresh_plugin_cache(
         "objects": {},
     }
 
-    core_version = _get_ansible_core_version(paths)
-    if core_version >= packaging.version.Version("2.13.0.dev0"):
-        if paths.is_collection:
-            _load_collection_plugins_2_13(
-                plugins_data, paths, collection_details, config
-            )
-        else:
-            _load_plugins_2_13(plugins_data, paths, "ansible.builtin")
-    elif paths.is_collection:
-        _load_collection_plugins(
-            plugins_data, paths, collection_details, config, use_ansible_doc
-        )
+    if paths.is_collection:
+        _load_collection_plugins_2_13(plugins_data, paths, collection_details, config)
     else:
-        _load_ansible_plugins(plugins_data, paths, use_ansible_doc)
+        _load_plugins_2_13(plugins_data, paths, "ansible.builtin")
 
     # remove empty namespaces from plugins
     for category in ("plugins", "objects"):
@@ -631,7 +512,8 @@ def load_plugins(  # pylint: disable=too-many-arguments
     config: ChangelogConfig,
     version: str,
     force_reload: bool = False,
-    use_ansible_doc: bool = False,
+    # pylint: disable-next=unused-argument,fixme
+    use_ansible_doc: bool = False,  # TODO: deprecate!
     add_plugin_period: bool = False,
     *,
     ignore_cache: bool = False,
@@ -643,7 +525,6 @@ def load_plugins(  # pylint: disable=too-many-arguments
     :arg collection_details: Collection details
     :arg version: The current version. Used for caching data
     :arg force_reload: Set to ``True`` to ignore potentially cached data
-    :arg use_ansible_doc: Set to ``True`` to always use ansible-doc to enumerate plugins/modules
     :arg ignore_cache: Set to ``True`` to neither read nor write the cache.
         Implies ``force_reload=True``.
     :return: A list of all plugins
@@ -665,9 +546,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
             plugins_data = {}
 
     if not plugins_data:
-        plugins_data = _refresh_plugin_cache(
-            paths, collection_details, config, version, use_ansible_doc
-        )
+        plugins_data = _refresh_plugin_cache(paths, collection_details, config, version)
         if not ignore_cache:
             store_yaml_file(plugin_cache_path, plugins_data)
 

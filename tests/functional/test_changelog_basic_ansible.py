@@ -819,7 +819,7 @@ changelogs/fragments/trivial.yml:0:0: invalid section: trivial
 
 FAKE_PLUGINS = {
     "callback": {
-        "test_callback": {
+        "ansible.builtin.test_callback": {
             "doc": {
                 "author": ["Someone else"],
                 "description": ["This is a relatively new callback added before."],
@@ -840,7 +840,7 @@ FAKE_PLUGINS = {
         }
     },
     "module": {
-        "old_module": {
+        "ansible.builtin.cloud.sky.old_module": {
             "doc": {
                 "author": ["Elder"],
                 "description": ["This is an old module."],
@@ -858,7 +858,7 @@ FAKE_PLUGINS = {
             },
             "return": {},
         },
-        "test_module": {
+        "ansible.builtin.test_module": {
             "doc": {
                 "author": ["Someone"],
                 "description": ["This is a :strong:`TEST` :emphasis:`module`."],
