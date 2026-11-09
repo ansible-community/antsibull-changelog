@@ -471,7 +471,7 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -489,7 +489,7 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -506,7 +506,7 @@ def do_refresh(  # pylint: disable=too-many-arguments,too-many-locals
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=unused-argument,fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
