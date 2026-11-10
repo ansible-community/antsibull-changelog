@@ -207,7 +207,7 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
     common_build.add_argument(  # TODO: remove!
         "--use-ansible-doc",
         action="store_true",
-        help="always use ansible-doc to find plugins",
+        help="always use ansible-doc to find plugins (deprecated)",
     )
     common_build.add_argument(
         "--refresh",
