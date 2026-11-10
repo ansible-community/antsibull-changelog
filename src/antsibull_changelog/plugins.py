@@ -513,7 +513,7 @@ def load_plugins(  # pylint: disable=too-many-arguments
     version: str,
     force_reload: bool = False,
     # pylint: disable-next=unused-argument,fixme
-    use_ansible_doc: bool = False,  # TODO: deprecate!
+    use_ansible_doc: bool = False,  # TODO: add runtime deprecation!
     add_plugin_period: bool = False,
     *,
     ignore_cache: bool = False,

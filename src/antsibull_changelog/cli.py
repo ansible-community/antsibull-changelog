@@ -204,10 +204,10 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         "--ansible-doc-bin", help="path to ansible-doc (overrides autodetect)"
     )
     # pylint: disable-next=fixme
-    common_build.add_argument(  # TODO: deprecate!
+    common_build.add_argument(  # TODO: remove!
         "--use-ansible-doc",
         action="store_true",
-        help="always use ansible-doc to find plugins",
+        help="always use ansible-doc to find plugins (deprecated)",
     )
     common_build.add_argument(
         "--refresh",
@@ -471,7 +471,7 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -489,7 +489,7 @@ def do_refresh(  # pylint: disable=too-many-arguments  # noqa: E704
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -506,7 +506,7 @@ def do_refresh(  # pylint: disable=too-many-arguments,too-many-locals
     args_refresh: bool,
     args_reload_plugins: bool,
     # pylint: disable-next=unused-argument,fixme
-    args_use_ansible_doc: bool = False,  # TODO: deprecate
+    args_use_ansible_doc: bool = False,  # TODO: add runtime deprecation
     paths: PathsConfig,
     collection_details: CollectionDetails,
     config: ChangelogConfig,
@@ -677,12 +677,21 @@ def _get_version_and_codename(
     return version, codename
 
 
+def _depr_use_ansible_doc(args: argparse.Namespace) -> None:
+    if args.use_ansible_doc:
+        LOGGER.warning(
+            "The --use-ansible-doc argument is deprecated. "
+            "It will be removed and become a syntax error in a future release."
+        )
+
+
 def command_release(args: argparse.Namespace) -> int:
     """
     Add a new release to a changelog.
 
     :arg args: Parsed arguments
     """
+    _depr_use_ansible_doc(args)
     ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
 
@@ -795,6 +804,7 @@ def command_generate(args: argparse.Namespace) -> int:
 
     :arg args: Parsed arguments
     """
+    _depr_use_ansible_doc(args)
     ansible_doc_bin: str | None = args.ansible_doc_bin
     paths = set_paths(is_collection=args.is_collection, ansible_doc_bin=ansible_doc_bin)
     version: str | None = args.version
