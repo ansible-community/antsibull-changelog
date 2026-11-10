@@ -477,6 +477,15 @@ def _load_collection_plugins_2_13(
         )
 
 
+def _remove_empty_namespaces(plugins_data: dict[str, Any]) -> None:
+    # remove empty namespaces from plugins
+    for category in ("plugins", "objects"):
+        for section in plugins_data[category].values():
+            for plugin in section.values():
+                if plugin["namespace"] is None:
+                    del plugin["namespace"]
+
+
 def _refresh_plugin_cache(
     paths: PathsConfig,
     collection_details: CollectionDetails,
@@ -484,7 +493,6 @@ def _refresh_plugin_cache(
     version: str,
 ):
     LOGGER.info("refreshing plugin cache")
-
     plugins_data: dict[str, Any] = {
         "version": version,
         "plugins": {},
@@ -496,13 +504,7 @@ def _refresh_plugin_cache(
     else:
         _load_plugins_2_13(plugins_data, paths, "ansible.builtin")
 
-    # remove empty namespaces from plugins
-    for category in ("plugins", "objects"):
-        for section in plugins_data[category].values():
-            for plugin in section.values():
-                if plugin["namespace"] is None:
-                    del plugin["namespace"]
-
+    _remove_empty_namespaces(plugins_data)
     return plugins_data
 
 
