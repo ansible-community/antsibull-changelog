@@ -15,8 +15,20 @@ import json
 import os
 import subprocess
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Generator
 
+from antsibull_docs_loader.ansible import (
+    ALL_DOCUMENTABLE_PLUGIN_TYPES,
+    EDA_PLUGIN_TYPES,
+)
+from antsibull_docs_loader.data import CollectionInfo
+from antsibull_docs_loader.loader import (
+    Documentation,
+    load_docs,
+    load_docs_from_role_argspec_file,
+)
+from antsibull_docs_loader.routing import load_routing_information
 from antsibull_docs_parser import dom as _ansible_markup_dom
 from antsibull_docs_parser.parser import Context as _AnsibleMarkupContext
 from antsibull_docs_parser.parser import Whitespace as _AnsibleMarkupWhitespace
@@ -31,6 +43,7 @@ from antsibull_fileutils.vcs import detect_vcs
 from antsibull_fileutils.yaml import load_yaml_file, store_yaml_file
 
 from .ansible import (
+    OBJECT_TYPES,
     PLUGIN_EXCEPTIONS,
     get_documentable_objects,
     get_documentable_plugins,
@@ -491,7 +504,7 @@ def _refresh_plugin_cache(
     collection_details: CollectionDetails,
     config: ChangelogConfig,
     version: str,
-):
+) -> dict[str, Any]:
     LOGGER.info("refreshing plugin cache")
     plugins_data: dict[str, Any] = {
         "version": version,
@@ -506,6 +519,139 @@ def _refresh_plugin_cache(
 
     _remove_empty_namespaces(plugins_data)
     return plugins_data
+
+
+def _get_collection_info(
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+) -> CollectionInfo:
+    if paths.is_collection:
+        namespace = collection_details.get_namespace()
+        name = collection_details.get_name()
+        return CollectionInfo(
+            path=Path(paths.base_dir),
+            namespace=namespace,
+            name=name,
+            full_name=f"{namespace}.{name}",
+            version=collection_details.version,
+            is_ansible_core=False,
+        )
+    return CollectionInfo(
+        path=Path(paths.base_dir) / "lib" / "ansible",
+        namespace="ansible",
+        name="builtin",
+        full_name="ansible.builtin",
+        version=None,  # we don't need the correct value
+        is_ansible_core=True,
+    )
+
+
+def _get_entry(
+    plugin_fqcn: tuple[str, ...], plugin_type: str, docs: Documentation
+) -> dict[str, Any]:
+    return {
+        "name": ".".join(plugin_fqcn),
+        "namespace": (".".join(plugin_fqcn[:-1]) if plugin_type == "module" else None),
+        "description": docs.documentation.get("short_description"),
+        "version_added": docs.documentation.get("version_added"),
+    }
+
+
+def _refresh_plugin_cache_new(
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+    _config: ChangelogConfig,
+    version: str,
+) -> dict[str, Any]:
+    LOGGER.info("refreshing plugin cache")
+    plugins_data: dict[str, Any] = {
+        "version": version,
+        "plugins": {},
+        "objects": {},
+    }
+
+    collection_info = _get_collection_info(paths, collection_details)
+    routing_info = load_routing_information(collection_info)
+    for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES:
+        if plugin_type in EDA_PLUGIN_TYPES:
+            continue
+        dest: dict[str, dict[str, str | None]] = {}
+        destination = (
+            plugins_data["objects"]
+            if plugin_type in OBJECT_TYPES
+            else plugins_data["plugins"]
+        )
+        destination[plugin_type] = dest
+        plugin_data = routing_info.files.get(plugin_type)
+        if plugin_data is None:
+            continue
+        for plugin_fqcn, plugin_file in sorted(plugin_data.items()):
+            if plugin_type == "role":
+                entrypoints = load_docs_from_role_argspec_file(
+                    plugin_file.docs_candidates[0]
+                )
+                main = entrypoints.entrypoints.get("main") if entrypoints else None
+                if main is not None:
+                    dest[plugin_fqcn[-1]] = _get_entry(plugin_fqcn, plugin_type, main)
+            else:
+                docs = load_docs(plugin_file.docs_candidates)
+                if docs is not None:
+                    dest[plugin_fqcn[-1]] = _get_entry(plugin_fqcn, plugin_type, docs)
+
+    _remove_empty_namespaces(plugins_data)
+    return plugins_data
+
+
+def _compare_plugin_type(
+    *, category: str, plugin_type: str, op: dict[str, Any], np: dict[str, Any]
+) -> None:
+    if sorted(op) != sorted(np):
+        LOGGER.warning(
+            f"Found differences when scanning plugin cache for {category}.{plugin_type}:"
+            " missing {missing}, superfluous {superfluous}",
+            missing=sorted(set(op) - set(np)),
+            superfluous=sorted(set(np) - set(op)),
+        )
+    for plugin_name in op:
+        if plugin_name in np:
+            opd = op[plugin_name]
+            npd = np[plugin_name]
+            if opd != npd:
+                LOGGER.warning(
+                    "Found differences when scanning plugin cache for"
+                    f" {category}.{plugin_type}.{plugin_name}: {{opd}} vs. {{npd}}",
+                    opd=opd,
+                    npd=npd,
+                )
+
+
+def _refresh_plugin_cache_cmp(
+    paths: PathsConfig,
+    collection_details: CollectionDetails,
+    config: ChangelogConfig,
+    version: str,
+) -> dict[str, Any]:
+    old_cache = _refresh_plugin_cache(paths, collection_details, config, version)
+    new_cache = _refresh_plugin_cache_new(paths, collection_details, config, version)
+    for category in ("plugins", "objects"):
+        o = old_cache[category]
+        n = new_cache[category]
+        if sorted(o) != sorted(n):
+            LOGGER.warning(
+                f"Found differences when scanning plugin cache for {category}:"
+                " missing {missing}, superfluous {superfluous}",
+                missing=sorted(set(o) - set(n)),
+                superfluous=sorted(set(n) - set(o)),
+            )
+        for plugin_type, op in o.items():
+            if plugin_type in n:
+                _compare_plugin_type(
+                    category=category,
+                    plugin_type=plugin_type,
+                    op=op,
+                    np=n[plugin_type],
+                )
+    return old_cache
 
 
 def load_plugins(  # pylint: disable=too-many-arguments
@@ -548,7 +694,9 @@ def load_plugins(  # pylint: disable=too-many-arguments
             plugins_data = {}
 
     if not plugins_data:
-        plugins_data = _refresh_plugin_cache(paths, collection_details, config, version)
+        plugins_data = _refresh_plugin_cache_cmp(
+            paths, collection_details, config, version
+        )
         if not ignore_cache:
             store_yaml_file(plugin_cache_path, plugins_data)
 
