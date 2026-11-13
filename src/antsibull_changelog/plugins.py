@@ -16,7 +16,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any, Generator, Literal
 
 from antsibull_docs_loader.ansible import (
     ALL_DOCUMENTABLE_PLUGIN_TYPES,
@@ -50,6 +50,8 @@ from .ansible import (
 )
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .logger import LOGGER
+
+PLUGIN_MODE: Literal["compare", "old", "new"] = "compare"
 
 
 class _AnsibleMarkupRSTFormatter(_AnsibleMarkupRSTFormatterBase):
@@ -557,11 +559,11 @@ def _get_entry(
     }
 
 
-def _refresh_plugin_cache_new(
+def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
     paths: PathsConfig,
     collection_details: CollectionDetails,
-    _config: ChangelogConfig,
     version: str,
+    include_eda: bool,
 ) -> dict[str, Any]:
     LOGGER.info("refreshing plugin cache")
     plugins_data: dict[str, Any] = {
@@ -573,7 +575,7 @@ def _refresh_plugin_cache_new(
     collection_info = _get_collection_info(paths, collection_details)
     routing_info = load_routing_information(collection_info)
     for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES:
-        if plugin_type in EDA_PLUGIN_TYPES:
+        if not include_eda and plugin_type in EDA_PLUGIN_TYPES:
             continue
         dest: dict[str, dict[str, str | None]] = {}
         destination = (
@@ -631,8 +633,16 @@ def _refresh_plugin_cache_cmp(
     config: ChangelogConfig,
     version: str,
 ) -> dict[str, Any]:
+    if PLUGIN_MODE == "old":
+        return _refresh_plugin_cache(paths, collection_details, config, version)
+    if PLUGIN_MODE == "new":
+        return _refresh_plugin_cache_new(
+            paths, collection_details, version, include_eda=True
+        )
     old_cache = _refresh_plugin_cache(paths, collection_details, config, version)
-    new_cache = _refresh_plugin_cache_new(paths, collection_details, config, version)
+    new_cache = _refresh_plugin_cache_new(
+        paths, collection_details, version, include_eda=False
+    )
     for category in ("plugins", "objects"):
         o = old_cache[category]
         n = new_cache[category]
