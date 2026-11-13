@@ -12,11 +12,9 @@ from __future__ import annotations
 
 from functools import cache
 
-import packaging.version
-
 OBJECT_TYPES = ("role", "playbook")
 
-OTHER_PLUGIN_TYPES = ("module", "test", "filter")
+OTHER_PLUGIN_TYPES = ("module",)
 
 # These are pairs (plugin_type, plugin_filename) inside ansible-core which are *not*
 # plugins, but files used by plugins.
@@ -40,6 +38,7 @@ def get_documentable_plugins() -> tuple[str, ...]:
             "callback",
             "cliconf",
             "connection",
+            "filter",
             "httpapi",
             "inventory",
             "lookup",
@@ -48,6 +47,7 @@ def get_documentable_plugins() -> tuple[str, ...]:
             "vars",
             "module",
             "strategy",
+            "test",
         )
 
 
@@ -56,18 +56,7 @@ def get_documentable_objects() -> tuple[str, ...]:
     """
     Retrieve object types that can be documented.
     """
-    try:
-        # We import from ansible locally since importing it is rather slow
-        # pylint: disable-next=import-outside-toplevel
-        from ansible import release as ansible_release
-
-        if packaging.version.Version(
-            ansible_release.__version__
-        ) < packaging.version.Version("2.11.0"):
-            return ()
-        return ("role",)
-    except ImportError:
-        return ()
+    return ("role",)
 
 
 @cache

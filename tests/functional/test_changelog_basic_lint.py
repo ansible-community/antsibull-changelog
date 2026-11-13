@@ -106,7 +106,7 @@ changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #1 must have a "description" entry of type string
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" entry #1 must have a "name" entry of type string
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add object.role" list items must be type dict not str
-changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.asdf"'s type must be one of become, cache, callback, cliconf, connection, httpapi, inventory, lookup, netconf, shell, vars, module, strategy, module, test, filter, not "asdf"
+changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.asdf"'s type must be one of become, cache, callback, cliconf, connection, filter, httpapi, inventory, lookup, netconf, shell, vars, module, strategy, test, module, not "asdf"
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 has invalid keys "meh"
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 must have a "description" entry of type string
 changelogs/fragments/invalid-add-obj.yaml:0:0: section "add plugin.module" entry #0 must have a "name" entry of type string

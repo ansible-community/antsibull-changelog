@@ -876,6 +876,19 @@ FAKE_PLUGINS = {
             "return": {},
         },
     },
+    "become": {},
+    "cache": {},
+    "cliconf": {},
+    "connection": {},
+    "filter": {},
+    "httpapi": {},
+    "inventory": {},
+    "lookup": {},
+    "netconf": {},
+    "shell": {},
+    "strategy": {},
+    "test": {},
+    "vars": {},
 }
 
 
