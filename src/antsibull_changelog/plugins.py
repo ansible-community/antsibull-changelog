@@ -51,7 +51,7 @@ from .ansible import (
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .logger import LOGGER
 
-PLUGIN_MODE: Literal["compare", "old", "new"] = "compare"
+PluginMode = Literal["compare", "old", "new"]
 
 
 class _AnsibleMarkupRSTFormatter(_AnsibleMarkupRSTFormatterBase):
@@ -559,11 +559,10 @@ def _get_entry(
     }
 
 
-def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
+def _refresh_plugin_cache_new(
     paths: PathsConfig,
     collection_details: CollectionDetails,
     version: str,
-    include_eda: bool,
 ) -> dict[str, Any]:
     LOGGER.info("refreshing plugin cache")
     plugins_data: dict[str, Any] = {
@@ -575,8 +574,6 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
     collection_info = _get_collection_info(paths, collection_details)
     routing_info = load_routing_information(collection_info)
     for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES:
-        if not include_eda and plugin_type in EDA_PLUGIN_TYPES:
-            continue
         dest: dict[str, dict[str, str | None]] = {}
         destination = (
             plugins_data["objects"]
@@ -604,16 +601,34 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
     return plugins_data
 
 
+_ISSUES_URL = "https://github.com/ansible-community/antsibull-changelog/issues/"
+_COMPARE_MESSAGE = f"Please report this issue in {_ISSUES_URL}. Thanks!"
+
+
 def _compare_plugin_type(
-    *, category: str, plugin_type: str, op: dict[str, Any], np: dict[str, Any]
+    *,
+    category: str,
+    plugin_type: str,
+    op: dict[str, Any],
+    np: dict[str, Any],
+    is_ansible_core: bool,
 ) -> None:
     if sorted(op) != sorted(np):
-        LOGGER.warning(
-            f"Found differences when scanning plugin cache for {category}.{plugin_type}:"
-            " missing {missing}, superfluous {superfluous}",
-            missing=sorted(set(op) - set(np)),
-            superfluous=sorted(set(np) - set(op)),
-        )
+        missing = sorted(set(op) - set(np))
+        superfluous = sorted(set(np) - set(op))
+        if is_ansible_core and plugin_type in ("filter", "test"):
+            # Ansible-core includes docs for builtin Jinja2 filters and tests.
+            # antsibull-docs-loader doesn't know about these yet and will not return them.
+            # Since they never have 'version_added', this doesn't matter for our use-case,
+            # so we don't warn about them.
+            missing.clear()
+        if missing or superfluous:
+            LOGGER.warning(
+                f"Found differences when scanning plugin cache for {category}.{plugin_type}:"
+                f" missing {missing}, superfluous {superfluous}. {_COMPARE_MESSAGE}",
+                missing=missing,
+                superfluous=superfluous,
+            )
     for plugin_name in op:
         if plugin_name in np:
             opd = op[plugin_name]
@@ -621,7 +636,8 @@ def _compare_plugin_type(
             if opd != npd:
                 LOGGER.warning(
                     "Found differences when scanning plugin cache for"
-                    f" {category}.{plugin_type}.{plugin_name}: {{opd}} vs. {{npd}}",
+                    f" {category}.{plugin_type}.{plugin_name}: {{opd}} vs. {{npd}}."
+                    f" {_COMPARE_MESSAGE}",
                     opd=opd,
                     npd=npd,
                 )
@@ -632,36 +648,35 @@ def _refresh_plugin_cache_cmp(
     collection_details: CollectionDetails,
     config: ChangelogConfig,
     version: str,
+    plugin_mode: PluginMode,
 ) -> dict[str, Any]:
-    if PLUGIN_MODE == "old":
+    if plugin_mode == "old":
         return _refresh_plugin_cache(paths, collection_details, config, version)
-    if PLUGIN_MODE == "new":
-        return _refresh_plugin_cache_new(
-            paths, collection_details, version, include_eda=True
-        )
+    if plugin_mode == "new":
+        return _refresh_plugin_cache_new(paths, collection_details, version)
     old_cache = _refresh_plugin_cache(paths, collection_details, config, version)
-    new_cache = _refresh_plugin_cache_new(
-        paths, collection_details, version, include_eda=False
-    )
+    new_cache = _refresh_plugin_cache_new(paths, collection_details, version)
     for category in ("plugins", "objects"):
-        o = old_cache[category]
-        n = new_cache[category]
+        # Skip EDA plugin types since the old method does not support them
+        o = [pt for pt in old_cache[category] if pt not in EDA_PLUGIN_TYPES]
+        n = [pt for pt in new_cache[category] if pt not in EDA_PLUGIN_TYPES]
         if sorted(o) != sorted(n):
             LOGGER.warning(
                 f"Found differences when scanning plugin cache for {category}:"
-                " missing {missing}, superfluous {superfluous}",
+                f" missing {{missing}}, superfluous {{superfluous}}. {_COMPARE_MESSAGE}",
                 missing=sorted(set(o) - set(n)),
                 superfluous=sorted(set(n) - set(o)),
             )
-        for plugin_type, op in o.items():
+        for plugin_type in o:
             if plugin_type in n:
                 _compare_plugin_type(
                     category=category,
                     plugin_type=plugin_type,
-                    op=op,
-                    np=n[plugin_type],
+                    op=old_cache[category][plugin_type],
+                    np=new_cache[category][plugin_type],
+                    is_ansible_core=not paths.is_collection,
                 )
-    return old_cache
+    return new_cache
 
 
 def load_plugins(  # pylint: disable=too-many-arguments
@@ -693,6 +708,9 @@ def load_plugins(  # pylint: disable=too-many-arguments
     plugin_cache_path = os.path.join(paths.changelog_dir, ".plugin-cache.yaml")
     plugins_data: dict[str, Any] = {}
 
+    # TODO: Keep this?
+    plugin_mode: PluginMode = "compare"
+
     if not ignore_cache and not force_reload and os.path.exists(plugin_cache_path):
         plugins_data = load_yaml_file(plugin_cache_path)
         if version != plugins_data["version"]:
@@ -705,7 +723,11 @@ def load_plugins(  # pylint: disable=too-many-arguments
 
     if not plugins_data:
         plugins_data = _refresh_plugin_cache_cmp(
-            paths, collection_details, config, version
+            paths,
+            collection_details,
+            config,
+            version,
+            plugin_mode=plugin_mode,
         )
         if not ignore_cache:
             store_yaml_file(plugin_cache_path, plugins_data)
