@@ -1954,6 +1954,19 @@ FAKE_PLUGINS = {
             "path": "",
         },
     },
+    "become": {},
+    "cache": {},
+    "cliconf": {},
+    "connection": {},
+    "filter": {},
+    "httpapi": {},
+    "inventory": {},
+    "lookup": {},
+    "netconf": {},
+    "shell": {},
+    "strategy": {},
+    "test": {},
+    "vars": {},
 }
 
 
