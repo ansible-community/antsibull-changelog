@@ -837,7 +837,33 @@ FAKE_PLUGINS = {
                 "supported_by": "community",
             },
             "return": {},
-        }
+        },
+        "ansible.builtin.dont.find.me.test_callback2": {
+            "doc": {
+                "author": ["Someone else"],
+                "description": ["This is a relatively new callback added before."],
+                "filename": os.path.join(
+                    "lib",
+                    "ansible",
+                    "plugins",
+                    "callback",
+                    "dont",
+                    "find",
+                    "me",
+                    "test_callback2.py",
+                ),
+                "name": "test_callback2",
+                "options": {},
+                "short_description": "This one should be found nowadays.",
+                "version_added": "2.9",
+            },
+            "examples": "# Some examples\n",
+            "metadata": {
+                "status": ["preview"],
+                "supported_by": "community",
+            },
+            "return": {},
+        },
     },
     "module": {
         "ansible.builtin.cloud.sky.old_module": {
@@ -999,7 +1025,7 @@ sections:
                 DOCUMENTATION={
                     "name": "bad_module2",
                     "short_description": "An bad module",
-                    "description": ["Shold not be found either."],
+                    "description": ["Shold be found nowadays."],
                     "author": ["Elder"],
                     "options": {},
                 },
@@ -1030,7 +1056,7 @@ sections:
             create_plugin(
                 DOCUMENTATION={
                     "name": "test_callback2",
-                    "short_description": "This one should not be found.",
+                    "short_description": "This one should be found nowadays.",
                     "version_added": "2.9",
                     "description": ["This is a relatively new callback added before."],
                     "author": ["Someone else"],
@@ -1098,7 +1124,30 @@ sections:
         )
 
         # Plugin cache: callbacks
-        assert sorted(plugin_cache["plugins"]["callback"]) == ["test_callback"]
+        assert sorted(plugin_cache["plugins"]["callback"]) == [
+            "dont.find.me.test_callback2",
+            "test_callback",
+        ]
+        assert (
+            plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"]["name"]
+            == "dont.find.me.test_callback2"
+        )
+        assert (
+            plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"][
+                "description"
+            ]
+            == "This one should be found nowadays."
+        )
+        assert (
+            plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"][
+                "version_added"
+            ]
+            == "2.9"
+        )
+        assert (
+            "namespace"
+            not in plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"]
+        )
         assert (
             plugin_cache["plugins"]["callback"]["test_callback"]["name"]
             == "test_callback"

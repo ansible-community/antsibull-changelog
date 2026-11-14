@@ -555,7 +555,7 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
             },
             Dumper=yaml.SafeDumper,
         ).encode("utf-8")
-        self._write(os.path.join(role_meta_dir, "argument_spec.yml"), argspec)
+        self._write(os.path.join(role_meta_dir, "argument_specs.yml"), argspec)
 
 
 class OtherChangelogEnvironment(ChangelogEnvironment):
