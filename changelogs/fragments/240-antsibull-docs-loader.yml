@@ -1,0 +1,10 @@
+major_changes:
+  - "Now uses antsibull-docs-loader for searching for new plugins, modules, and roles in a collection.
+     Currently antsibull-changelog also uses ansible-doc and compares the result, and will emit warnings
+     if there are differences. If you encounter such warnings, please `create an issue in the antsibull-changelog
+     repository <https://github.com/ansible-community/antsibull-changelog/issues/>`__. Thanks!
+     In a future version, the ansible-doc fallback will be removed, which will result in a performance win
+     (https://github.com/ansible-community/antsibull-changelog/pull/240)."
+  - "Support EDA event filter and event source plugin types when searching for new plugins (https://github.com/ansible-community/antsibull-changelog/pull/240)."
+minor_changes:
+  - "Adds new dependency on `antsibull-docs-loader <https://pypi.org/project/antsibull-docs-loader>`__ (https://github.com/ansible-community/antsibull-changelog/pull/240)."
