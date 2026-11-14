@@ -54,6 +54,8 @@ from .logger import LOGGER
 
 PluginMode = Literal["compare", "old", "new"]
 
+_FAIL_ON_BAD_COMPARISON = False
+
 
 class _AnsibleMarkupRSTFormatter(_AnsibleMarkupRSTFormatterBase):
     @staticmethod
@@ -550,10 +552,10 @@ def _get_collection_info(
 
 
 def _get_entry(
-    plugin_fqcn: tuple[str, ...], plugin_type: str, docs: Documentation
+    plugin_fqcn: tuple[str, ...], plugin_type: str, docs: Documentation | None
 ) -> tuple[str, dict[str, Any]]:
-    description = docs.documentation.get("short_description")
-    version_added = docs.documentation.get("version_added")
+    description = docs.documentation.get("short_description") if docs else None
+    version_added = docs.documentation.get("version_added") if docs else None
     if plugin_type == "module":
         return plugin_fqcn[-1], {
             "name": plugin_fqcn[-1],
@@ -605,9 +607,10 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
                 entrypoints = load_docs_from_role_argspec_file(
                     plugin_file.docs_candidates[0]
                 )
-                main = entrypoints.entrypoints.get("main") if entrypoints else None
-                if main is not None:
-                    fqcn, entry = _get_entry(plugin_fqcn, plugin_type, main)
+                if entrypoints is not None:
+                    fqcn, entry = _get_entry(
+                        plugin_fqcn, plugin_type, entrypoints.entrypoints.get("main")
+                    )
                     dest[fqcn] = entry
             else:
                 docs = load_docs(plugin_file.docs_candidates)
@@ -647,6 +650,8 @@ def _compare_plugin_type(
                 missing=missing,
                 superfluous=superfluous,
             )
+            if _FAIL_ON_BAD_COMPARISON:
+                raise ValueError("Comparison failed!")
     for plugin_name in op:
         if plugin_name in np:
             opd = op[plugin_name]
@@ -659,6 +664,8 @@ def _compare_plugin_type(
                     opd=opd,
                     npd=npd,
                 )
+                if _FAIL_ON_BAD_COMPARISON:
+                    raise ValueError("Comparison failed!")
 
 
 def _refresh_plugin_cache_cmp(
@@ -685,6 +692,8 @@ def _refresh_plugin_cache_cmp(
                 missing=sorted(set(o) - set(n)),
                 superfluous=sorted(set(n) - set(o)),
             )
+            if _FAIL_ON_BAD_COMPARISON:
+                raise ValueError("Comparison failed!")
         for plugin_type in o:
             if plugin_type in n:
                 _compare_plugin_type(

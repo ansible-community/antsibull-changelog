@@ -1992,6 +1992,7 @@ FAKE_PLUGINS = {
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     collection_changelog,
 ):  # noqa: F811
+    antsibull_changelog.plugins._FAIL_ON_BAD_COMPARISON = True
     with mock.patch(
         "antsibull_changelog.plugins.get_documentable_objects",
         return_value=("role",),

@@ -15,6 +15,7 @@ from unittest import mock
 from fixtures import ansible_changelog  # noqa: F401; pylint: disable=unused-variable
 from fixtures import create_plugin
 
+import antsibull_changelog.plugins  # noqa: F401; pylint: disable=unused-variable
 from antsibull_changelog import constants as C
 
 
@@ -921,6 +922,7 @@ FAKE_PLUGINS = {
 def test_changelog_release_ansible_plugin_cache(  # pylint: disable=redefined-outer-name
     ansible_changelog,
 ):  # noqa: F811
+    antsibull_changelog.plugins._FAIL_ON_BAD_COMPARISON = True
     with mock.patch(
         "subprocess.run",
         ansible_changelog.create_fake_subprocess_ansible_doc(FAKE_PLUGINS),
