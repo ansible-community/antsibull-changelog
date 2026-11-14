@@ -16,7 +16,7 @@ from typing import Any
 
 from antsibull_fileutils.yaml import load_yaml_file
 
-from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
+from .ansible import OBJECT_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, PathsConfig, TextFormat
 from .errors import ChangelogError
 from .logger import LOGGER
@@ -166,20 +166,17 @@ class ChangelogFragmentLinter:
                     )
                 )
         elif obj_class == "plugin":
-            if (
-                obj_type not in get_documentable_plugins()
-                and obj_type not in OTHER_PLUGIN_TYPES
-            ):
+            if obj_type not in get_documentable_plugins():
+                allowed_types = sorted(get_documentable_plugins())
                 errors.append(
                     (
                         fragment.path,
                         0,
                         0,
-                        'section "%s"\'s type must be one of %s, %s, not "%s"'
+                        'section "%s"\'s type must be one of %s, not "%s"'
                         % (
                             section,
-                            ", ".join(get_documentable_plugins()),
-                            ", ".join(OTHER_PLUGIN_TYPES),
+                            ", ".join(allowed_types),
                             obj_type,
                         ),
                     )
