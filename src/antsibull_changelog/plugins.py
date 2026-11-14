@@ -726,7 +726,8 @@ def load_plugins(  # pylint: disable=too-many-arguments
     plugin_cache_path = os.path.join(paths.changelog_dir, ".plugin-cache.yaml")
     plugins_data: dict[str, Any] = {}
 
-    # TODO: Keep this?
+    # pylint: disable-next=fixme
+    # TODO: change to 'new' in next version
     plugin_mode: PluginMode = "compare"
 
     if not ignore_cache and not force_reload and os.path.exists(plugin_cache_path):
