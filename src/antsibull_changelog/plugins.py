@@ -20,6 +20,7 @@ from typing import Any, Generator, Literal
 
 from antsibull_docs_loader.ansible import (
     ALL_DOCUMENTABLE_PLUGIN_TYPES,
+    CORE_DOCUMENTABLE_PLUGIN_TYPES,
     EDA_PLUGIN_TYPES,
 )
 from antsibull_docs_loader.data import CollectionInfo
@@ -550,16 +551,26 @@ def _get_collection_info(
 
 def _get_entry(
     plugin_fqcn: tuple[str, ...], plugin_type: str, docs: Documentation
-) -> dict[str, Any]:
-    return {
-        "name": ".".join(plugin_fqcn),
-        "namespace": (".".join(plugin_fqcn[:-1]) if plugin_type == "module" else None),
-        "description": docs.documentation.get("short_description"),
-        "version_added": docs.documentation.get("version_added"),
+) -> tuple[str, dict[str, Any]]:
+    description = docs.documentation.get("short_description")
+    version_added = docs.documentation.get("version_added")
+    if plugin_type == "module":
+        return plugin_fqcn[-1], {
+            "name": plugin_fqcn[-1],
+            "namespace": ".".join(plugin_fqcn[:-1]),
+            "description": description,
+            "version_added": version_added,
+        }
+    fqcn = ".".join(plugin_fqcn)
+    return fqcn, {
+        "name": fqcn,
+        "namespace": None,
+        "description": description,
+        "version_added": version_added,
     }
 
 
-def _refresh_plugin_cache_new(
+def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
     paths: PathsConfig,
     collection_details: CollectionDetails,
     version: str,
@@ -574,6 +585,11 @@ def _refresh_plugin_cache_new(
     collection_info = _get_collection_info(paths, collection_details)
     routing_info = load_routing_information(collection_info)
     for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES:
+        if (
+            not paths.is_collection
+            and plugin_type not in CORE_DOCUMENTABLE_PLUGIN_TYPES
+        ):
+            continue
         dest: dict[str, dict[str, str | None]] = {}
         destination = (
             plugins_data["objects"]
@@ -591,11 +607,13 @@ def _refresh_plugin_cache_new(
                 )
                 main = entrypoints.entrypoints.get("main") if entrypoints else None
                 if main is not None:
-                    dest[plugin_fqcn[-1]] = _get_entry(plugin_fqcn, plugin_type, main)
+                    fqcn, entry = _get_entry(plugin_fqcn, plugin_type, main)
+                    dest[fqcn] = entry
             else:
                 docs = load_docs(plugin_file.docs_candidates)
                 if docs is not None:
-                    dest[plugin_fqcn[-1]] = _get_entry(plugin_fqcn, plugin_type, docs)
+                    fqcn, entry = _get_entry(plugin_fqcn, plugin_type, docs)
+                    dest[fqcn] = entry
 
     _remove_empty_namespaces(plugins_data)
     return plugins_data
