@@ -63,6 +63,12 @@ jobs:
         with:
           path: antsibull-changelog
           persist-credentials: false
+      - name: Check out dependent project antsibull-docs-loader
+        uses: actions/checkout@v6
+        with:
+          repository: ansible-community/antsibull-docs-loader
+          path: antsibull-docs-loader
+          persist-credentials: false
       - name: Check out dependent project antsibull-docs-parser
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:

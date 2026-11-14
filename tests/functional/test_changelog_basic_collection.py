@@ -1877,6 +1877,25 @@ FAKE_PLUGINS = {
             },
             "return": {},
         },
+        "acme.test.dont.find.me.test_callback2": {
+            "doc": {
+                "author": ["Someone else"],
+                "description": ["This is a relatively new callback added before."],
+                "filename": os.path.join(
+                    "plugins", "callback", "dont", "find", "me", "test_callback2.py"
+                ),
+                "name": "test_callback2",
+                "options": {},
+                "short_description": "This one should be found nowadays.",
+                "version_added": "2.9",
+            },
+            "examples": "# Some examples\n",
+            "metadata": {
+                "status": ["preview"],
+                "supported_by": "community",
+            },
+            "return": {},
+        },
     },
     "module": {
         "acme.test.cloud.sky.old_module": {
@@ -1973,6 +1992,7 @@ FAKE_PLUGINS = {
 def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
     collection_changelog,
 ):  # noqa: F811
+    antsibull_changelog.plugins._FAIL_ON_BAD_COMPARISON = True
     with mock.patch(
         "antsibull_changelog.plugins.get_documentable_objects",
         return_value=("role",),
@@ -2048,7 +2068,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
                     DOCUMENTATION={
                         "name": "bad_module2",
                         "short_description": "An bad module",
-                        "description": ["Shold not be found either."],
+                        "description": ["Shold be found nowadays as well."],
                         "author": ["Elder"],
                         "options": {},
                     },
@@ -2081,7 +2101,7 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
                 create_plugin(
                     DOCUMENTATION={
                         "name": "test_callback2",
-                        "short_description": "This one should not be found.",
+                        "short_description": "This one should be found nowadays.",
                         "version_added": "2.9",
                         "description": [
                             "This is a relatively new callback added before."
@@ -2182,7 +2202,34 @@ def test_changelog_release_plugin_cache(  # pylint: disable=redefined-outer-name
             )
 
             # Plugin cache: callbacks
-            assert sorted(plugin_cache["plugins"]["callback"]) == ["test_callback"]
+            assert sorted(plugin_cache["plugins"]["callback"]) == [
+                "dont.find.me.test_callback2",
+                "test_callback",
+            ]
+            assert (
+                plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"][
+                    "name"
+                ]
+                == "dont.find.me.test_callback2"
+            )
+            assert (
+                plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"][
+                    "description"
+                ]
+                == "This one should be found nowadays."
+            )
+            assert (
+                plugin_cache["plugins"]["callback"]["dont.find.me.test_callback2"][
+                    "version_added"
+                ]
+                == "2.9"
+            )
+            assert (
+                "namespace"
+                not in plugin_cache["plugins"]["callback"][
+                    "dont.find.me.test_callback2"
+                ]
+            )
             assert (
                 plugin_cache["plugins"]["callback"]["test_callback"]["name"]
                 == "test_callback"
