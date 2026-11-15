@@ -663,14 +663,6 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
 
 _ISSUES_URL = "https://github.com/ansible-community/antsibull-changelog/issues/"
 _COMPARE_MESSAGE = f"Please report this issue in {_ISSUES_URL}. Thanks!"
-_COMPARE_MESSAGE_FILTER_TEST_LIST = (
-    "This might be caused due to wrongly placed documentation."
-    " Documentation for a filter (not plugin file!) 'foo' should be in"
-    " 'foo.py', 'foo.yml', or 'foo.yaml'."
-    " While ansible-doc might find the correct documentation for the filters,"
-    " antsibull-changelog and antsibull-docs will stop finding them in the future."
-    f" If this is not the case, please report this issue in {_ISSUES_URL}. Thanks!"
-)
 
 
 def _compare_plugin_type(
@@ -691,14 +683,9 @@ def _compare_plugin_type(
             # so we don't warn about them.
             missing.clear()
         if missing or superfluous:
-            msg = (
-                _COMPARE_MESSAGE_FILTER_TEST_LIST
-                if plugin_type in ("filter", "test")
-                else _COMPARE_MESSAGE
-            )
             LOGGER.warning(
                 f"Found differences when scanning plugin cache for {category}.{plugin_type}:"
-                f" missing {missing}, superfluous {superfluous}. {msg}",
+                f" missing {missing}, superfluous {superfluous}. {_COMPARE_MESSAGE}",
                 missing=missing,
                 superfluous=superfluous,
             )
