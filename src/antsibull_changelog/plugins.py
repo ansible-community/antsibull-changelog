@@ -29,7 +29,12 @@ from antsibull_docs_loader.loader import (
     load_docs,
     load_docs_from_role_argspec_file,
 )
-from antsibull_docs_loader.routing import load_routing_information
+from antsibull_docs_loader.routing import (
+    CollectionRouting,
+    File,
+    complete_redirects_for_collection,
+    load_routing_information,
+)
 from antsibull_docs_parser import dom as _ansible_markup_dom
 from antsibull_docs_parser.parser import Context as _AnsibleMarkupContext
 from antsibull_docs_parser.parser import Whitespace as _AnsibleMarkupWhitespace
@@ -572,6 +577,27 @@ def _get_entry(
     }
 
 
+def _resolve(
+    *,
+    collection_name: str,
+    routing_info: CollectionRouting,
+    plugin_fqcn: tuple[str, ...],
+    plugin_type: str,
+    plugin_file: File,
+) -> File | None:
+    if plugin_type not in routing_info.plugin_data:
+        return plugin_file
+    routing = routing_info.plugin_data[plugin_type].get(".".join(plugin_fqcn))
+    if routing is None or routing.redirect is None:
+        return plugin_file
+    if routing.redirect is ...:
+        return None
+    if not routing.redirect.startswith(f"{collection_name}."):
+        return None
+    new_fqcn = tuple(routing.redirect[len(collection_name) + 1 :].split("."))
+    return routing_info.files[plugin_type].get(new_fqcn)
+
+
 def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
     paths: PathsConfig,
     collection_details: CollectionDetails,
@@ -586,6 +612,10 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
 
     collection_info = _get_collection_info(paths, collection_details)
     routing_info = load_routing_information(collection_info)
+    complete_redirects_for_collection(
+        {collection_info.full_name: routing_info},
+        collection_name=collection_info.full_name,
+    )
     for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES:
         if (
             not paths.is_collection
@@ -603,9 +633,18 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
         if plugin_data is None:
             continue
         for plugin_fqcn, plugin_file in sorted(plugin_data.items()):
+            actual_plugin_file = _resolve(
+                collection_name=collection_info.full_name,
+                routing_info=routing_info,
+                plugin_fqcn=plugin_fqcn,
+                plugin_type=plugin_type,
+                plugin_file=plugin_file,
+            )
+            if actual_plugin_file is None:
+                continue
             if plugin_type == "role":
                 entrypoints = load_docs_from_role_argspec_file(
-                    plugin_file.docs_candidates[0]
+                    actual_plugin_file.docs_candidates[0]
                 )
                 if entrypoints is not None:
                     fqcn, entry = _get_entry(
@@ -613,7 +652,7 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
                     )
                     dest[fqcn] = entry
             else:
-                docs = load_docs(plugin_file.docs_candidates)
+                docs = load_docs(actual_plugin_file.docs_candidates)
                 if docs is not None:
                     fqcn, entry = _get_entry(plugin_fqcn, plugin_type, docs)
                     dest[fqcn] = entry
