@@ -652,9 +652,9 @@ def _refresh_plugin_cache_new(  # pylint: disable=too-many-locals
                     )
                     dest[fqcn] = entry
             else:
-                docs = load_docs(actual_plugin_file.docs_candidates)
-                if docs is not None:
-                    fqcn, entry = _get_entry(plugin_fqcn, plugin_type, docs)
+                docs_path = load_docs(actual_plugin_file.docs_candidates)
+                if docs_path is not None:
+                    fqcn, entry = _get_entry(plugin_fqcn, plugin_type, docs_path[0])
                     dest[fqcn] = entry
 
     _remove_empty_namespaces(plugins_data)
