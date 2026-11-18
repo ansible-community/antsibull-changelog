@@ -196,6 +196,14 @@ class ChangelogGenerator(ChangelogGeneratorBase):
         section.close()
 
     @staticmethod
+    def _get_plugin_section_name(plugin_type: str) -> str:
+        title = {
+            "eda_event_filter": "EDA Event Filter",
+            "eda_event_source": "EDA Event Source",
+        }.get(plugin_type)
+        return plugin_type.title() if title is None else title
+
+    @staticmethod
     def _add_plugins(
         renderer: AbstractRenderer,
         plugins_database: dict[str, list[dict[str, Any]]],
@@ -217,7 +225,9 @@ class ChangelogGenerator(ChangelogGeneratorBase):
             if not plugins_section:
                 plugins_section = renderer.add_section("New Plugins")
 
-            plugin_section = plugins_section.add_section(plugin_type.title())
+            plugin_section = plugins_section.add_section(
+                ChangelogGenerator._get_plugin_section_name(plugin_type)
+            )
 
             ChangelogGenerator.add_plugins(plugin_section, plugins, fqcn_prefix)
 

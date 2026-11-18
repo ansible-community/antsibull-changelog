@@ -19,7 +19,7 @@ import packaging.version
 import semantic_version
 from antsibull_fileutils.yaml import load_yaml_file
 
-from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
+from .ansible import OBJECT_TYPES, get_documentable_plugins
 from .config import ChangelogConfig, CollectionDetails, PathsConfig
 from .fragment import ChangelogFragment, ChangelogFragmentLinter
 
@@ -46,7 +46,6 @@ class ChangelogYamlLinter:
         self.errors = []
         self.path = path
         self.valid_plugin_types = set(get_documentable_plugins())
-        self.valid_plugin_types.update(OTHER_PLUGIN_TYPES)
         self.no_semantic_versioning = no_semantic_versioning
         self.preprocess_data = preprocess_data
         self.strict = strict
