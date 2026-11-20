@@ -87,6 +87,7 @@ formatters = [
     "isort",
 ]
 test = [
+    "nox >= 2026.10.20; python_version >= '3.10'",
     "pytest",
     "pytest-cov",
     "pytest-error-for-skips",
