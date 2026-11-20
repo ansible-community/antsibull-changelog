@@ -1,4 +1,10 @@
 ---
+# Adapted from the Python Packaging User Guide:
+# https://github.com/pypa/packaging.python.org/blob/main/source/guides/github-actions-ci-cd-sample/publish-to-pypi.yml
+# Changes: release trigger, pinned actions, project names and concurrency.
+# SPDX-FileCopyrightText: 2013-2020 PyPA
+# SPDX-License-Identifier: CC-BY-SA-3.0
+
 name: Publish Python 🐍 distribution 📦 to PyPI
 
 on:
