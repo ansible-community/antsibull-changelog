@@ -1,0 +1,8 @@
+minor_changes:
+  - >-
+    The maintainer command ``nox -e publish`` now creates a GitHub release and waits for
+    GitHub Actions to build and publish distributions to PyPI using trusted publishing.
+    It requires an authenticated GitHub CLI and the release commit and tag to be pushed
+    upstream first. Hatch publishing arguments are no longer accepted. The local
+    post-release version bump only runs after publishing succeeds
+    (https://github.com/ansible-community/antsibull-changelog/pull/243).
