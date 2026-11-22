@@ -1,0 +1,4 @@
+minor_changes:
+  - "Add option ``--output-no-section-ids`` to ``antsibull-changelog generate`` to avoid writing section IDs in MarkDown files.
+     This is useful when using ``--output`` together with ``--output-format md`` and ``--only-latest`` to get hold of the MarkDown
+     version of the latest changelog fragment (https://github.com/ansible-community/antsibull-changelog/pull/244)."
