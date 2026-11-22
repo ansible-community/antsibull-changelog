@@ -4,6 +4,37 @@ Ansible Changelog Tool Release Notes
 
 .. contents:: Topics
 
+v0.38.0
+=======
+
+Release Summary
+---------------
+
+Feature release.
+
+Major Changes
+-------------
+
+- Now uses antsibull-docs-loader for searching for new plugins, modules, and roles in a collection. Currently antsibull-changelog also uses ansible-doc and compares the result, and will emit warnings if there are differences. If you encounter such warnings, please `create an issue in the antsibull-changelog repository <https://github.com/ansible-community/antsibull-changelog/issues/>`__. Thanks! In a future version, the ansible-doc fallback will be removed, which will result in a performance win (https://github.com/ansible-community/antsibull-changelog/pull/240).
+- Support EDA event filter and event source plugin types when searching for new plugins (https://github.com/ansible-community/antsibull-changelog/pull/240).
+
+Minor Changes
+-------------
+
+- Add option ``--output-no-section-ids`` to ``antsibull-changelog generate`` to avoid writing section IDs in MarkDown files. This is useful when using ``--output`` together with ``--output-format md`` and ``--only-latest`` to get hold of the MarkDown version of the latest changelog fragment (https://github.com/ansible-community/antsibull-changelog/pull/244).
+- Adds new dependency on `antsibull-docs-loader <https://pypi.org/project/antsibull-docs-loader>`__ (https://github.com/ansible-community/antsibull-changelog/pull/240).
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- Remove support for ansible-core 2.12 and earlier (https://github.com/ansible-community/antsibull-changelog/pull/238).
+
+Deprecated Features
+-------------------
+
+- The ``--use-ansible-doc`` parameter to the ``generate`` and ``release`` subcommands is deprecated. It will be removed in a future version and using it will become a syntax error (https://github.com/ansible-community/antsibull-changelog/pull/239).
+- When using antsibull-changelog as a library, the arguments ``use_ansible_doc`` to ``antsibull_changelog.plugins.load_plugins()`` and ``args_use_ansible_doc`` to ``antsibull_changelog.cli.do_refresh()`` are deprecated. Runtime deprecations will be added in a future release; ``args_use_ansible_doc`` now has a default of ``False``, it was required before (https://github.com/ansible-community/antsibull-changelog/pull/239).
+
 v0.37.0
 =======
 
