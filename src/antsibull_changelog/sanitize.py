@@ -18,7 +18,7 @@ from typing import Any
 import packaging.version
 import semantic_version
 
-from .ansible import OBJECT_TYPES, OTHER_PLUGIN_TYPES, get_documentable_plugins
+from .ansible import OBJECT_TYPES, get_documentable_plugins
 from .config import ChangelogConfig
 
 ISO_DATE_REGEX = re.compile("^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])$")
@@ -34,7 +34,6 @@ class Sanitizer:  # pylint: disable=too-few-public-methods
     def __init__(self, config: ChangelogConfig):
         self.config = config
         self.plugin_types = set(get_documentable_plugins())
-        self.plugin_types.update(OTHER_PLUGIN_TYPES)
 
     def _is_version(self, version: Any, allow_none: bool = False) -> bool:
         try:

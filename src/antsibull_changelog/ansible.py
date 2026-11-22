@@ -12,9 +12,12 @@ from __future__ import annotations
 
 from functools import cache
 
+from antsibull_docs_loader.ansible import ALL_DOCUMENTABLE_PLUGIN_TYPES
+
 OBJECT_TYPES = ("role", "playbook")
 
-OTHER_PLUGIN_TYPES = ("module",)
+# pylint: disable-next=fixme
+OTHER_PLUGIN_TYPES = ("module",)  # TODO: deprecate and remove
 
 # These are pairs (plugin_type, plugin_filename) inside ansible-core which are *not*
 # plugins, but files used by plugins.
@@ -26,29 +29,11 @@ def get_documentable_plugins() -> tuple[str, ...]:
     """
     Retrieve plugin types that can be documented.
     """
-    try:
-        # We import from ansible locally since importing it is rather slow
-        from ansible import constants as C  # pylint: disable=import-outside-toplevel
-
-        return C.DOCUMENTABLE_PLUGINS
-    except ImportError:
-        return (
-            "become",
-            "cache",
-            "callback",
-            "cliconf",
-            "connection",
-            "filter",
-            "httpapi",
-            "inventory",
-            "lookup",
-            "netconf",
-            "shell",
-            "vars",
-            "module",
-            "strategy",
-            "test",
-        )
+    return tuple(
+        plugin_type
+        for plugin_type in ALL_DOCUMENTABLE_PLUGIN_TYPES
+        if plugin_type not in OBJECT_TYPES
+    )
 
 
 @cache
