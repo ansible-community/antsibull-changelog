@@ -6,12 +6,18 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import os
 import tempfile
+import time
 from functools import partial
 from pathlib import Path
 
 import nox
+from packaging.version import Version
+
+RELEASE_REPOSITORY = "ansible-community/antsibull-changelog"
+PUBLISH_WORKFLOW = "pypi-publish.yaml"
 
 DEFAULT_MODE = os.environ.get("OTHER_ANTSIBULL_MODE", "auto")
 IN_CI = "GITHUB_ACTIONS" in os.environ
@@ -329,12 +335,124 @@ def bump(session: nox.Session):
 @nox.session
 def publish(session: nox.Session):
     check_no_modifications(session)
+    if session.posargs:
+        session.error("publish no longer accepts hatch publish arguments")
     install(session, "hatch")
-    session.run("hatch", "publish", *session.posargs)
+    version = session.run("hatch", "version", silent=True).strip()
+    parsed_version = Version(version)
+    if parsed_version.is_devrelease or parsed_version.is_postrelease:
+        session.error("Cannot publish a development or post-release version")
+    commit = session.run("git", "rev-parse", "HEAD", external=True, silent=True).strip()
+    tag_commit = session.run(
+        "git",
+        "rev-parse",
+        "--verify",
+        f"refs/tags/{version}^{{commit}}",
+        external=True,
+        silent=True,
+    ).strip()
+    if tag_commit != commit:
+        session.error(f"Tag {version} does not point to HEAD")
+
+    # Keep diagnostics out of JSON output, including a missing release's error.
+    gh = partial(session.run, "gh", external=True, silent=True, stderr=None)
+    # Check upstream explicitly, even when this checkout belongs to a fork.
+    remote_tag = json.loads(
+        gh("api", f"repos/{RELEASE_REPOSITORY}/git/ref/tags/{version}")
+    )["object"]
+    while remote_tag["type"] == "tag":
+        remote_tag = json.loads(
+            gh("api", f"repos/{RELEASE_REPOSITORY}/git/tags/{remote_tag['sha']}")
+        )["object"]
+    if remote_tag["type"] != "commit" or remote_tag["sha"] != commit:
+        session.error(f"Upstream tag {version} does not point to HEAD")
+
+    release_args = ("--repo", RELEASE_REPOSITORY)
+    release = gh(
+        "release",
+        "view",
+        version,
+        *release_args,
+        "--json",
+        "isDraft,publishedAt",
+        success_codes=[0, 1],
+    )
+    if not release:
+        gh(
+            "release",
+            "create",
+            version,
+            *release_args,
+            "--verify-tag",
+            "--title",
+            f"antsibull-changelog {version}",
+            "--notes-from-tag",
+            *(["--prerelease"] if parsed_version.is_prerelease else []),
+        )
+        release = gh(
+            "release", "view", version, *release_args, "--json", "isDraft,publishedAt"
+        )
+    release = json.loads(release)
+    if release["isDraft"]:
+        session.error(f"Release {version} is still a draft; publish it on GitHub first")
+
+    run_id = wait_for_publish_run(session, version, commit, release["publishedAt"])
+    session.log(
+        f"Waiting for PyPI publishing: https://github.com/{RELEASE_REPOSITORY}/actions/runs/{run_id}"
+    )
+    gh("run", "watch", str(run_id), *release_args, "--exit-status", silent=False)
+    # A skipped or cancelled publishing job must not count as a successful upload.
+    jobs = json.loads(gh("run", "view", str(run_id), *release_args, "--json", "jobs"))[
+        "jobs"
+    ]
+    if not any(
+        job["name"] == "Publish Python 🐍 distribution 📦 to PyPI"
+        and job["conclusion"] == "success"
+        for job in jobs
+    ):
+        session.error(
+            "The PyPI publishing job did not succeed; leaving the version unchanged"
+        )
     session.run("hatch", "version", "post")
     session.run("git", "add", "src/antsibull_changelog/__init__.py", external=True)
     session.run(
         "git", "commit", "-m", "Post-release version bump.", "--gpg-sign", external=True
+    )
+
+
+def wait_for_publish_run(
+    session: nox.Session, version: str, commit: str, published_at: str
+) -> int:
+    """Find the release's publishing run, allowing for GitHub's scheduling delay."""
+    for _ in range(60):
+        runs = json.loads(
+            session.run(
+                "gh",
+                "api",
+                f"repos/{RELEASE_REPOSITORY}/actions/workflows/{PUBLISH_WORKFLOW}/runs",
+                "--method",
+                "GET",
+                "-f",
+                "event=release",
+                "-f",
+                f"head_sha={commit}",
+                "-f",
+                "per_page=100",
+                external=True,
+                silent=True,
+            )
+        )["workflow_runs"]
+        matching = [
+            run
+            for run in runs
+            if run["head_branch"] == version and run["created_at"] >= published_at
+        ]
+        if matching:
+            return max(matching, key=lambda run: run["id"])["id"]
+        time.sleep(5)
+    session.error(
+        f"No publishing run found for release {version} after five minutes. "
+        f"Check {PUBLISH_WORKFLOW} on GitHub, then run nox -e publish again."
     )
 
 

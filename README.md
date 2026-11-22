@@ -84,18 +84,32 @@ To run specific tests:
 
 ## Creating a new release:
 
+Install the [GitHub CLI](https://cli.github.com/) and authenticate with `gh auth login`
+using an account that can create releases and read Actions runs in
+`ansible-community/antsibull-changelog`.
+
 1. Run `nox -e bump -- <version> <release_summary_message>`. This:
    * Bumps the package version in `src/antsibull_changelog/__init__.py`.
    * Creates `changelogs/fragments/<version>.yml` with a `release_summary` section.
    * Runs `antsibull-changelog release` and adds the changed files to git.
    * Commits with message `Release <version>.` and runs `git tag -a -m 'antsibull-changelog <version>' <version>`.
-   * Runs `hatch build --clean`.
-2. Run `git push` to the appropriate remotes.
+   * Runs `hatch build --clean` as a local packaging check; GitHub Actions builds
+     the distributions used for publishing.
+2. Push the release commit and signed tag to the upstream repository, for example
+   with `git push --follow-tags origin`.
 3. Once CI passes on GitHub, run `nox -e publish`. This:
-   * Runs `hatch publish`;
-   * Bumps the version to `<version>.post0`;
-   * Adds the changed file to git and run `git commit -m 'Post-release version bump.'`;
-4. Run `git push --follow-tags` to the appropriate remotes and create a GitHub release.
+   * Checks that the local and upstream release tags point to the current commit;
+   * Creates a GitHub release using the tag annotation as release notes, marking
+     prereleases appropriately;
+   * Waits for the release's `pypi-publish.yaml` workflow to build and upload the
+     distributions using PyPI trusted publishing;
+   * After successful publishing, bumps the version to `<version>.post0` and
+     creates the signed `Post-release version bump.` commit.
+4. Push the post-release commit to the appropriate remotes.
+
+If publishing fails, the local version is left unchanged; fix the cause, rerun
+the failed jobs in GitHub Actions, then run `nox -e publish` again to complete
+the version bump.
 
 ## License
 
