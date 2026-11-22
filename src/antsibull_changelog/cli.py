@@ -21,7 +21,7 @@ import subprocess
 import sys
 import traceback
 from collections.abc import Callable
-from typing import Literal, cast, overload
+from typing import Any, Literal, cast, overload
 
 try:
     import argcomplete
@@ -38,6 +38,7 @@ from .config import (
     ChangelogConfig,
     ChangelogOutput,
     CollectionDetails,
+    OutputTextFormat,
     PathsConfig,
     TextFormat,
 )
@@ -288,6 +289,11 @@ def create_argparser(program_name: str) -> argparse.ArgumentParser:
         help="If specified, will write the changelog in the given format. Must be specified"
         " if --output is specified and the configuration file mentions multiple output"
         " formats.",
+    )
+    generate_parser.add_argument(
+        "--output-no-section-ids",
+        action="store_true",
+        help="If specified, no section IDs will be generated. Is only used for MarkDown output.",
     )
 
     reformat_parser = subparsers.add_parser(
@@ -771,7 +777,7 @@ def command_release(args: argparse.Namespace) -> int:
 
 def _get_outputs(
     config: ChangelogConfig, *, output: str | None, output_format: str | None
-):
+) -> list[ChangelogOutput]:
     if output is not None:
         if output_format is None:
             output_format_choices = {doc_output.format for doc_output in config.output}
@@ -783,21 +789,27 @@ def _get_outputs(
             output_format = list(output_format_choices)[0].to_extension()
         return [
             ChangelogOutput(
-                file=output, format=TextFormat.from_extension(output_format)
+                file=output, format=OutputTextFormat.from_extension(output_format)
             )
         ]
 
     if output_format:
-        text_format = TextFormat.from_extension(output_format)
+        output_text_format = OutputTextFormat.from_extension(output_format)
+        text_format: TextFormat | None
+        try:
+            text_format = TextFormat.from_extension(output_format)
+        except ValueError:
+            text_format = None
         return [
             doc_output
             for doc_output in config.output
-            if doc_output.format == text_format
+            if doc_output.format in (output_text_format, text_format)
         ]
 
     return config.output
 
 
+# pylint: disable-next=too-many-locals
 def command_generate(args: argparse.Namespace) -> int:
     """
     (Re-)generate the reStructuredText version of the changelog.
@@ -810,6 +822,7 @@ def command_generate(args: argparse.Namespace) -> int:
     version: str | None = args.version
     output: str | None = args.output
     only_latest: bool = args.only_latest
+    output_no_section_ids: bool = args.output_no_section_ids
     output_format: str | None = args.output_format
 
     collection_details = CollectionDetails(paths)
@@ -850,6 +863,12 @@ def command_generate(args: argparse.Namespace) -> int:
         )
     doc_outputs = _get_outputs(config, output=output, output_format=output_format)
     for doc_output in doc_outputs:
+        renderer_kwargs: dict[str, Any] = {}
+        if output_no_section_ids and doc_output.format in (
+            TextFormat.MARKDOWN,
+            OutputTextFormat.MARKDOWN,
+        ):
+            renderer_kwargs["add_section_ids"] = False
         generate_changelog(
             paths,
             config,
@@ -857,6 +876,7 @@ def command_generate(args: argparse.Namespace) -> int:
             doc_output,
             flatmap=flatmap,
             only_latest=only_latest,
+            renderer_kwargs=renderer_kwargs,
         )
 
     return C.RC_SUCCESS

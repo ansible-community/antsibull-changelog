@@ -200,6 +200,44 @@ This is the first proper release\.
 
     assert (
         collection_changelog.run_tool(
+            "generate",
+            [
+                "-v",
+                "--refresh",
+                "--output",
+                "extract.md",
+                "--output-format",
+                "md",
+                "--output-no-section-ids",
+            ],
+        )
+        == C.RC_SUCCESS
+    )
+
+    diff = collection_changelog.diff()
+    assert diff.added_dirs == []
+    assert diff.added_files == []
+    assert diff.removed_dirs == []
+    assert diff.removed_files == []
+    assert diff.changed_files == ["extract.md"]
+    assert diff.file_contents["extract.md"].decode("utf-8") == (
+        r"""# Ansible Release Notes
+
+**Topics**
+
+- v1\.0\.0
+    - Release Summary
+
+## v1\.0\.0
+
+### Release Summary
+
+This is the first proper release\.
+"""
+    )
+
+    assert (
+        collection_changelog.run_tool(
             "release", ["-v", "--codename", "primetime", "--date", "2020-01-03"]
         )
         == C.RC_SUCCESS
