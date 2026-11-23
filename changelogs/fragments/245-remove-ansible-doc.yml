@@ -1,0 +1,2 @@
+minor_changes:
+  - "Remove comparison code for new plugin/module/role scanning that also uses ansible-doc and compares the result (https://github.com/ansible-community/antsibull-changelog/pull/245)."
