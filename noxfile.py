@@ -79,7 +79,16 @@ def other_antsibull(
     python=["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"], allow_parallel=True
 )
 def test(session: nox.Session):
-    install(session, ".[test, coverage]", *other_antsibull(), editable=True)
+    install(
+        session,
+        ".",
+        "--group",
+        "test",
+        "--group",
+        "coverage",
+        *other_antsibull(),
+        editable=True,
+    )
     covfile = Path(session.create_tmp(), ".coverage")
     more_args = []
     if session.python not in {"3.9", "3.10", "3.11"}:
@@ -103,7 +112,7 @@ def integration(session: nox.Session):
     `antsibull-changelog lint-changelog-yaml` against antsibull-changelog
     changelog and community.general's changelogs
     """
-    install(session, ".[coverage]", *other_antsibull(), editable=True)
+    install(session, ".", "--group", "coverage", *other_antsibull(), editable=True)
     tmp = Path(session.create_tmp())
     covfile = tmp / ".coverage"
     env = {"COVERAGE_FILE": f"{covfile}", **session.env}
@@ -169,7 +178,7 @@ def integration(session: nox.Session):
 
 @nox.session
 def coverage(session: nox.Session):
-    install(session, ".[coverage]", *other_antsibull(), editable=True)
+    install(session, ".", "--group", "coverage", *other_antsibull(), editable=True)
     combined = map(str, Path().glob(".nox/*/tmp/.coverage"))
     # Combine the results into a single .coverage file in the root
     session.run("coverage", "combine", "--keep", *combined)
@@ -186,7 +195,7 @@ def lint(session: nox.Session):
 
 @nox.session(allow_parallel=IN_CI)
 def formatters(session: nox.Session):
-    install(session, ".[formatters]", *other_antsibull())
+    install(session, ".", "--group", "formatters", *other_antsibull())
     posargs = list(session.posargs)
     if IN_CI:
         posargs.append("--check")
@@ -196,7 +205,7 @@ def formatters(session: nox.Session):
 
 @nox.session(allow_parallel=True)
 def codeqa(session: nox.Session):
-    install(session, ".[codeqa]", *other_antsibull(), editable=True)
+    install(session, ".", "--group", "codeqa", *other_antsibull(), editable=True)
     session.run("flake8", "src/antsibull_changelog", *session.posargs)
     session.run(
         "pylint",
@@ -212,7 +221,7 @@ def codeqa(session: nox.Session):
 
 @nox.session(allow_parallel=True)
 def typing(session: nox.Session):
-    install(session, ".[typing]", *other_antsibull())
+    install(session, ".", "--group", "typing", *other_antsibull())
     session.run("mypy", "src/antsibull_changelog")
 
 
@@ -267,7 +276,7 @@ def bump(session: nox.Session):
             session.error(
                 f"Either {fragment_file} must already exist, or two positional arguments must be provided."
             )
-    install(session, ".[toml]", "hatch")
+    install(session, ".", "--group", "toml", "hatch")
     current_version = session.run("hatch", "version", silent=True).strip()
     if version != current_version:
         session.run("hatch", "version", version)
