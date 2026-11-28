@@ -414,47 +414,6 @@ class AnsibleChangelogEnvironment(ChangelogEnvironment):
             return ["lib", "ansible", "modules"]
         return ["lib", "ansible", "plugins", plugin_type]
 
-    def create_fake_subprocess_ansible_doc(
-        self,
-        plugin_data: dict[str, dict[str, Any]],
-    ) -> Callable[[list[str]], str]:
-        def fake_subprocess_ansible_doc(
-            command: list[str],
-            *,
-            check: bool | None = None,
-            stdout: int | None = None,
-            stderr: int | None = None,
-            timeout: float | None = None,
-            text: bool | None = None,
-            encoding: str | None = None,
-        ) -> subprocess.CompletedProcess:
-            assert check is True
-            assert stdout is subprocess.PIPE
-            assert stderr is subprocess.PIPE
-            if command[0].endswith("ansible-doc") and command[1] == "--version":
-                return _cp(
-                    args=command,
-                    stdout=_ANSIBLE_DOC_VERSION_TEMPLATE.format(
-                        ansible_core_version=self.ansible_core_version,
-                    ).encode("utf-8"),
-                    stderr=b"",
-                )
-            if (
-                command[0].endswith("ansible-doc")
-                and len(command) == 3
-                and command[1] == "--metadata-dump"
-                and command[2] == "ansible.builtin"
-            ):
-                result = self._create_ansible_doc_metadata(
-                    plugin_data, self.paths.base_dir
-                )
-                return _cp(
-                    args=command, stdout=json.dumps(result).encode("utf-8"), stderr=b""
-                )
-            raise Exception("Unexpected command: {0}".format(command))
-
-        return fake_subprocess_ansible_doc
-
 
 class CollectionChangelogEnvironment(ChangelogEnvironment):
     """
@@ -484,57 +443,6 @@ class CollectionChangelogEnvironment(ChangelogEnvironment):
         galaxy_path = os.path.join(self.paths.base_dir, "galaxy.yml")
         self._write_yaml(galaxy_path, data)
         self.paths.galaxy_path = galaxy_path
-
-    def create_fake_subprocess_ansible_doc(
-        self, plugin_data: dict[str, dict[str, Any]]
-    ) -> Callable[[list[str]], str]:
-        def fake_subprocess_ansible_doc(
-            command: list[str],
-            *,
-            check: bool | None = None,
-            stdout: int | None = None,
-            stderr: int | None = None,
-            timeout: float | None = None,
-            text: bool | None = None,
-            encoding: str | None = None,
-        ) -> subprocess.CompletedProcess:
-            assert check is True
-            assert stdout is subprocess.PIPE
-            assert stderr is subprocess.PIPE
-            base_dir = self.paths.base_dir
-            if command[0].endswith("ansible-doc") and command[1] == "--version":
-                return _cp(
-                    args=command,
-                    stdout=_ANSIBLE_DOC_VERSION_TEMPLATE.format(
-                        ansible_core_version=self.ansible_core_version,
-                    ).encode("utf-8"),
-                    stderr=b"",
-                )
-            if (
-                command[0].endswith("ansible-doc")
-                and len(command) == 5
-                and command[1] == "--metadata-dump"
-                and command[2] == f"{self.namespace}.{self.collection}"
-                and command[3] == "--playbook-dir"
-            ):
-                base_dir = os.path.join(
-                    command[4],
-                    "collections",
-                    "ansible_collections",
-                    self.namespace,
-                    self.collection,
-                )
-                result = self._create_ansible_doc_metadata(plugin_data, base_dir)
-                return _cp(
-                    args=command,
-                    stdout=json.dumps(result).encode("utf-8"),
-                    stderr=b"",
-                )
-            if command[0] == "git":
-                raise FileNotFoundError("git is not available")
-            raise Exception("Unexpected command: {0}".format(command))
-
-        return fake_subprocess_ansible_doc
 
     def add_role(self, name, entry_points):
         role_meta_dir = os.path.join(self.paths.base_dir, "roles", name, "meta")
