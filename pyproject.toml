@@ -62,20 +62,17 @@ antsibull-changelog = "antsibull_changelog.cli:main"
 
 
 [project.optional-dependencies]
-#
-# User facing
-#
-
 # Use for getting the current version from pyproject.toml
 toml = [
     "tomli; python_version<'3.11'",
 ]
+all = [
+    "antsibull-docutils[toml]",
+]
 
-#
-# Development. Not user facing.
-#
-
+[dependency-groups]
 codeqa = [
+    "antsibull-changelog[all]",
     "flake8 >= 3.8.0",
     "pylint",
     "reuse",
@@ -88,11 +85,13 @@ formatters = [
     "isort",
 ]
 test = [
+    "antsibull-changelog[all]",
     "pytest",
     "pytest-cov",
     "pytest-error-for-skips",
 ]
 typing = [
+    "antsibull-changelog[all]",
     "mypy",
     "types-docutils",
     "types-PyYAML",
@@ -100,11 +99,11 @@ typing = [
 ]
 dev = [
     # Used by nox sessions
-    "antsibull-changelog[codeqa]",
-    "antsibull-changelog[coverage]",
-    "antsibull-changelog[formatters]",
-    "antsibull-changelog[test]",
-    "antsibull-changelog[typing]",
+    {include-group = "codeqa"},
+    {include-group = "coverage"},
+    {include-group = "formatters"},
+    {include-group = "test"},
+    {include-group = "typing"},
     # misc
     "nox",
 ]
